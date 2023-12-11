@@ -1,0 +1,62 @@
+# Alternative Options for Risk Calculation
+
+This section contains alternative kinds of risk score calculation, along with advantages and disadvantages of each.
+
+## General Notes
+
+The risk score is the algorithm which takes in patient information (provided by the rest of the system) and outputs either a continuous or discrete number which ranks how likely it is that a patient will experience a negative outcome. The number can be a probability, but does not need to be (for example, it just be 0 for low risk and 1 for high risk).
+
+There need to be two risk scores, one for bleeding and one for ischaemia. Ideally, they should be in the same format for simplicity (but do not need to be).
+
+The risk score calculation represents a black box component of the system that is mostly independent of the other parts. That means the decision for what risk scores to use should be broadly independent of the other decisions in the system. This is not completely true, because a machine learning model that requires a very large number of inputs will require a more complicated system to obtain those inputs, compared to a simple risk score.
+
+For each risk score, there should be a mechanism to decide when a risk has "changed", for the purpose of alerting health-care professionals (i.e. in the automatic monitoring period). For a probability score, this could be a change of +/-5% risk. For a simple binary 0/1, any change in score would trigger an alert. The recalculation rate of the risk in the monitoring period (i.e. once per day, multiple times per day, twice per week) is a parameter of the system (not the risk score).
+
+## Alternative Risk Scores List
+
+This section contains the list of alternative options for the risk score.
+
+### Consensus-based score
+
+This option is a simple calculation that is not derived by "fitting" a model to data, and instead represents a decision by clinical experts as to what variables most effect the negative outcome. An example is the ARC-HBR criteria for high bleeding risk.
+
+#### Advantages
+
+* Does not require statistics or model fitting to define the model (simplicity)
+* Simple to implement (in addition, may be simple enough that the entire tool is not considered a medical device, due to reasonable ability to check the calculation).
+
+#### Disadvantages
+
+* Likely cannot be created/tweaked ourselves -- needs to come from a reputable source (such as ARC).
+* May not be as accurate as a statistical model or machine learning model
+
+### Using a simple statistical model
+
+This is a simple statistical model (such as a one based on logistic regression or survival analysis). An example of this type of model is the bleeding/ischaemia trade-off model.
+
+#### Advantages
+
+* Offers more opportunity for a bespoke model fitted to data specific to UHBW.
+* More scope to analyse the statistical properties of the predictions
+* Still offers some explainability of the risk score (i.e. if the model depends linearly on the input parameters)
+
+#### Disadvantages
+
+* Requires an outcome definition in order fit models (i.e. a dataset containing whether patients bled/had ischaemic events, which requires a definition of those events)
+* Requires obtaining data to fit the model
+* Requires on-going checking that the model is fit for purpose (including accuracy).
+
+### Using a machine-learning algorithm
+
+A complex model such as a random forest, neural network, or other large-scale non-linear model, could be used to predict bleeding or ischaemia risk. 
+
+#### Advantages
+
+* Potentially offers more accuracy compared to basic statistical models.
+* May be better able to identify predictive features compared to basic statistical models.
+
+#### Disadvantages
+
+* Requires an outcome definition in order fit models (i.e. a dataset containing whether patients bled/had ischaemic events, which requires a definition of those events)
+* Requires obtaining data to fit the model. Complexity of model may increase complexity of dataset.
+* Requires on-going checking that the model is fit for purpose (including accuracy). Complexity of model may increase need for ongoing checking.
