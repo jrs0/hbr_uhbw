@@ -1,6 +1,9 @@
 # Intended Purpose
 
-* **Structure and Function of the device**
+This file contains the intended purpose of the device, which is a description of how it is intended to be used, how it should behave, who should use it, and other high-level information. It is not intended to specify how the device will work.
+
+## Function of the device
+
 The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options.
 
 Currently stratified risk scores do exist but, anecdotally, are not routinely used in the evaluation of patients initiated on anti-coagulation.
@@ -30,3 +33,4 @@ The tool should operate with data that is readily available for an inpatient.
 
 * The risk score could be used on the wrong patient group. 
 * The risk score could be used to inform choice of the wrong medication (i.e. non-blood-thinning medication) (note: we should explicitly list what medication is within scope?)
+* Risks could be interpreted too broadly (i.e. an ischaemia risk targeting only AMI and stroke could be interpreted as applying to all cardiovascular conditions)
