@@ -1,0 +1,40 @@
+# List of Currently-Existing Tools/Solutions
+
+This file contains a list of the current solutions to the problems presented in the intended purpose.
+
+## Current Clinical Practice
+
+
+
+## Other Risk Scores/Tools
+
+This section contain risk scores (statistical models or other kinds of calculations) designed to aid in the assessment of bleeding/ischaemia risk for ACS patients.
+
+### DAPT Score (not directly applicable, but methods may be useful)
+
+* **Intended purpose**: "The App is intended to help physicians determine whether or not to continue or discontinue DAPT in patients at least 12 months post-PCI procedure without having a major bleeding or ischemic event, and who were not on chronic oral anticoagulation" (from [here](https://tools.acc.org/daptriskapp/#!/content/about/about-index))
+* **Form**: Web calculator requiring the user to input patient risk factors. As these are being inputted, a score from -2 (more bleeding risk) to 9 (more ischaemia risk) rates the trade-off between bleeding and ischaemia risk post 12 months of DATP (see the calculator [here](https://tools.acc.org/daptriskapp/))
+* **Intended patient group** The calculator should be used only for those patients who have completed 12 months of DAPT already without any major bleeding or ischaemia events
+
+Due to its intended use on patients who have already completed 12 months of DAPT, this tool is not directly comparable with the tool under development, which is supposed to assess patients _before_ they are placed on DAPT. 
+
+Development and validation of the DAPT score is presented in [this](https://pubmed.ncbi.nlm.nih.gov/27022822/) paper (full text freely available).
+
+#### Models Used
+
+The following steps were used to build up the model presented in the web calculator
+1. One Cox regression model `A` was developed to model time to major bleeding after 12 months
+2. Another Cox regression model `B` was developed to model time to major ischaemia event after 12 months
+
+Both these models included variables obtained from literature review and clinical plausibility, and also included the the following variables related to treatment:
+* whether continued thienopydidine vs. placebo was used after 12 months (i.e. thienopydidine + aspirin, or aspirin alone)
+* whether treatment used clopidogrel or prasugrel (is this independent of the previous point?)
+
+As a result, models A and B can be used to assess differences in risk depending on treatment options.
+
+Next, for each patient:
+3. Model `A` was used twice to calculate the increased risk of bleeding, `IncB`, when using thienopyridine + aspirin, vs. using aspirin alone
+4. Model `B` was used twice to calculate the reduced risk of ischaemia, `RedI`, when using thienopyridine + aspirin, vs. using aspirin alone
+5. Assuming both `IncB` and `RedI` are positive (i.e. the bleeding risk does actually go up with treatment, and the ischaemia risk does actually go down), the paper defines `benefit_risk_difference = RedI - IncB`. Even though they refer to the "absolute" risk difference, I don't think an absolute value is taken, because they refer to negative values. They might mean absolute in the sense of "not relative" (i.e. not a proportion). They interpret high `benefit_risk_difference` as meaning greater benefit of continued therapy, which is consistent with the direction of subtraction above (i.e. `RedI - IncB`, rather than `IncB - RedI`). In this case, a high value comes from "a large reduction in ischaemia risk" and/or a "small increase in bleeding risk". On the other hand, low (or negative) `benefit_risk_difference` comes from a small `RedI` (less reduction in ischaemia risk) and/or a large `IncB` (large increase in bleeding risk), and is therefore interpreted as reduced benefit of continued therapy.
+
+To develop the simple model in the web calculator, the `benefit_risk_difference` was modelled using a linear model, using all the variables used for both models `A` and `B`. As stated in the supplementary material, the coefficients of this model represent the increase in `benefit_risk_difference` (of continuing therapy) for a unit change in the variable. The output of the model is therefore showing risk trade-offs associated with _continuing therapy_ after 12 months, vs. the default case where therapy is stopped (which implicitly corresponds to a `benefit_risk_difference` of zero).
