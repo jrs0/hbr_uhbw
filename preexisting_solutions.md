@@ -12,8 +12,10 @@ This section contain risk scores (statistical models or other kinds of calculati
 
 ### DAPT Score (not directly applicable, but methods may be useful)
 
+_The DAPT score is a linear model whose outcome is a number between -2 and 10, which rates a patient's tendancy to have major ischaemic events (high score) or major bleeding events (low score) if they are continued on therapy after 12 months of major-event-free DAPT. The score is created by combining predictions from separate bleeding and ischaemia models, both run under the assumption of continued vs. discontinued therapy._
+
 * **Intended purpose**: "The App is intended to help physicians determine whether or not to continue or discontinue DAPT in patients at least 12 months post-PCI procedure without having a major bleeding or ischemic event, and who were not on chronic oral anticoagulation" (from [here](https://tools.acc.org/daptriskapp/#!/content/about/about-index))
-* **Form**: Web calculator requiring the user to input patient risk factors. As these are being inputted, a score from -2 (more bleeding risk) to 9 (more ischaemia risk) rates the trade-off between bleeding and ischaemia risk post 12 months of DATP (see the calculator [here](https://tools.acc.org/daptriskapp/))
+* **Form**: Web calculator requiring the user to input patient risk factors. As these are being inputted, a score from -2 (more bleeding risk) to 9 (more ischaemia risk) rates the trade-off between bleeding and ischaemia risk post 12 months of DATP (see the calculator [here](https://tools.acc.org/daptriskapp/)). More detailed information is also shown when the results are submitted, including the actual risk of each event if DAPT is continued vs. discontinued
 * **Intended patient group** The calculator should be used only for those patients who have completed 12 months of DAPT already without any major bleeding or ischaemia events
 
 Due to its intended use on patients who have already completed 12 months of DAPT, this tool is not directly comparable with the tool under development, which is supposed to assess patients _before_ they are placed on DAPT. 
@@ -38,3 +40,17 @@ Next, for each patient:
 5. Assuming both `IncB` and `RedI` are positive (i.e. the bleeding risk does actually go up with treatment, and the ischaemia risk does actually go down), the paper defines `benefit_risk_difference = RedI - IncB`. Even though they refer to the "absolute" risk difference, I don't think an absolute value is taken, because they refer to negative values. They might mean absolute in the sense of "not relative" (i.e. not a proportion). They interpret high `benefit_risk_difference` as meaning greater benefit of continued therapy, which is consistent with the direction of subtraction above (i.e. `RedI - IncB`, rather than `IncB - RedI`). In this case, a high value comes from "a large reduction in ischaemia risk" and/or a "small increase in bleeding risk". On the other hand, low (or negative) `benefit_risk_difference` comes from a small `RedI` (less reduction in ischaemia risk) and/or a large `IncB` (large increase in bleeding risk), and is therefore interpreted as reduced benefit of continued therapy.
 
 To develop the simple model in the web calculator, the `benefit_risk_difference` was modelled using a linear model, using all the variables used for both models `A` and `B`. As stated in the supplementary material, the coefficients of this model represent the increase in `benefit_risk_difference` (of continuing therapy) for a unit change in the variable. The output of the model is therefore showing risk trade-offs associated with _continuing therapy_ after 12 months, vs. the default case where therapy is stopped (which implicitly corresponds to a `benefit_risk_difference` of zero).
+
+#### Outcomes Modelled
+
+The outcomes used to develop the models `A` and `B` were:
+* ischaemia: MI and ARC ST in months 12-30 after ACS (defined in detail in supplementary information)
+* bleeding: GUSTO moderate or severe bleeding in months 12-30 
+
+Detailed information about how each endpoint was defined is contained in the supplementary information. 
+
+#### Validation Used
+
+The methodology to validate the score in the PROTECT trial is described in the supplementary material. In order to assess the score, patients were divided in "high" (score >= 2) and "low" (score < 2) groups. Survival analysis was used to find the hazard ratio for ischaemia between the high and low groups (HR 2.01, meaning a higher score tends to be associated with more ischaemia events), and again for bleeding (HR 0.69, meaning a high score tends to be associated with less major bleeding).
+
+The validation of the two models `A` and `B` used to develop the linear model was not used directly to validate the overall score, because those focus on only one outcome at a time.
