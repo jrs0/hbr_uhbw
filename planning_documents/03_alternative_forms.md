@@ -14,8 +14,8 @@ The rest of the system is software or processes that enable the risk score to be
 
 The tool will be constructed to operate within the existing IT infrastructure, using the ICE laboratory request and result system. This would allow for use within existing workflows. Further, patient identifiable information would be suitably protected.
 
-
 Questions (might be naive):
+
 * How often are new tests integrated into the lab? Is there a system/policy for doing it?
 * Is there any precedent for lab tests which are not "proper" lab tests like bloods etc. -- i.e. anything similar to a risk score?
 * How is the output of lab tests presented to clinicians/is there flexibility in how the system (ICE?) presents results

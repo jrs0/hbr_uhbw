@@ -25,16 +25,19 @@ Development and validation of the DAPT score is presented in [this](https://pubm
 #### Models Used
 
 The following steps were used to build up the model presented in the web calculator
+
 1. One Cox regression model `A` was developed to model time to major bleeding after 12 months
 2. Another Cox regression model `B` was developed to model time to major ischaemia event after 12 months
 
 Both these models included variables obtained from literature review and clinical plausibility, and also included the the following variables related to treatment:
+
 * whether continued thienopydidine vs. placebo was used after 12 months (i.e. thienopydidine + aspirin, or aspirin alone)
 * whether treatment used clopidogrel or prasugrel (is this independent of the previous point?)
 
 As a result, models A and B can be used to assess differences in risk depending on treatment options.
 
 Next, for each patient:
+
 3. Model `A` was used twice to calculate the increased risk of bleeding, `IncB`, when using thienopyridine + aspirin, vs. using aspirin alone
 4. Model `B` was used twice to calculate the reduced risk of ischaemia, `RedI`, when using thienopyridine + aspirin, vs. using aspirin alone
 5. Assuming both `IncB` and `RedI` are positive (i.e. the bleeding risk does actually go up with treatment, and the ischaemia risk does actually go down), the paper defines `benefit_risk_difference = RedI - IncB`. Even though they refer to the "absolute" risk difference, I don't think an absolute value is taken, because they refer to negative values. They might mean absolute in the sense of "not relative" (i.e. not a proportion). They interpret high `benefit_risk_difference` as meaning greater benefit of continued therapy, which is consistent with the direction of subtraction above (i.e. `RedI - IncB`, rather than `IncB - RedI`). In this case, a high value comes from "a large reduction in ischaemia risk" and/or a "small increase in bleeding risk". On the other hand, low (or negative) `benefit_risk_difference` comes from a small `RedI` (less reduction in ischaemia risk) and/or a large `IncB` (large increase in bleeding risk), and is therefore interpreted as reduced benefit of continued therapy.
@@ -44,6 +47,7 @@ To develop the simple model in the web calculator, the `benefit_risk_difference`
 #### Outcomes Modelled
 
 The outcomes used to develop the models `A` and `B` were:
+
 * ischaemia: MI and ARC ST in months 12-30 after ACS (defined in detail in supplementary information)
 * bleeding: GUSTO moderate or severe bleeding iv
 
@@ -100,3 +104,4 @@ The methodology to validate the score in the PROTECT trial is described in the s
 The 
 
 The validation of the two models `A` and `B` used to develop the linear model was not used directly to validate the overall score, because those focus on only one outcome at a time.
+

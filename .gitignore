@@ -1,2 +1,5 @@
 # Emacs autosaves
 *~
+
+# Ignore pdf files (can be refined later if needed)
+*.pdf

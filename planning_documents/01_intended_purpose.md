@@ -14,6 +14,7 @@ For example, if a patient is identified as being at a high risk of bleeding thro
 In addition to providing risks on request, the tool should also notify relevant health care professionals if the risks change enough to warrant a change in therapy at any point in a monitoring period.
 
 The tool should be easy enough to use that it can be incorporated into routine clinical practice. This means:
+
 * it should be integrated within current workflows so that it can be routinely used
 * it should use information that the clinician is already _required_ to input into clinical systems (it may require existing systems to be modified to require more information to be inputted)
 * the amount of required information (or additional required information) should be low enough that a clinician can reasonably source all of it (i.e. the tool cannot require 1000 new manually entered data points).
@@ -33,8 +34,9 @@ The tool can also use data that is automatically available for an inpatient (i.e
     * Pre-deployment a review with local and external data would be required. Post deployment an audit of the device risk scores with a selected sample of case reviews to demonstrate whether the scores impact patient management. A retrospective analysis of the number of patients being admitted to hospital post PCI with haemorrhage.
     * A risk management file describing what alternative solutions were considered for all aspects of the design, why the design itself was selected, and how the design is shown to reduce risks/hazards as much as possible in accordance with relevant risk management guidelines.
  
-# Reasonably forseeable misuse
+## Reasonably forseeable misuse
 
 * The risk score could be used on the wrong patient group. 
 * The risk score could be used to inform choice of the wrong medication (i.e. non-blood-thinning medication) (note: we should explicitly list what medication is within scope?)
 * Risks could be interpreted too broadly (i.e. an ischaemia risk targeting only AMI and stroke could be interpreted as applying to all cardiovascular conditions)
+
