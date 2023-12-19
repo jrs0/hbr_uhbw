@@ -13,8 +13,12 @@ For example, if a patient is identified as being at a high risk of bleeding thro
 
 In addition to providing risks on request, the tool should also notify relevant health care professionals if the risks change enough to warrant a change in therapy at any point in a monitoring period.
 
-The tool should be easy enough to use that it can be incorporated into routine clinical practice. This includes not requiring the user to source a large quantity of information required to produce the relative risks.
-The tool should operate with data that is readily available for an inpatient.
+The tool should be easy enough to use that it can be incorporated into routine clinical practice. This means:
+* it should be integrated within current workflows so that it can be routinely used
+* it should use information that the clinician is already _required_ to input into clinical systems (it may require existing systems to be modified to require more information to be inputted)
+* the amount of required information (or additional required information) should be low enough that a clinician can reasonably source all of it (i.e. the tool cannot require 1000 new manually entered data points).
+
+The tool can also use data that is automatically available for an inpatient (i.e. could be automatically drawn from other clinical systems).
 
 ## Indications for use
 

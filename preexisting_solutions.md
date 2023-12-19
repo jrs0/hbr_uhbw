@@ -45,7 +45,7 @@ To develop the simple model in the web calculator, the `benefit_risk_difference`
 
 The outcomes used to develop the models `A` and `B` were:
 * ischaemia: MI and ARC ST in months 12-30 after ACS (defined in detail in supplementary information)
-* bleeding: GUSTO moderate or severe bleeding in months 12-30 
+* bleeding: GUSTO moderate or severe bleeding iv
 
 Detailed information about how each endpoint was defined is contained in the supplementary information. 
 
