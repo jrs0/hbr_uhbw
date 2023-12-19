@@ -53,9 +53,9 @@ Detailed information about how each endpoint was defined is contained in the sup
 
 The predictors are listed in the supplemtary material (eTable 1), and were found through literature review and clinical plausability (this list is the predictors for both bleeding and ischaemia risk):
 
-| Type | Variable | Notes
+| Type | Variable | Potential source
 |------|----------|------
-|Sociodemographic Variables | Age |
+|Sociodemographic Variables | Age | Age, sex and race could come from CCW or PAS| 
 ||Sex |
 ||Race |
 |Cardiovascular History Variables|Congestive heart failure or left ventricular ejection fraction < 30% |
@@ -68,7 +68,7 @@ The predictors are listed in the supplemtary material (eTable 1), and were found
 |Comorbidity Variables|Diabetes mellitus |
 ||Renal insufficiency (Cr > 2) |
 ||Cancer at time of randomization |
-|History of major bleeding |
+||History of major bleeding |
 ||Hypertension |
 ||Current smoking |
 ||Body mass index |
