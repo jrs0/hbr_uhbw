@@ -49,8 +49,54 @@ The outcomes used to develop the models `A` and `B` were:
 
 Detailed information about how each endpoint was defined is contained in the supplementary information. 
 
+#### Predictors used
+
+The predictors are listed in the supplemtary material (eTable 1), and were found through literature review and clinical plausability (this list is the predictors for both bleeding and ischaemia risk):
+
+| Type | Variable | Notes
+|------|----------|------
+|Sociodemographic Variables | Age |
+||Sex |
+||Race |
+|Cardiovascular History Variables|Congestive heart failure or left ventricular ejection fraction < 30% |
+||Prior percutaneous coronary intervention |
+||Prior coronary artery bypass graft | 
+||Prior myocardial infarction |
+||Peripheral arterial disease |
+||Stroke/Transient ischemic attack |
+||Atrial fibrillation |
+|Comorbidity Variables|Diabetes mellitus |
+||Renal insufficiency (Cr > 2) |
+||Cancer at time of randomization |
+|History of major bleeding |
+||Hypertension |
+||Current smoking |
+||Body mass index |
+|Procedural Variables|Presentation with myocardial infarction |
+||Stenting of a vein graft |
+||Stent diameter |
+||Stent type |
+||Prior in-stent restenosis |
+||Number of stents |
+||Severe coronary calcification |
+||Coronary lesion class C |
+||Total stent length |
+||> 2 Lesions per vessel |
+||Number of treated vessels |
+||Pre-procedural stenosis |
+||TIMI grade flow post procedure |
+||Unprotected left main stenting |
+||Bifurcation stenting |
+||Thrombus-containing lesion |
+||Prior brachytherapy |
+|Medical Therapy Variables|Randomization arm (continued thienopyridine vs. placebo) |
+||Treatment with clopidogrel vs. prasugrel |
+||Treatment with statin at time of randomization |
+
 #### Validation Used
 
 The methodology to validate the score in the PROTECT trial is described in the supplementary material. In order to assess the score, patients were divided in "high" (score >= 2) and "low" (score < 2) groups. Survival analysis was used to find the hazard ratio for ischaemia between the high and low groups (HR 2.01, meaning a higher score tends to be associated with more ischaemia events), and again for bleeding (HR 0.69, meaning a high score tends to be associated with less major bleeding).
+
+The 
 
 The validation of the two models `A` and `B` used to develop the linear model was not used directly to validate the overall score, because those focus on only one outcome at a time.
