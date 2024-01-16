@@ -1,28 +1,28 @@
-# List of Currently-Existing Tools/Solutions
+= List of Currently-Existing Tools/Solutions
 
 This file contains a list of the current solutions to the problems presented in the intended purpose.
 
-## Current Clinical Practice
+== Current Clinical Practice
 
 
 
-## Other Risk Scores/Tools
+== Other Risk Scores/Tools
 
 This section contain risk scores (statistical models or other kinds of calculations) designed to aid in the assessment of bleeding/ischaemia risk for ACS patients.
 
-### DAPT Score (not directly applicable, but methods may be useful)
+=== DAPT Score (not directly applicable, but methods may be useful)
 
 _The DAPT score is a linear model whose outcome is a number between -2 and 10, which rates a patient's tendancy to have major ischaemic events (high score) or major bleeding events (low score) if they are continued on therapy after 12 months of major-event-free DAPT. The score is created by combining predictions from separate bleeding and ischaemia models, both run under the assumption of continued vs. discontinued therapy._
 
-* **Intended purpose**: "The App is intended to help physicians determine whether or not to continue or discontinue DAPT in patients at least 12 months post-PCI procedure without having a major bleeding or ischemic event, and who were not on chronic oral anticoagulation" (from [here](https://tools.acc.org/daptriskapp/#!/content/about/about-index))
-* **Form**: Web calculator requiring the user to input patient risk factors. As these are being inputted, a score from -2 (more bleeding risk) to 9 (more ischaemia risk) rates the trade-off between bleeding and ischaemia risk post 12 months of DATP (see the calculator [here](https://tools.acc.org/daptriskapp/)). More detailed information is also shown when the results are submitted, including the actual risk of each event if DAPT is continued vs. discontinued
+* **Intended purpose**: "The App is intended to help physicians determine whether or not to continue or discontinue DAPT in patients at least 12 months post-PCI procedure without having a major bleeding or ischemic event, and who were not on chronic oral anticoagulation" (from https://tools.acc.org/daptriskapp/#!/content/about/about-index[here])
+* **Form**: Web calculator requiring the user to input patient risk factors. As these are being inputted, a score from -2 (more bleeding risk) to 9 (more ischaemia risk) rates the trade-off between bleeding and ischaemia risk post 12 months of DATP (see the calculator https://tools.acc.org/daptriskapp/[here]). More detailed information is also shown when the results are submitted, including the actual risk of each event if DAPT is continued vs. discontinued
 * **Intended patient group** The calculator should be used only for those patients who have completed 12 months of DAPT already without any major bleeding or ischaemia events
 
 Due to its intended use on patients who have already completed 12 months of DAPT, this tool is not directly comparable with the tool under development, which is supposed to assess patients _before_ they are placed on DAPT. 
 
-Development and validation of the DAPT score is presented in [this](https://pubmed.ncbi.nlm.nih.gov/27022822/) paper (full text freely available).
+Development and validation of the DAPT score is presented in https://pubmed.ncbi.nlm.nih.gov/27022822/[this] paper (full text freely available).
 
-#### Models Used
+==== Models Used
 
 The following steps were used to build up the model presented in the web calculator
 
@@ -38,13 +38,13 @@ As a result, models A and B can be used to assess differences in risk depending 
 
 Next, for each patient:
 
-3. Model `A` was used twice to calculate the increased risk of bleeding, `IncB`, when using thienopyridine + aspirin, vs. using aspirin alone
-4. Model `B` was used twice to calculate the reduced risk of ischaemia, `RedI`, when using thienopyridine + aspirin, vs. using aspirin alone
-5. Assuming both `IncB` and `RedI` are positive (i.e. the bleeding risk does actually go up with treatment, and the ischaemia risk does actually go down), the paper defines `benefit_risk_difference = RedI - IncB`. Even though they refer to the "absolute" risk difference, I don't think an absolute value is taken, because they refer to negative values. They might mean absolute in the sense of "not relative" (i.e. not a proportion). They interpret high `benefit_risk_difference` as meaning greater benefit of continued therapy, which is consistent with the direction of subtraction above (i.e. `RedI - IncB`, rather than `IncB - RedI`). In this case, a high value comes from "a large reduction in ischaemia risk" and/or a "small increase in bleeding risk". On the other hand, low (or negative) `benefit_risk_difference` comes from a small `RedI` (less reduction in ischaemia risk) and/or a large `IncB` (large increase in bleeding risk), and is therefore interpreted as reduced benefit of continued therapy.
+1. Model `A` was used twice to calculate the increased risk of bleeding, `IncB`, when using thienopyridine + aspirin, vs. using aspirin alone
+2. Model `B` was used twice to calculate the reduced risk of ischaemia, `RedI`, when using thienopyridine + aspirin, vs. using aspirin alone
+3. Assuming both `IncB` and `RedI` are positive (i.e. the bleeding risk does actually go up with treatment, and the ischaemia risk does actually go down), the paper defines `benefit_risk_difference = RedI - IncB`. Even though they refer to the "absolute" risk difference, I don't think an absolute value is taken, because they refer to negative values. They might mean absolute in the sense of "not relative" (i.e. not a proportion). They interpret high `benefit_risk_difference` as meaning greater benefit of continued therapy, which is consistent with the direction of subtraction above (i.e. `RedI - IncB`, rather than `IncB - RedI`). In this case, a high value comes from "a large reduction in ischaemia risk" and/or a "small increase in bleeding risk". On the other hand, low (or negative) `benefit_risk_difference` comes from a small `RedI` (less reduction in ischaemia risk) and/or a large `IncB` (large increase in bleeding risk), and is therefore interpreted as reduced benefit of continued therapy.
 
 To develop the simple model in the web calculator, the `benefit_risk_difference` was modelled using a linear model, using all the variables used for both models `A` and `B`. As stated in the supplementary material, the coefficients of this model represent the increase in `benefit_risk_difference` (of continuing therapy) for a unit change in the variable. The output of the model is therefore showing risk trade-offs associated with _continuing therapy_ after 12 months, vs. the default case where therapy is stopped (which implicitly corresponds to a `benefit_risk_difference` of zero).
 
-#### Outcomes Modelled
+==== Outcomes Modelled
 
 The outcomes used to develop the models `A` and `B` were:
 
@@ -53,51 +53,90 @@ The outcomes used to develop the models `A` and `B` were:
 
 Detailed information about how each endpoint was defined is contained in the supplementary information. 
 
-#### Predictors used
+==== Predictors used
 
 The predictors are listed in the supplemtary material (eTable 1), and were found through literature review and clinical plausability (this list is the predictors for both bleeding and ischaemia risk):
 
-| Type | Variable | Potential source
-|------|----------|------
-|Sociodemographic Variables | Age | Age, sex and race could come from CCW or PAS| 
-||Sex |
-||Race |
-|Cardiovascular History Variables|Congestive heart failure or left ventricular ejection fraction < 30% |
-||Prior percutaneous coronary intervention |
-||Prior coronary artery bypass graft | 
-||Prior myocardial infarction |
-||Peripheral arterial disease |
-||Stroke/Transient ischemic attack |
-||Atrial fibrillation |
-|Comorbidity Variables|Diabetes mellitus |
-||Renal insufficiency (Cr > 2) |
-||Cancer at time of randomization |
-||History of major bleeding |
-||Hypertension |
-||Current smoking |
-||Body mass index |
-|Procedural Variables|Presentation with myocardial infarction |
-||Stenting of a vein graft |
-||Stent diameter |
-||Stent type |
-||Prior in-stent restenosis |
-||Number of stents |
-||Severe coronary calcification |
-||Coronary lesion class C |
-||Total stent length |
-||> 2 Lesions per vessel |
-||Number of treated vessels |
-||Pre-procedural stenosis |
-||TIMI grade flow post procedure |
-||Unprotected left main stenting |
-||Bifurcation stenting |
-||Thrombus-containing lesion |
-||Prior brachytherapy |
-|Medical Therapy Variables|Randomization arm (continued thienopyridine vs. placebo) |
-||Treatment with clopidogrel vs. prasugrel |
-||Treatment with statin at time of randomization |
+[cols="1,1,1"]
+|===
+| Type | Variable| Potential source
 
-#### Validation Used
+|Sociodemographic Variables | Age | Age, sex and race could come from CCW or PA
+
+||Sex |
+
+||Race |
+
+|Cardiovascular History Variables|Congestive heart failure or left ventricular ejection fraction < 30% |
+
+||Prior percutaneous coronary intervention |
+
+||Prior coronary artery bypass graft |
+
+||Prior myocardial infarction |
+
+||Peripheral arterial disease |
+
+||Stroke/Transient ischemic attack |
+
+||Atrial fibrillation |
+
+|Comorbidity Variables|Diabetes mellitus |
+
+||Renal insufficiency (Cr > 2) |
+
+||Cancer at time of randomization |
+
+||History of major bleeding |
+
+||Hypertension |
+
+||Current smoking |
+
+||Body mass index |
+
+|Procedural Variables|Presentation with myocardial infarction |
+
+||Stenting of a vein graft |
+
+||Stent diameter |
+
+||Stent type |
+
+||Prior in-stent restenosis |
+
+||Number of stents |
+
+||Severe coronary calcification |
+
+||Coronary lesion class C |
+
+||Total stent length |
+
+||> 2 Lesions per vessel |
+
+||Number of treated vessels |
+
+||Pre-procedural stenosis |
+
+||TIMI grade flow post procedure |
+
+||Unprotected left main stenting |
+
+||Bifurcation stenting |
+
+||Thrombus-containing lesion |
+
+||Prior brachytherapy |
+
+|Medical Therapy Variables|Randomization arm (continued thienopyridine vs. placebo) |
+
+||Treatment with clopidogrel vs. prasugrel |
+
+||Treatment with statin at time of randomization |
+|===
+
+==== Validation Used
 
 The methodology to validate the score in the PROTECT trial is described in the supplementary material. In order to assess the score, patients were divided in "high" (score >= 2) and "low" (score < 2) groups. Survival analysis was used to find the hazard ratio for ischaemia between the high and low groups (HR 2.01, meaning a higher score tends to be associated with more ischaemia events), and again for bleeding (HR 0.69, meaning a high score tends to be associated with less major bleeding).
 
