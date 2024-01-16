@@ -11,7 +11,7 @@ Actions for JS this week (16th - 23rd Jan 2024):
 For Tom to look at in this document:
 
 * Nothing specific this time, just check over and see if you find this format OK to comment on.
-* Source code for this documentation is stored in a GitHub repository. If you want to see it, you can make a free GitHub account and send me your username, then I can add you to the repository. This isn't essential though, because I'll generate this word document each week containing the project info.
+* Source code for this documentation is stored in a GitHub repository. If you want to see it, you can make a free GitHub account and send me your username, then I can add you to the repository. This is optional though, because I'll generate this word document each week containing the project info.
 * Any comments you have on this document, I can incorporate into the git repository so they are stored in the project history
-* Structure is currently a bit rough (e.g. no table of contents), will improve it with time
+* Structure is currently a bit rough (e.g. no table of contents); will improve it with time
 
