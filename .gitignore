@@ -3,3 +3,6 @@
 
 # Ignore pdf files (can be refined later if needed)
 *.pdf
+
+# Ignore generated html output
+*.html

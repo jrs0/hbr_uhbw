@@ -1,8 +1,8 @@
-# Intended Purpose
+= Intended Purpose
 
 This file contains the intended purpose of the device, which is a description of how it is intended to be used, how it should behave, who should use it, and other high-level information. It is not intended to specify how the device will work.
 
-## Function of the device
+== Function of the device
 
 The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options.
 
@@ -21,7 +21,7 @@ The tool should be easy enough to use that it can be incorporated into routine c
 
 The tool can also use data that is automatically available for an inpatient (i.e. could be automatically drawn from other clinical systems).
 
-## Indications for use
+== Indications for use
 
 * **Who will use the tool**: clinicians or other health care professionals involved in the assessment of what blood thinning therapy to prescribe to a patient. 
 * **When will the tool be used**: when a patient presents with an ACS, and blood thinning therapy is indicated. In addition, any time the risks change and a relevant health-care professional is notified in the monitoring period. It is expected that a healthcare professional would be able to request an automated risk score when requesting other laboratory investigations.
@@ -34,7 +34,7 @@ The tool can also use data that is automatically available for an inpatient (i.e
     * Pre-deployment a review with local and external data would be required. Post deployment an audit of the device risk scores with a selected sample of case reviews to demonstrate whether the scores impact patient management. A retrospective analysis of the number of patients being admitted to hospital post PCI with haemorrhage.
     * A risk management file describing what alternative solutions were considered for all aspects of the design, why the design itself was selected, and how the design is shown to reduce risks/hazards as much as possible in accordance with relevant risk management guidelines.
  
-## Reasonably forseeable misuse
+== Reasonably forseeable misuse
 
 * The risk score could be used on the wrong patient group. 
 * The risk score could be used to inform choice of the wrong medication (i.e. non-blood-thinning medication) (note: we should explicitly list what medication is within scope?)
