@@ -1,5 +1,0 @@
-= Bleeding/Ischaemia Risk Prediction Tool
-:doctype: book
-:toc: left
-
-include::01_intended_purpose.adoc[offsetlevel=+1]

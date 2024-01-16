@@ -1,0 +1,14 @@
+= Planning Documents
+
+This folder contains documents that will eventually form part of the risk management file for the project. The documentation is written using https://asciidoc.org/[AsciiDoc]. To generate the documentation:
+
+1. Install AsciiDoctor https://docs.asciidoctor.org/asciidoctor/latest/install/windows/[for your platform]. If you use Visual Studio Code, a simple approach is to install the AsciiDoc extension. Alternatively, install Ruby for your operating system, and then run `gem install asciidoctor` and `gem install asciidoctor-pdf` (see https://docs.asciidoctor.org/asciidoctor/latest/install/ruby-packaging/[here] for reference).
+2. Run `asciidoctor 00_all.adoc` to generate the documentation. Alternatively, in Visual Studio Code, open `00_all.adoc`, type Ctrl-Shift-P, and run `AsciiDoc: Save HTML Document` or `AsciiDoc: Export Document as PDF`. The former requires `asciidoctor`, the latter requires `asciidoctor-pdf`.
+
+To generate the documentation as a word document, run the following commands:
+
+[,bash]
+----
+asciidoctor -b docbook all.adoc
+pandoc -r docbook -t docx -o all.docx all.xml
+----

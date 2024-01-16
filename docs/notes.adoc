@@ -1,0 +1,15 @@
+= Weekly Notes
+
+This section will contain notes about progress this week, specific things to look at in this document (if any), etc.
+
+Actions for JS this week (16th - 23rd Jan 2024):
+
+* Double check if anything else is needed for UHBW DPIA
+* Expect contract from UHBW
+* Look into potential submission to ESC conference (submit deadline mid Feb)
+
+For Tom to look at in this document:
+
+* Nothing specific this time, just check over and see if you find this format OK to comment on.
+* Source code for this documentation is stored in a GitHub repository. If you want to see it, you can make a free GitHub account and send me your username, then I can add you to the repository. This isn't essential though, because I'll generate this word document each week containing the project info.
+* Any comments you have on this document, I can incorporate into the git repository so they are stored in the project history

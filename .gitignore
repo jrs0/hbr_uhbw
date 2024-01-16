@@ -4,5 +4,7 @@
 # Ignore pdf files (can be refined later if needed)
 *.pdf
 
-# Ignore generated html output
+# Ignore generated xml/html/pdf/docx output from documentation
+*.xml
+*.docx
 *.html
