@@ -1,8 +1,8 @@
 = Bleeding/Ischaemia Risk Prediction Tool
-John Scott <john.scott@uhbw.nhs.uk>; Maredudd Harris <john.harris10@nhs.net>
-
 :doctype: book
 :toc: left
+
+John Scott <john.scott@uhbw.nhs.uk>; Maredudd Harris <john.harris10@nhs.net>
 
 include::notes.adoc[offsetlevel=+1]
 
