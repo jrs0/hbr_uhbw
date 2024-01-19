@@ -57,83 +57,10 @@ Detailed information about how each endpoint was defined is contained in the sup
 
 The predictors are listed in the supplemtary material (eTable 1), and were found through literature review and clinical plausability (this list is the predictors for both bleeding and ischaemia risk):
 
-[cols="1,1,1"]
+.Predictors used for models in the DAPT score
+[format=csv,options="header"]
 |===
-| Type | Variable| Potential source
-
-|Sociodemographic Variables | Age | Age, sex and race could come from CCW or PA
-
-||Sex |
-
-||Race |
-
-|Cardiovascular History Variables|Congestive heart failure or left ventricular ejection fraction < 30% |
-
-||Prior percutaneous coronary intervention |
-
-||Prior coronary artery bypass graft |
-
-||Prior myocardial infarction |
-
-||Peripheral arterial disease |
-
-||Stroke/Transient ischemic attack |
-
-||Atrial fibrillation |
-
-|Comorbidity Variables|Diabetes mellitus |
-
-||Renal insufficiency (Cr > 2) |
-
-||Cancer at time of randomization |
-
-||History of major bleeding |
-
-||Hypertension |
-
-||Current smoking |
-
-||Body mass index |
-
-|Procedural Variables|Presentation with myocardial infarction |
-
-||Stenting of a vein graft |
-
-||Stent diameter |
-
-||Stent type |
-
-||Prior in-stent restenosis |
-
-||Number of stents |
-
-||Severe coronary calcification |
-
-||Coronary lesion class C |
-
-||Total stent length |
-
-||> 2 Lesions per vessel |
-
-||Number of treated vessels |
-
-||Pre-procedural stenosis |
-
-||TIMI grade flow post procedure |
-
-||Unprotected left main stenting |
-
-||Bifurcation stenting |
-
-||Thrombus-containing lesion |
-
-||Prior brachytherapy |
-
-|Medical Therapy Variables|Randomization arm (continued thienopyridine vs. placebo) |
-
-||Treatment with clopidogrel vs. prasugrel |
-
-||Treatment with statin at time of randomization |
+include::dapt_predictors.csv[]
 |===
 
 ==== Validation Used
