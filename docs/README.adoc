@@ -12,3 +12,11 @@ To generate the documentation as a word document, run the following commands:
 asciidoctor -b docbook all.adoc
 pandoc -r docbook -t docx -o all.docx all.xml
 ----
+
+To use the asciidoctor-bibtex extension, install the following libraries (as per the https://github.com/asciidoctor/asciidoctor-bibtex[documentation]):
+
+[,bash]
+----
+gem install asciidoctor-bibtex bibtex-ruby citeproc-ruby csl-ruby
+----
+

@@ -1,6 +1,7 @@
 = Bleeding/Ischaemia Risk Prediction Tool
 :doctype: book
 :toc: left
+:bibtex-file: ref.bib
 John Scott <john.scott@uhbw.nhs.uk>; Maredudd Harris <john.harris10@nhs.net>
 
 include::notes.adoc[leveloffset=+1]
@@ -12,3 +13,5 @@ include::preexisting_solutions.adoc[leveloffset=+1]
 include::alternative_forms.adoc[leveloffset=+1]
 
 include::alternative_risk_scores.adoc[leveloffset=+1]
+
+bibliography::[]

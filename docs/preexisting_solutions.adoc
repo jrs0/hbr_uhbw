@@ -10,6 +10,10 @@ This file contains a list of the current solutions to the problems presented in 
 
 This section contain risk scores (statistical models or other kinds of calculations) designed to aid in the assessment of bleeding/ischaemia risk for ACS patients.
 
+=== ARC HBR Score (applies only to assessing high bleeding risk)
+
+
+
 === DAPT Score (not directly applicable, but methods may be useful)
 
 _The DAPT score is a linear model whose outcome is a number between -2 and 10, which rates a patient's tendancy to have major ischaemic events (high score) or major bleeding events (low score) if they are continued on therapy after 12 months of major-event-free DAPT. The score is created by combining predictions from separate bleeding and ischaemia models, both run under the assumption of continued vs. discontinued therapy._
