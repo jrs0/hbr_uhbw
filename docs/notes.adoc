@@ -1,6 +1,6 @@
 = Weekly Notes
 
-This section will contain notes about progress this week, specific things to look at in this document (if any), etc.
+_This section will contain notes about progress this week, specific things to look at in this document (if any), etc._
 
 Summary of previous week work (16th - 23rd Jan 2024):
 
