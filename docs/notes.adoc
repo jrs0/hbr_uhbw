@@ -2,16 +2,19 @@
 
 This section will contain notes about progress this week, specific things to look at in this document (if any), etc.
 
-Actions for JS this week (16th - 23rd Jan 2024):
+Summary of previous week work (16th - 23rd Jan 2024):
+
+* Submitted work request to ICB infrastructure to transfer HIC data to ICB, and minimised the HIC tables to avoid duplicating data already at the ICB
+* Added summary of ARC criteria to these notes, ahead of looking at calculating as many ARC criteria as possible from the HIC data
+
+Actions for JS this week (23rd - 30th Jan 2024):
 
 * Double check if anything else is needed for UHBW DPIA
 * Expect contract from UHBW
 * Look into potential submission to ESC conference (submit deadline mid Feb)
+* Want to start looking at how to calculate the ARC HBR criteria from HIC, but first need access to the new HIC (hopefully Mike can make it available). 
 
-For Tom to look at in this document:
+For Tom to look at:
 
-* Nothing specific this time, just check over and see if you find this format OK to comment on.
-* Source code for this documentation is stored in a GitHub repository. If you want to see it, you can make a free GitHub account and send me your username, then I can add you to the repository. This is optional though, because I'll generate this word document each week containing the project info.
-* Any comments you have on this document, I can incorporate into the git repository so they are stored in the project history
-* Structure is currently a bit rough (e.g. no table of contents); will improve it with time
+* In the xref:preexisting_solutions.adoc#arc_hbr_score[ARC Section], I've highlighted some bits in yellow for you to take a look at. I'm trying to document the "ideal" ARC HBR calculation for reference, before getting into how to do it using the HIC data
 
