@@ -1,0 +1,14 @@
+﻿ARC Criterion,Summary,Major/Minor
+Age,If age >= 75,Minor
+Oral anti-coagulant use,Anticipated long term use,Major
+Chronic kidney disease,"Stage 3 minor, 4/5 major",Major/minor
+Anaemia,Based on Hb level (+ gender),Major/minor
+Prior bleeding/transfusion,Based on time-before-PCI and kind,Major/minor
+Thrombocytopenia,< 100e9/L,Major
+Chronic bleeding diatheses,If present ,Major
+Cirrhosis + portal hypertension,If present ,Major
+Cancer,Active malignancy,Major
+Prior ischaemic stroke or ICH,Based on time-before-PCI and severity,Major/minor
+Planned major noncardiac surgery,Within 1 year? (Not specified),Major
+Prior major surgery or trauma,Within previous 30 days,Major
+Oral NSAID/Steriod use,Long term at >= 4 d/wk (days per week?),Minor

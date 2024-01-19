@@ -10,9 +10,151 @@ This file contains a list of the current solutions to the problems presented in 
 
 This section contain risk scores (statistical models or other kinds of calculations) designed to aid in the assessment of bleeding/ischaemia risk for ACS patients.
 
-=== ARC HBR Score (applies only to assessing high bleeding risk)
+=== ARC HBR Score (applies to assessing high bleeding risk)
 
+_The ARC HBR score is a numerical consensus-based score (rather than being a statistically-driven score), where the presence of a major criterion contributes a 1 to the total score, and a minor criterion contributes 0.5 to the total. A patient is considered at HBR if their score is at least 1 (e.g. due to one major criterion, or two minor criteria)._
 
+==== ARC HBR Score Definition
+
+A summary of the criteria is shown in the table below:
+
+.Summary of ARC HBR criteria
+[format=csv, options="header"]
+|===
+include::arc_hbr_summary.csv[]
+|===
+
+The sections below describe the conditions that define each criterion in more detail.
+
+===== Age
+
+Patient age at least 75 at the time of risk score calculation is considered a minor criterion. The relevant time point for the calculation is the time of intervention (the PCI procedure, or shortly afterwords when therapy is being prescribed). 
+
+===== Oral Anticoagulant Use
+
+Anticipated use of long-term OAC is considered a major criterion. There are two types of oral anticoagulants:
+
+* Vitamin K antagonists: warfarin
+* Direct oral anticoagulants: apixaban, dabigatran, edoxaban, rivaroxaban
+
+[.yellow-background]#What timescale defines long-term use?#
+
+===== Chronic Kidney Disease
+
+Severe or end-stage chronic kidney disease (CKD) is a major criterion; moderate CKD is a minor criterion.
+
+The stages of chronic kidney disease map to both ICD-10 codes and estimated glomerular filtration rate measurements (eGFR, from urea and electrolytes laboratory results), as follows (see https://www.nhs.uk/conditions/kidney-disease/diagnosis/[here]):
+
+[cols="1,1,1,1"]
+|===
+| Stage | ICD-10 | eGFR | ARC-HBR
+
+| Stage 5, end-stage | N18.5 | eGFR < 15 ml/min | Major
+| Stage 4, severe | N18.4 | 15 ml/min \<= eGFR < 30 ml/min | Major
+| Stage 3b, moderate | N18.3 | 30 ml/min \<= eGFR < 45 ml/min | Minor
+| Stage 3a, moderate | N18.3 | 45 ml/min \<= eGFR < 60 ml/min | Minor
+| Stage 2, mild | N18.2 | 60 ml/min \<= eGFR < 90 ml/min | None
+| Stage 1, normal eGFR | N18.1 | eGFR > 90 ml/min | None
+|===
+
+===== Anaemia (Low Haemoglobin)
+
+Haemoglobin level < 11.0 g/dL is a major criterion (for men and women).
+
+Haemoglobin (hb) greater than 11.0 g/dL is divided into two categories:
+
+* Women: 11.0 g/dL \<= hb < 11.9 g/dL is a minor criterion
+* Men: 11.0 g/dL \<= hb < 12.9 g/dL is a minor criterion
+
+Any other haemoglobin level is not an ARC HBR criterion.
+
+Haemoglobin level varies with time, and is captured in the data as either laboratory measurements from the full blood count, or potentially as anaemia codes from ICD-10 data in hospital episode statistics.
+
+A blood test including an Hb measurement is often performed in the intervention episode, so this should be used to calculate the risk. If Hb from the index is not available, then a previous low Hb could be taken as a proxy to calculate the risk.
+
+The anaemia HBR criterion has been interpreted to mean baseline anaemia (although this is not explicitly stated in the ARC HBR definition). As a result, the first Hb reading will be used to assess anaemia.
+
+===== [.yellow-background]#Prior Bleeding/Transfusion#
+
+"Spontaneous (nonintracranial) bleeding requiring hospitalization
+or transfusion in the past 6 months (or at
+any time if recurrent) is considered a major ARC-HBR
+criterion, and a first spontaneous (nonintracranial)
+bleed requiring hospitalization or transfusion >6 and
+<12 months before PCI is considered a minor ARC-HBR
+criterion"
+-- ARC HBR Paper
+
+Interpretation of terms:
+
+* Spontaneous: not having an obvious cause (like trauma). How would this manifest in hospital records? Primary diagnosis in ICD?
+* Recurrent: has occurred at least once before
+
+Summary of criteria:
+
+* **Major**: A first bleed not in the brain within 6 months before PCI, which:
+** Required hospitalisation (i.e. the hospitalisation was not due to something else) or required transfusion.
+** Occurred on its own (i.e. was not caused by something else occurring in the spell, like other procedures)
+
+* **Major** A non-first bleed (recurrent) occurring at any time, which satisfies the requirements above (hospitalisation/transfusion/spontaneous)
+
+* **Minor** A first bleed _not_ within the 6 months before the PCI, which satisfies the requirements above (hospitalisation/transfusion/spontaneous)
+
+===== Thrombocytopenia (Low Platelet Count)
+
+Moderate or severe baseline thrombocytopenia (low platelet count) i, meaning count < 100e9/L, is a major criterion.
+
+Baseline means before intervention. The platelet count can be obtained from measurements from the full blood count. This information is routinely collected in the index presentation.
+
+===== Chronic Bleeding Diatheses
+
+It is a major ARC criteria if any of these conditions are present at PCI:
+
+* Platelet dysfunction ([.yellow-background]#is this a specific thing?#)
+* von Willebrand disease
+* Clotting factor deficiencies (including factors VII, VIII [hemophilia A], IX
+[hemophilia B], and XI)
+* Acquired antibodies to clotting factors ([.yellow-background]#more detail required?#)
+* [.yellow-background]#Anything else? HBR paper mentions "such as [...] among others" when giving the list above#
+
+===== Cirrhosis with Portal Hypertension
+
+Presence of liver cirrhosis with portal hypertension is a major criterion. [.yellow-background]#So liver cirrhosis on its own is not a criterion?#
+
+===== Cancer
+
+Diagnosis within the previous 12 months or ongoing active cancer treatment (surgery, radiotherapy, chemotherapy, immunotherapy) is a major ARC criterion.
+
+===== Prior Ischaemic Stroke or ICH
+
+The following are major ARC criteria:
+
+* Brain arteriovenous malformation
+* Prior intracranial haemorrhage at any time
+* Prior moderate/severe ischaemic stroke (National Institutes of Health Stroke Scale >=5) within 6 months before PCI
+
+The following is a minor criterion
+
+* Prior ischaemic stroke (any severity, any time)
+
+===== Planned Major Non-cardiac Surgery 
+
+Planned non-deferrable major non-cardiac surgery on DAPT after PCI is a major ARC criterion:
+
+Interpretation as follows:
+
+* Timescale after PCI is not relevant. Instead, it is to do with whether the patient will be on DAPT (which has a variable typical timescale after PCI, e.g. 3 - 6months)
+* [.yellow-background]#What constitutes major surgery? Could we make a list of the most common possibilities?#
+
+The calculation depends on a choice of DAPT, so this criteria cannot be calculated automatically based on patient characteristics/history.
+
+===== Prior Major Surgery/Trauma 
+
+Major surgery or major trauma ([.yellow-background]#what is in these categories?#) within 30 days before PCI is a major ARC criterion.
+
+===== Long-term Oral NSAID/Steroid Use
+
+Planned daily intake of oral NSAID/steriods for >4 d/wk ([.yellow-background]#what timeframe is this? Looks like days/week, but ARC paper phrases it like a duration#) is a minor ARC criterion.
 
 === DAPT Score (not directly applicable, but methods may be useful)
 
