@@ -1,7 +1,8 @@
 HASH=$(shell git rev-parse --short HEAD)
 DATE=$(shell date +%d-%m-%Y)
+FILENAME_DATE=$(shell date +%d_%m_%Y)
 
-bhf_hbr_notes.docx: all.html
+bhf_hbr_notes_$(FILENAME_DATE).docx: all.html
 	pandoc --toc \
 		   --lua-filter=highlight_mark.lua \
 	       --number-sections \

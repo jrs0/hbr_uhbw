@@ -5,16 +5,20 @@ _This section will contain notes about progress this week, specific things to lo
 Summary of previous week work (16th - 23rd Jan 2024):
 
 * Submitted work request to ICB infrastructure to transfer HIC data to ICB, and minimised the HIC tables to avoid duplicating data already at the ICB
-* Added summary of ARC criteria to these notes, ahead of looking at calculating as many ARC criteria as possible from the HIC data
+* Added summary of ARC criteria to these notes
+* Fixed this document (added TOC/ability to highlight in yellow)
+* Had a few thoughts about the ESC abstract:
+** Would like to try to incorporate some of the work we do over the next 6 months or so -- can we include something about trying to recreate ARC-HBR score + some of the other scores? Can say we'll compare results to the previous HES/MI models, without having to specify the results.
+** ...could maybe lead into a discussion about the difficulty of implementing the scores in practice/getting the information that is required...
+** I think the abstract deadline is 1st march, so there's a bit of time.
 
 Actions for JS this week (23rd - 30th Jan 2024):
 
-* Double check if anything else is needed for UHBW DPIA
-* Expect contract from UHBW
-* Look into potential submission to ESC conference (submit deadline mid Feb)
+* Check in with Amy regarding the DPIA progress
+* Expect contract from UHBW -- not had anything yet
 * Want to start looking at how to calculate the ARC HBR criteria from HIC, but first need access to the new HIC (hopefully Mike can make it available). 
 
 For Tom to look at:
 
-* In the xref:preexisting_solutions.adoc#arc_hbr_score[ARC Section], #I've highlighted some bits in yellow for you to take a look at#. I'm trying to document the "ideal" ARC HBR calculation for reference, before getting into how to do it using the HIC data
+* In the xref:preexisting_solutions.adoc#arc_hbr_score[ARC Section], #I've highlighted some bits in yellow for you to take a look at#. I'm trying to document the "ideal" ARC HBR calculation for reference, before trying to implement it it using the HIC data.
 
