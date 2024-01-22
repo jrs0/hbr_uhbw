@@ -13,6 +13,15 @@ asciidoctor -b docbook all.adoc
 pandoc -r docbook -t docx -o all.docx all.xml
 ----
 
+The docx output can be customised by using Lua filter. Create a file `filter.lua`, and run the conversion as follows:
+
+[,bash]
+----
+pandoc --lua-filter filter.lua -r docbook -t docx -o all.docx all.xml
+----
+
+To develop the filter, you can inspect pandoc's native output using `pandoc --lua-filter filter.lua -r docbook -t native -o all.native all.xml`, which will create the file `all.native`. 
+
 To use the asciidoctor-bibtex extension, install the following libraries (as per the https://github.com/asciidoctor/asciidoctor-bibtex[documentation]):
 
 [,bash]

@@ -21,7 +21,7 @@ It won't change text content regardless of colors.
 local List = require("pandoc").List
 
 local MESSAGE = "[ lua ] Colored span found"
-local KEY = "yellow-background"
+local KEY = "mark"
 
 local COLORHEAD = pandoc.RawInline("openxml", "<w:r><w:rPr>")
 local COLORMID = pandoc.RawInline("openxml", "</w:rPr>")
@@ -92,7 +92,8 @@ if FORMAT == "docx" then
                 end
                 el.attributes[BG_KEY] = nil
             end
-
+            
+            -- 
             background = pandoc.RawInline("openxml", string.format(BG_TAG, "yellow"))
 
             return pandoc.Span({ COLORHEAD, foreground, background, COLORMID, el, COLORFOOT })

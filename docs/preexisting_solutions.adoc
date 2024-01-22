@@ -75,7 +75,7 @@ A blood test including an Hb measurement is often performed in the intervention 
 
 The anaemia HBR criterion has been interpreted to mean baseline anaemia (although this is not explicitly stated in the ARC HBR definition). As a result, the first Hb reading will be used to assess anaemia.
 
-===== [.yellow-background]#Prior Bleeding/Transfusion#
+===== #Prior Bleeding/Transfusion#
 
 "Spontaneous (nonintracranial) bleeding requiring hospitalization
 or transfusion in the past 6 months (or at
@@ -87,8 +87,6 @@ criterion"
 -- ARC HBR Paper
 
 Interpretation of terms:
-
-NOTE: look at this please.
 
 * Spontaneous: not having an obvious cause (like trauma). How would this manifest in hospital records? Primary diagnosis in ICD?
 * Recurrent: has occurred at least once before
