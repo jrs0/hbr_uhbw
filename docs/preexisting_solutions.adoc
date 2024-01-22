@@ -38,7 +38,7 @@ Anticipated use of long-term OAC is considered a major criterion. There are two 
 * Vitamin K antagonists: warfarin
 * Direct oral anticoagulants: apixaban, dabigatran, edoxaban, rivaroxaban
 
-[underline]#What timescale defines long-term use?#
+#What timescale defines long-term use?#
 
 ===== Chronic Kidney Disease
 
