@@ -13,6 +13,15 @@ asciidoctor all.adoc
 pandoc -r html -t docx --lua-filter highlight_mark.lua -o all.docx all.html
 ----
 
+Alternatively, ensure make is installed and in your PATH, and then run `make`. To install make on Windows, one way (that works without admin rights) is to install MSYS2 (which will install into `c:/msys64` or similar by default), and then add this snippet to your VS Code `settings.json`:
+
+[,json]
+----
+"terminal.integrated.env.windows": {
+        "PATH": "C:\\msys64\\usr\\bin;${env:PATH}"
+    },
+----
+
 == Notes
 
 The docx output can be customised by using Lua filter. Create a file `filter.lua`, and run the conversion as follows:

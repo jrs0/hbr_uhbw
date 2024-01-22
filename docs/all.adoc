@@ -1,15 +1,17 @@
+:doctype: book
 // This is the top-level file for generating of the word-document 
 // format of the documentation. To create it, run
 //
 // $ asciidoctor all.adoc
-// $ pandoc
+// $ pandoc --lua-filter=highlight_mark.lua --toc -r html -t docx -o all.docx all.html \
+//         metadata title="Bleeding/Ischaemia Risk Prediction Tool"
 
-include::notes.adoc[leveloffset=+1]
+include::notes.adoc[]
 
-include::intended_purpose.adoc[leveloffset=+1]
+include::intended_purpose.adoc[]
 
-include::preexisting_solutions.adoc[leveloffset=+1]
+include::preexisting_solutions.adoc[]
 
-include::alternative_forms.adoc[leveloffset=+1]
+include::alternative_forms.adoc[]
 
-include::alternative_risk_scores.adoc[leveloffset=+1]
+include::alternative_risk_scores.adoc[]

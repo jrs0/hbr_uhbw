@@ -1,11 +1,16 @@
 HASH=$(shell git rev-parse --short HEAD)
 DATE=$(shell date +%d-%m-%Y)
 
-planning_documents.pdf: $(wildcard [0-9][0-9]*.md)
+bhf_hbr_notes.docx: all.html
 	pandoc --toc \
+		   --lua-filter=highlight_mark.lua \
 	       --number-sections \
+		   --number-offset=1 \
 	       --metadata title="Bleeding/Ischaemia Risk Prediction Tool" \
-	       --metadata subtitle="Planning Document (git checkout $(HASH))" \
+	       --metadata subtitle="Notes (git checkout $(HASH))" \
 	       --metadata author="John Scott and Maredudd Harris" \
 	       --metadata date="$(DATE)"\
-	       $^ -o $@
+	       -o $@ $^
+
+all.html: all.adoc
+	asciidoctor all.adoc
