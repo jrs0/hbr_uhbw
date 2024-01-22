@@ -12,5 +12,5 @@ bhf_hbr_notes.docx: all.html
 	       --metadata date="$(DATE)"\
 	       -o $@ $^
 
-all.html: all.adoc
-	asciidoctor all.adoc
+all.html: all.adoc *.adoc
+	asciidoctor $<

@@ -16,5 +16,5 @@ Actions for JS this week (23rd - 30th Jan 2024):
 
 For Tom to look at:
 
-* In the xref:preexisting_solutions.adoc#arc_hbr_score[ARC Section], I've highlighted some bits in yellow for you to take a look at. I'm trying to document the "ideal" ARC HBR calculation for reference, before getting into how to do it using the HIC data
+* In the xref:preexisting_solutions.adoc#arc_hbr_score[ARC Section], #I've highlighted some bits in yellow for you to take a look at#. I'm trying to document the "ideal" ARC HBR calculation for reference, before getting into how to do it using the HIC data
 
