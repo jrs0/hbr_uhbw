@@ -8,7 +8,7 @@ Summary of previous week work (16th - 23rd Jan 2024):
 * Added summary of ARC criteria to these notes
 * Fixed this document (added TOC/ability to highlight in yellow)
 * Had a few thoughts about the ESC abstract:
-** Would like to try to incorporate some of the work we do over the next 6 months or so -- can we include something about trying to recreate ARC-HBR score + some of the other scores? Can say we'll compare results to the previous HES/MI models, without having to specify the results.
+** Would like to try to incorporate some of the work we do over the next 6 months or so -- can we include something about trying to recreate ARC-HBR score + some of the other scores? Could say we'll compare results to the previous HES/MI models, without having to specify the results.
 ** ...could maybe lead into a discussion about the difficulty of implementing the scores in practice/getting the information that is required...
 ** I think the abstract deadline is 1st march, so there's a bit of time.
 
