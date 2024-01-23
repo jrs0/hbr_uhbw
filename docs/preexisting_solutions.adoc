@@ -25,7 +25,7 @@ A summary of the criteria is shown in the table below:
 include::arc_hbr_summary.csv[]
 |===
 
-The sections below describe the conditions that define each criterion in more detail.
+The sections below describe the conditions that define each criterion in more detail. The intention is to define an "ideal" ARC HBR calculation, based on the paper, which is amenable to automated calculation by a computer program, and would be possible to achieve if arbitrary information was available to the program. Commentary about ways to enhance the score (possibly increasing its predictive performance), or about practicalities involved in the calculation, are included as notes, but do not form part of the definition of the ideal score.
 
 ===== Age
 
@@ -36,9 +36,11 @@ Patient age at least 75 at the time of risk score calculation is considered a mi
 Anticipated use of long-term OAC is considered a major criterion. There are two types of oral anticoagulants:
 
 * Vitamin K antagonists: warfarin
-* Direct oral anticoagulants: apixaban, dabigatran, edoxaban, rivaroxaban
+* Direct oral anticoagulants (DOAC): apixaban, dabigatran, edoxaban, rivaroxaban
 
-#What timescale defines long-term use?#
+"Anticipated long-term use" means that the patient is prescribed an OAC at the time of PCI, and a factor which indicates chronic use (for example, atrial fibrillation, or evidence of previous long-term use of OAC in previous prescribing history). Direct evidence of planned long-term use is also valid.
+
+NOTE: As a crude approximation to the ARC HBR score, any prescription of warfarin or DOACs (regardless of "chronic use" awareness) could be taken to imply increased risk.
 
 ===== Chronic Kidney Disease
 
@@ -58,6 +60,8 @@ The stages of chronic kidney disease map to both ICD-10 codes and estimated glom
 | Stage 1, normal eGFR | N18.1 | eGFR > 90 ml/min | None
 |===
 
+NOTE: outside ARC HBR, temporal trends may be more predictive.
+
 ===== Anaemia (Low Haemoglobin)
 
 Haemoglobin level < 11.0 g/dL is a major criterion (for men and women).
@@ -75,9 +79,9 @@ A blood test including an Hb measurement is often performed in the intervention 
 
 The anaemia HBR criterion has been interpreted to mean baseline anaemia (although this is not explicitly stated in the ARC HBR definition). As a result, the first Hb reading will be used to assess anaemia.
 
-===== Prior Bleeding/Transfusion
+NOTE: An enhancement to the ARC HBR score may be achieved by considering time-varying Hb measurements. For example, a transient dip in Hb may reflect a heightened longterm risk of bleeding.
 
-#Does what I've written below look right?#
+===== Prior Bleeding/Transfusion
 
 "Spontaneous (nonintracranial) bleeding requiring hospitalization
 or transfusion in the past 6 months (or at
@@ -90,8 +94,8 @@ criterion"
 
 Interpretation of terms:
 
-* Spontaneous: not having an obvious cause (like trauma). How would this manifest in hospital records? Primary diagnosis in ICD?
-* Recurrent: has occurred at least once before
+* Spontaneous: not having an obvious cause (e.g. not due to trauma/major surgery).
+* Recurrent: has occurred at least once before.
 
 Summary of criteria:
 
@@ -103,26 +107,33 @@ Summary of criteria:
 
 * **Minor** A first bleed _not_ within the 6 months before the PCI, which satisfies the requirements above (hospitalisation/transfusion/spontaneous)
 
+NOTE: Previous work based on primary care data (system-wide dataset) indicated that any history of anaemia/bleeding (and therefore possible transfusion) was predictive of risk. Therefore, a crude form of ARC HBR calculation would be to take any previous bleeding diagnosis (e.g. from ICD-10 clinical coding) and use it as a proxy for this criterion, without considering spontaneity/recurrence. 
+
 ===== Thrombocytopenia (Low Platelet Count)
 
 Moderate or severe baseline thrombocytopenia (low platelet count) i, meaning count < 100e9/L, is a major criterion.
 
 Baseline means before intervention. The platelet count can be obtained from measurements from the full blood count. This information is routinely collected in the index presentation.
 
+NOTE: Similarly to anaemia, time-varying behaviour of platelet count (e.g. transient dips) could prove more predictive for bleeding risk. In addition, considering the numerical value of the platelet count (e.g. considering 50e9/L as more severe than 90ep/L) could improve the score's performance.
+
 ===== Chronic Bleeding Diatheses
 
 It is a major ARC criteria if any of these conditions are present at PCI:
 
-* Platelet dysfunction (#is this a specific thing?#)
-* von Willebrand disease
-* Clotting factor deficiencies (including factors VII, VIII [hemophilia A], IX
+* Platelet dysfunction; for example:
+** von Willebrand disease
+** Clotting factor deficiencies (including factors VII, VIII [hemophilia A], IX
 [hemophilia B], and XI)
-* Acquired antibodies to clotting factors (#more detail required?#)
-* #Anything else? HBR paper mentions "such as [...] among others" when giving the list above#
+** Acquired antibodies to clotting factors
+
+NOTE: There are many conditions which fall within the scope of this criterion; in addition, they are all quite rare. A crude indication of risk in this category may be that the patient has been seen by haemotology. 
 
 ===== Cirrhosis with Portal Hypertension
 
-Presence of liver cirrhosis with portal hypertension is a major criterion. #So liver cirrhosis on its own is not a criterion?#
+Presence of liver cirrhosis with portal hypertension is a major criterion. 
+
+NOTE: THe ARC HBR official app states "liver cirrhosis" only on the main page of critera, but qualifies "with portal hypertension" on the next page. Applying the ARC HBR score strictly, liver cirrhosis alone is not an ARC criteria, but further granularity or predictivity in the score may be achievable by considering liver cirrhosis without portal hypertension to be a risk factor. Similarly, esophageal varices could also be considered in this category. 
 
 ===== Cancer
 
@@ -142,14 +153,17 @@ The following is a minor criterion
 
 ===== Planned Major Non-cardiac Surgery 
 
-Planned non-deferrable major non-cardiac surgery on DAPT after PCI is a major ARC criterion:
+Planned major non-deferrable non-cardiac surgery on DAPT after PCI is a major ARC criterion:
 
 Interpretation as follows:
 
 * Timescale after PCI is not relevant. Instead, it is to do with whether the patient will be on DAPT (which has a variable typical timescale after PCI, e.g. 3 - 6months)
-* #What constitutes major surgery? Could we make a list of the most common possibilities?#
+* Major surgery means:
 
 The calculation depends on a choice of DAPT, so this criteria cannot be calculated automatically based on patient characteristics/history.
+
+NOTE: 
+
 
 ===== Prior Major Surgery/Trauma 
 
@@ -158,6 +172,8 @@ Major surgery or major trauma (#what is in these categories?#) within 30 days be
 ===== Long-term Oral NSAID/Steroid Use
 
 Planned daily intake of oral NSAID/steriods for >4 d/wk (#what timeframe is this? Looks like days/week, but ARC paper phrases it like a duration#) is a minor ARC criterion.
+
+NOTE: long-term use (similar to OAC) is not determined by the timescale, it is obtained from the indication + the prescriptions (i.e. if the patient has a condition that would imply they are on long-term NSAID).
 
 === DAPT Score (not directly applicable, but methods may be useful)
 
