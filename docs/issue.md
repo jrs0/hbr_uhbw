@@ -220,7 +220,33 @@ Oddly, the command returns nil, when it should return a non-null entry (based on
 
 # It works in Linux
 
-Testing out using 
+Testing out using Linux Mint 21.1 Cinnamon, running:
+
+```bash
+# sudo gem install asciidoctor-bibtex
+Fetching bibtex-ruby-5.1.6.gem
+Fetching asciidoctor-bibtex-0.8.0.gem
+Fetching csl-styles-1.0.1.11.gem
+Fetching citeproc-ruby-1.1.14.gem
+Successfully installed csl-styles-1.0.1.11
+Successfully installed citeproc-ruby-1.1.14
+Successfully installed bibtex-ruby-5.1.6
+Successfully installed asciidoctor-bibtex-0.8.0
+Parsing documentation for csl-styles-1.0.1.11
+Installing ri documentation for csl-styles-1.0.1.11
+Parsing documentation for citeproc-ruby-1.1.14
+Installing ri documentation for citeproc-ruby-1.1.14
+Parsing documentation for bibtex-ruby-5.1.6
+Installing ri documentation for bibtex-ruby-5.1.6
+Parsing documentation for asciidoctor-bibtex-0.8.0
+Installing ri documentation for asciidoctor-bibtex-0.8.0
+Done installing documentation for csl-styles, citeproc-ruby, bibtex-ruby, asciidoctor-bibtex after 0 seconds
+4 gems installed
+```
+
+All the gem versions look the same as Windows to me (unless I missed something), but it does work on Linux (the minimal example above right at the top runs fine).
+
+That made me think maybe it was a Ruby version issue -- on Linux, `ruby --version` gives `ruby 3.0.2p107 (2021-07-07 revision 0db68f0233) [x86_64-linux-gnu]`, and on Windows it gives ``
 
 # Conclusion
 
