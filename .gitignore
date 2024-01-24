@@ -1,11 +1,5 @@
 # Emacs autosaves
 *~
 
-# Ignore pdf files (can be refined later if needed)
-*.pdf
-
-# Ignore generated xml/html/pdf/docx output from documentation
-*.xml
-*.docx
-*.html
-*.native
+# Ignore builds (docs or other)
+build/

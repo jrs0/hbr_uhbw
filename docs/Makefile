@@ -1,9 +1,17 @@
 HASH=$(shell git rev-parse --short HEAD)
 DATE=$(shell date +%d-%m-%Y)
 FILENAME_DATE=$(shell date +%d_%m_%Y)
+BUILD=build/
 
-.PHONY: word_doc
-word_doc: word_doc.html
+# Run `make docx` to build the word document
+.PHONY: docx
+docx: $(BUILD)/bhf_hbr_notes.docx
+
+# Run `make pdf` to build the PDF document
+.PHONY: pdf
+pdf: $(BUILD)/bhf_hbr_notes.pdf
+
+$(BUILD)/bhf_hbr_notes.docx: $(BUILD)/word_doc_intermediate.html
 	pandoc --toc \
 	       --lua-filter=highlight_mark.lua \
 	       --number-sections \
@@ -12,16 +20,17 @@ word_doc: word_doc.html
 	       --metadata subtitle="Notes (git checkout $(HASH))" \
 	       --metadata author="John Scott and Maredudd Harris" \
 	       --metadata date="$(DATE)"\
-	       -o bhf_hbr_notes_$(FILENAME_DATE).docx $^
+	       -o $@ $^
 
-.PHONY: pdf
-pdf: main.adoc	
-	asciidoctor-pdf -r asciidoctor-bibtex $< -o bhf_hbr_notes_$(FILENAME_DATE).pdf
+$(BUILD)/bhf_hbr_notes.pdf: main.adoc	
+	asciidoctor-pdf -r asciidoctor-bibtex $< -o $@
 
-word_doc.html: word_doc.adoc *.adoc
-	asciidoctor -r asciidoctor-bibtex $<
+$(BUILD)/word_doc_intermediate.html: word_doc.adoc *.adoc
+	asciidoctor -r asciidoctor-bibtex $< -o $@
 
 .PHONY: clean
 clean:
-	rm -rf *.html *.docx *.pdf
+	rm -rf $(BUILD)
 
+$(BUILD):
+	mkdir -p $(BUILD)
