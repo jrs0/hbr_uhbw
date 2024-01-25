@@ -16,6 +16,4 @@ include::alternative_forms.adoc[]
 
 include::alternative_risk_scores.adoc[]
 
-cite:[urban2021assessing]
-
 bibliography::[]

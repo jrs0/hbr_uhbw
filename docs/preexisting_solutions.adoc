@@ -13,7 +13,7 @@ This section contain risk scores (statistical models or other kinds of calculati
 [#arc_hbr_score]
 === ARC HBR Score (applies to assessing high bleeding risk)
 
-_The ARC HBR score is a numerical consensus-based score (rather than being a statistically-driven score), where the presence of a major criterion contributes a 1 to the total score, and a minor criterion contributes 0.5 to the total. A patient is considered at HBR if their score is at least 1 (e.g. due to one major criterion, or two minor criteria)._
+_The ARC HBR score cite:[urban2019defining] is a numerical consensus-based score (rather than being a statistically-driven score), where the presence of a major criterion contributes a 1 to the total score, and a minor criterion contributes 0.5 to the total. A patient is considered at HBR if their score is at least 1 (e.g. due to one major criterion, or two minor criteria)._
 
 ==== ARC HBR Score Definition
 
@@ -83,6 +83,8 @@ NOTE: An enhancement to the ARC HBR score may be achieved by considering time-va
 
 ===== Prior Bleeding/Transfusion
 
+The ARC HBR paper cite:[urban2019defining] states:
+
 "Spontaneous (nonintracranial) bleeding requiring hospitalization
 or transfusion in the past 6 months (or at
 any time if recurrent) is considered a major ARC-HBR
@@ -90,7 +92,7 @@ criterion, and a first spontaneous (nonintracranial)
 bleed requiring hospitalization or transfusion >6 and
 <12 months before PCI is considered a minor ARC-HBR
 criterion"
--- ARC HBR Paper
+-- ARC HBR
 
 Interpretation of terms:
 
@@ -153,27 +155,30 @@ The following is a minor criterion
 
 ===== Planned Major Non-cardiac Surgery 
 
-Planned major non-deferrable non-cardiac surgery on DAPT after PCI is a major ARC criterion:
+The ARC HBR paper cite:[urban2019defining] states:
 
-Interpretation as follows:
+"Planned nondeferrable [noncardiac] major surgery on DAPT after PCI is considered a major ARC-HBR criterion"
+--- ARC HBR
 
-* Timescale after PCI is not relevant. Instead, it is to do with whether the patient will be on DAPT (which has a variable typical timescale after PCI, e.g. 3 - 6months)
-* Major surgery means:
+Given the subjectivity around the use of the term "major surgery" cite:[newsome2021major], the following two approaches could be used to make an objective definition:
 
-The calculation depends on a choice of DAPT, so this criteria cannot be calculated automatically based on patient characteristics/history.
+* Take all nondeferrable surgery on DAPT as a major risk criterion.
+* Make a list of qualifying surgical procedures that confer major risk.
 
-NOTE: 
-
+The timescale after PCI is not directly relevant; instead, the risk is related to with whether the patient will be on DAPT (which has a variable typical timescale after PCI, e.g. 3 - 6months). The calculation depends on a choice of DAPT, so this criteria cannot be calculated automatically based on patient characteristics/history.
 
 ===== Prior Major Surgery/Trauma 
 
-Major surgery or major trauma (#what is in these categories?#) within 30 days before PCI is a major ARC criterion.
+Major surgery or major trauma within 30 days before PCI is a major ARC criterion. Similarly to the case of planned major surgery above, two approaches are possible:
+
+* Consider any surgery or any trauma within the previous 30 days to confer major risk.
+* Create a list of qualifying surgical procedures and trauma that confer major risk in the previous 30 days.
 
 ===== Long-term Oral NSAID/Steroid Use
 
-Planned daily intake of oral NSAID/steriods for >4 d/wk (#what timeframe is this? Looks like days/week, but ARC paper phrases it like a duration#) is a minor ARC criterion.
+Planned long-term use of oral NSAID/steriods at >= 4 days/week is a minor ARC criterion.
 
-NOTE: long-term use (similar to OAC) is not determined by the timescale, it is obtained from the indication + the prescriptions (i.e. if the patient has a condition that would imply they are on long-term NSAID).
+NOTE: Long-term use (similar to OAC) is not determined by the timescale. Instead, it is implied by an indication for chronic use combined with a prescription (i.e. if the patient has a condition that would imply they should be on long-term NSAID).
 
 === DAPT Score (not directly applicable, but methods may be useful)
 

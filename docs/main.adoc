@@ -11,6 +11,4 @@ include::alternative_forms.adoc[leveloffset=+1]
 
 include::alternative_risk_scores.adoc[leveloffset=+1]
 
-cite:[urban2021assessing]
-
 bibliography::[]
