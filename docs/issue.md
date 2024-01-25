@@ -246,8 +246,10 @@ Done installing documentation for csl-styles, citeproc-ruby, bibtex-ruby, asciid
 
 All the gem versions look the same as Windows to me (unless I missed something), but it does work on Linux (the minimal example above right at the top runs fine).
 
-That made me think maybe it was a Ruby version issue -- on Linux, `ruby --version` gives `ruby 3.0.2p107 (2021-07-07 revision 0db68f0233) [x86_64-linux-gnu]`, and on Windows it gives ``
+That made me think maybe it was a Ruby version issue -- on Linux, `ruby --version` gives `ruby 3.0.2p107 (2021-07-07 revision 0db68f0233) [x86_64-linux-gnu]`, and on Windows it gives `ruby 3.3.0 (2023-12-25 revision 5124f9ac75) [x64-mingw-ucrt]`. Not sure if that would make any difference.
 
 # Conclusion
 
-Not knowing anything about Ruby, I'm not really sure what the issue is, but it looked like some kind of dependency thing. I wondered if you would be able to offer any insight or any workarounds? (Or point out if I did anything obviously wrong!)
+Not knowing anything about Ruby, I'm not really sure what the issue is, but it looked like some kind of dependency thing. I wondered if you would be able to offer any insight or any workarounds? (Or point out if I did anything obviously wrong!, which would be ideal!)
+
+Thanks in advance.
