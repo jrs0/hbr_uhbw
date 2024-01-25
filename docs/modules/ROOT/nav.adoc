@@ -1,2 +1,3 @@
 * xref:index.adoc[]
 * xref:intended_purpose.adoc[]
+* xref:preexisting_solutions.adoc[]
