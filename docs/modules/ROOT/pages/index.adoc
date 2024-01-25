@@ -1,0 +1,11 @@
+= Overview
+
+The intention of this project is to create a tool capable of flagging patients undergoing percutaneous coronary intervention (PCI) who are at elevated bleeding risk, in order to prompt a clinician to consider more closely what type of blood thinning therapy should be prescribed.
+
+The tool should provide an improvement on the current methods used to assess bleeding risk, either by making it easier for clinicians to access/calculate already-validated/recommended risk scores, or by providing new scores with better predictive accuracy.
+
+If the tool performs a calculation which is not easily verifiable by the user, the tool would likely be considered a medical device and will need to follow the medical device regulations in the UK. One purpose of this document is to form part of the technical file for risk management purposes.
+
+The tool is being developed in the Bristol Heart Institute at University Hospital Bristol and Western, using funding provided by the British Heart Foundation.
+
+

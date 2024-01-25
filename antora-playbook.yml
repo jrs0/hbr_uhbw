@@ -1,0 +1,16 @@
+site:
+  title: Bleeding/Ischaemia Risk 
+content:
+  edit_url: false
+  sources: 
+  - url: ./
+    start_path: docs
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+  
+output:
+  # Go careful not to set dir: to something
+  # that you don't want clean below to delete!
+  clean: true
