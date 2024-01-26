@@ -7,6 +7,7 @@ WARNING: This plan is not yet approved (DCB 0129, section 3.2.2)
 NOTE: The following risk definitions are taken from section 4.4 of the DCB 0129 guidance, with the intention to tailor them to this specific project.
 
 Estimation of clinical risk involves:
+
 * Estimating the severity of the hazard on a qualitative scale
 * Estimating the likelihood of the hazard on a qualitative scale
 * Use a matrix of likelihood and severity to obtain a clinical risk
