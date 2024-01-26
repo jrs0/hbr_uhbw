@@ -46,6 +46,26 @@ The following scale is used for the assessment of severity (terminology from DCB
 *** Death; OR
 *** Permanent life-changing incapacity and any condition for which the prognosis is death or permanent life-changing incapacity; severe injury or severe incapacity from which recovery is not expected in the short term
 
+=== Assessment of Likelihood
+
+The following scale is used for the assessment of severity (terminology from DCB 0129 guidance document):
+
+* *Very high*: Certain or almost certain; highly likely to occur
+* *High*: Not certain but very possible; reasonably expected to occur in the majority of cases
+* *Medium*: Possible
+* *Low*: Could occur but in the great majority of occasions will not
+* *Very low*: Negligible or nearly negligible possibility of occurring
+
+=== Risk Assessment Matrix
+
+The following matrix (from DCB 0129 guidance document, Table 9) is used to obtain an clinical risk score for combinations of severity and likelihood:
+
+.Clinical risks based on severity and likelihood of occurrence
+[format=csv]
+|===
+include::risk_matrix.csv[]
+|===
+
 == Planned Activities
 
 TODO
