@@ -4,8 +4,6 @@ The intention of this project is to create a tool capable of flagging patients u
 
 The tool should provide an improvement on the current methods used to assess bleeding risk, either by making it easier for clinicians to access/calculate already-validated/recommended risk scores, or by providing new scores with better predictive accuracy.
 
-If the tool performs a calculation which is not easily verifiable by the user, the tool would likely be considered a medical device and will need to follow the medical device regulations in the UK. One purpose of this document is to form part of the technical file for risk management purposes.
+If the tool performs a calculation which is not easily verifiable by the user, the tool would likely be considered a medical device and will need to follow the medical device regulations in the UK. The technical file for this project, which includes the source code for this document, is available at https://github.com/jrs0/hbr_uhbw/technical_file[].
 
 The tool is being developed in the Bristol Heart Institute at University Hospital Bristol and Western, using funding provided by the British Heart Foundation.
-
-
