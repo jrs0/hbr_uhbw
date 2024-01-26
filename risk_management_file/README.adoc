@@ -1,6 +1,8 @@
-= Planning Documents
+= Clinical Risk Management File
 
-This folder contains documents that will eventually form part of the risk management file for the project. The documentation is written using https://asciidoc.org/[AsciiDoc]. To generate the documentation:
+This folder contains the risk management file (RMF) that is being developed in accordance with https://digital.nhs.uk/data-and-information/information-standards/information-standards-and-data-collections-including-extractions/publications-and-notifications/standards-and-collections/dcb0129-clinical-risk-management-its-application-in-the-manufacture-of-health-it-systems[DCB 0129] (section 3.1). All documents referred to by this RMF are stored within this git repository, which also stores the history of all the documents. Where reference to a particular version of a file is made, the branch and commit hash of the file will also be included.
+
+A summary of the documentation can be generated in PDF format. To generate the documentation:
 
 1. Install AsciiDoctor https://docs.asciidoctor.org/asciidoctor/latest/install/windows/[for your platform]. If you use Visual Studio Code, a simple approach is to install the AsciiDoc extension, which comes bundled with the `asciidoctor` binary. Alternatively, install Ruby for your operating system, and then run `gem install asciidoctor` and `gem install asciidoctor-pdf` (see https://docs.asciidoctor.org/asciidoctor/latest/install/ruby-packaging/[here] for reference). If you are using Linux, run `sudo apt install asciidoctor ruby-asciidoctor-pdf pandoc ruby-dev` and `sudo gem install asciidoctor-bibtex`
 2. Run `asciidoctor 00_all.adoc` to generate the documentation. Alternatively, in Visual Studio Code, open `00_all.adoc`, type Ctrl-Shift-P, and run `AsciiDoc: Save HTML Document` or `AsciiDoc: Export Document as PDF`. The former requires `asciidoctor`, the latter requires `asciidoctor-pdf`.
