@@ -39,4 +39,4 @@ The tool can also use data that is automatically available for an inpatient (i.e
 * The risk score could be used on the wrong patient group. 
 * The risk score could be used to inform choice of the wrong medication (i.e. non-blood-thinning medication) (note: we should explicitly list what medication is within scope?)
 * Risks could be interpreted too broadly (i.e. an ischaemia risk targeting only AMI and stroke could be interpreted as applying to all cardiovascular conditions)
-
+* If required information must be inputted before the score is calculated, incorrect or guessed values for this information may be inputted into the tool to speed up the calculation process. This may cause invalid risk calculations.

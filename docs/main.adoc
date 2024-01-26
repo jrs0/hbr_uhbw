@@ -2,6 +2,9 @@
 John Scott and Maredudd Harris
 :doctype: book
 :toc:
+:sectnums:
+
+include::overview.adoc[leveloffset=+1]
 
 include::intended_purpose.adoc[leveloffset=+1]
 
