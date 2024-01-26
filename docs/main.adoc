@@ -4,14 +4,6 @@ John Scott and Maredudd Harris
 :toc:
 :sectnums:
 
-include::overview.adoc[leveloffset=+1]
-
-include::intended_purpose.adoc[leveloffset=+1]
-
-include::preexisting_solutions.adoc[leveloffset=+1]
-
-include::alternative_forms.adoc[leveloffset=+1]
-
-include::alternative_risk_scores.adoc[leveloffset=+1]
+include::specifications.adoc[leveloffset=+1]
 
 bibliography::[]

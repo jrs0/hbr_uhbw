@@ -10,7 +10,7 @@ Currently stratified risk scores do exist but, anecdotally, are not routinely us
 
 * *Basic* Calculates already-existing and validated risk scores in a semi-automated way (drawing as much information as possible automatically from clinical systems), in order to make it easier for clinicians to use the scores.
 * *Intermediate* Uses custom statistical or machine-learning models to enhance the predictive accuracy of the tool. Involves development and internal/external validation of the custom models.
-* *Advanced* 
+* *Advanced* Using any score/model, track the risk score of patients who have had PCI over time (as a follow-up mechanism), regularly calculate the risk score based on the time-varying information about the patient (e.g. automatically once per day/week). If the risk changes significantly, automatically alert a clinician, so they can review the medication.
 
 The tool should be easy enough to use that it can be incorporated into routine clinical practice. This means:
 

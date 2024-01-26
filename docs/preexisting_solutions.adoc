@@ -6,7 +6,6 @@ This file contains a list of the current solutions to the problems presented in 
 
 include::arc_hbr.adoc[leveloffset=+1]
 
-
 == Other Risk Scores/Tools
 
 This section contain risk scores (statistical models or other kinds of calculations) designed to aid in the assessment of bleeding/ischaemia risk for ACS patients.
@@ -59,7 +58,7 @@ Detailed information about how each endpoint was defined is contained in the sup
 The predictors are listed in the supplemtary material (eTable 1), and were found through literature review and clinical plausability (this list is the predictors for both bleeding and ischaemia risk):
 
 .Predictors used for models in the DAPT score
-[format=csv,options="header"]
+[format=csv,options="header",orientation=landscape]
 |===
 include::dapt_predictors.csv[]
 |===
