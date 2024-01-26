@@ -4,22 +4,21 @@ The intended purpose of the device is a description of how it is intended to be 
 
 == Function of the device
 
-The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options.
+The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options. For example, if a patient is identified as being at a high risk of bleeding through the use of the tool then the clinician could use this information to choose a less aggressive blood thinning therapy option. In addition to providing risks on request, an advanced version of the tool should also notify relevant health care professionals if the risks change enough to warrant a change in therapy at any point in a monitoring period.
 
-Currently stratified risk scores do exist but, anecdotally, are not routinely used in the evaluation of patients initiated on anti-coagulation.
-Our device would allow for existing risk scores to be used and for the additional use of a machine learning trained device to risk stratify patients. 
+Currently stratified risk scores do exist but, anecdotally, are not routinely used in the evaluation of patients initiated on anti-coagulation therapy. This device would have different variants, varying in likely implementation complexity:
 
-For example, if a patient is identified as being at a high risk of bleeding through the use of the tool then the clinician could use this information to choose a less aggressive blood thinning therapy option.
-
-In addition to providing risks on request, the tool should also notify relevant health care professionals if the risks change enough to warrant a change in therapy at any point in a monitoring period.
+* *Basic* Calculates already-existing and validated risk scores in a semi-automated way (drawing as much information as possible automatically from clinical systems), in order to make it easier for clinicians to use the scores.
+* *Intermediate* Uses custom statistical or machine-learning models to enhance the predictive accuracy of the tool. Involves development and internal/external validation of the custom models.
+* *Advanced* 
 
 The tool should be easy enough to use that it can be incorporated into routine clinical practice. This means:
 
 * It should be integrated within current workflows so that it can be routinely used
-* It should use information that the clinician is already _required_ to input into clinical systems (it may require existing systems to be modified to require more information to be inputted)
-* The amount of required information (or additional required information) should be low enough that a clinician can reasonably source all of it (i.e. the tool cannot require 25 new manually entered data points).
+* The scores/models should predominantly use variables that the clinician is already _required_ to input into clinical systems (it may require existing systems to be modified to require more information to be inputted).
+* If more information is required to be sourced by the clinician, it should be low enough that a clinician can reasonably source all of it (e.g. the tool cannot require 25 new manually entered data points).
 
-The tool can also use data that is automatically available for an inpatient (i.e. could be automatically drawn from other clinical systems).
+The tool can also use data that is automatically available for an inpatient (i.e. could be automatically drawn from other clinical systems), if it is sufficiently common that the data exists (to minimise the need for estimating/imputing values).
 
 == Indications for use
 
@@ -39,4 +38,4 @@ The tool can also use data that is automatically available for an inpatient (i.e
 * The risk score could be used on the wrong patient group. 
 * The risk score could be used to inform choice of the wrong medication (i.e. non-blood-thinning medication) (note: we should explicitly list what medication is within scope?)
 * Risks could be interpreted too broadly (i.e. an ischaemia risk targeting only AMI and stroke could be interpreted as applying to all cardiovascular conditions)
-* If required information must be inputted before the score is calculated, incorrect or guessed values for this information may be inputted into the tool to speed up the calculation process. This may cause invalid risk calculations.
+* If required information must be inputted before the score is calculated, incorrect or estimated values for this information may be inputted into the tool to speed up the calculation process. This may cause invalid risk calculations.
