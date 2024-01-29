@@ -3,3 +3,6 @@
 
 # Ignore builds (docs or other)
 build/
+
+# Python virtual environment
+.venv*
