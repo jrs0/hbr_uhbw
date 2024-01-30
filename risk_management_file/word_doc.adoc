@@ -8,12 +8,8 @@
 
 include::notes.adoc[]
 
-include::intended_purpose.adoc[]
+include::specifications.adoc[leveloffset=+1]
 
-include::preexisting_solutions.adoc[]
-
-include::alternative_forms.adoc[]
-
-include::alternative_risk_scores.adoc[]
+include::risk_management_plan.adoc[leveloffset=+1]
 
 bibliography::[]

@@ -1,12 +1,22 @@
 = Intended Purpose
 
-The intended purpose of the device is a description of how it is intended to be used, how it should behave, who should use it, and other high-level information. Design/implementation choices should be guided by how well they meet the intended purpose.
+The intended purpose of the device is a description of how it is intended to be used, including how it should behave, who should use it, and other high-level information. Design/implementation choices should be guided by how well they meet the intended purpose.
 
 == Function of the device
 
-The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options. For example, if a patient is identified as being at a high risk of bleeding through the use of the tool then the clinician could use this information to choose a less aggressive blood thinning therapy option. In addition to providing risks on request, an advanced version of the tool should also notify relevant health care professionals if the risks change enough to warrant a change in therapy at any point in a monitoring period.
+The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options. For example, if a patient is identified as being at a high risk of bleeding through the use of the tool then the clinician could use this information to choose a less aggressive blood thinning therapy option.
 
-Currently stratified risk scores do exist but, anecdotally, are not routinely used in the evaluation of patients initiated on anti-coagulation therapy. This device would have different variants, varying in likely implementation complexity:
+In addition to providing risks on request, an advanced version of the tool should also notify relevant health care professionals if the risks change enough to warrant a change in therapy at any point in a monitoring period.
+
+Currently stratified risk scores do exist but, anecdotally, are not routinely used in the evaluation of patients initiated on anti-coagulation therapy. One purpose of this tool would be to reduce the barrier for clinical use, for example by:
+
+* Tagging a calculation of bleeding/ischaemia risk onto an already-existing routine request (such as laboratory tests)
+* Auto-populating fields in the software systems currently used by clinicians to document PCI patients
+* Making the calculation easy enough that there is no barrier to performing it routinely (i.e. by automatically collecting some of the required information)
+
+incorporating considering of bleeding/ischaemia risk as part of a standard clinical workflow (making it more likely for a clinician to remember to ), or automatically prompting the clinician to consider bleeding/ischaemia risk for all patients.
+
+This device would have different variants, varying in likely implementation complexity:
 
 * *Basic* Calculates already-existing and validated risk scores in a semi-automated way (drawing as much information as possible automatically from clinical systems), in order to make it easier for clinicians to use the scores.
 * *Intermediate* Uses custom statistical or machine-learning models to enhance the predictive accuracy of the tool. Involves development and internal/external validation of the custom models.
@@ -30,8 +40,8 @@ The tool can also use data that is automatically available for an inpatient (i.e
 * **What form will the tool take**: the tool would comprise a risk score subsystem, which would calculate the bleeding/ischaemia risk from patient information, and a supporting process/system for enabling clinicians to obtain the risk scores in accordance with this intended purpose. See [Alternative Forms](alternative_forms.md) for different ways to realise this system.
 
 * **What evidence is required to demonstrate the device meets the specifics of the intended purpose?** 
-    * Pre-deployment a review with local and external data would be required. Post deployment an audit of the device risk scores with a selected sample of case reviews to demonstrate whether the scores impact patient management. A retrospective analysis of the number of patients being admitted to hospital post PCI with haemorrhage.
-    * A risk management file describing what alternative solutions were considered for all aspects of the design, why the design itself was selected, and how the design is shown to reduce risks/hazards as much as possible in accordance with relevant risk management guidelines.
+** Pre-deployment a review with local and external data would be required. Post deployment an audit of the device risk scores with a selected sample of case reviews to demonstrate whether the scores impact patient management. A retrospective analysis of the number of patients being admitted to hospital post PCI with haemorrhage.
+** A risk management file describing what alternative solutions were considered for all aspects of the design, why the design itself was selected, and how the design is shown to reduce risks/hazards as much as possible in accordance with relevant risk management guidelines.
  
 == Reasonably forseeable misuse
 

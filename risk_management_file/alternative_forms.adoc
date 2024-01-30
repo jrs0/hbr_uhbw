@@ -1,51 +1,94 @@
-= Alternative Forms of the Tool
+[#alternative_forms]
+= #Alternative Forms of the Tool#
 
-This file describes alternative types of tool that might satisfy the intended purpose. 
+This section describes various system designs that might satisfy the intended purpose.
 
 == Description of the system
 
-The tool comprises a risk score calculation, which takes patient information as inputs and produces a bleeding and ischaemia risk as output (see [Alternative Risk Scores](alternative_risk_scores.md) for more information). It can be considered as a black box from the point of view of the rest of the system.
+[ditaa]
+....
+                   +-------------+
+                   | Asciidoctor |-------+
+                   |   diagram   |       |
+                   +-------------+       | PNG out
+                       ^                 |
+                       | ditaa in        |
+                       |                 v
+ +--------+   +--------+----+    /---------------\
+ |        | --+ Asciidoctor +--> |               |
+ |  Text  |   +-------------+    |   Beautiful   |
+ |Document|   |   !magic!   |    |    Output     |
+ |     {d}|   |             |    |               |
+ +---+----+   +-------------+    \---------------/
+     :                                   ^
+     |          Lots of work             |
+     +-----------------------------------+
+....
 
-The rest of the system is software or processes that enable the risk score to be calculated and brought to clinicians in a way that meets the intended purpose. The section below describes alternative formats for this system.
+There system will likely comprise two parts:
 
-== Alternative Systems List
+* *Risk Score Calculator* The tool includes a risk score calculation, which takes patient information as inputs and produces a bleeding and ischaemia risk as output. It can be considered as a black box from the point of view of the rest of the system.
+* *Hospital System Interface* The rest of the system is software or processes that enable the risk score to be calculated and brought to clinicians in a way that meets the intended purpose. One method (ideal for the clinician) would be for all the information to flow in an automated way from hospital systems to the risk score calculator. In the event that this full level of automation is not possible, the following criteria should guide the choice of interfacing system:
+** The system should interface as closely as possible with already-existing systems/workflows, with the aim to reduce integration effort and align maintenance with existing systems.
+** The system should automate the retrieval of as much patient information as possible, leaving a minimal amount of information for the clinician to source manually (meeting this requirement may impose restrictions on what variables can be used in the risk scores, on top of pure predictive-performance considerations)
+
+== Alternative Hospital System Interfaces
+
+The following is a list of possible methods to realize the hospital system interface. It is likely that the choice of interface will constrain the choice of risk score calculation, due to narrowing the information which can be automatically retrieved/manually inputted.
 
 === Integrated into routine lab tests
 
-The tool will be constructed to operate within the existing IT infrastructure, using the ICE laboratory request and result system. This would allow for use within existing workflows. Further, patient identifiable information would be suitably protected.
+From the clinician's perspective, the barrier to use of the tool would be lessened if it were incorporated into a process that is routinely conducted. One such process is requesting laboratory test results (routinely collected on patients undergoing PCI), which are requested automatically and returned through the ICE system. 
 
-Questions (might be naive):
+If the test could be automatically appended to other laboratory tests for patients undergoing PCI, then there would be no need for the clinician to remember to add the test, meeting the requirement in the intended purpose to reduce the barrier for clinical use.
 
-* How often are new tests integrated into the lab? Is there a system/policy for doing it?
-* Is there any precedent for lab tests which are not "proper" lab tests like bloods etc. -- i.e. anything similar to a risk score?
-* How is the output of lab tests presented to clinicians/is there flexibility in how the system (ICE?) presents results
-* Do any current lab tests require collection of patient information (like age, gender, etc.) as part of calculating the results?
-* Is there any equivalent of a "standing order" for a lab test (i.e. do this test for this patient every week), or are all tests triggered by clinician requests?
+If it is possible to configure the clinical-frontend to ICE when requesting the laboratory test to require additional information for the calculation of a risk score, then this may encourage the clinician to source this additional information.
 
-==== Advantages
+A further advantage of using the ICE system would be potential access to information to some parts of the electronic record of the patient, which could be incorporated into the risk score calculation.
 
-* More of the work is integrated into routine lab tests, and could be taken away from front-line clinicians.
-* More manual data could be collected if this was incorporated as a part of a standard process, as for a laboratory test.
+The risk score calculation would happen in one of two ways:
 
-==== Disadvantages
+* The calculation could take place inside the ICE system itself. This would only be possible if ICE supports this facility, and if the risk score calculation were simple enough.
+* The calculation could be performed by a separate server, and the ICE system could query this server for the information. This may involve data-protection considerations in addition to purely technical questions, since the new server would likely need access to patient information stored on the ICE system.
 
-* May be difficult to trigger ongoing monitoring of patient risk (who would trigger the re-evaluation?)
+A disadvantage of this option is that it may not be possible to automatically track patient risk in a follow-up period (because the laboratory test is triggered by the clinician).
+
+.Notes regarding this alternative
+[format=csv,options="header"]
+|===
+include::lab_proposal_log.csv[]
+|===
 
 === New stand-alone software
 
-The tool will be a desktop application (for Windows and Mac), and a mobile phone application (for Android and iOS). The desktop application will be installed in relevant clinical locations (e.g. the CathLab, on the ward computer trolleys, etc.). The mobile phone application will be installable by any clinician involved in the patient's care.
+Compared to the current options available (often presented as web applications/dashboards or mobile applications), the most similar option is to develop a new standalone piece of software, to run either on clinician's computers or mobile devices. However, the currently available options involve manually sourcing several data points, which is a barrier to clinical use.
 
-The calculations themselves will take place in a server, installed on the hospital site, which will be able to source some information automatically from electronic hospital systems, and source some information from the frontend desktop/mobile applications.
+For new software to provide a benefit, it must be possible to automatically populate the risk score variables from items in the patient's electronic health record. This could be achieved by a traditional frontend/backend system, as follows:
 
-Clinicians can trigger a risk calculation from the desktop/mobile application. In addition, clinicians who have opted-in to notifications about a particular patient will receive push notifications if the risk for that patient changes. The server will regularly (multiple times per day) poll its information sources, and recalculate patient risk, to check if this notification should be sent.
+* *Backend* A server, interfacing with hospital systems to extract relevant patient information (e.g. in a compatible format such as HL7, or via SQL queries to relevant databases). The risk score calculation itself would take place on the backend server.
+* *Frontend* Client software installed on clinical workstations (e.g. the CathLab, on the ward computer trolleys, etc.), which would access the backend server via the hospital network, and enable clinicians to retrieve or track patient risk.
 
-==== Advantages
+The advantage to using a bespoke system is the ability to customize how all aspects work. This could enable the more advanced versions of the tool, including the ability to track changing risk over time, alert clinicians to changing risk over time, and customize the frontend to present the information in an optimal way.
 
-* Flexibility of implementation (what can be included/how the tool can be designed); might be better tailored to intended purpose
-* Automatic interface to hospital systems may be able to reduce manual information input as much as possible.
+The primary disadvantages are:
 
-==== Disadvantages
+* The complexity of designing a bespoke system.
+* Complexity regarding the data protection considerations in storing patient data in the backend server.
+* Potential lack of alignment with existing systems, in terms of deployment and ongoing maintenance.
+* Potential lack of integration between the new system and already-existing workflows (the system may become "yet another IT system to have to use")
 
-* Complexity of implementation (depending how much is designed from scratch).
-* Complexity of interfacing with existing hospital systems.
+=== Integration Into Cardiology Centricity Workflow (CCW)
 
+The CCW software is an IT system used in the Bristol Heart Institute to manage information about cardiology patients; in particular, it is used by clinicians to input compulsory information for the British Cardiovascular Intervention Society (BCIS) audit. Some of this information is used to populate an automatically generated discharge note, in PDF format.
+
+If the CCW frontend can be modified to allow additional information to be inputted (some of this could be marked as required, similarly to the current BCIS-required information), then:
+
+* This information could potentially be accessed via a backend server directly from the CCW system itself (using SQL).
+* The backend server could calculate the risk score.
+* The results could be pushed back to the CCW system, and ideally be directed to the automatically generated PDF output.
+
+The primary advantage of this option is that it most closely aligns with the currently-existing workflow used by cardiologists in the Bristol Heart Institute, and likely optimises the visibility of the risk score. 
+
+There may be technical challenges regarding the modification of the CCW system, particularly regarding whether customized information can be pushed into it from an external server. The manufacturer of the CCW system may be able to advise on the feasibility of this.
+
+In addition, there may be data protection considerations involved in storing CCW data on a custom server.

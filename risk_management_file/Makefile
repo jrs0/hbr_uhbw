@@ -23,10 +23,10 @@ $(BUILD)/bhf_hbr_notes.docx: $(BUILD)/word_doc_intermediate.html
 	       -o $@ $^
 
 $(BUILD)/bhf_hbr_notes.pdf: main.adoc *.adoc
-	asciidoctor-pdf $< -o $@
+	asciidoctor-pdf -r asciidoctor-diagram $< -o $@
 
 $(BUILD)/word_doc_intermediate.html: word_doc.adoc *.adoc
-	asciidoctor -r asciidoctor-bibtex $< -o $@
+	asciidoctor -r asciidoctor-diagram $< -o $@
 
 .PHONY: clean
 clean:

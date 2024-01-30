@@ -2,23 +2,18 @@
 
 _This section will contain notes about progress this week, specific things to look at in this document (if any), etc._
 
-Summary of previous week work (16th - 23rd Jan 2024):
+Summary of previous week work (23rd - 30th Jan 2024):
 
-* Submitted work request to ICB infrastructure to transfer HIC data to ICB, and minimised the HIC tables to avoid duplicating data already at the ICB
-* Added summary of ARC criteria to these notes
-* Fixed this document (added TOC/ability to highlight in yellow)
-* Had a few thoughts about the ESC abstract:
-** Would like to try to incorporate some of the work we do over the next 6 months or so -- can we include something about trying to recreate ARC-HBR score + some of the other scores? Could say we'll compare results to the previous HES/MI models, without having to specify the results.
-** ...could maybe lead into a discussion about the difficulty of implementing the scores in practice/getting the information that is required...
-** I think the abstract deadline is 1st march, so there's a bit of time.
+* Got comments back from Amy regarding the DPIA, started going through them. Plan to submit it after confirming a few details with Mike on Wednesday
+* Started working on some of the required elements for the risk management file, with a view to contacting the IT team at UHBW in a few weeks for some advice on how we can integrate the tool within hospital systems.
 
-Actions for JS this week (23rd - 30th Jan 2024):
+Actions for JS this week (30th Jan - 6th Feb 2024):
 
-* Check in with Amy regarding the DPIA progress
-* Expect contract from UHBW -- not had anything yet
-* Want to start looking at how to calculate the ARC HBR criteria from HIC, but first need access to the new HIC (hopefully Mike can make it available). 
+* Meeting with Mike on Wednesday -- can hopefully get access to new HIC data (which will enable planning ARC HBR calculation)
+* Submit DPIA to Amy after chatting to Mike
+* Expect contract from UHBW
 
 For Tom to look at:
 
-* In the xref:preexisting_solutions.adoc#arc_hbr_score[ARC Section], #I've highlighted some bits in yellow for you to take a look at#. I'm trying to document the "ideal" ARC HBR calculation for reference, before trying to implement it it using the HIC data.
+* In the xref:preexisting_solutions.adoc#alternative_forms[Alternative Forms], you could have a read over the different proposed forms of the tool. I've tried to write up the different ideas, including the lab test integration idea Med and I discussed, the idea of developing new bespoke software, and the possibility of integrating into CCW. Feel free to add comments (but no need to do it before tomorrow!)
 
