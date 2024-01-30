@@ -27,6 +27,25 @@
 # compressing it; the compression ratio is very good (e.g. 500 MiB to
 # 100 MiB).
 #
+# After copying to the new computer, change the following variables:
+#
+#    .venv/Scripts/activate: change VIRTUAL_ENV to point to the new
+#         location of the virtual environment (use quotes if the path
+#         has spaces)
+#    .venv/pyvenv.cfg: change all the variables to match the paths to
+#         python on the new computer.
+#
+# On UHBW trust computer, loading a virtual environment using powershell
+# results in an error: ".venv\Scripts\Activate.ps1 cannot be loaded because 
+# running scripts is disabled on this system." IT advised this is a 
+# powershell-specific issue; changing the VS code default terminal to
+# bash (e.g. git bash) solves the problem. You can change your default
+# terminal using Ctrl-Shift-P, and running (make sure git bash in installed
+# first):
+#
+#    Terminal: Select Default Profile
+#    <pick Git Bash>
+#
 # The packages in this virtual environment were installed using:
 #
 #   pip install numpy matplotlib pandas scikit-learn scikit-survival
