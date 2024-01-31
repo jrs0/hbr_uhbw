@@ -4,6 +4,25 @@ The intended purpose of the device is a description of how it is intended to be 
 
 == Function of the device
 
+.Caption
+[ditaa]
+....
+                                               +----------------------+
+                                               | Electronic patient   |
+                                               | record/other sources |
+                                               +----------+-----------+
+                                                          |
+                                                          V
+                          +------------+          +---------------+
+  Clinician sources       |            |          |  Risk Score   |
+  some input data  ------>|            |--------->+  Calculation  +-----+
+                          | Frontend   |          |               |     |
+                          |            |          +---------------+     |
+  Clinician gets   <------|            |<-------------------------------+
+  patient bleeding/       |            |
+  ischaemia risk          +------------+	                              
+....
+
 The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options. For example, if a patient is identified as being at a high risk of bleeding through the use of the tool then the clinician could use this information to choose a less aggressive blood thinning therapy option.
 
 In addition to providing risks on request, an advanced version of the tool should also notify relevant health care professionals if the risks change enough to warrant a change in therapy at any point in a monitoring period.
