@@ -253,3 +253,16 @@ That made me think maybe it was a Ruby version issue -- on Linux, `ruby --versio
 Not knowing anything about Ruby, I'm not really sure what the issue is, but it looked like some kind of dependency thing. I wondered if you would be able to offer any insight or any workarounds? (Or point out if I did anything obviously wrong!, which would be ideal!)
 
 Thanks in advance.
+
+# Follow up
+
+Main branch now fixed, this is how to install from the fixed version.
+
+```bash
+# Remove everything to start from clean:
+gem uninstall asciidoctor-bibtex bibtex-ruby citeproc-ruby cls-styles
+
+# Install directly from the github main branch
+gem install specific_install
+gem specific_install -l https://github.com/asciidoctor/asciidoctor-bibtex
+```
