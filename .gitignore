@@ -10,3 +10,4 @@ build/
 # Zipped files
 *.7z
 *.tar.gz
+*.whl
