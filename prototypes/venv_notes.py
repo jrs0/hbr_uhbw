@@ -46,9 +46,15 @@
 #    Terminal: Select Default Profile
 #    <pick Git Bash>
 #
+# If more packages need to be installed later, copy the .venv/Lib folder
+# (containing the site-packages), as an alternative to copying the whole
+# .venv again. This avoids the need to update the environment variables
+# twice.
+#
 # The packages in this virtual environment were installed using:
 #
-#   pip install numpy matplotlib pandas scikit-learn scikit-survival
+#   pip install numpy matplotlib pandas scikit-learn scikit-survival \
+#       sqlalchemy scipy imbalanced-learn pytest argparse
 #
 # The package versions are listed in requirements.txt, and the same
 # versions can be installed in a new environment using 
@@ -58,5 +64,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import sqlalchemy
 import sklearn as skl
 import sksurv as sks
