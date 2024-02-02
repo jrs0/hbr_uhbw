@@ -54,7 +54,8 @@
 # The packages in this virtual environment were installed using:
 #
 #   pip install numpy matplotlib pandas scikit-learn scikit-survival \
-#       sqlalchemy scipy imbalanced-learn pytest argparse
+#       sqlalchemy scipy imbalanced-learn pytest argparse wheel \
+#       setuptools hatchling
 #
 # The package versions are listed in requirements.txt, and the same
 # versions can be installed in a new environment using 
