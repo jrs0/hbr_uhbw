@@ -69,3 +69,12 @@ import sqlalchemy
 import sklearn as skl
 import sksurv as sks
 import polars as pl
+
+# This is a better way:
+#
+# 1. pip download -r requirements.txt -d packages
+# 2. Zip the packages folder and transfer to other computer
+# 3. On computer with PyPi access, download latest pip
+#    wheel, and move to other computer
+# 4. On new computer, run python -m venv .venv (note: not python3;
+#    on Windows, Python 3 executable is called python)
