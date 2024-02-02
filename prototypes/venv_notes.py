@@ -78,3 +78,6 @@ import polars as pl
 #    wheel, and move to other computer
 # 4. On new computer, run python -m venv .venv (note: not python3;
 #    on Windows, Python 3 executable is called python)
+# 5. Run this line: pip install --no-index --find-links ../packages/packages -r prototypes/requirements.txt
+#    The key points here are --no-index (do not use PyPi) and --find-links (path to the wheels).
+# 
