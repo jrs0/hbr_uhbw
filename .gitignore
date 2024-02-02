@@ -7,7 +7,8 @@ build/
 # Python virtual environment
 .venv*
 
-# Zipped files
+# Zipped files/wheels/python packages
 *.7z
 *.tar.gz
 *.whl
+packages/
