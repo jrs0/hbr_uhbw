@@ -72,6 +72,8 @@ import polars as pl
 
 # This is a better way:
 #
+# -1: Make a venv and install all the packages you need
+# 0. pip freeze --all > prototypes/requirements.txt
 # 1. pip download -r requirements.txt -d packages
 # 1b. Download pip and wheel wheels and add them to 
 #     the packages folder
