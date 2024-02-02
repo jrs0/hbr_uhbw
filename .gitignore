@@ -12,3 +12,6 @@ build/
 *.tar.gz
 *.whl
 packages/
+
+# Python cache
+__pycache__
