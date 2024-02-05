@@ -52,19 +52,22 @@ These instructions were tested on Windows using VS Code virtual environments. Ev
     1. Create a new virtual environment using `python -m venv .venv`. Activate it in VS code (on Linux, or if you have bash, run `source .venv/bin/activate`).
     2. Using any process (manual pip install, pip install from requirements, or automatic installation of dependencies), install all the packages you need in the virtual environment.
     3. Run `pip freeze --all > requirements.txt`
-    4. Download all the package wheels into a folder `packages` using `pip download -r requirements.txt -d packages`
+    4. Download all the package wheels into a folder `packages` using 
+       ```bash
+       pip download -r requirements.txt -d packages
+       ```
     5. Compress the `packages` folder using any tool; e.g. to produce `packages.7z`
 2. Move the `packages.7z` folder, and the `requirements.txt` file, from `B` to `A`
 3. On `A`
-    1. Extract
+    1. Extract `packages.7z` to `packages`
+    2. Create a new virtual environment as above
+    3. Install all the dependencies from the `packages` folder using 
+       ```bash
+       python -m pip install --no-index --find-links packages -r requirements.txt
+       ```
+       The `--no-index` switch disables querying PyPi, and `--find-links` provides a path to the wheels. Note the use of `python -m pip`, which will also allow pip to be upgraded.
 
-
-
-
-
-
-1. First, create a virtual environment and manually install the requirements listed in `../prototypes/requirements.txt`.
-2. Run `pip install -e .`. Since the dependencies are already installed, there will be no need to query PyPi.
+It should now be possible to install the `pyhbr` package using `pip install -e .`
 
 
 
