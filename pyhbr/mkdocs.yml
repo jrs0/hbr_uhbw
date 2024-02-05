@@ -1,0 +1,10 @@
+site_name: PyHBR Docs
+
+plugins:
+- mkdocstrings:
+    handlers:
+      python:
+        paths: [src]
+
+theme:
+  name: "material"
