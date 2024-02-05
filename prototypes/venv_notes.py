@@ -55,7 +55,10 @@
 #
 #   pip install numpy matplotlib pandas scikit-learn scikit-survival \
 #       sqlalchemy scipy imbalanced-learn pytest argparse wheel \
-#       setuptools hatchling
+#       setuptools hatchling setuptools-scm[toml]
+#
+# (Note: the setuptools-scm[toml] is to fix what looks like a dependency
+# bug in xlsx2csv, where pip freeze does not correctly record the dependency)
 #
 # The package versions are listed in requirements.txt, and the same
 # versions can be installed in a new environment using 
