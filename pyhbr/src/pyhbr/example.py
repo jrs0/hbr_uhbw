@@ -1,12 +1,23 @@
 def foo():
     """Print Foo
+    
+    Examples:
+        >>> from pyhbr.example import foo
+        >>> foo()
+        Foo ran
+    
     """
     print("Foo ran")
     
 def bar(x):
-    """Do something with x
+    """Bar returns x + 1
+
+    Examples:
+        >>> from pyhbr.example import bar
+        >>> bar(3)
+        4
 
     Args:
         x (int): The value to use
     """
-    print(x)
+    return x+1

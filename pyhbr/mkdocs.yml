@@ -6,5 +6,8 @@ plugins:
       python:
         paths: [src]
 
+watch:
+- src
+
 theme:
   name: "material"
