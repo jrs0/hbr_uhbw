@@ -26,7 +26,7 @@ $(BUILD)/bhf_hbr_notes.pdf: main.adoc *.adoc
 	asciidoctor-pdf --trace -r asciidoctor-bibtex $< -o $@
 
 $(BUILD)/word_doc_intermediate.html: word_doc.adoc *.adoc
-	asciidoctor -r asciidoctor-diagram $< -o $@
+	asciidoctor -r asciidoctor-bibtex $< -o $@
 
 .PHONY: clean
 clean:

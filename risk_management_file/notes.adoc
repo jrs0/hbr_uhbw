@@ -2,18 +2,24 @@
 
 _This section will contain notes about progress this week, specific things to look at in this document (if any), etc._
 
-Summary of previous week work (23rd - 30th Jan 2024):
+Summary of previous week work (30th Jan - 6th Feb 2024):
 
-* Got comments back from Amy regarding the DPIA, started going through them. Plan to submit it after confirming a few details with Mike on Wednesday
-* Started working on some of the required elements for the risk management file, with a view to contacting the IT team at UHBW in a few weeks for some advice on how we can integrate the tool within hospital systems.
+* Met with Mike on Wednesday
+** Confirmed that HIC data for sharing with ICB is on the way (it is not quite finished yet)
+** Mike shared an internal copy of the data with me, for development of scripts. He will update my copy soon with the tested version once he has finished it, but this will let me get on with starting to implement the ARC HBR score (this week's job).
+** Confirmed from Mike that I can get a laptop by submitting a request to IT after I become a UHBW employee.
+* DPIA is now complete and (I believe) Amy has submitted it to UHBW to sign off.
+* Still some confusion over whether we need to do a GP opt-out at the ICB end -- going to try to get some clarity this week.
+* Signed an honorary contract with ICB, means I can keep my laptop/sign-ins etc. 
+* (Mostly technical, but time consuming) Got a python environment set up on trust systems to begin to develop the ARC score
+* Agreed to give a presentation/signed up for BHI event in Feb.
 
-Actions for JS this week (30th Jan - 6th Feb 2024):
+Actions for JS this week (7th Feb - 13th Feb 2024):
 
-* Meeting with Mike on Wednesday -- can hopefully get access to new HIC data (which will enable planning ARC HBR calculation)
-* Submit DPIA to Amy after chatting to Mike
-* Expect contract from UHBW
+* Make a start on ARC score calculation
+* Figure out this GP opt-out question
 
 For Tom to look at:
 
-* In the xref:preexisting_solutions.adoc#alternative_forms[Alternative Forms], you could have a read over the different proposed forms of the tool. I've tried to write up the different ideas, including the lab test integration idea Med and I discussed, the idea of developing new bespoke software, and the possibility of integrating into CCW. Feel free to add comments (but no need to do it before tomorrow!)
+* Nothing this time changed in the document -- hoping to have some specifics about the ARC score calculation next week.
 

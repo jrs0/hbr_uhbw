@@ -4,6 +4,7 @@ The intended purpose of the device is a description of how it is intended to be 
 
 == Function of the device
 
+////
 .Caption
 [ditaa]
 ....
@@ -22,6 +23,7 @@ The intended purpose of the device is a description of how it is intended to be 
   patient bleeding/       |            |
   ischaemia risk          +------------+	                              
 ....
+////
 
 The purpose of the tool is to help clinicians identify the relative risks of bleeding outcomes and ischaemic outcomes for patients presenting with acute coronary syndromes (ACS), for the purpose of choosing between different therapy options. For example, if a patient is identified as being at a high risk of bleeding through the use of the tool then the clinician could use this information to choose a less aggressive blood thinning therapy option.
 

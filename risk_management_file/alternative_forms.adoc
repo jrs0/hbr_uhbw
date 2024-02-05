@@ -1,5 +1,5 @@
 [#alternative_forms]
-= #Alternative Forms of the Tool#
+= Alternative Forms of the Tool
 
 This section describes various system designs that might satisfy the intended purpose.
 
