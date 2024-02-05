@@ -15,6 +15,7 @@ classifiers = [
 dependencies = [
   "sqlalchemy",
   "pandas",
+  "pyodbc",
 ]
 
 [project.urls]
