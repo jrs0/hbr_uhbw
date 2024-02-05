@@ -65,24 +65,6 @@ These instructions were tested on Windows using VS Code virtual environments. Ev
        ```bash
        python -m pip install --no-index --find-links packages -r requirements.txt
        ```
-       The `--no-index` switch disables querying PyPi, and `--find-links` provides a path to the wheels. Note the use of `python -m pip`, which will also allow pip to be upgraded.
+       The `--no-index` switch disables querying PyPI, and `--find-links` provides a path to the wheels. Note the use of `python -m pip`, which will also allow pip to be upgraded.
 
 It should now be possible to install the `pyhbr` package using `pip install -e .`
-
-
-
-# This is a better way:
-#
-# -1: Make a venv and install all the packages you need
-# 0. pip freeze --all > prototypes/requirements.txt
-# 1. pip download -r requirements.txt -d packages
-# 1b. Download pip and wheel wheels and add them to 
-#     the packages folder
-# 2. Zip the packages folder and transfer to other computer
-# 3. On computer with PyPi access, download latest pip
-#    wheel, and move to other computer
-# 4. On new computer, run python -m venv .venv (note: not python3;
-#    on Windows, Python 3 executable is called python)
-# 5. Run this line: python -m pip install --no-index --find-links packages -r prototypes/requirements.txt
-#    The key points here are --no-index (do not use PyPi) and --find-links (path to the wheels).
-# 
