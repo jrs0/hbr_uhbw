@@ -1,0 +1,24 @@
+# Implementing Risk Scores on HIC Data
+
+This section describes implementations of the already-existing risk scores using data from the Hospital Information Collaborative (HIC) dataset, which is formed from finished consultant episode data, British Cardiovascular Intervention Society (BCIS) audit data from the BHI, and prescription information from the BHI.
+
+The utility of the HIC dataset is that it may have substantial overlap 
+
+Any score used in the deployed device must be validated using the data that will be used by the device. This data may have substantial overlap with the HIC data, meaning the results in this section may be indicative of the accuracy of the score calculated by the tool. However, for the purpose of making the clinical safety case (DCB 0129) for the device, the final selected score for the device should be validated on an extract of the same format of data used as input to the device.
+
+== Overview of HIC data structure
+
+== ARC HBR Score Calculation
+
+The ARC HBR score is the simplest possible calculation that would meet the intended purpose and provide value to clinicians selecting blood thinning medication for PCI patients. If it were used in the deployment, it would have the following advantages:
+
+* Simple calculation and interpretation (compared to other approaches) as outlined in the ARC HBR paper
+* Reduced validation requirement
+** If the device also displays the raw information going into the score, the clinician can verify the calculation
+** The score has been developed externally by clinical consensus
+** The score has been externally validated (add the citations)
+** The score makes a binary, rather than continuous, assessment of risk
+* If the intended use of the device it to prompt the clinician to look closely at a particular patient, then the risk due to a false positive is that the clinician wastes time, and the risk due to a false negative is that the status quo (without the tool) is maintained. (There is a subtlety that a false negative may influence a clinician not to investigate a case they would previously have investigated. These cases will be analysed as part of the risk estimation.)
+
+This section describes a calculation of the ARC HBR score using the HIC dataset, as a prototype which may inform the calculation in the final device.
+

@@ -2,27 +2,39 @@
 
 A variety of methods for calculating risk scores are under consideration for use in the tool. Potential options include:
 
-* A simple calculation of whether the patient is at high bleeding risk using the ARC-HBR score (i.e. not including an assessment of ischaemia risk)
-* Use of a statistical score for assessing bleeding/ischaemia risk, such as the PreciseDAPT score
-* Development of a custom statistical or machine-learning model to predict bleeding and ischaemia
+* A simple calculation of whether the patient is at high bleeding risk using the ARC-HBR score (i.e. not including an assessment of ischaemia risk).
+* Use of a statistical score for assessing bleeding/ischaemia risk, such as the PreciseDAPT score.
+* Development of a custom statistical or machine-learning model to predict bleeding and ischaemia.
 
-This section contains an implementation of the risk scores using data from the Hospital Information Collaborative (HIC) dataset, which is formed from finished consultant episode data, British Cardiovascular Intervention Society (BCIS) audit data from the BHI, and prescription information from the BHI. This data will be used as a test bench to recreate pre-existing scores and prototype new scores. 
+== Validation Prior to First Use
 
-Any score used in the deployed device must be validated using the data that will be used by the device. This data may have substantial overlap with the HIC data, meaning the results in this section may be indicative of the accuracy of the score calculated by the tool. However, for the purpose of making the clinical safety case (DCB 0129) for the device, the final selected score for the device should be validated on an extract of the same format of data used as input to the device.
+Any risk score, including those developed and validated externally, should be validated before use. This is because the implementation of the third-party risk calculation may contain difference compared with the original implementation that may effect the accuracy of the results; the intention is to establish that the predicted risks are not obviously wrong or unsafe.
 
-== Overview of HIC data structure
+Prior to initial (proof-of-principle) use, the validation must minimally involve testing that the risk predictions are valid on an internal dataset comprising:
 
-== ARC HBR Score Calculation
+* A sample of the data used as input into the tool (without modifications or processing)
+* The patient outcome(s).
 
-The ARC HBR score is the simplest possible calculation that would meet the intended purpose and provide value to clinicians selecting blood thinning medication for PCI patients. If it were used in the deployment, it would have the following advantages:
+The risk score will be calculated for each patient in the dataset, and risk-score-specific accuracy criteria defined prior to performing the test will be used to establish that the score meets a minimum standard for use.
 
-* Simple calculation and interpretation (compared to other approaches) as outlined in the ARC HBR paper
-* Reduced validation requirement
-** If the device also displays the raw information going into the score, the clinician can verify the calculation
-** The score has been developed externally by clinical consensus
-** The score has been externally validated (add the citations)
-** The score makes a binary, rather than continuous, assessment of risk
-* If the intended use of the device it to prompt the clinician to look closely at a particular patient, then the risk due to a false positive is that the clinician wastes time, and the risk due to a false negative is that the status quo (without the tool) is maintained. (There is a subtlety that a false negative may influence a clinician not to investigate a case they would previously have investigated. These cases will be analysed as part of the risk estimation.)
+== Development of a Custom Model
 
-This section describes a calculation of the ARC HBR score using the HIC dataset, as a prototype which may inform the calculation in the final device.
+The development of a custom model for bleeding/ischaemia is more complex than the use of a third-party score, because it requires development, initially lacks external validation, and initially lacks consideration/recommendation of the wider community.
 
+On the other hand, a custom model offer better predictive performance, or be tailored better to the data available to the tool.
+
+In addition to requiring the same minimal validation required before deployment of the external risk score, a training dataset (having the same format as the validation dataset) is required to develop the model and provide initial evidence that it works.
+
+After the model has been developed, it should be assessed on a separate internal validation dataset (of the same kind as described above for third-party risk scores), to ensure it meets a minimal standard for use. However, the validation requirements should be more stringent than those for third-party externally-validated/already recommended scores.
+
+In addition, initial use of the tool should be confined to the purposes of collecting data for further validation, and logging incidents (e.g. incorrect/odd-looking predictions), in order to build the safety case for the risk score.
+
+== Patient Outcome Definition
+
+In any validation of a high bleeding risk or bleeding/ischaemia risk score, numerical accuracy must be calculated with respect to some definition of bleeding/ischaemia outcomes.
+
+These outcomes should be derived from expert clinical/academic consensus, in order to ensure that the risk score is calculating a relevant risk. 
+
+This section contains a review of outcome definitions used in relation to other bleeding/ischaemia or cardiovascular scores, and which third-party scores use which outcome definitions.
+
+TODO
