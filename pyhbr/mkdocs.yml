@@ -6,6 +6,11 @@ plugins:
       python:
         paths: [src]
 
+nav:
+  - 'index.md'
+  - 'design.md'
+  - 'reference.md'
+
 watch:
 - src
 
