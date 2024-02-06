@@ -1,4 +1,6 @@
-"""Common utilities for other modules
+"""Common utilities for other modules.
+
+A collection of routines used by the data source or analysis functions.
 """
 
 import sqlalchemy as sql
@@ -11,7 +13,7 @@ def read_sql(query, con_string = "mssql+pyodbc://dsn"):
     Server. The preferred method to connect to the server
     on Windows is to use a Data Source Name. To use the
     default connection string argument, set up a data source
-    name called "dsn" using the program "ODBC Data Sources."
+    name called "dsn" using the program "ODBC Data Sources".
 
     Any database server supported by sqlalchemy can be used
     with this function. Specify the con_string for the

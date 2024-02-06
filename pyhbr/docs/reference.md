@@ -1,6 +1,8 @@
 # Data Sources
 
-::: pyhbr.data_source
+::: pyhbr
+    options:
+        show_submodules: true
 
 # Analysis
 
