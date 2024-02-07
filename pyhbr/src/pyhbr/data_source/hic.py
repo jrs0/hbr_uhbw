@@ -1,6 +1,8 @@
 """SQL queries and functions for HIC (UHBW) data.
 """
 
+from sqlalchemy import select
+
 def demographics_query():
     """Get demographic information from HIC data
 
@@ -15,6 +17,8 @@ def demographics_query():
     Returns:
         (str): SQL query to retrieve episodes table
     """
+    stmt = select(hic_cv_test.dbo.cv1_demographics.subject.label("patient_id"))
+    return stmt
     return (
         "select subject as patient_id"
         ",gender"
