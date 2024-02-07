@@ -10,9 +10,14 @@
 # print(query)
 # df = read_sql(query)
 
-from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy import Table, MetaData, select
+from pyhbr.common import make_engine
+import pandas as pd
 
-connect_args = { "database": "hic_cv_test"}
-engine = create_engine("mssql+pyodbc://dsn", connect_args=connect_args)
+engine = make_engine()
+
 metadata_obj = MetaData()
-Table("cv1_demographics", metadata_obj, autoload_with=engine)
+table = Table("cv1_demographics", metadata_obj, autoload_with=engine)
+stmt = select(table.c.subject.label("patient_id"))
+df = pd.read_sql(stmt, engine)
+
