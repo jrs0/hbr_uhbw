@@ -1,3 +1,6 @@
+"""SQL queries and other functions for HES (BNSSG ICB) data.
+"""
+
 def diagnosis_and_procedure_columns():
     """BNSSG ICB diagnosis/procedure column names
 
@@ -96,10 +99,10 @@ def episodes_query(start_date, end_date):
         ",aimtc_age as age"
         ",sex as gender"
         ",pbrspellid as spell_id"
-        ",aimtc_providerspell_start_date as spell_start_date"
-        ",aimtc_providerspell_end_date as spell_end_date"
-        ",startdate_consultantepisode as episode_start_date"
-        ",enddate_consultantepisode as episode_end_date"
+        ",aimtc_providerspell_start_date as spell_start"
+        ",aimtc_providerspell_end_date as spell_end"
+        ",startdate_consultantepisode as episode_start"
+        ",enddate_consultantepisode as episode_end"
         + diagnosis_and_procedure_columns()
         + " from abi.dbo.vw_apc_sem_001"
         f" where startdate_consultantepisode between '{start_date}' and '{end_date}'"
