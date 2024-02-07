@@ -3,7 +3,7 @@
 A collection of routines used by the data source or analysis functions.
 """
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData, Table
 import pandas as pd
 
 def make_engine(con_string = "mssql+pyodbc://dsn", database = "hic_cv_test"):
@@ -31,6 +31,19 @@ def make_engine(con_string = "mssql+pyodbc://dsn", database = "hic_cv_test"):
     """
     connect_args = { "database": database}
     return create_engine(con_string, connect_args=connect_args)
+
+def get_table(table, engine):
+    """Get a table by reading from the remote server
+
+    Args:
+        table (str): The table name to get
+        engine (sqlalchemy.Engine): The database connection 
+
+    Returns:
+        (sqlalchemy.Table): The table data for use in SQL queries
+    """
+    metadata_obj = MetaData()
+    return Table(table, metadata_obj, autoload_with=engine)
 
 def read_sql(query, ):
     """Connect to a database and execute a query

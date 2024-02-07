@@ -2,8 +2,9 @@
 """
 
 from sqlalchemy import select
+from pyhbr.common import get_table
 
-def demographics_query():
+def demographics_query(engine):
     """Get demographic information from HIC data
 
     The date/time at which the data was obtained is
@@ -14,20 +15,23 @@ def demographics_query():
     The underlying table does have a cause_of_death column,
     but it is all null, so not included.
 
+    Args:
+        engine (sqlalchemy.Engine): the connection to the database
+    
     Returns:
-        (str): SQL query to retrieve episodes table
+        (sqlalchemy.Select): SQL query to retrieve episodes table
     """
-    stmt = select(hic_cv_test.dbo.cv1_demographics.subject.label("patient_id"))
-    return stmt
-    return (
-        "select subject as patient_id"
-        ",gender"
-        ",year_of_birth"
-        ",death_date"
-        " from hic_cv_test.dbo.cv1_demographics"
+    table = get_table("cv1_demographics", engine)
+    stmt = select(
+        table.c.subject.label("patient_id"),
+        table.c.gender,
+        table.c.year_of_birth,
+        table.c.death_date
     )
+    return stmt
 
-def episodes_query(start_date, end_date):
+
+def episodes_query(engine, start_date, end_date):
     """Get the episodes list in the HIC data
 
     This table does not contain any episode information,
@@ -35,23 +39,31 @@ def episodes_query(start_date, end_date):
     and procedure information in other tables.
 
     Args:
+        engine (sqlalchemy.Engine): the connection to the database
         start_date (datetime.date): first valid consultant-episode start date
         end_date (datetime.date): last valid consultant-episode start date
 
     Returns:
-        (str): SQL query to retrieve episodes table
+        (sqlalchemy.Select): SQL query to retrieve episodes table
     """
-    return (
-        "select subject as patient_id"
-        ",spell_identifier as spell_id"
-        ",episode_identifier as episode_id"
-        ",episode_start_time as episode_start"
-        ",episode_end_time as episode_end"
-        " from hic_cv_test.dbo.cv1_episodes"
-        f" where episode_start_time between '{start_date}' and '{end_date}'"
-    )
+    table_name = "cv1_episodes"
+    table = get_table(table_name, engine)
+    try:
+        stmt = select(
+            table.c.subject.label("patient_id"),
+            table.c.episode_identifier.label("episode_id"),
+            table.c.spell_identifier.label("spell_id"),
+            table.c.episode_start_time.label("episode_start"),
+            table.c.episode_end_time.label("episode_end"),
+        ).where(
+            table.c.episode_start_time >= start_date,
+            table.c.episode_end_timae <= end_date
+        )
+        return stmt
+    except AttributeError as e:
+        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
 
-def diagnoses_query():
+def diagnoses_query(engine):
     """Get the diagnoses corresponding to episodes
 
     This should be linked to the episodes table to
@@ -62,15 +74,20 @@ def diagnoses_query():
     the episode (1-indexed).
 
     Returns:
-        (str): SQL query to retrieve diagnoses table
+        (sqlalchemy.Select): SQL query to retrieve diagnoses table
     """
-    return (
-        "select episode_identifier as episode_id"
-        ",diagnosis_date_time as time"
-        ",diagnosis_position as position"
-        ",diagnosis_code_icd as icd"
-        " from hic_cv_test.dbo.cv1_episodes_diagnosis"
-    )
+    table_name = "cv1_episodes_diagnosis"
+    table = get_table(table_name, engine)
+    try:
+        stmt = select(
+            table.c.episode_identifier.label("episode_id"),
+            table.c.diagnosis_date_time.label("time"),
+            table.c.diagnosis_position.label("position"),
+            table.c.diagnosis_code_icd.label("icd"),
+        )
+        return stmt
+    except AttributeError as e:
+        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
 
 def procedures_query():
     """Get the procedures corresponding to episodes
