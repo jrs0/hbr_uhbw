@@ -89,3 +89,68 @@ def procedures_query():
         " from hic_cv_test.dbo.cv1_episodes_procedures"
     )
 
+def pathology_blood_query(investigations = ["OBR_BLS_UE", "OBR_BLE_FB"]):
+    """Get the table of blood test results in the HIC data
+
+    Since blood tests in this table are not associated with an episode
+    directly by key, it is necessary to link them based on the patient
+    identifier and date. This operation can be quite slow if the blood
+    tests table is large. One way to reduce the size is to filter by
+    investigation using the investigations parameter. The investigation
+    codes in the HIC data are shown below:
+
+    | `investigation` | Description |
+    |--------------------|-------------|
+    | OBR_BLS_UL |                          LFT|
+    | OBR_BLS_UE |    UREA,CREAT + ELECTROLYTES|
+    | OBR_BLS_FB |             FULL BLOOD COUNT|
+    | OBR_BLS_UT |        THYROID FUNCTION TEST|
+    | OBR_BLS_TP |                TOTAL PROTEIN|
+    | OBR_BLS_CR |           C-REACTIVE PROTEIN|
+    | OBR_BLS_CS |              CLOTTING SCREEN|
+    | OBR_BLS_FI |                        FIB-4|
+    | OBR_BLS_AS |                          AST|
+    | OBR_BLS_CA |                CALCIUM GROUP|
+    | OBR_BLS_TS |                  TSH AND FT4|
+    | OBR_BLS_FO |                SERUM FOLATE|
+    | OBR_BLS_PO |                    PHOSPHATE|
+    | OBR_BLS_LI |                LIPID PROFILE|
+    | OBR_POC_VG | POCT BLOOD GAS VENOUS SAMPLE|
+    | OBR_BLS_HD |              HDL CHOLESTEROL|
+    | OBR_BLS_FT |                      FREE T4|
+    | OBR_BLS_FE |               SERUM FERRITIN|
+    | OBR_BLS_GP |    ELECTROLYTES NO POTASSIUM|
+    | OBR_BLS_CH |                  CHOLESTEROL|
+    | OBR_BLS_MG |                    MAGNESIUM|
+    | OBR_BLS_CO |                     CORTISOL|
+
+    Each test is similarly encoded. The valid test codes in the full
+    blood count and U+E investigations are shown below:
+
+    | `investigation` | `test` | Description |
+    |-----------------|--------|-------------|
+    | OBR_BLS_FB | OBX_BLS_NE |           Neutrophils|
+    | OBR_BLS_FB | OBX_BLS_PL |             Platelets|
+    | OBR_BLS_FB | OBX_BLS_WB |      White Cell Count|
+    | OBR_BLS_FB | OBX_BLS_LY |           Lymphocytes|
+    | OBR_BLS_FB | OBX_BLS_MC |                   MCV|
+    | OBR_BLS_FB | OBX_BLS_HB |           Haemoglobin|
+    | OBR_BLS_FB | OBX_BLS_HC |           Haematocrit|
+    | OBR_BLS_UE | OBX_BLS_NA |                Sodium|
+    | OBR_BLS_UE | OBX_BLS_UR |                  Urea|
+    | OBR_BLS_UE | OBX_BLS_K  |             Potassium|
+    | OBR_BLS_UE | OBX_BLS_CR |            Creatinine|
+    | OBR_BLS_UE | OBX_BLS_EP | eGFR/1.73m2 (CKD-EPI)|
+    
+    Args:
+        investigation_codes (list[str]): Which types of laboratory
+            test to include in the query. Fetching fewer types of
+            test makes the query faster.
+
+    Returns:
+        (str): SQL query to retrieve blood tests table
+    """
+    return (
+        "select top 1000 subject as patient_id,*"
+        " from hic_cv_test.dbo.cv1_pathology_blood"
+    )
