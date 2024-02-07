@@ -2,6 +2,7 @@
 """
 
 from sqlalchemy import select
+from sqlalchemy.exc import NoSuchTableError
 from pyhbr.common import get_table
 
 def demographics_query(engine):
@@ -73,6 +74,9 @@ def diagnoses_query(engine):
     position column contains the order of diagnoses in
     the episode (1-indexed).
 
+    Args:
+        engine (sqlalchemy.Engine): the connection to the database    
+    
     Returns:
         (sqlalchemy.Select): SQL query to retrieve diagnoses table
     """
@@ -89,7 +93,7 @@ def diagnoses_query(engine):
     except AttributeError as e:
         raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
 
-def procedures_query():
+def procedures_query(engine):
     """Get the procedures corresponding to episodes
 
     This should be linked to the episodes table to
@@ -99,18 +103,26 @@ def procedures_query():
     position column contains the order of procedures in
     the episode (1-indexed).
     
-    Returns:
-        (str): SQL query to retrieve procedures table
-    """
-    return (
-        "select episode_identifier as episode_id"
-        ",procedure_date_time as time"
-        ",procedure_position as position"
-        ",procedure_code_opcs as opcs"
-        " from hic_cv_test.dbo.cv1_episodes_procedures"
-    )
+    Args:
+        engine (sqlalchemy.Engine): the connection to the database
 
-def pathology_blood_query(investigations = ["OBR_BLS_UE", "OBR_BLE_FB"]):
+    Returns:
+        (sqlalchemy.Select): SQL query to retrieve procedures table
+    """
+    table_name = "cv1_episodes_procedures"
+    table = get_table(table_name, engine)
+    try:
+        stmt = select(
+            table.c.episode_identifier.label("episode_id"),
+            table.c.procedure_date_time.label("time"),
+            table.c.procedure_position.label("position"),
+            table.c.procedure_code_opcs.label("opcs"),
+        )
+        return stmt
+    except AttributeError as e:
+        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
+
+def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"]):
     """Get the table of blood test results in the HIC data
 
     Since blood tests in this table are not associated with an episode
@@ -164,24 +176,32 @@ def pathology_blood_query(investigations = ["OBR_BLS_UE", "OBR_BLE_FB"]):
     | OBR_BLS_UE | OBX_BLS_EP | eGFR/1.73m2 (CKD-EPI)|
     
     Args:
+        engine (sqlalchemy.Engine): the connection to the database
         investigation_codes (list[str]): Which types of laboratory
             test to include in the query. Fetching fewer types of
             test makes the query faster.
 
     Returns:
-        (str): SQL query to retrieve blood tests table
+        (sqlalchemy.Select): SQL query to retrieve blood tests table
     """
-    return (
-        "select subject as patient_id"
-        ",investigation_code as investigation"
-        ",test_code as test"
-        ",test_result as result"
-        ",test_result_unit as unit"
-        ",sample_collected_date_time as sample_date"
-        ",result_available_date_time as result_date"
-        ",result_flag"
-        ",result_lower_range"
-        ",result_upper_range"
-        " from hic_cv_test.dbo.cv1_pathology_blood"
-        f" where investigation_code in {investigations}"
-    )
+    table_name = "cv1_pathology_blood"
+    try:
+        table = get_table(table_name, engine)
+    except NoSuchTableError as e:
+        raise RuntimeError(f"Could not find table '{e}' in database connection '{engine.url}'")
+    try:
+        stmt = select(
+            table.c.subject.label("patient_id"),
+            table.c.investigation_code.label("investigation"),
+            table.c.test_code.label("test"),
+            table.c.test_result.label("result"),
+            table.c.test_result_unit.label("unit"),
+            table.c.sample_collected_date_time.label("sample_date"),
+            table.c.result_available_date_time.label("result_date"),
+            table.c.result_flag,
+            table.c.result_lower_range,
+            table.c.result_upper_range
+        ).where(table.c.investigation_code.in_(investigations))
+        return stmt
+    except AttributeError as e:
+        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
