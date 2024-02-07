@@ -80,7 +80,6 @@ def diagnoses_query(engine):
         table.col("diagnosis_code_icd").label("icd"),
     )
 
-
 def procedures_query(engine):
     """Get the procedures corresponding to episodes
 
