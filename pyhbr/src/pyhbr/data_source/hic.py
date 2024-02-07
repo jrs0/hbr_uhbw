@@ -184,21 +184,17 @@ def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"])
     Returns:
         (sqlalchemy.Select): SQL query to retrieve blood tests table
     """
-    table_name = "cv1_pathology_blood"
-    table = CheckedTable(table_name, engine)
-    try:
-        stmt = select(
-            table.c.subject.label("patient_id"),
-            table.c.investigation_code.label("investigation"),
-            table.c.test_code.label("test"),
-            table.c.test_result.label("result"),
-            table.c.test_result_unit.label("unit"),
-            table.c.sample_collected_date_time.label("sample_date"),
-            table.c.result_available_date_time.label("result_date"),
-            table.c.result_flag,
-            table.c.result_lower_range,
-            table.c.result_upper_range
-        ).where(table.c.investigation_code.in_(investigations))
-        return stmt
-    except AttributeError as e:
-        raise RuntimeError(f"Could not find column name '{e}' in table '{table_name}'")
+    table = CheckedTable("cv1_pathology_blood", engine)
+    stmt = select(
+        table.col("subject").label("patient_id"),
+        table.col("investigation_code").label("investigation"),
+        table.col("test_code").label("test"),
+        table.col("test_result").label("result"),
+        table.col("test_result_unit").label("unit"),
+        table.col("sample_collected_date_time").label("sample_date"),
+        table.col("result_available_date_time").label("result_date"),
+        table.col("result_flag"),
+        table.col("result_lower_range"),
+        table.col("result_upper_range")
+    ).where(table.col("investigation_code").in_(investigations))
+    return stmt

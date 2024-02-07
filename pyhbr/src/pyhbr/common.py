@@ -55,23 +55,19 @@ class CheckedTable:
         except NoSuchTableError as e:
             raise RuntimeError(f"Could not find table '{e}' in database connection '{engine.url}'")
 
-    def c(self)
-        try:
-            self.table.c
-            table.c.investigation_code.label("investigation"),
-            table.c.test_code.label("test"),
-            table.c.test_result.label("result"),
-            table.c.test_result_unit.label("unit"),
-            table.c.sample_collected_date_time.label("sample_date"),
-            table.c.result_available_date_time.label("result_date"),
-            table.c.result_flag,
-            table.c.result_lower_range,
-            table.c.result_upper_range
-        ).where(table.c.investigation_code.in_(investigations))
-        return stmt
-    except AttributeError as e:
-        raise RuntimeError(f"Could not find column name '{e}' in table '{table_name}'")
+    def col(self, column_name):
+        """Get a column
 
+        Args:
+            column_name (str): The column to fetch
+
+        Raises:
+            RuntimeError: Thrown if the column does not exist
+        """
+        try:
+            return getattr(self.table.c, column_name)
+        except AttributeError as e:
+            raise RuntimeError(f"Could not find column name '{column_name}' in table '{self.name}'")
 
 def read_sql(query, ):
     """Connect to a database and execute a query
