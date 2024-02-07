@@ -10,4 +10,3 @@ query = hic.pathology_blood_query()#episodes_query(start_date, end_date)
 print(query)
 df = read_sql(query)
 
-df[df.investigation_code.isin(["OBR_BLS_UE","OBR_BLS_FB"])][["investigation_code","test_code","test_name"]].drop_duplicates()

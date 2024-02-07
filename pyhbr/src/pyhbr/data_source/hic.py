@@ -151,6 +151,16 @@ def pathology_blood_query(investigations = ["OBR_BLS_UE", "OBR_BLE_FB"]):
         (str): SQL query to retrieve blood tests table
     """
     return (
-        "select top 1000 subject as patient_id,*"
+        "select subject as patient_id"
+        ",investigation_code as investigation"
+        ",test_code as test"
+        ",test_result as result"
+        ",test_result_unit as unit"
+        ",sample_collected_date_time as sample_date"
+        ",result_available_date_time as result_date"
+        ",result_flag"
+        ",result_lower_range"
+        ",result_upper_range"
         " from hic_cv_test.dbo.cv1_pathology_blood"
+        f" where investigation_code in {investigations}"
     )
