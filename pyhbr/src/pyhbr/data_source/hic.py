@@ -3,7 +3,7 @@
 
 from sqlalchemy import select
 from sqlalchemy.exc import NoSuchTableError
-from pyhbr.common import get_table
+from pyhbr.common import CheckedTable
 
 def demographics_query(engine):
     """Get demographic information from HIC data
@@ -22,7 +22,7 @@ def demographics_query(engine):
     Returns:
         (sqlalchemy.Select): SQL query to retrieve episodes table
     """
-    table = get_table("cv1_demographics", engine)
+    table = CheckedTable("cv1_demographics", engine)
     stmt = select(
         table.c.subject.label("patient_id"),
         table.c.gender,
@@ -48,7 +48,7 @@ def episodes_query(engine, start_date, end_date):
         (sqlalchemy.Select): SQL query to retrieve episodes table
     """
     table_name = "cv1_episodes"
-    table = get_table(table_name, engine)
+    table = CheckedTable(table_name, engine)
     try:
         stmt = select(
             table.c.subject.label("patient_id"),
@@ -81,7 +81,7 @@ def diagnoses_query(engine):
         (sqlalchemy.Select): SQL query to retrieve diagnoses table
     """
     table_name = "cv1_episodes_diagnosis"
-    table = get_table(table_name, engine)
+    table = CheckedTable(table_name, engine)
     try:
         stmt = select(
             table.c.episode_identifier.label("episode_id"),
@@ -110,7 +110,7 @@ def procedures_query(engine):
         (sqlalchemy.Select): SQL query to retrieve procedures table
     """
     table_name = "cv1_episodes_procedures"
-    table = get_table(table_name, engine)
+    table = CheckedTable(table_name, engine)
     try:
         stmt = select(
             table.c.episode_identifier.label("episode_id"),
@@ -185,10 +185,7 @@ def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"])
         (sqlalchemy.Select): SQL query to retrieve blood tests table
     """
     table_name = "cv1_pathology_blood"
-    try:
-        table = get_table(table_name, engine)
-    except NoSuchTableError as e:
-        raise RuntimeError(f"Could not find table '{e}' in database connection '{engine.url}'")
+    table = CheckedTable(table_name, engine)
     try:
         stmt = select(
             table.c.subject.label("patient_id"),
@@ -204,4 +201,4 @@ def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"])
         ).where(table.c.investigation_code.in_(investigations))
         return stmt
     except AttributeError as e:
-        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
+        raise RuntimeError(f"Could not find column name '{e}' in table '{table_name}'")
