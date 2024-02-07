@@ -12,7 +12,7 @@ end_date = dt.date(2030,1,1)
 # df = read_sql(query)
 
 engine = make_engine()
-stmt = hic.pathology_blood_query(engine)
+stmt = hic.demographics_query(engine)
 print(stmt)
 df = pd.read_sql(stmt, engine)
 

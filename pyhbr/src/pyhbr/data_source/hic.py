@@ -2,7 +2,6 @@
 """
 
 from sqlalchemy import select
-from sqlalchemy.exc import NoSuchTableError
 from pyhbr.common import CheckedTable
 
 def demographics_query(engine):
@@ -23,14 +22,12 @@ def demographics_query(engine):
         (sqlalchemy.Select): SQL query to retrieve episodes table
     """
     table = CheckedTable("cv1_demographics", engine)
-    stmt = select(
-        table.c.subject.label("patient_id"),
-        table.c.gender,
-        table.c.year_of_birth,
-        table.c.death_date
+    return select(
+        table.col("subject").label("patient_id"),
+        table.col("gender"),
+        table.col("year_of_birth"),
+        table.col("death_date"),
     )
-    return stmt
-
 
 def episodes_query(engine, start_date, end_date):
     """Get the episodes list in the HIC data
@@ -47,22 +44,17 @@ def episodes_query(engine, start_date, end_date):
     Returns:
         (sqlalchemy.Select): SQL query to retrieve episodes table
     """
-    table_name = "cv1_episodes"
-    table = CheckedTable(table_name, engine)
-    try:
-        stmt = select(
-            table.c.subject.label("patient_id"),
-            table.c.episode_identifier.label("episode_id"),
-            table.c.spell_identifier.label("spell_id"),
-            table.c.episode_start_time.label("episode_start"),
-            table.c.episode_end_time.label("episode_end"),
-        ).where(
-            table.c.episode_start_time >= start_date,
-            table.c.episode_end_timae <= end_date
-        )
-        return stmt
-    except AttributeError as e:
-        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
+    table = CheckedTable("cv1_episodes", engine)
+    return select(
+        table.col("subject").label("patient_id"),
+        table.col("episode_identifier").label("episode_id"),
+        table.col("spell_identifier").label("spell_id"),
+        table.col("episode_start_time").label("episode_start"),
+        table.col("episode_end_time").label("episode_end"),
+    ).where(
+        table.col("episode_start_time") >= start_date,
+        table.col("episode_end_time") <= end_date
+    )
 
 def diagnoses_query(engine):
     """Get the diagnoses corresponding to episodes
@@ -80,18 +72,14 @@ def diagnoses_query(engine):
     Returns:
         (sqlalchemy.Select): SQL query to retrieve diagnoses table
     """
-    table_name = "cv1_episodes_diagnosis"
-    table = CheckedTable(table_name, engine)
-    try:
-        stmt = select(
-            table.c.episode_identifier.label("episode_id"),
-            table.c.diagnosis_date_time.label("time"),
-            table.c.diagnosis_position.label("position"),
-            table.c.diagnosis_code_icd.label("icd"),
-        )
-        return stmt
-    except AttributeError as e:
-        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
+    table = CheckedTable("cv1_episodes_diagnosis", engine)
+    return select(
+        table.col("episode_identifier").label("episode_id"),
+        table.col("diagnosis_date_time").label("time"),
+        table.col("diagnosis_position").label("position"),
+        table.col("diagnosis_code_icd").label("icd"),
+    )
+
 
 def procedures_query(engine):
     """Get the procedures corresponding to episodes
@@ -109,18 +97,13 @@ def procedures_query(engine):
     Returns:
         (sqlalchemy.Select): SQL query to retrieve procedures table
     """
-    table_name = "cv1_episodes_procedures"
-    table = CheckedTable(table_name, engine)
-    try:
-        stmt = select(
-            table.c.episode_identifier.label("episode_id"),
-            table.c.procedure_date_time.label("time"),
-            table.c.procedure_position.label("position"),
-            table.c.procedure_code_opcs.label("opcs"),
-        )
-        return stmt
-    except AttributeError as e:
-        raise RuntimeError(f"Could not column name '{e}' in table '{table_name}'")
+    table = CheckedTable("cv1_episodes_procedures", engine)
+    return select(
+        table.col("episode_identifier").label("episode_id"),
+        table.col("procedure_date_time").label("time"),
+        table.col("procedure_position").label("position"),
+        table.col("procedure_code_opcs").label("opcs"),
+    )
 
 def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"]):
     """Get the table of blood test results in the HIC data
@@ -185,7 +168,7 @@ def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"])
         (sqlalchemy.Select): SQL query to retrieve blood tests table
     """
     table = CheckedTable("cv1_pathology_blood", engine)
-    stmt = select(
+    return select(
         table.col("subject").label("patient_id"),
         table.col("investigation_code").label("investigation"),
         table.col("test_code").label("test"),
@@ -197,4 +180,3 @@ def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"])
         table.col("result_lower_range"),
         table.col("result_upper_range")
     ).where(table.col("investigation_code").in_(investigations))
-    return stmt
