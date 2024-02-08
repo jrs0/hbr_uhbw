@@ -1,9 +1,9 @@
 """SQL queries and functions for HIC (UHBW) data.
 """
 
+from datetime import date
 from sqlalchemy import select, Select, Engine
 from pyhbr.common import CheckedTable
-from datetime import date
 
 
 def demographics_query(engine: Engine) -> Select:
@@ -110,9 +110,7 @@ def procedures_query(engine: Engine) -> Select:
     )
 
 
-def pathology_blood_query(
-    engine: Engine, investigations: list[str] = ["OBR_BLS_UE", "OBR_BLE_FB"]
-) -> Engine:
+def pathology_blood_query(engine: Engine, investigations: list[str]) -> Engine:
     """Get the table of blood test results in the HIC data
 
     Since blood tests in this table are not associated with an episode

@@ -3,11 +3,11 @@
 A collection of routines used by the data source or analysis functions.
 """
 
-from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
-from sqlalchemy.exc import NoSuchTableError
-from pandas import DataFrame
 from typing import Callable
 
+from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
+from sqlalchemy.exc import NoSuchTableError
+from pandas import DataFrame, read_sql
 
 def make_engine(
     con_string: str = "mssql+pyodbc://dsn", database: str = "hic_cv_test"
@@ -37,6 +37,8 @@ def make_engine(
 
 
 class CheckedTable:
+    """Wrapper for sqlalchemy table with checks for table/columns
+    """
     def __init__(self, table_name: str, engine: Engine) -> None:
         """Get a CheckedTable by reading from the remote server
 
@@ -58,7 +60,7 @@ class CheckedTable:
         except NoSuchTableError as e:
             raise RuntimeError(
                 f"Could not find table '{e}' in database connection '{engine.url}'"
-            )
+            ) from e
 
     def col(self, column_name: str) -> Column:
         """Get a column
@@ -74,7 +76,7 @@ class CheckedTable:
         except AttributeError as e:
             raise RuntimeError(
                 f"Could not find column name '{column_name}' in table '{self.name}'"
-            )
+            ) from e
 
 
 def get_data(
@@ -96,4 +98,5 @@ def get_data(
         The pandas dataframe containing the SQL data
     """
     stmt = query(engine, *args)
-    return pd.read_sql(stmt, engine)
+    return read_sql(stmt, engine)
+
