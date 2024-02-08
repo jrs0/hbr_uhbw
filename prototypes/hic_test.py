@@ -2,11 +2,12 @@
 """
 
 import datetime as dt
-from importlib.resources import files
 
 from pyhbr.common import make_engine, get_data
 from pyhbr.data_source import hic
-import pyhbr.clinical_codes.files
+import pyhbr.clinical_codes as codes
+
+res = codes.load_from_package("icd10.yaml")
 
 """
 start_date = dt.date(1990, 1, 1)
@@ -24,5 +25,3 @@ pathology_blood = get_data(
 
 patients = episodes[["patient_id"]].drop_duplicates()
 """
-
-codes_file = files(pyhbr.clinical_codes.files).joinpath('icd10.yaml').read_text()
