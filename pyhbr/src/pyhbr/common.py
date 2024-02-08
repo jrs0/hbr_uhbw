@@ -3,11 +3,15 @@
 A collection of routines used by the data source or analysis functions.
 """
 
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
 from sqlalchemy.exc import NoSuchTableError
-import pandas as pd
+from pandas import DataFrame
+from typing import Callable
 
-def make_engine(con_string = "mssql+pyodbc://dsn", database = "hic_cv_test"):
+
+def make_engine(
+    con_string: str = "mssql+pyodbc://dsn", database: str = "hic_cv_test"
+) -> Engine:
     """Make a sqlalchemy engine
 
     This function is intended for use with Microsoft SQL
@@ -17,72 +21,79 @@ def make_engine(con_string = "mssql+pyodbc://dsn", database = "hic_cv_test"):
     name called "dsn" using the program "ODBC Data Sources".
 
     If you need to access multiple different databases on the
-    same server, you will need different engines. Specify the 
+    same server, you will need different engines. Specify the
     database name while creating the engine (this will override
     a default database in the DSN, if there is one).
 
     Args:
-        con_string (str, optional): The sqlalchemy connection string.
-            Defaults to "mssql+pyodbc://dsn".
-        database (str, optional): The database name to connect to.
-            Defaults to "hic_cv_test".
+        con_string: The sqlalchemy connection string.
+        database: The database name to connect to.
 
     Returns:
-        (sqlalchemy.engine): The sqlalchemy engine 
+        The sqlalchemy engine
     """
-    connect_args = { "database": database}
+    connect_args = {"database": database}
     return create_engine(con_string, connect_args=connect_args)
 
+
 class CheckedTable:
-    def __init__(self, table_name, engine):
+    def __init__(self, table_name: str, engine: Engine) -> None:
         """Get a CheckedTable by reading from the remote server
 
-        This is a wrapper around the sqlalchemy Table for 
+        This is a wrapper around the sqlalchemy Table for
         catching errors when accessing columns through the
         c attribute.
-        
+
         Args:
-            table (str): The table name to get
-            engine (sqlalchemy.Engine): The database connection 
+            table: The name of the table whose metadata should be retrieved
+            engine: The database connection
 
         Returns:
-            (CheckedTable): The table data for use in SQL queries
+            The table data for use in SQL queries
         """
         self.name = table_name
         metadata_obj = MetaData()
         try:
             self.table = Table(self.name, metadata_obj, autoload_with=engine)
         except NoSuchTableError as e:
-            raise RuntimeError(f"Could not find table '{e}' in database connection '{engine.url}'")
+            raise RuntimeError(
+                f"Could not find table '{e}' in database connection '{engine.url}'"
+            )
 
-    def col(self, column_name):
+    def col(self, column_name: str) -> Column:
         """Get a column
 
         Args:
-            column_name (str): The column to fetch
+            column_name: The name of the column to fetch.
 
         Raises:
             RuntimeError: Thrown if the column does not exist
         """
         try:
-            return getattr(self.table.c, column_name)
+            return self.table.c[column_name]
         except AttributeError as e:
-            raise RuntimeError(f"Could not find column name '{column_name}' in table '{self.name}'")
+            raise RuntimeError(
+                f"Could not find column name '{column_name}' in table '{self.name}'"
+            )
 
-def read_sql(query, ):
-    """Connect to a database and execute a query
 
-    Any database server supported by sqlalchemy can be used
-    with this function. Specify the con_string for the
-    connection as described [here](https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls).
+def get_data(
+    engine: Engine, query: Callable[[Engine, ...], Select], *args
+) -> DataFrame:
+    """Convenience function to make a query and fetch data
+
+    Wraps a function like hic.demographics_query with a
+    call to pd.read_data.
 
     Args:
-        query (str): The SQL query to execute
-        con_string (str): sqlalchemy connection string
+        engine: The database connection
+        query: A function returning a sqlalchemy Select statement
+        *args: Positional arguments to be passed to query in addition
+            to engine (which is passed first). Make sure they are passed
+            in the same order expected by the query function.
 
     Returns:
-        (pandas.DataFrame): The result of the query
+        The pandas dataframe containing the SQL data
     """
-    con = sql.create_engine(con_string)
-    result = pd.read_sql(query, con)
-    return result
+    stmt = query(engine, *args)
+    return pd.read_sql(stmt, engine)
