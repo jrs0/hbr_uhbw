@@ -1,10 +1,12 @@
 """SQL queries and functions for HIC (UHBW) data.
 """
 
-from sqlalchemy import select
+from sqlalchemy import select, Select, Engine
 from pyhbr.common import CheckedTable
+from datetime import date
 
-def demographics_query(engine):
+
+def demographics_query(engine: Engine) -> Select:
     """Get demographic information from HIC data
 
     The date/time at which the data was obtained is
@@ -16,10 +18,10 @@ def demographics_query(engine):
     but it is all null, so not included.
 
     Args:
-        engine (sqlalchemy.Engine): the connection to the database
-    
+        engine: the connection to the database
+
     Returns:
-        (sqlalchemy.Select): SQL query to retrieve episodes table
+        SQL query to retrieve episodes table
     """
     table = CheckedTable("cv1_demographics", engine)
     return select(
@@ -29,7 +31,8 @@ def demographics_query(engine):
         table.col("death_date"),
     )
 
-def episodes_query(engine, start_date, end_date):
+
+def episodes_query(engine: Engine, start_date: date, end_date: date) -> Select:
     """Get the episodes list in the HIC data
 
     This table does not contain any episode information,
@@ -37,12 +40,12 @@ def episodes_query(engine, start_date, end_date):
     and procedure information in other tables.
 
     Args:
-        engine (sqlalchemy.Engine): the connection to the database
-        start_date (datetime.date): first valid consultant-episode start date
-        end_date (datetime.date): last valid consultant-episode start date
+        engine: the connection to the database
+        start_date: first valid consultant-episode start date
+        end_date: last valid consultant-episode start date
 
     Returns:
-        (sqlalchemy.Select): SQL query to retrieve episodes table
+        SQL query to retrieve episodes table
     """
     table = CheckedTable("cv1_episodes", engine)
     return select(
@@ -53,10 +56,11 @@ def episodes_query(engine, start_date, end_date):
         table.col("episode_end_time").label("episode_end"),
     ).where(
         table.col("episode_start_time") >= start_date,
-        table.col("episode_end_time") <= end_date
+        table.col("episode_end_time") <= end_date,
     )
 
-def diagnoses_query(engine):
+
+def diagnoses_query(engine: Engine) -> Select:
     """Get the diagnoses corresponding to episodes
 
     This should be linked to the episodes table to
@@ -67,10 +71,10 @@ def diagnoses_query(engine):
     the episode (1-indexed).
 
     Args:
-        engine (sqlalchemy.Engine): the connection to the database    
-    
+        engine: the connection to the database
+
     Returns:
-        (sqlalchemy.Select): SQL query to retrieve diagnoses table
+        SQL query to retrieve diagnoses table
     """
     table = CheckedTable("cv1_episodes_diagnosis", engine)
     return select(
@@ -80,7 +84,8 @@ def diagnoses_query(engine):
         table.col("diagnosis_code_icd").label("icd"),
     )
 
-def procedures_query(engine):
+
+def procedures_query(engine: Engine) -> Select:
     """Get the procedures corresponding to episodes
 
     This should be linked to the episodes table to
@@ -89,12 +94,12 @@ def procedures_query(engine):
     Procedures are encoded using OPCS-4 codes, and the
     position column contains the order of procedures in
     the episode (1-indexed).
-    
+
     Args:
-        engine (sqlalchemy.Engine): the connection to the database
+        engine: the connection to the database
 
     Returns:
-        (sqlalchemy.Select): SQL query to retrieve procedures table
+        SQL query to retrieve procedures table
     """
     table = CheckedTable("cv1_episodes_procedures", engine)
     return select(
@@ -104,7 +109,10 @@ def procedures_query(engine):
         table.col("procedure_code_opcs").label("opcs"),
     )
 
-def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"]):
+
+def pathology_blood_query(
+    engine: Engine, investigations: list[str] = ["OBR_BLS_UE", "OBR_BLE_FB"]
+) -> Engine:
     """Get the table of blood test results in the HIC data
 
     Since blood tests in this table are not associated with an episode
@@ -114,57 +122,57 @@ def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"])
     investigation using the investigations parameter. The investigation
     codes in the HIC data are shown below:
 
-    | `investigation` | Description |
-    |--------------------|-------------|
-    | OBR_BLS_UL |                          LFT|
-    | OBR_BLS_UE |    UREA,CREAT + ELECTROLYTES|
-    | OBR_BLS_FB |             FULL BLOOD COUNT|
-    | OBR_BLS_UT |        THYROID FUNCTION TEST|
-    | OBR_BLS_TP |                TOTAL PROTEIN|
-    | OBR_BLS_CR |           C-REACTIVE PROTEIN|
-    | OBR_BLS_CS |              CLOTTING SCREEN|
-    | OBR_BLS_FI |                        FIB-4|
-    | OBR_BLS_AS |                          AST|
-    | OBR_BLS_CA |                CALCIUM GROUP|
-    | OBR_BLS_TS |                  TSH AND FT4|
-    | OBR_BLS_FO |                SERUM FOLATE|
-    | OBR_BLS_PO |                    PHOSPHATE|
-    | OBR_BLS_LI |                LIPID PROFILE|
-    | OBR_POC_VG | POCT BLOOD GAS VENOUS SAMPLE|
-    | OBR_BLS_HD |              HDL CHOLESTEROL|
-    | OBR_BLS_FT |                      FREE T4|
-    | OBR_BLS_FE |               SERUM FERRITIN|
-    | OBR_BLS_GP |    ELECTROLYTES NO POTASSIUM|
-    | OBR_BLS_CH |                  CHOLESTEROL|
-    | OBR_BLS_MG |                    MAGNESIUM|
-    | OBR_BLS_CO |                     CORTISOL|
+    | `investigation` | Description                 |
+    |-----------------|-----------------------------|
+    | OBR_BLS_UL      |                          LFT|
+    | OBR_BLS_UE      |    UREA,CREAT + ELECTROLYTES|
+    | OBR_BLS_FB      |             FULL BLOOD COUNT|
+    | OBR_BLS_UT      |        THYROID FUNCTION TEST|
+    | OBR_BLS_TP      |                TOTAL PROTEIN|
+    | OBR_BLS_CR      |           C-REACTIVE PROTEIN|
+    | OBR_BLS_CS      |              CLOTTING SCREEN|
+    | OBR_BLS_FI      |                        FIB-4|
+    | OBR_BLS_AS      |                          AST|
+    | OBR_BLS_CA      |                CALCIUM GROUP|
+    | OBR_BLS_TS      |                  TSH AND FT4|
+    | OBR_BLS_FO      |                SERUM FOLATE|
+    | OBR_BLS_PO      |                    PHOSPHATE|
+    | OBR_BLS_LI      |                LIPID PROFILE|
+    | OBR_POC_VG      | POCT BLOOD GAS VENOUS SAMPLE|
+    | OBR_BLS_HD      |              HDL CHOLESTEROL|
+    | OBR_BLS_FT      |                      FREE T4|
+    | OBR_BLS_FE      |               SERUM FERRITIN|
+    | OBR_BLS_GP      |    ELECTROLYTES NO POTASSIUM|
+    | OBR_BLS_CH      |                  CHOLESTEROL|
+    | OBR_BLS_MG      |                    MAGNESIUM|
+    | OBR_BLS_CO      |                     CORTISOL|
 
     Each test is similarly encoded. The valid test codes in the full
     blood count and U+E investigations are shown below:
 
-    | `investigation` | `test` | Description |
-    |-----------------|--------|-------------|
-    | OBR_BLS_FB | OBX_BLS_NE |           Neutrophils|
-    | OBR_BLS_FB | OBX_BLS_PL |             Platelets|
-    | OBR_BLS_FB | OBX_BLS_WB |      White Cell Count|
-    | OBR_BLS_FB | OBX_BLS_LY |           Lymphocytes|
-    | OBR_BLS_FB | OBX_BLS_MC |                   MCV|
-    | OBR_BLS_FB | OBX_BLS_HB |           Haemoglobin|
-    | OBR_BLS_FB | OBX_BLS_HC |           Haematocrit|
-    | OBR_BLS_UE | OBX_BLS_NA |                Sodium|
-    | OBR_BLS_UE | OBX_BLS_UR |                  Urea|
-    | OBR_BLS_UE | OBX_BLS_K  |             Potassium|
-    | OBR_BLS_UE | OBX_BLS_CR |            Creatinine|
-    | OBR_BLS_UE | OBX_BLS_EP | eGFR/1.73m2 (CKD-EPI)|
-    
+    | `investigation` | `test`     | Description          |
+    |-----------------|------------|----------------------|
+    | OBR_BLS_FB      | OBX_BLS_NE |           Neutrophils|
+    | OBR_BLS_FB      | OBX_BLS_PL |             Platelets|
+    | OBR_BLS_FB      | OBX_BLS_WB |      White Cell Count|
+    | OBR_BLS_FB      | OBX_BLS_LY |           Lymphocytes|
+    | OBR_BLS_FB      | OBX_BLS_MC |                   MCV|
+    | OBR_BLS_FB      | OBX_BLS_HB |           Haemoglobin|
+    | OBR_BLS_FB      | OBX_BLS_HC |           Haematocrit|
+    | OBR_BLS_UE      | OBX_BLS_NA |                Sodium|
+    | OBR_BLS_UE      | OBX_BLS_UR |                  Urea|
+    | OBR_BLS_UE      | OBX_BLS_K  |             Potassium|
+    | OBR_BLS_UE      | OBX_BLS_CR |            Creatinine|
+    | OBR_BLS_UE      | OBX_BLS_EP | eGFR/1.73m2 (CKD-EPI)|
+
     Args:
-        engine (sqlalchemy.Engine): the connection to the database
-        investigation_codes (list[str]): Which types of laboratory
+        engine: the connection to the database
+        investigations: Which types of laboratory
             test to include in the query. Fetching fewer types of
             test makes the query faster.
 
     Returns:
-        (sqlalchemy.Select): SQL query to retrieve blood tests table
+        SQL query to retrieve blood tests table
     """
     table = CheckedTable("cv1_pathology_blood", engine)
     return select(
@@ -177,5 +185,5 @@ def pathology_blood_query(engine, investigations = ["OBR_BLS_UE", "OBR_BLE_FB"])
         table.col("result_available_date_time").label("result_date"),
         table.col("result_flag"),
         table.col("result_lower_range"),
-        table.col("result_upper_range")
+        table.col("result_upper_range"),
     ).where(table.col("investigation_code").in_(investigations))
