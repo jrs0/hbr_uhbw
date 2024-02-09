@@ -2,11 +2,26 @@
 
 This section describes implementations of the already-existing risk scores using data from the Hospital Information Collaborative (HIC) dataset, which is formed from finished consultant episode data, British Cardiovascular Intervention Society (BCIS) audit data from the BHI, and prescription information from the BHI.
 
-The utility of the HIC dataset is that it may have substantial overlap 
-
 Any score used in the deployed device must be validated using the data that will be used by the device. This data may have substantial overlap with the HIC data, meaning the results in this section may be indicative of the accuracy of the score calculated by the tool. However, for the purpose of making the clinical safety case (DCB 0129) for the device, the final selected score for the device should be validated on an extract of the same format of data used as input to the device.
 
 == Overview of HIC data structure
+
+The HIC dataset contains these six tables:
+
+* `demographics`: Contains gender, year of birth and date of death.
+* `episodes`: Contains an episode ID, and the episode start and end date/time
+* `diagnoses`: Contains all the diagnoses in an episode (linked by the episode ID); includes the diagnosis ICD-10 code, the diagnosis position, and the date/time of the diagnosis
+* `procedures`: Contains all the procedures in an episode (linked by the episode ID); includes the procedure OPCS-4 code, the procedure position, and the date/time of the procedure
+* `pathology_blood`: Contains blood test results, including the test result and unit; when the sample was collected/when the result was returned; and the normal range for the result. Tests are described using an `investigation` (e.g. full blood count) and a `test` within the investigation (e.g. platelets). Some tests/investigations relevant to the calculation of the ARC-HBR score are shown in 
+* ``
+
+.Some relevant laboratory investigations/tests included in the blood tests table
+[format=csv, options="header"]
+|===
+include::relevant_blood_tests.csv[]
+|===
+
+
 
 == ARC HBR Score Calculation
 
