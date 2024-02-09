@@ -193,14 +193,34 @@ def pathology_blood_query(engine: Engine, investigations: list[str]) -> Engine:
 
 
 def pharmacy_prescribing_query(engine: Engine) -> Select:
-    """Get the procedures corresponding to episodes
+    """Get medicines prescribed to patients over time
 
-    This should be linked to the episodes table to
-    obtain information about the procedures in the episode.
+    This table contains information about medicines 
+    prescribed to patients, identified by patient and time
+    (i.e. it is not associated to an episode). The information
+    includes the medicine name, dose (includes unit), frequency, 
+    form (e.g. tablets), route (e.g. oral), and whether the
+    medicine was present on admission.
 
-    Procedures are encoded using OPCS-4 codes, and the
-    position column contains the order of procedures in
-    the episode (1-indexed).
+    The tables below show the format of the data for various
+    relevant types of drug. Rows for clopidogrel take one of the
+    following forms (exhaustive list):
+
+    name    dose             frequency            drug_form          route
+    clopidogrel   75 mg        in the MORNING  film coated tablets           Oral
+    clopidogrel   75 mg        in the MORNING                 None           Oral
+    clopidogrel    None        in the MORNING  film coated tablets           Oral
+    clopidogrel    None  ONCE a day  at 18:00  film coated tablets           Oral
+    clopidogrel  300 mg        in the MORNING  film coated tablets           Oral
+    clopidogrel   75 mg              at NIGHT  film coated tablets           Oral
+    clopidogrel   75 mg  ONCE a day  at 10:30  film coated tablets           Oral
+    clopidogrel   75 mg  ONCE a day  at 08:00  film coated tablets           Oral
+    clopidogrel   75 mg  ONCE a day  at 08:00                 None           Oral
+    clopidogrel   75 mg  ONCE a day  at 18:00                 None           Oral
+    clopidogrel   75 mg        in the MORNING                 None  Jejunoenteral
+    clopidogrel  600 mg        in the MORNING  film coated tablets           Oral
+
+    
 
     Args:
         engine: the connection to the database
@@ -212,12 +232,10 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
     return select(
         table.col("subject").cast(String).label("patient_id"),
         table.col("order_date_time").label("order_date"),
-        table.col("prescription_type"),
-        table.col("medication_name"),
+        table.col("medication_name").label("name"),
         table.col("ordered_dose").label("dose"),
         table.col("ordered_frequency").label("frequency"),
         table.col("ordered_drug_form").label("drug_form"),
-        table.col("ordered_unit").label("unit"),
         table.col("ordered_route").label("route"),
         table.col("admission_medicine_y_n").label("admission_medicine"),
     )
