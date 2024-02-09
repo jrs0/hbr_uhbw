@@ -205,16 +205,16 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
     The most commonly occurring formats for various relevant
     medicines are shown in the table below:
 
-    | `name`       | `dose` | `frequency`    | `drug_form`         | `route` |
-    |--------------|--------|----------------|---------------------|---------|
-    | clopidogrel  | 75 mg  | in the MORNING | film coated tablets | Oral    |
-    | ticagrelor | 90 mg  | TWICE a day    | tablets     | Oral     |
-    | warfarin  | 3 mg   | ONCE a day  at 18:00 | NaN         |   Oral   |
-    | warfarin  | 5 mg   | ONCE a day  at 18:00 | tablets     |   Oral   |       
-    | apixaban  | 5 mg   | TWICE a day          | tablets     | Oral     |
-    | dabigatran etexilate | 110 mg | TWICE a day | capsules    | Oral     |
-    | edoxaban  | 60 mg  | in the MORNING       | tablets     | Oral     |
-    | rivaroxaban | 20 mg  | in the MORNING | film coated tablets | Oral     |
+    | `name`       | `dose`  | `frequency`    | `drug_form`         | `route` |
+    |--------------|---------|----------------|---------------------|---------|
+    | clopidogrel  | 75 mg   | in the MORNING | film coated tablets | Oral    |
+    | ticagrelor   | 90 mg   | TWICE a day    | tablets             | Oral    |
+    | warfarin     | 3 mg    | ONCE a day  at 18:00 | NaN           | Oral    |
+    | warfarin     | 5 mg    | ONCE a day  at 18:00 | tablets       | Oral    |       
+    | apixaban     | 5 mg    | TWICE a day          | tablets       | Oral    |
+    | dabigatran etexilate | 110 mg | TWICE a day   | capsules      | Oral    |
+    | edoxaban     | 60 mg   | in the MORNING       | tablets       | Oral    |
+    | rivaroxaban  | 20 mg   | in the MORNING | film coated tablets | Oral    |
 
     Args:
         engine: the connection to the database
