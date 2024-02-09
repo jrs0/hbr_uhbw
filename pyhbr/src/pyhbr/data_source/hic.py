@@ -207,6 +207,8 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
 
     | `name`       | `dose`  | `frequency`    | `drug_form`         | `route` |
     |--------------|---------|----------------|---------------------|---------|
+    | aspirin      | 75 mg   | in the MORNING | NaN                 | Oral    |
+    | aspirin      | 75 mg   | in the MORNING | dispersible tablet  | Oral    |
     | clopidogrel  | 75 mg   | in the MORNING | film coated tablets | Oral    |
     | ticagrelor   | 90 mg   | TWICE a day    | tablets             | Oral    |
     | warfarin     | 3 mg    | ONCE a day  at 18:00 | NaN           | Oral    |
