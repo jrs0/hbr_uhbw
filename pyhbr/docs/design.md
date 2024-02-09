@@ -56,3 +56,9 @@ df = pd.read_sql(stmt, engine)
 ```
 
 See the `pyhbr.data_source` module for more examples of functions that return the `stmt` variable for different tables.
+
+The following are some tips for building statements using the `CheckedTable` object:
+
+* `CheckedTable` contains the SQLAlchemy `Table` as the `table` member. This means you can use `select(table.table)` to initially fetch all the columns (useful for seeing what the table contains)
+* If you need to rename a column (using `AS` in SQL), use `label`; e.g. `select(table.col("old_name").label("new_name"))`.
+* Sometimes (particularly with ID columns which are typed incorrectly), it is useful to be able to cast to a different type. You can do this using `select(table.col("col_to_cast").cast(String))`. The list of generic types is provided [here](https://docs.sqlalchemy.org/en/20/core/type_basics.html#generic-camelcase-types); import the one you need using a line like `from sqlalchemy import String`.
