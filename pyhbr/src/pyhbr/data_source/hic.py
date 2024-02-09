@@ -203,24 +203,52 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
     medicine was present on admission.
 
     The tables below show the format of the data for various
-    relevant types of drug. Rows for clopidogrel take one of the
-    following forms (exhaustive list):
+    relevant types of drug. The vast majority of rows for
+    clopidogrel take the following form: 
 
     name    dose             frequency            drug_form          route
     clopidogrel   75 mg        in the MORNING  film coated tablets           Oral
-    clopidogrel   75 mg        in the MORNING                 None           Oral
-    clopidogrel    None        in the MORNING  film coated tablets           Oral
-    clopidogrel    None  ONCE a day  at 18:00  film coated tablets           Oral
-    clopidogrel  300 mg        in the MORNING  film coated tablets           Oral
-    clopidogrel   75 mg              at NIGHT  film coated tablets           Oral
-    clopidogrel   75 mg  ONCE a day  at 10:30  film coated tablets           Oral
-    clopidogrel   75 mg  ONCE a day  at 08:00  film coated tablets           Oral
-    clopidogrel   75 mg  ONCE a day  at 08:00                 None           Oral
-    clopidogrel   75 mg  ONCE a day  at 18:00                 None           Oral
-    clopidogrel   75 mg        in the MORNING                 None  Jejunoenteral
-    clopidogrel  600 mg        in the MORNING  film coated tablets           Oral
 
+    The majority of prasugrel entries are:
+
+    name       dose   frequency       drug_form  route
+    prasugrel  10 mg  in the MORNING  tablets    Oral 
+
+    Most ticagrelor entries use:
+
+    name        dose   frequency                       drug_form  route
+    ticagrelor  90 mg  TWICE a day                     tablets    Oral
+
+    The most commonly occurring entires for warfarin are:
+
+    name      dose           frequency             drug_form  route
+    warfarin  4 mg           ONCE a day  at 18:00  NaN        Oral
+    warfarin  5 mg           ONCE a day  at 18:00  NaN        Oral
+    warfarin  3 mg           ONCE a day  at 18:00  NaN        Oral
+    warfarin  5 mg           ONCE a day  at 18:00  tablets    Oral
     
+    Most apixaban entires use the following format:
+
+    name      dose    frequency                       drug_form  route        
+    apixaban  5 mg    TWICE a day                     tablets    Oral
+    
+    Most dabigatran use the following format:
+
+    name                  dose    frequency                       drug_form  route
+    dabigatran etexilate  110 mg  TWICE a day                     capsules   Oral
+
+    Most edoxaban entries are like:
+
+    name      dose   frequency             drug_form  route
+    edoxaban  60 mg  in the MORNING        tablets    Oral    
+
+    Rivaroxaban entries are commonly:
+
+    name         dose   frequency                       drug_form            route
+    rivaroxaban  20 mg  in the MORNING                  film coated tablets  Oral
+
+    but the frequency is often `TWICE a day` or `ONCE a day  at 18:00` (note the
+    additional space).
 
     Args:
         engine: the connection to the database
