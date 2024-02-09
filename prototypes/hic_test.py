@@ -9,7 +9,6 @@ import pyhbr.clinical_codes as codes
 
 res = codes.load_from_package("icd10.yaml")
 
-"""
 start_date = dt.date(1990, 1, 1)
 end_date = dt.date(2030, 1, 1)
 
@@ -22,6 +21,7 @@ procedures = get_data(engine, hic.procedures_query)
 pathology_blood = get_data(
     engine, hic.pathology_blood_query, ["OBR_BLS_UE", "OBR_BLE_FB"]
 )
+df = get_data(engine, hic.pharmacy_prescribing_query)
 
-patients = episodes[["patient_id"]].drop_duplicates()
-"""
+
+#patients = episodes[["patient_id"]].drop_duplicates()

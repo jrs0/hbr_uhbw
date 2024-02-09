@@ -1,8 +1,13 @@
 """SQL queries and functions for HIC (UHBW) data.
+
+Most data available in the HIC tables is fetched in the 
+queries below, apart from columns which are all-NULL,
+provide keys/IDs that will not be used, or provide duplicate
+information (e.g. duplicated in two tables). 
 """
 
 from datetime import date
-from sqlalchemy import select, Select, Engine
+from sqlalchemy import select, Select, Engine, String
 from pyhbr.common import CheckedTable
 
 
@@ -25,7 +30,7 @@ def demographics_query(engine: Engine) -> Select:
     """
     table = CheckedTable("cv1_demographics", engine)
     return select(
-        table.col("subject").label("patient_id"),
+        table.col("subject").cast(String).label("patient_id"),
         table.col("gender"),
         table.col("year_of_birth"),
         table.col("death_date"),
@@ -49,9 +54,9 @@ def episodes_query(engine: Engine, start_date: date, end_date: date) -> Select:
     """
     table = CheckedTable("cv1_episodes", engine)
     return select(
-        table.col("subject").label("patient_id"),
-        table.col("episode_identifier").label("episode_id"),
-        table.col("spell_identifier").label("spell_id"),
+        table.col("subject").cast(String).label("patient_id"),
+        table.col("episode_identifier").cast(String).label("episode_id"),
+        table.col("spell_identifier").cast(String).label("spell_id"),
         table.col("episode_start_time").label("episode_start"),
         table.col("episode_end_time").label("episode_end"),
     ).where(
@@ -78,7 +83,7 @@ def diagnoses_query(engine: Engine) -> Select:
     """
     table = CheckedTable("cv1_episodes_diagnosis", engine)
     return select(
-        table.col("episode_identifier").label("episode_id"),
+        table.col("episode_identifier").cast(String).label("episode_id"),
         table.col("diagnosis_date_time").label("time"),
         table.col("diagnosis_position").label("position"),
         table.col("diagnosis_code_icd").label("icd"),
@@ -103,7 +108,7 @@ def procedures_query(engine: Engine) -> Select:
     """
     table = CheckedTable("cv1_episodes_procedures", engine)
     return select(
-        table.col("episode_identifier").label("episode_id"),
+        table.col("episode_identifier").cast(String).label("episode_id"),
         table.col("procedure_date_time").label("time"),
         table.col("procedure_position").label("position"),
         table.col("procedure_code_opcs").label("opcs"),
@@ -174,7 +179,7 @@ def pathology_blood_query(engine: Engine, investigations: list[str]) -> Engine:
     """
     table = CheckedTable("cv1_pathology_blood", engine)
     return select(
-        table.col("subject").label("patient_id"),
+        table.col("subject").cast(String).label("patient_id"),
         table.col("investigation_code").label("investigation"),
         table.col("test_code").label("test"),
         table.col("test_result").label("result"),
@@ -185,3 +190,34 @@ def pathology_blood_query(engine: Engine, investigations: list[str]) -> Engine:
         table.col("result_lower_range"),
         table.col("result_upper_range"),
     ).where(table.col("investigation_code").in_(investigations))
+
+
+def pharmacy_prescribing_query(engine: Engine) -> Select:
+    """Get the procedures corresponding to episodes
+
+    This should be linked to the episodes table to
+    obtain information about the procedures in the episode.
+
+    Procedures are encoded using OPCS-4 codes, and the
+    position column contains the order of procedures in
+    the episode (1-indexed).
+
+    Args:
+        engine: the connection to the database
+
+    Returns:
+        SQL query to retrieve procedures table
+    """
+    table = CheckedTable("cv1_pharmacy_prescribing", engine)
+    return select(
+        table.col("subject").cast(String).label("patient_id"),
+        table.col("order_date_time").label("order_date"),
+        table.col("prescription_type"),
+        table.col("medication_name"),
+        table.col("ordered_dose").label("dose"),
+        table.col("ordered_frequency").label("frequency"),
+        table.col("ordered_drug_form").label("drug_form"),
+        table.col("ordered_unit").label("unit"),
+        table.col("ordered_route").label("route"),
+        table.col("admission_medicine_y_n").label("admission_medicine"),
+    )
