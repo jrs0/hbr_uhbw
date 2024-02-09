@@ -3,9 +3,12 @@ John Scott and Maredudd Harris
 :doctype: book
 :toc:
 :sectnums:
+:xrefstyle: short
 
 include::specifications.adoc[leveloffset=+1]
 
 include::risk_management_plan.adoc[leveloffset=+1]
+
+include::hic_implementations.adoc[leveloffset=+1]
 
 bibliography::[]

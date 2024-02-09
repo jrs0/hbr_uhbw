@@ -1,0 +1,9 @@
+Name,Dose,Frequency,Drug Form,Route
+aspirin,75mg,in the MORNING,dispersible tablet,Oral
+clopidogrel,75mg,in the MORNING,film coated tablets,Oral
+ticagrelor,90mg,TWICE a day,tablets,Oral
+warfarin,5mg,ONCE a day at 18:00,tablets,Oral
+apixaban,5mg,TWICE a day,tablets,Oral
+dabigatran etexilate,110mg,TWICE a day,capsules,Oral
+edoxaban,60mg,in the MORNING,tablets,Oral
+rivaroxaban,20mg,in the MORNING,film coated tablets,Oral

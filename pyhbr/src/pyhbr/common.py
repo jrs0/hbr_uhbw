@@ -47,7 +47,7 @@ class CheckedTable:
         c attribute.
 
         Args:
-            table: The name of the table whose metadata should be retrieved
+            table_name: The name of the table whose metadata should be retrieved
             engine: The database connection
 
         Returns:
@@ -80,7 +80,7 @@ class CheckedTable:
 
 
 def get_data(
-    engine: Engine, query: Callable[[Engine, ...], Select], *args
+    engine: Engine, query: Callable[[Engine, ...], Select], *args: ...
 ) -> DataFrame:
     """Convenience function to make a query and fetch data
 
