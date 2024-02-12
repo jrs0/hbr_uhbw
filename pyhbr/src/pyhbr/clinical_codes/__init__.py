@@ -1,8 +1,36 @@
 from importlib.resources import files
-import yaml
+from serde.yaml import from_yaml
 
+from dataclasses import dataclass
+from serde import serde
 
-def load_from_package(name: str) -> dict:
+@serde
+@dataclass
+class Index:
+    """Index used to sort the code categories
+    """
+    index: str | tuple[str, str]
+
+@serde
+@dataclass
+class Category:
+    """Code/categories struct
+    """
+    name: str
+    docs: str
+    index: Index
+    categories: list["Category"] | None
+    exclude: set[str] | None
+
+@serde
+@dataclass
+class ClinicalCodeTree:
+    """Code definition file structure
+    """
+    categories: list[Category]
+    groups: set[str]
+
+def load_from_package(name: str) -> ClinicalCodeTree:
     """Load a clinical codes file from the pyhbr package.
 
     The clinical codes are stored in yaml format, and this
@@ -16,4 +44,7 @@ def load_from_package(name: str) -> dict:
         The contents of the file.
     """
     contents = files("pyhbr.clinical_codes.files").joinpath(name).read_text()
-    return yaml.load(contents, Loader=yaml.CLoader)
+    return from_yaml(ClinicalCodeTree, contents)
+    #return yaml.load(contents, Loader=yaml.CLoader)
+
+

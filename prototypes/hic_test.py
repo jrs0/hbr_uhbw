@@ -5,9 +5,6 @@ import datetime as dt
 
 from pyhbr.common import make_engine, get_data
 from pyhbr.data_source import hic
-import pyhbr.clinical_codes as codes
-
-res = codes.load_from_package("icd10.yaml")
 
 start_date = dt.date(1990, 1, 1)
 end_date = dt.date(2030, 1, 1)
