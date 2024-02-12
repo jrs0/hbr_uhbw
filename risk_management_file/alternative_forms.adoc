@@ -5,6 +5,7 @@ This section describes various system designs that might satisfy the intended pu
 
 == Description of the system
 
+////
 [ditaa]
 ....
                    +-------------+
@@ -24,6 +25,7 @@ This section describes various system designs that might satisfy the intended pu
      |          Lots of work             |
      +-----------------------------------+
 ....
+////
 
 There system will likely comprise two parts:
 

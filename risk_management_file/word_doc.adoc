@@ -1,4 +1,5 @@
 :doctype: book
+:xrefstyle: short
 // This is the top-level file for generating of the word-document 
 // format of the documentation. To create it, run
 //
@@ -11,5 +12,7 @@ include::notes.adoc[]
 include::specifications.adoc[leveloffset=+1]
 
 include::risk_management_plan.adoc[leveloffset=+1]
+
+include::hic_implementations.adoc[leveloffset=+1]
 
 bibliography::[]

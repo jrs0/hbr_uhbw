@@ -1,4 +1,4 @@
-# Implementing Risk Scores on HIC Data
+# #Implementing Risk Scores on HIC Data#
 
 This section describes implementations of the already-existing risk scores using data from the Hospital Information Collaborative (HIC) dataset, which is formed from finished consultant episode data, British Cardiovascular Intervention Society (BCIS) audit data from the BHI, and prescription information from the BHI.
 
@@ -21,7 +21,7 @@ The HIC dataset contains these six tables:
 include::relevant_blood_tests.csv[]
 |===
 
-.Relevant medicines contained in the prescriptions table and associated data
+.Relevant medicines contained in the prescriptions table and example data formats
 [#prescriptions, format=csv, options="header"]
 |===
 include::example_prescriptions.csv[]

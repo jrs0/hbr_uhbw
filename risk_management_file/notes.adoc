@@ -2,24 +2,23 @@
 
 _This section will contain notes about progress this week, specific things to look at in this document (if any), etc._
 
-Summary of previous week work (30th Jan - 6th Feb 2024):
+Summary of previous week work (7th Feb - 13th Feb 2024):
 
-* Met with Mike on Wednesday
-** Confirmed that HIC data for sharing with ICB is on the way (it is not quite finished yet)
-** Mike shared an internal copy of the data with me, for development of scripts. He will update my copy soon with the tested version once he has finished it, but this will let me get on with starting to implement the ARC HBR score (this week's job).
-** Confirmed from Mike that I can get a laptop by submitting a request to IT after I become a UHBW employee.
-* DPIA is now complete and (I believe) Amy has submitted it to UHBW to sign off.
-* Still some confusion over whether we need to do a GP opt-out at the ICB end -- going to try to get some clarity this week.
-* Signed an honorary contract with ICB, means I can keep my laptop/sign-ins etc. 
-* (Mostly technical, but time consuming) Got a python environment set up on trust systems to begin to develop the ARC score
-* Agreed to give a presentation/signed up for BHI event in Feb.
+* Accessed the new HIC testing data Mike gave me. 
+** Written python code to access the tables and document the structure/made some notes on the blood test types/prescriptions.
+** Just a few more technical things to get out the way, then should be able to start an ARC HBR score calculation!
+* Got the GP opt-out finalised, sent off for first round of ICB approval.
+* Looks like the national HES access is progressing a bit.
 
-Actions for JS this week (7th Feb - 13th Feb 2024):
+Actions for JS this week (13th Feb - 12th Feb 2024):
 
-* Make a start on ARC score calculation
-* Figure out this GP opt-out question
+* Document specifically how to calculate ARC criteria from the HIC tables (including documenting code groups and calculation logic).
+* Continue working on GP opt-out submission
+* Continue working on national HES access form/logistics etc.
+* Prepare a presentation for the BHI event next week -- going to do a talk on the dimension reduction work
+* Start working on abstract for the ESC submission (end of Feb), also on dimension reduction work.
 
 For Tom to look at:
 
-* Nothing this time changed in the document -- hoping to have some specifics about the ARC score calculation next week.
+* I've highlighted the new section on the HIC data tables/blood tests/prescriptions in yellow. Would you mind having a look through, and seeing if you think there are any big things missing? (e.g. other relevant drugs, or blood test categories). No need to comment/return, we can chat tomorrow and I can make notes.
 
