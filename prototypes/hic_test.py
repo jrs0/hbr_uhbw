@@ -21,7 +21,7 @@ procedures = get_data(engine, hic.procedures_query)
 pathology_blood = get_data(
     engine, hic.pathology_blood_query, ["OBR_BLS_UE", "OBR_BLE_FB"]
 )
-df = get_data(engine, hic.pharmacy_prescribing_query)
+pharmacy_prescribing = get_data(engine, hic.pharmacy_prescribing_query)
 
 
 #patients = episodes[["patient_id"]].drop_duplicates()
