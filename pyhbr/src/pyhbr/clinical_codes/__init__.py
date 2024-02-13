@@ -36,6 +36,14 @@ class Category:
     categories: list[Category] | None
     exclude: set[str] | None
 
+    def is_leaf(self):
+        """Check if the categories is a leaf node
+
+        Returns:
+            True if leaf node (i.e. clinical code), false otherwise
+        """
+        return self.categories is None
+
 @serde
 @dataclass
 class ClinicalCodeTree:
@@ -59,6 +67,23 @@ def load_from_package(name: str) -> ClinicalCodeTree:
     """
     contents = files("pyhbr.clinical_codes.files").joinpath(name).read_text()
     return from_yaml(ClinicalCodeTree, contents)
-    return yaml.load(contents, Loader=yaml.CLoader)
 
-
+def get_codes_in_groups(group: str, category: Category):
+    
+    # Filter out the categories that exclude the group
+    categories_left = ...
+    
+    # Loop over the remaining categories. For all the leaf
+    # categories, if there is no exclude for this group,
+    # include it in the results. For non-leaf categories,
+    # call this function again and append the resulting codes
+    for category in categories_left:
+        if category.is_leaf() and not category.exclude().contains(group):
+            clinical_code = ClinicalCode::from(category)
+            clinical_code_ref = code_store.clinical_code_ref_from(clinical_code)
+            codes_in_group.append(clinical_code_ref)
+        else:
+            sub_categories = category.categories
+            # Check it is non-empty (or refactor logic)
+            new_codes = get_codes_in_group(group, sub_categories)
+            codes_in_group.append(new_codes)
