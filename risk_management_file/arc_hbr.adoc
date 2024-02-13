@@ -61,6 +61,8 @@ Haemoglobin (hb) greater than 11.0 g/dL is divided into two categories:
 
 Any other haemoglobin level is not an ARC HBR criterion.
 
+NOTE: In the ARC HBR official app, the anaemia calculation is simplified by using the Hb level for men for both men and women.
+
 Haemoglobin level varies with time, and is captured in the data as either laboratory measurements from the full blood count, or potentially as anaemia codes from ICD-10 data in hospital episode statistics.
 
 A blood test including an Hb measurement is often performed in the intervention episode, so this should be used to calculate the risk. If Hb from the index is not available, then a previous low Hb could be taken as a proxy to calculate the risk.
