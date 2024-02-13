@@ -16,6 +16,7 @@ dependencies = [
   "sqlalchemy",
   "pandas",
   "pyodbc",
+  "pyserde[yaml]",
 ]
 
 [project.urls]
