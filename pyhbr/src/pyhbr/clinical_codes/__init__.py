@@ -58,6 +58,29 @@ class Category:
         else:
             return False
     
+def get_codes_in_group(group: str, categories: list[Category]) -> list[str]:
+    
+    # Filter out the categories that exclude the group
+    categories_left = [c for c in categories if not c.excludes(group)]
+    
+    codes_in_group = []
+    
+    # Loop over the remaining categories. For all the leaf
+    # categories, if there is no exclude for this group,
+    # include it in the results. For non-leaf categories,
+    # call this function again and append the resulting codes
+    for category in categories_left:
+        if category.is_leaf() and not category.excludes(group):
+            # Make a custom code object here to store codes and docs
+            codes_in_group.append(category.name)
+        else:
+            sub_categories = category.categories
+            # Check it is non-empty (or refactor logic)
+            new_codes = get_codes_in_group(group, sub_categories)
+            codes_in_group.extend(new_codes)
+            
+    return codes_in_group    
+
 @serde
 @dataclass
 class ClinicalCodeTree:
@@ -65,6 +88,23 @@ class ClinicalCodeTree:
     """
     categories: list[Category]
     groups: set[str]
+    
+    def codes_in_group(self, group):
+        """Get the clinical codes in a code group
+
+        Args:
+            group: The group to fetch 
+
+        Raises:
+            ValueError: Raised if the requested group does not exist
+
+        Returns:
+            The list of code groups
+        """
+        if not group in self.groups:
+            raise ValueError(f"'{group}' is not a valid code group ({self.groups})")
+
+        return get_codes_in_group(group, self.categories)
 
 def load_from_package(name: str) -> ClinicalCodeTree:
     """Load a clinical codes file from the pyhbr package.
@@ -82,23 +122,3 @@ def load_from_package(name: str) -> ClinicalCodeTree:
     contents = files("pyhbr.clinical_codes.files").joinpath(name).read_text()
     return from_yaml(ClinicalCodeTree, contents)
 
-def get_codes_in_group(group: str, categories: list[Category]) -> list[str]:
-    
-    # Filter out the categories that exclude the group
-    categories_left = [c for c in categories if]
-    
-    codes_in_group = []
-    
-    # Loop over the remaining categories. For all the leaf
-    # categories, if there is no exclude for this group,
-    # include it in the results. For non-leaf categories,
-    # call this function again and append the resulting codes
-    for category in categories_left:
-        if category.is_leaf() and not category.excludes(group):
-            # Make a custom code object here to store codes and docs
-            codes_in_group.append(category.name)
-        else:
-            sub_categories = category.categories
-            # Check it is non-empty (or refactor logic)
-            new_codes = get_codes_in_group(group, sub_categories)
-            codes_in_group.extend(new_codes)
