@@ -58,7 +58,66 @@ class Category:
         else:
             return False
     
+def normalise_code(code: str) -> str:
+    """Remove whitespace/dots, and convert to lower-case
+
+    The format of clinical codes can vary across different data 
+    sources. A simple way to compare codes is to convert them into
+    a common format and compare them as strings. The purpose of
+    this function is to define the common format, which uses all
+    lower-case letters, does not contain any dots, and does not
+    include any leading/trailing whitespace.
+    
+    Comparing codes for equality does not immediately allow checking
+    whether one code is a sub-category of another. It also ignores
+    clinical code annotations such as dagger/asterisk.
+
+    Examples:
+        >>> normalise_code("  I21.0 ")
+        'i210'
+
+    Args:
+        code: The raw code, e.g.
+
+    Returns:
+        The normalised form of the clinical code
+    """
+    return code.lower().strip().replace(".","")
+
+    
+@dataclass
+class ClinicalCode:
+    """Store a clinical code together with its description.
+    
+    Attributes:
+        name: The code itself, e.g. "I21.0"
+        docs: The code description, e.g. "Acute 
+            transmural myocardial infarction of anterior wall"
+    """    
+    name: str
+    docs: str
+    
+    def normalize(self):
+        """Return the name without whitespace/dots, as lowercase
+
+        See the documentation for [normalize_code()][pyhbr.clinical_codes.normalise_code].
+
+        Returns:
+            The normalized form of this clinical code
+        """
+        return normalise_code(self.name)
+
 def get_codes_in_group(group: str, categories: list[Category]) -> list[str]:
+    """Helper function to get clinical codes in a group
+
+    Args:
+        group: The group to fetch
+        categories: The list of categories to search for codes
+
+    Returns:
+        A list of
+    """
+    
     
     # Filter out the categories that exclude the group
     categories_left = [c for c in categories if not c.excludes(group)]
