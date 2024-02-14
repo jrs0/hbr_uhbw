@@ -65,3 +65,87 @@ The ARC HBR score is the simplest possible calculation that would meet the inten
 
 This section describes a calculation of the ARC HBR score using the HIC dataset, as a prototype which may inform the calculation in the final device.
 
+=== Age
+
+Age will be calculated using the episode start date (episodes table) and the year of birth (demographics table). The resulting age should be accurate to within about a year.
+
+If age \> 75 years, 0.5 is added to the score.
+
+=== Oral Anticoagulant Use
+
+Presence of any of the following medications on admission (at the index ACS/PCI episode) will add 1 to the ARC HBR score:
+
+* Warfarin
+* Apixaban, rivaroxaban, edoxaban, dabigatran
+
+NOTE: Dose is not considered in this implementation of the ARC HBR score.
+
+== Chronic Kidney Disease
+
+If a laboratory test for eGFR was taken during the index presentation #or at any time period before the index presentation#, use the result to calculate the contribution to the ARC score:
+
+[cols="1,1"]
+|===
+| eGFR | Contribution to ARC-HBR
+
+| < 15 ml/min | 1
+| 15 ml/min \<= eGFR < 30 ml/min | 1
+| 30 ml/min \<= eGFR < 45 ml/min | 0.5
+| 45 ml/min \<= eGFR < 60 ml/min | 0.5
+| 60 ml/min \<= eGFR < 90 ml/min | 0
+|  > 90 ml/min | 0
+|===
+
+If no eGFR result is available, fall back on presence of an ICD-10 code #at any time in patient history#:
+
+[cols="1,1"]
+|===
+| ICD-10 | Contribution to ARC-HBR
+
+| N18.5 | 1
+| N18.4 | 1
+| N18.3 | 0.5
+| N18.3 | 0.5
+| N18.2 | 0
+| N18.1 | 0
+|===
+
+If no eGFR or clinical-code evidence of renal problems are present, assume ARC HBR 0.
+
+=== Anaemia
+
+Use the first Hb measurement from the index presentation for the purposes of the anaemia calculation. If no Hb measurement is present, use the most recent Hb measurement from the patient's medical history. Calculate the contribution to the ARC HBR score as follows (taking the first row that matches):
+
+.Contribution to the ARC HBR score by Hb level/gender
+[cols="1,1,1"]
+|===
+| Hb Level/(g/dL) | Male | Female
+| < 11.0         | 1    | 1
+| < 11.9         | 0.5  | 0.5
+| < 12.9         | 0.5  | 0
+| >= 12.9        | 0    | 0 
+|===
+
+If no Hb measurement is available in the patient history, fall back on ICD-10 codes:
+
+#TODO put in the anaemia codes#
+
+If no codes are present in the patient history, assume no ARC HBR criterion.
+
+=== Prior Bleeding/Transfusion
+
+Inclusion criteria for consideration of a bleeding event is:
+
+* In the primary position (an attempt to capture "spontaneous"/not due to another cause)
+* In the first episode of the spell (attempt to capture "requiring hospitalisation", i.e. the admission was due to the bleeding)
+
+Depending on when the total number of qualifying events in the patient's history before the index ACS/PCI, the following rules are used (evaluate these conditions in order):
+
+* If a bleed occurred 6 months before the index, add 1 to the ARC HBR score.
+* If there are at least two bleeds in the patient history, add 1 to the ARC HBR score
+* If there is only one bleed in the patient history, add 0.5 to the ARC HBR score
+* If there are no bleeds in the patient history, add 0 to the ARC HBR score.
+
+NOTE: Transfusion is ignored in this definition.
+
+#The ICD-10 codes used to identify bleeding events are shown below#.

@@ -85,7 +85,7 @@ Interpretation of terms:
 
 Summary of criteria:
 
-* **Major**: `A` first bleed not in the brain within 6 months before PCI, which:
+* **Major**: Any bleed not in the brain within 6 months before PCI, which:
 ** Required hospitalisation (i.e. the hospitalisation was not due to something else) or required transfusion.
 ** Occurred on its own (i.e. was not caused by something else occurring in the spell, like other procedures)
 
