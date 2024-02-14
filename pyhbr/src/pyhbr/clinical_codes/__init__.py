@@ -44,6 +44,20 @@ class Category:
         """
         return self.categories is None
 
+    def excludes(self, group: str) -> bool :
+        """Check if this category excludes a code group
+
+        Args:
+            group: The string name of the group to check
+
+        Returns:
+            True if the group is excluded; False otherwise
+        """
+        if self.exclude is not None:
+            return group in self.exclude
+        else:
+            return False
+    
 @serde
 @dataclass
 class ClinicalCodeTree:
@@ -68,22 +82,23 @@ def load_from_package(name: str) -> ClinicalCodeTree:
     contents = files("pyhbr.clinical_codes.files").joinpath(name).read_text()
     return from_yaml(ClinicalCodeTree, contents)
 
-def get_codes_in_groups(group: str, category: Category):
+def get_codes_in_group(group: str, categories: list[Category]) -> list[str]:
     
     # Filter out the categories that exclude the group
-    categories_left = ...
+    categories_left = [c for c in categories if]
+    
+    codes_in_group = []
     
     # Loop over the remaining categories. For all the leaf
     # categories, if there is no exclude for this group,
     # include it in the results. For non-leaf categories,
     # call this function again and append the resulting codes
     for category in categories_left:
-        if category.is_leaf() and not category.exclude().contains(group):
-            clinical_code = ClinicalCode::from(category)
-            clinical_code_ref = code_store.clinical_code_ref_from(clinical_code)
-            codes_in_group.append(clinical_code_ref)
+        if category.is_leaf() and not category.excludes(group):
+            # Make a custom code object here to store codes and docs
+            codes_in_group.append(category.name)
         else:
             sub_categories = category.categories
             # Check it is non-empty (or refactor logic)
             new_codes = get_codes_in_group(group, sub_categories)
-            codes_in_group.append(new_codes)
+            codes_in_group.extend(new_codes)
