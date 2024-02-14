@@ -29,7 +29,27 @@ include::example_prescriptions.csv[]
 
 === Overview of Relevant Laboratory Tests
 
+NOTE: TODO: put tables of all these investigations in this section to show all the available tests.
 
+Some other laboratory investigations (i.e. classes of test) which may be relevant for bleeding are:
+
+* LFT (liver function test)
+* Clotting screen
+* Serum ferritin (iron; bleeding results in a drop in iron)
+
+Other full blood count tests relevant to bleeding:
+
+* MCV (mean cell volume; bleeding tends to result in lower MCV)
+* Haematocrit (proportion of red cells, lower after bleeding)
+
+Relevant laboratory investigations for ischaemia risk:
+
+* Diabetes (serrum glucose, glycosolated Hb (HbA1c)) 
+* Cholesterol measurements come in different formats:
+** Total cholesterol: this measurement returns just one value, which is the sum of all the cholesterol components.
+** Non-HDL component only: HDH (high-density lipoprotein) is the "good" variety of cholesterol, so this measurement returns the total amount of "bad" cholesterol.
+** Full profile: Each component is given separately: HDL, LDL (low-density lipoprotein), and triglycerides.
+* Lipoprotein-a: Similar to LDL cholesterol
 
 == ARC HBR Score Calculation
 
