@@ -65,6 +65,8 @@ The ARC HBR score is the simplest possible calculation that would meet the inten
 
 This section describes a calculation of the ARC HBR score using the HIC dataset, as a prototype which may inform the calculation in the final device.
 
+Each criterion below can add 0, 0.5 or 1 to the total score.
+
 === Age
 
 Age will be calculated using the episode start date (episodes table) and the year of birth (demographics table). The resulting age should be accurate to within about a year.
@@ -149,3 +151,69 @@ Depending on when the total number of qualifying events in the patient's history
 NOTE: Transfusion is ignored in this definition.
 
 #The ICD-10 codes used to identify bleeding events are shown below#.
+
+=== Thrombocytopenia (Low Platelet Count)
+
+Using the first platelet count measurement from the index presentation, add 1 to the ARC HBR score if the count is <100e9/L. Otherwise add 0.
+
+=== Chronic Bleeding Diatheses
+
+TODO
+
+=== Cirrhosis with Portal Hypertension
+
+If the patient has any ICD-10 code for cirrhosis with portal hypertension at any point in their history, add 1 to the ARC HBR score. The relevant ICD-10 codes are shown below:
+
+TODO CODES
+
+=== Cancer
+
+If the patient has a cancer diagnosis code (ICD-10) in the previous 12 months before the index ACS/PCI, add 1 to the ARC HBR score. The relevant ICD-10 codes are shown below:
+
+TODO CODES
+
+Alternatively, if the patient has ongoing cancer therapy (identified by OPCS-4 codes within 12 months before the diagnosis), then add 1 to the ARC HBR score. Relevant OPCS-4 codes are shown below:
+
+NOTE: The ARC HBR definition refers to "ongoing" cancer therapy. The assumption is that a 12 month window should catch most ongoing therapy, but will also likely return some false positives (i.e. if therapy has just finished).
+
+=== Prior Ischaemic Stroke or ICH
+
+Add 1 to the ARC HBR score if either of these two conditions are present anywhere in the patient's history (ICD-10 codes):
+
+* Brain arteriovenous malformation
+* Prior intracranial haemorrhage at any time
+
+The relevant codes are shown below:
+
+Alternatively, identify all ischaemic stroke events in the patient's history, using ICD-10 codes:
+
+* If a moderate/severe ischaemic stroke occurred within 6 months before ACS/PCI, then add 1 to the ARC HBR score; or
+* If there is at least one ischaemic stroke, add 0.5 to the ARC HBR score
+
+The relevant ICD-10 codes for ischaemic strokes, along with severity, are shown in the table below:
+
+TODO CODES
+
+=== Prior Major Non-cardiac Surgery
+
+TODO
+
+=== Prior Major Surgery/Trauma 
+
+If there is any surgical procedure (OPCS-4 code) within 30 days before the index ACS/PCI presentation, add 1 to the ARC HBR score. Otherwise, add 0. Qualifying procedures are shown in the table below:
+
+TODO CODES
+
+=== Long-term Oral NSAID/Steroid Use
+
+Presence of any of the following medications on admission (at the index ACS/PCI episode) where the frequency is >= 4 days/week will add 1 to the ARC HBR score:
+
+* Ibuprofen
+* Naproxen
+* Diclofenac
+* Celecoxib
+* Mefenamic acid
+* Etoricoxib
+* Indomethacin
+* Aspirin (high-dose, for pain-relief)
+* #Anything else?#

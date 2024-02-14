@@ -97,7 +97,7 @@ NOTE: Previous work based on primary care data (system-wide dataset) indicated t
 
 === Thrombocytopenia (Low Platelet Count)
 
-Moderate or severe baseline thrombocytopenia (low platelet count) i, meaning count < 100e9/L, is a major criterion.
+Moderate or severe baseline thrombocytopenia (low platelet count), meaning count < 100e9/L, is a major criterion.
 
 Baseline means before intervention. The platelet count can be obtained from measurements from the full blood count. This information is routinely collected in the index presentation.
 
