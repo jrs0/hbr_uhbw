@@ -3021,6 +3021,10 @@ categories:
       - B99
       name: B99-B99
     docs: Certain infectious and parasitic diseases
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - A00
     - B99
@@ -5884,6 +5888,10 @@ categories:
       - D48
       name: D37-D48
     docs: Neoplasms
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - C00
     - D48
@@ -6529,6 +6537,10 @@ categories:
       - D89
       name: D80-D89
     docs: Diseases of the blood and blood-forming organs and certain disorders involving the immune mechanism
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - D50
     - D89
@@ -6687,6 +6699,8 @@ categories:
         index: E07
         name: E07
       docs: Disorders of thyroid gland
+      exclude:
+      - group_3
       index:
       - E00
       - E07
@@ -6758,6 +6772,8 @@ categories:
           index: E119
           name: E11.9
         docs: Type 2 diabetes mellitus
+        exclude:
+        - group_3
         index: E11
         name: E11
       - categories:
@@ -6792,6 +6808,8 @@ categories:
           index: E129
           name: E12.9
         docs: Malnutrition-related diabetes mellitus
+        exclude:
+        - group_3
         index: E12
         name: E12
       - categories:
@@ -6826,6 +6844,8 @@ categories:
           index: E139
           name: E13.9
         docs: Other specified diabetes mellitus
+        exclude:
+        - group_3
         index: E13
         name: E13
       - categories:
@@ -6860,6 +6880,8 @@ categories:
           index: E149
           name: E14.9
         docs: Unspecified diabetes mellitus
+        exclude:
+        - group_3
         index: E14
         name: E14
       docs: Diabetes mellitus
@@ -6897,6 +6919,8 @@ categories:
         index: E16
         name: E16
       docs: Other disorders of glucose regulation and pancreatic internal secretion
+      exclude:
+      - group_3
       index:
       - E15
       - E16
@@ -7191,6 +7215,8 @@ categories:
         index: E35
         name: E35
       docs: Disorders of other endocrine glands
+      exclude:
+      - group_3
       index:
       - E20
       - E35
@@ -7225,6 +7251,8 @@ categories:
         index: E46
         name: E46
       docs: Malnutrition
+      exclude:
+      - group_3
       index:
       - E40
       - E46
@@ -7410,6 +7438,8 @@ categories:
         index: E64
         name: E64
       docs: Other nutritional deficiencies
+      exclude:
+      - group_3
       index:
       - E50
       - E64
@@ -7460,6 +7490,8 @@ categories:
         index: E68
         name: E68
       docs: Obesity and other hyperalimentation
+      exclude:
+      - group_3
       index:
       - E65
       - E68
@@ -7870,11 +7902,16 @@ categories:
         index: E90
         name: E90
       docs: Metabolic disorders
+      exclude:
+      - group_3
       index:
       - E70
       - E90
       name: E70-E90
     docs: Endocrine, nutritional and metabolic diseases
+    exclude:
+    - group_1
+    - group_2
     index:
     - E00
     - E90
@@ -7914,6 +7951,8 @@ categories:
         index: I02
         name: I02
       docs: Acute rheumatic fever
+      exclude:
+      - group_1
       index:
       - I00
       - I02
@@ -8018,6 +8057,8 @@ categories:
         index: I09
         name: I09
       docs: Chronic rheumatic heart diseases
+      exclude:
+      - group_1
       index:
       - I05
       - I09
@@ -8082,6 +8123,8 @@ categories:
         index: I15
         name: I15
       docs: Hypertensive diseases
+      exclude:
+      - group_1
       index:
       - I10
       - I15
@@ -8123,6 +8166,8 @@ categories:
           index: I219
           name: I21.9
         docs: Acute myocardial infarction
+        exclude:
+        - group_1
         index: I21
         name: I21
       - categories:
@@ -8139,6 +8184,8 @@ categories:
           index: I229
           name: I22.9
         docs: Subsequent myocardial infarction
+        exclude:
+        - group_1
         index: I22
         name: I22
       - categories:
@@ -8167,6 +8214,8 @@ categories:
           index: I238
           name: I23.8
         docs: Certain current complications following acute myocardial infarction
+        exclude:
+        - group_1
         index: I23
         name: I23
       - categories:
@@ -8183,6 +8232,8 @@ categories:
           index: I249
           name: I24.9
         docs: Other acute ischaemic heart diseases
+        exclude:
+        - group_1
         index: I24
         name: I24
       - categories:
@@ -8214,6 +8265,8 @@ categories:
           index: I259
           name: I25.9
         docs: Chronic ischaemic heart disease
+        exclude:
+        - group_1
         index: I25
         name: I25
       docs: Ischaemic heart diseases
@@ -8268,6 +8321,8 @@ categories:
         index: I28
         name: I28
       docs: Pulmonary heart disease and diseases of pulmonary circulation
+      exclude:
+      - group_1
       index:
       - I26
       - I28
@@ -8716,6 +8771,8 @@ categories:
         index: I52
         name: I52
       docs: Other forms of heart disease
+      exclude:
+      - group_1
       index:
       - I30
       - I52
@@ -8953,6 +9010,8 @@ categories:
         index: I69
         name: I69
       docs: Cerebrovascular diseases
+      exclude:
+      - group_1
       index:
       - I60
       - I69
@@ -9147,6 +9206,8 @@ categories:
         index: I79
         name: I79
       docs: Diseases of arteries, arterioles and capillaries
+      exclude:
+      - group_1
       index:
       - I70
       - I79
@@ -9299,6 +9360,8 @@ categories:
         index: I89
         name: I89
       docs: Diseases of veins, lymphatic vessels and lymph nodes, not elsewhere classified
+      exclude:
+      - group_1
       index:
       - I80
       - I89
@@ -9365,11 +9428,16 @@ categories:
         index: I99
         name: I99
       docs: Other and unspecified disorders of the circulatory system
+      exclude:
+      - group_1
       index:
       - I95
       - I99
       name: I95-I99
     docs: Diseases of the circulatory system
+    exclude:
+    - group_2
+    - group_3
     index:
     - I00
     - I99
@@ -10903,6 +10971,10 @@ categories:
       - F99
       name: F99-F99
     docs: Mental and behavioural disorders
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - F00
     - F99
@@ -12200,6 +12272,10 @@ categories:
       - G99
       name: G90-G99
     docs: Diseases of the nervous system
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - G00
     - G99
@@ -13238,6 +13314,10 @@ categories:
       - H59
       name: H55-H59
     docs: Diseases of the eye and adnexa
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - H00
     - H59
@@ -13695,6 +13775,10 @@ categories:
       - H95
       name: H90-H95
     docs: Diseases of the ear and mastoid process
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - H60
     - H95
@@ -14643,6 +14727,10 @@ categories:
       - J99
       name: J95-J99
     docs: Diseases of the respiratory system
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - J00
     - J99
@@ -15037,6 +15125,8 @@ categories:
         index: K14
         name: K14
       docs: Diseases of oral cavity, salivary glands and jaws
+      exclude:
+      - group_2
       index:
       - K00
       - K14
@@ -15298,6 +15388,8 @@ categories:
         index: K31
         name: K31
       docs: Diseases of oesophagus, stomach and duodenum
+      exclude:
+      - group_2
       index:
       - K20
       - K31
@@ -15317,6 +15409,8 @@ categories:
         index: K35
         name: K35
       - docs: Other appendicitis
+        exclude:
+        - group_2
         index: K36
         name: K36
       - docs: Unspecified appendicitis
@@ -15342,6 +15436,8 @@ categories:
           index: K389
           name: K38.9
         docs: Other diseases of appendix
+        exclude:
+        - group_2
         index: K38
         name: K38
       docs: Diseases of appendix
@@ -15478,6 +15574,8 @@ categories:
         index: K46
         name: K46
       docs: Hernia
+      exclude:
+      - group_2
       index:
       - K40
       - K46
@@ -15547,6 +15645,8 @@ categories:
         index: K52
         name: K52
       docs: Noninfective enteritis and colitis
+      exclude:
+      - group_2
       index:
       - K50
       - K52
@@ -15794,6 +15894,8 @@ categories:
         index: K64
         name: K64
       docs: Other diseases of intestines
+      exclude:
+      - group_2
       index:
       - K55
       - K64
@@ -15848,6 +15950,8 @@ categories:
         index: K67
         name: K67
       docs: Diseases of peritoneum
+      exclude:
+      - group_2
       index:
       - K65
       - K67
@@ -16036,6 +16140,8 @@ categories:
         index: K77
         name: K77
       docs: Diseases of liver
+      exclude:
+      - group_2
       index:
       - K70
       - K77
@@ -16190,6 +16296,8 @@ categories:
         index: K87
         name: K87
       docs: Disorders of gallbladder, biliary tract and pancreas
+      exclude:
+      - group_2
       index:
       - K80
       - K87
@@ -16281,11 +16389,16 @@ categories:
         index: K93
         name: K93
       docs: Other diseases of the digestive system
+      exclude:
+      - group_2
       index:
       - K90
       - K93
       name: K90-K93
     docs: Diseases of the digestive system
+    exclude:
+    - group_1
+    - group_3
     index:
     - K00
     - K93
@@ -17598,6 +17711,10 @@ categories:
       - L99
       name: L80-L99
     docs: Diseases of the skin and subcutaneous tissue
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - L00
     - L99
@@ -19665,6 +19782,10 @@ categories:
       - M99
       name: M95-M99
     docs: Diseases of the musculoskeletal system and connective tissue
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - M00
     - M99
@@ -21319,6 +21440,10 @@ categories:
       - N99
       name: N99-N99
     docs: Diseases of the genitourinary system
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - N00
     - N99
@@ -26019,6 +26144,10 @@ categories:
       - T98
       name: T90-T98
     docs: Injury, poisoning and certain other consequences of external causes
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - S00
     - T98
@@ -27643,6 +27772,10 @@ categories:
       - O99
       name: O94-O99
     docs: Pregnancy, childbirth and the puerperium
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - O00
     - O99
@@ -28924,6 +29057,10 @@ categories:
       - P96
       name: P90-P96
     docs: Certain conditions originating in the perinatal period
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - P00
     - P96
@@ -31197,6 +31334,10 @@ categories:
       - Q99
       name: Q90-Q99
     docs: Congenital malformations, deformations and chromosomal abnormalities
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - Q00
     - Q99
@@ -32533,6 +32674,10 @@ categories:
       - R99
       name: R95-R99
     docs: Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - R00
     - R99
@@ -37485,6 +37630,10 @@ categories:
       - Y98
       name: Y90-Y98
     docs: External causes of morbidity and mortality
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - V01
     - Y98
@@ -39751,6 +39900,10 @@ categories:
       - Z99
       name: Z80-Z99
     docs: Factors influencing health status and contact with health services
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - Z00
     - Z99
@@ -39913,6 +40066,10 @@ categories:
       - U85
       name: U82-U85
     docs: Codes for special purposes
+    exclude:
+    - group_1
+    - group_2
+    - group_3
     index:
     - U00
     - U85
@@ -39922,4 +40079,7 @@ categories:
   - A00
   - Z99
   name: ICD-10
-groups: []
+groups:
+- group_1
+- group_2
+- group_3

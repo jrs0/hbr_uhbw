@@ -178,6 +178,13 @@ def load_from_package(name: str) -> ClinicalCodeTree:
     function returns a dictionary corresponding to the structure
     of the yaml file.
 
+    Examples:
+        >>> import pyhbr.clinical_codes as codes
+        >>> tree = codes.load_from_package("icd10_test.yaml")
+        >>> group = tree.codes_in_group("group_1")
+        >>> [code.name for code in group]
+        ['I20.0', 'I20.1', 'I20.8', 'I20.9']
+
     Args:
         name: The file name of the codes file to load
 
