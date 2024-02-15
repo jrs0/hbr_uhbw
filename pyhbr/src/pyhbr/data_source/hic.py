@@ -9,6 +9,7 @@ information (e.g. duplicated in two tables).
 from datetime import date
 from sqlalchemy import select, Select, Engine, String
 from pyhbr.common import CheckedTable
+from pandas import DataFrame
 
 
 def demographics_query(engine: Engine) -> Select:
@@ -235,3 +236,7 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
         table.col("ordered_route").label("route"),
         table.col("admission_medicine_y_n").label("admission_medicine"),
     )
+
+
+def get_clinical_codes(engine: Engine) -> DataFrame:
+    pass
