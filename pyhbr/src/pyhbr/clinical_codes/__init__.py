@@ -2,7 +2,7 @@
 """
 
 from __future__ import annotations
-from importlib.resources import files
+from importlib.resources import files as res_files
 
 from dataclasses import dataclass
 from serde import serde
@@ -191,5 +191,5 @@ def load_from_package(name: str) -> ClinicalCodeTree:
     Returns:
         The contents of the file.
     """
-    contents = files("pyhbr.clinical_codes.files").joinpath(name).read_text()
+    contents = res_files("pyhbr.clinical_codes.files").joinpath(name).read_text()
     return from_yaml(ClinicalCodeTree, contents)
