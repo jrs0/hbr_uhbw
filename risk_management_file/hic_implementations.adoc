@@ -92,10 +92,8 @@ If a laboratory test for eGFR was taken during the index presentation #or at any
 
 | < 15 ml/min | 1
 | 15 ml/min \<= eGFR < 30 ml/min | 1
-| 30 ml/min \<= eGFR < 45 ml/min | 0.5
-| 45 ml/min \<= eGFR < 60 ml/min | 0.5
-| 60 ml/min \<= eGFR < 90 ml/min | 0
-|  > 90 ml/min | 0
+| 30 ml/min \<= eGFR < 60 ml/min | 0.5
+|  >= 60 ml/min | 0
 |===
 
 If no eGFR result is available, fall back on presence of an ICD-10 code #at any time in patient history#:
@@ -106,7 +104,6 @@ If no eGFR result is available, fall back on presence of an ICD-10 code #at any 
 
 | N18.5 | 1
 | N18.4 | 1
-| N18.3 | 0.5
 | N18.3 | 0.5
 | N18.2 | 0
 | N18.1 | 0
