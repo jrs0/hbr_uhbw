@@ -9,7 +9,6 @@ information (e.g. duplicated in two tables).
 from datetime import date
 from sqlalchemy import select, Select, Engine, String
 from pyhbr.common import CheckedTable
-from pandas import DataFrame
 
 
 def demographics_query(engine: Engine) -> Select:
@@ -87,7 +86,7 @@ def diagnoses_query(engine: Engine) -> Select:
         table.col("episode_identifier").cast(String).label("episode_id"),
         table.col("diagnosis_date_time").label("time"),
         table.col("diagnosis_position").label("position"),
-        table.col("diagnosis_code_icd").label("icd"),
+        table.col("diagnosis_code_icd").label("code"),
     )
 
 
@@ -112,7 +111,7 @@ def procedures_query(engine: Engine) -> Select:
         table.col("episode_identifier").cast(String).label("episode_id"),
         table.col("procedure_date_time").label("time"),
         table.col("procedure_position").label("position"),
-        table.col("procedure_code_opcs").label("opcs"),
+        table.col("procedure_code_opcs").label("code"),
     )
 
 
@@ -237,6 +236,3 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
         table.col("admission_medicine_y_n").label("admission_medicine"),
     )
 
-
-def get_clinical_codes(engine: Engine) -> DataFrame:
-    pass

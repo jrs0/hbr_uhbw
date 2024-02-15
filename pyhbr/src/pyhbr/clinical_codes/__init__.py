@@ -7,7 +7,7 @@ from importlib.resources import files as res_files
 from dataclasses import dataclass
 from serde import serde
 from serde.yaml import from_yaml
-
+import pandas as pd
 
 # Note: this class is missing the @serde decorator
 # deliberately. It seems like there is an issue with
@@ -101,7 +101,7 @@ class ClinicalCode:
     name: str
     docs: str
 
-    def normalize(self):
+    def normalise(self):
         """Return the name without whitespace/dots, as lowercase
 
         See the documentation for [normalize_code()][pyhbr.clinical_codes.normalise_code].
@@ -193,3 +193,31 @@ def load_from_package(name: str) -> ClinicalCodeTree:
     """
     contents = res_files("pyhbr.clinical_codes.files").joinpath(name).read_text()
     return from_yaml(ClinicalCodeTree, contents)
+
+
+def codes_in_any_group(codes: ClinicalCodeTree) -> pd.DataFrame:
+    """Get a DataFrame of all the codes in any group in a codes file
+
+    Returns a table with the normalised code (lowercase/no whitespace/no
+    dots) in column `code`, and the group containing the code in the
+    column `group`. 
+
+    All codes which are in any group will be included.
+
+    Codes will be duplicated if they appear in more than one group.
+
+    Args:
+        codes: The tree clinical codes (e.g. ICD-10 or OPCS-4, loaded
+            from a file) to search for codes
+
+    Returns:
+        pd.DataFrame: All codes in any group in the codes file
+    """
+    dfs = []
+    for g in codes.groups:
+        clinical_codes = codes.codes_in_group(g)
+        normalised_codes = [c.normalise() for c in clinical_codes]
+        df = pd.DataFrame({"code": normalised_codes, "group": g})
+        dfs.append(df)
+
+    return pd.concat(dfs).reset_index()
