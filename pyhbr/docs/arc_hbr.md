@@ -26,9 +26,9 @@ Before identifying patients/index events, or calculating the score, some preproc
     * `csurgery`: Cardiac surgery. Used to exclude cardiac surgery for one criterion.
     * `surgery`: All surgery. Used as a proxy for "major surgery" criteria
 2. For laboratory results, narrow to the subset of results shown below. Convert all tests to the standard unit used in the ARC definition, and drop the unit from the table. Keep the date/time at which the laboratory sample was collected, and the patient ID (in this data, associated episode is not linked, and must be inferred from the date).
-    * `egfr`: Used to assess kidney function (unit: ml/min)
+    * `egfr`: Used to assess kidney function (unit: mL/min)
     * `hb`: Haemoglobin, used to assess anaemia (unit: g/dL)
-    * `platelets`: Platelet count, used to assess thrombocytopenia (unit: `x10^9`)
+    * `platelets`: Platelet count, used to assess thrombocytopenia (unit: `x10^9/L`)
 
 3. For prescriptions, narrow to the set of medicines shown below. Keep the medicine name, flag for present-on-admission, patient ID, and prescription order date (used to infer link to episode, as above).
     * `oac`: any of warfarin, apixaban, edoxaban, dabigatran
