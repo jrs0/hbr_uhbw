@@ -109,8 +109,8 @@ def check_const_column(df: pd.DataFrame, col_name: str, expect: str):
         )
 
 
-def get_lab_results(engine: Engine) -> pd.DataFrame:
-    """Get laboratory results from the HIC database
+def get_unlinked_lab_results(engine: Engine) -> pd.DataFrame:
+    """Get laboratory results from the HIC database (unlinked to episode)
 
     This function returns data for the following three
     tests, identified by one of these values in the
@@ -133,8 +133,8 @@ def get_lab_results(engine: Engine) -> pd.DataFrame:
 
     Returns:
         Table of laboratory results, including Hb (haemoglobin),
-        platelet count, and eGFR (kidney function). The columns are
-        `patient_id`, `test_name`, and `sample_date`.
+            platelet count, and eGFR (kidney function). The columns are
+            `patient_id`, `test_name`, and `sample_date`.
 
     """
     df = get_data(engine, hic.pathology_blood_query, ["OBR_BLS_UE", "OBR_BLS_FB"])
@@ -239,9 +239,9 @@ def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
 
     Returns:
         The table of prescriptions, including the patient_id,
-        order_date (to link to an episode), prescription name,
-        prescription group (oac or nsaid), and frequency (in
-        doses per day).
+            order_date (to link to an episode), prescription name,
+            prescription group (oac or nsaid), and frequency (in
+            doses per day).
     """
 
     df = get_data(engine, hic.pharmacy_prescribing_query)
@@ -315,85 +315,124 @@ def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
         ["patient_id", "order_date", "name", "group", "frequency", "on_admission"]
     ].reset_index(drop=True)
 
-def link_prescriptions_to_episodes(prescriptions: pd.DataFrame, episodes: pd.DataFrame) -> pd.DataFrame:
-    """Link HIC prescriptions to episode by order date
 
-    Associated each prescription with the first episode containing 
-    the prescription order date in its [episode_start, episode_end)
-    range.
+def link_to_episodes(
+    items: pd.DataFrame, episodes: pd.DataFrame, date_col_name: str
+) -> pd.DataFrame:
+    """Link HIC laboratory test/prescriptions to episode by date
+
+    Use this function to add an episode_id to the laboratory tests
+    table or the prescriptions table. Tests/prescriptions are generically
+    referred to as items below.
+
+    This function associates each item with the first episode containing
+    the item date in its [episode_start, episode_end) range. The column
+    containing the item date is given by `date_col_name`.
+
+    For prescriptions, use the prescription order date for linking. For
+    laboratory tests, use the sample collected date.
 
     This function assumes that the episode_id in the episodes table is
     unique (i.e. no patients share an episode ID).
 
-    For higher performance, reduce the prescriptions table to the
-    medicines of interest before using this function.
+    For higher performance, reduce the item table to items of interest
+    before calling this function.
 
-    Since episodes may slightly overlap, a prescription may be associated
+    Since episodes may slightly overlap, an item may be associated
     with more than one episode. In this case, the function will associate
-    the prescription with the earliest episode (the returned table will
-    not contain duplicate prescriptions).
+    the item with the earliest episode (the returned table will
+    not contain duplicate items).
 
     Args:
-        prescriptions: The prescriptions table. Must contain an `order_date`
-            column, which is used to compare with episode start/end dates, 
-            and the `patient_id`.
+        items: The prescriptions or laboratory tests table. Must contain a
+            `date_col_name` column, which is used to compare with episode
+            start/end dates, and the `patient_id`.
 
         episodes: The episodes table. Must contain `patient_id`, `episode_id`,
             `episode_start` and `episode_end`.
 
     Returns:
-        The prescriptions table with the extra column `episode_id`.
+        The items table with the extra column `episode_id`.
     """
 
-    # Before linking to episodes, add a prescription ID. This is to 
-    # remove duplicated prescriptions in the last step of linking, 
+    # Before linking to episodes, add an item ID. This is to
+    # remove duplicated items in the last step of linking,
     # due ot overlapping episode time windows.
-    prescriptions["prescription_id"] = range(prescriptions.shape[0])
+    items["item_id"] = range(items.shape[0])
 
-    # Join together all prescriptions and episode information by patient. Use
-    # a left join on prescriptions (assumed narrowed to the prescriptions types
+    # Join together all items and episode information by patient. Use
+    # a left join on items (assuming items is narrowed to the item types
     # of interest) to keep the result smaller.
-    with_episodes = pd.merge(prescriptions, episodes, how="left", on="patient_id")
+    with_episodes = pd.merge(items, episodes, how="left", on="patient_id")
 
-    # Thinking of each row as both an episode and a prescription, drop any
-    # rows where the prescription order date does not fall within the start
+    # Thinking of each row as both an episode and a item, drop any
+    # rows where the item date does not fall within the start
     # and end of the episode (start date inclusive).
-    consistent_dates = (with_episodes["order_date"] >= with_episodes["episode_start"]) & (
-        with_episodes["order_date"] < with_episodes["episode_end"]
-    )
+    consistent_dates = (
+        with_episodes[date_col_name] >= with_episodes["episode_start"]
+    ) & (with_episodes[date_col_name] < with_episodes["episode_end"])
     overlapping_episodes = with_episodes[consistent_dates]
 
-    # Since some episodes overlap in time, some prescriptions will end up
-    # being associated with more than one episode. To remove these duplicate
+    # Since some episodes overlap in time, some items will end up
+    # being associated with more than one episode. Remove any
+    # duplicates by associating only with the earliest episode.
     deduplicated = (
-        overlapping_episodes.sort_values("episode_start").groupby("prescription_id").head(1)
+        overlapping_episodes.sort_values("episode_start")
+        .groupby("item_id")
+        .head(1)
     )
 
     # Keep episode_id, drop other episodes/unnecessary columns
-    return deduplicated.drop(columns=["prescription_id"]).drop(
-        columns=[c for c in episodes.columns if c != "episode_id"]
-    ).reset_index(drop=True)
+    return (
+        deduplicated.drop(columns=["item_id"])
+        .drop(columns=[c for c in episodes.columns if c != "episode_id"])
+        .reset_index(drop=True)
+    )
+
 
 def get_prescriptions(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
     """Get relevant prescriptions from the HIC data, linked to episode
 
-    For information about the contents of the table, refer to the 
+    For information about the contents of the table, refer to the
     documentation for [get_unlinked_prescriptions()][pyhbr.middle.from_hic.get_unlinked_prescriptions].
 
-    The main additional feature of this function is to link the
-    prescriptions to an episode ID. For more about this, see 
-    [link_prescriptions_to_episodes()][pyhbr.middle.from_hic.link_prescriptions_to_episodes].
+    This function links each prescription to the first episode containing
+    the prescription order date in its date range. For more about this, see
+    [link_to_episodes()][pyhbr.middle.from_hic.link_to_episodes].
 
     Args:
         engine: The connection to the database
-        episodes: The episodes table, used for linking. Must contain 
+        episodes: The episodes table, used for linking. Must contain
             `patient_id`, `episode_id`, `episode_start` and `episode_end`.
 
     Returns:
-        The table of prescriptions, including the patient_id,
-            order_date (to link to an episode), prescription name,
-            prescription group (oac or nsaid), and frequency (in
-            doses per day).
+        The table of prescriptions, including the prescription name, 
+            prescription group (oac or nsaid), frequency (in doses per day),
+            and link to the associated episode.
     """
     prescriptions = get_unlinked_prescriptions(engine)
-    return link_prescriptions_to_episodes(prescriptions, episodes)
+    return link_to_episodes(prescriptions, episodes, "order_date")
+
+
+def get_lab_results(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
+    """Get relevant laboratory results from the HIC data, linked to episode
+
+    For information about the contents of the table, refer to the
+    documentation for [get_unlinked_lab_results()][pyhbr.middle.from_hic.get_unlinked_lab_results].
+
+    This function links each laboratory test to the first episode containing
+    the sample collected date in its date range. For more about this, see
+    [link_to_episodes()][pyhbr.middle.from_hic.link_to_episodes].
+
+    Args:
+        engine: The connection to the database
+        episodes: The episodes table, used for linking. Must contain
+            `patient_id`, `episode_id`, `episode_start` and `episode_end`.
+
+    Returns:
+        Table of laboratory results, including Hb (haemoglobin),
+            platelet count, and eGFR (kidney function). The columns are
+            `sample_date`, `test_name`, `episode_id`.
+    """
+    lab_results = get_unlinked_lab_results(engine)
+    return link_to_episodes(lab_results, episodes, "sample_date")
