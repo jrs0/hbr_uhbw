@@ -18,10 +18,11 @@ end_date = dt.date(2030, 1, 1)
 engine = make_engine()
 
 codes = from_hic.get_clinical_codes(engine, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml")
-lab_results = from_hic.get_lab_results(engine)
-prescriptions = from_hic.get_prescriptions(engine)
-demographics = get_data(engine, hic.demographics_query)
 episodes = get_data(engine, hic.episodes_query, start_date, end_date)
+prescriptions = from_hic.get_prescriptions(engine, episodes)
+lab_results = from_hic.get_lab_results(engine)
+
+demographics = get_data(engine, hic.demographics_query)
 
 if episodes.value_counts("episode_id").max() > 1:
     raise RuntimeError(
