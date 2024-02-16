@@ -167,3 +167,109 @@ def get_lab_results(engine: Engine) -> pd.DataFrame:
     df.loc[df["test_name"] == "hb", "result"] /= 10.0
 
     return df[["patient_id", "test_name", "result", "sample_date"]]
+
+def get_clinical_codes(engine: Engine, diagnoses_file: str, procedures_file: str) -> pd.DataFrame:
+    """Main diagnoses/procedures fetch for the HIC data
+
+    This function wraps the diagnoses/procedures queries and a filtering
+    operation to reduce the tables to only those rows which contain a code
+    in a group. One table is returned which contains both the diagnoses and
+    procedures in long format, along with the associated episode ID and the
+    primary/secondary position of the code in the episode.
+
+    Args:
+        engine: The connection to the database
+        diagnoses_file: The diagnoses codes file name (loaded from the package)
+        procedures_file: The procedures codes file name (loaded from the package)
+
+    Returns:
+        A table containing diagnoses/procedures, normalised codes, code groups,
+            diagnosis positions, and associated episode ID.
+    """
+
+    diagnosis_codes = load_from_package(diagnoses_file)
+    procedures_codes = load_from_package(procedures_file)
+
+    # Fetch the data from the server
+    diagnoses = get_data(engine, hic.diagnoses_query)
+    procedures = get_data(engine, hic.procedures_query)
+
+    # Reduce data to only code groups, and combine diagnoses/procedures
+    filtered_diagnoses = filter_to_groups(diagnoses, diagnosis_codes)
+    filtered_procedures = filter_to_groups(procedures, procedures_codes)
+
+    # Tag the diagnoses/procedures, and combine the tables
+    filtered_diagnoses["type"] = "diagnoses"
+    filtered_procedures["type"] = "procedures"
+    return pd.concat([filtered_diagnoses, filtered_procedures])
+
+def get_prescriptions(engine: Engine) -> pd.DataFrame:
+
+    df = get_data(engine, hic.pharmacy_prescribing_query)
+
+    prescriptions_of_interest = {
+        "warfarin": "oac",  
+        "apixaban": "oac",
+        "dabigatran etexilate": "oac",
+        "edoxaban": "oac",
+        "rivaroxaban": "oac",
+        "ibuprofen": "nsaid",
+        "naproxen": "nsaid",
+        "diclofenac": "nsaid",
+        "diclofenac sodium": "nsaid",
+        "celecoxib": "nsaid", # Not present in HIC data
+        "mefenamic acid": "nsaid", # Not present in HIC data
+        "etoricoxib": "nsaid",
+        "indometacin": "nsaid", # This spelling is used in HIC data
+        "indomethacin": "nsaid", # Alternative spelling
+        #"aspirin": "nsaid" -- not accounting for high dose
+    }
+
+    # Only keep prescriptions of interest
+    df = df[df["name"].isin(prescriptions_of_interest.keys())]
+
+    # Add the type of prescription to the table
+    df["group"] = df["name"].map(prescriptions_of_interest)
+
+    # Replace alternative spellings
+    df["name"] = df["name"].str.replace("indomethacin", "indometacin")
+
+    # Replace admission medicine column with bool
+    on_admission_map = { "y": True, "n": False }
+    df["on_admission"] = df["on_medicine"].map(on_admission_map)
+
+    # Extra spaces are not typos.
+    per_day = {
+        "TWICE a day": 2,
+        "in the MORNING": 1,
+        "THREE times a day": 3,
+        "TWICE a day at 08:00 and 22:00": 2,
+        "ONCE a day  at 18:00": 1,
+        "up to every SIX hours": 4,
+        "up to every EIGHT hours": 3,
+        "TWICE a day at 08:00 and 20:00": 2,
+        "up to every 24 hours": 1,
+        "THREE times a day at 08:00 15:00 and 22:00": 3,
+        "TWICE a day at 08:00 and 19:00": 2,
+        "ONCE a day  at 20:00": 1,
+        "ONCE a day  at 08:00": 1,
+        "up to every 12 hours": 2,
+        "ONCE a day  at 19:00": 1,
+        "THREE times a day at 08:00 15:00 and 20:00": 3,
+        "THREE times a day at 08:00 14:00 and 22:00": 3,
+        "ONCE a day  at 22:00": 1,
+        "every EIGHT hours": 24,
+        "ONCE a day  at 09:00": 1,
+        "up to every FOUR hours": 6,
+        "TWICE a day at 06:00 and 18:00": 2,
+        "at NIGHT": 1,
+        "ONCE a day  at 14:00": 1,
+        "ONCE a day  at 12:00": 1,
+        "THREE times a day at 08:00 14:00 and 20:00": 3,
+        "THREE times a day at 00:00 08:00 and 16:00": 3,
+    }
+
+    # Replace frequencies strings with doses per day
+    df["frequency"] = df["frequency"].map(per_day)
+
+    return df[["patient_id", "order_date", "name", "group", "frequency", "on_admission"]]

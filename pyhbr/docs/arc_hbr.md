@@ -31,7 +31,7 @@ Before identifying patients/index events, or calculating the score, some preproc
     * `platelets`: Platelet count, used to assess thrombocytopenia (unit: `x10^9/L`)
 
 3. For prescriptions, narrow to the set of medicines shown below. Keep the medicine name, flag for present-on-admission, patient ID, and prescription order date (used to infer link to episode, as above).
-    * `oac`: any of warfarin, apixaban, edoxaban, dabigatran
+    * `oac`: any of warfarin, apixaban, edoxaban, dabigatran, rivaroxaban
     * `nsaid`: any of ibuprofen, naproxen, diclofenac, celecoxib, mefenamic acid, etoricoxib, indomethacin (high-does aspirin excluded for now).
 
 4. For demographics, retain age and gender. This calculation may be postoned until after index events are calculated (for example, if the demographics table contains year of birth instead of age).

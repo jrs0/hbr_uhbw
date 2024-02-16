@@ -233,6 +233,6 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
         table.col("ordered_frequency").label("frequency"),
         table.col("ordered_drug_form").label("drug_form"),
         table.col("ordered_route").label("route"),
-        table.col("admission_medicine_y_n").label("admission_medicine"),
+        table.col("admission_medicine_y_n").label("on_medicine"),
     )
 
