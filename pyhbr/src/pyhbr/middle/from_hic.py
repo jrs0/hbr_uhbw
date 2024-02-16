@@ -166,7 +166,7 @@ def get_lab_results(engine: Engine) -> pd.DataFrame:
     # Convert hb units to g/dL (to match ARC HBR definition)
     df.loc[df["test_name"] == "hb", "result"] /= 10.0
 
-    return df[["patient_id", "test_name", "result", "sample_date"]]
+    return df[["patient_id", "sample_date", "test_name", "result"]]
 
 def get_clinical_codes(engine: Engine, diagnoses_file: str, procedures_file: str) -> pd.DataFrame:
     """Main diagnoses/procedures fetch for the HIC data
@@ -204,6 +204,28 @@ def get_clinical_codes(engine: Engine, diagnoses_file: str, procedures_file: str
     return pd.concat([filtered_diagnoses, filtered_procedures])
 
 def get_prescriptions(engine: Engine) -> pd.DataFrame:
+    """Get relevant prescriptions from the HIC data
+
+    This function is tailored towards the calculation of the
+    ARC HBR score, so it focusses on prescriptions on oral
+    anticoagulants (e.g. warfarin) and non-steroidal 
+    anti-inflammatory drugs (NSAIDs, e.g. ibuprofen).
+
+    The frequency column reflects the maximum allowable
+    doses per day. For the purposes of ARC HBR, where NSAIDs
+    must be prescribed > 4 days/week, all prescriptions in
+    the HIC data indicate frequency > 1 (i.e. at least one
+    per day), and therefore qualify for ARC HBR purposes.
+
+    Args:
+        engine: The connection to the database
+
+    Returns:
+        The table of prescriptions, including the patient_id,
+        order_date (to link to an episode), prescription name,
+        prescription group (oac or nsaid), and frequency (in
+        doses per day).
+    """
 
     df = get_data(engine, hic.pharmacy_prescribing_query)
 
