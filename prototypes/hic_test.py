@@ -36,31 +36,3 @@ lab_results
 
 episodes.sort_values(["patient_id", "spell_id", "episode_id"]).head(50)
 
-# Before linking to episodes, add a prescription ID (just the index
-# column). This is to remove duplicated prescriptions in the last step
-# of linking, due ot overlapping episode time windows.
-prescriptions.reset_index(inplace=True, names="prescription_id")
-
-# Join together all prescriptions and episode information by patient. Use
-# a left join on prescriptions (assumed narrowed to the prescriptions types
-# of interest) to keep the result smaller.
-with_episodes = pd.merge(prescriptions, episodes, how="left", on="patient_id")
-
-# Thinking of each row as both an episode and a prescription, drop any
-# rows where the prescription order date does not fall within the start
-# and end of the episode (start date inclusive).
-consistent_dates = (with_episodes["order_date"] >= with_episodes["episode_start"]) & (
-    with_episodes["order_date"] < with_episodes["episode_end"]
-)
-overlapping_episodes = with_episodes[consistent_dates]
-
-# Since some episodes overlap in time, some prescriptions will end up
-# being associated with more than one episode. To remove these duplicate
-deduplicated = (
-    overlapping_episodes.sort_values("episode_start").groupby("prescription_id").head(1)
-)
-
-# Keep episode_id, drop other episodes/unnecessary columns
-deduplicated.drop(columns=["prescription_id"]).drop(
-    columns=[c for c in episodes.columns if c != "episode_id"]
-).reset_index(drop=True)
