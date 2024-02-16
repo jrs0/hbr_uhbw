@@ -36,6 +36,14 @@ Before identifying patients/index events, or calculating the score, some preproc
 
 4. For demographics, retain age and gender. This calculation may be postoned until after index events are calculated (for example, if the demographics table contains year of birth instead of age).
 
+#### Link Laboratory Results and Prescriptions to Episodes
+
+In the HIC data, laboratory results and prescriptions do not contain an episode_id; instead, they contain a date/time (either a sample date for laboratory tests or an order date for prescriptions).
+
+To link each test/prescription to an episode, use the episode start and end times. If the sample date/order date falls within the episode start and end time, then it should be associated with that episode.
+
+A complication with this process is that episodes sometimes overlap (i.e. the start time of the next is before the end time of the previous one). This will be solved by associating a test/prescription with the earliest episode containing the time.
+
 ### Identify Index Events
 
 Inclusion criteria for calculation of the ARC HBR score is having a hospital visit (spell) where the first episode of the spell contains an ACS diagnosis in the primary position, or a PCI procedure in any position.
