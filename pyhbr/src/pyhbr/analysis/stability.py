@@ -58,39 +58,118 @@ model M0 and Mn on one graph). Any other accuracy metric of interest
 can be calculated from this information (i.e. for step 4 above).
 """
 
+from sklearn.base import clone
+from typing import Callable
+from sklearn.pipeline import Pipeline
 import numpy as np
+from numpy.random import RandomState
 from sklearn.utils import resample
 import warnings
 import pandas as pd
+from pandas import DataFrame, Series
+from dataclasses import dataclass
 
-
-def make_bootstrapped_resamples(X0_train, y0_train, M):
+@dataclass
+class Resamples:
+    """Store a training set along with M resamples of it
     """
-    Makes M boostrapped resamples of P0 that are the same
-    size as P0. M must be at least 200 (as per recommendation).
-    P0 is specified by its features X0_train and its outcome
-    y0_train, which must both be the same height (same number
-    of rows).
+    X0: DataFrame
+    y0: Series
+    Xm: list[DataFrame]
+    ym: list[Series]
 
-    Note: not yet reproducible from random_state.
 
-    Testing: not yet tested.
+def make_bootstrapped_resamples(X0: DataFrame, y0: Series, M: int, random_state: RandomState) -> Resamples:
+    """Make M resamples of the training data
+    
+    Makes M bootstrapped resamples of a training set (X0,y0).
+    M should be at least 200 (as per recommendation).
+
+    Args:
+        X0: The features in the training set to be resampled
+        y0: The outcome in the training set to be resampled
+        M: How many resamples to take
+        random_state: Source of randomness for resampling
+
+    Raises:
+        ValueError: If the number of rows in X0 and y0 do not match
+
+    Returns:
+        An object containing the original training set and the resamples.
     """
-    num_samples = X0_train.shape[0]
-    if num_samples != len(y0_train):
+    
+    num_samples = X0.shape[0]
+    if num_samples != len(y0):
         raise ValueError("Number of rows in X0_train and y0_train must match")
     if M < 200:
         warnings.warn("M should be at least 200; see Riley and Collins, 2022")
 
-    Xn_train = []
-    yn_train = []
+    Xm = []
+    ym = []
     for _ in range(M):
-        X, y = resample(X0_train, y0_train)
-        Xn_train.append(X)
-        yn_train.append(y)
+        X, y = resample(X0, y0, random_state=random_state)
+        Xm.append(X)
+        ym.append(y)
 
-    return Xn_train, yn_train
+    return Resamples(X0, y0, Xm, ym)
 
+@dataclass
+class FittedModel:
+    """Stores a model fitted to a training set and resamples of the training set.
+    """
+    M0: Pipeline
+    Mm: list[Pipeline]
+
+def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: RandomState) -> FittedModel:
+    """Fit a model to a training set and resamples of the training set.
+    
+    Use the unfitted model pipeline returned by model_factory to:
+    
+    * Fit a model to the training set (X0, y0)
+    * Fit a model to M resamples (Xm, ym) of the training set
+    
+    The model is an unfitted scikit-learn Pipeline. Note that if RandomState is used
+    when specifying the model, then the models used to fit the resamples here will
+    be _statstical clones_ (i.e. they might not necessarily produce the same result
+    on the same data). clone() is called on model before fitting, so each fit gets a 
+    new clean object.
+    
+    Args:
+        model: An unfitted scikit-learn pipeline, which is used as the basis for
+            all the fits. Each fit calls clone() on this object before fitting, to
+            get a new model with clean parameters. The cloned fitted models are then
+            stored in the returned fitted model.
+        X0: The training set features
+        y0: The training set outcome
+        M (int): How many resamples to take from the training set (ideally >= 200)
+        random_state: The source of randomness for model fitting
+
+    Returns:
+        An object containing the model fitted on (X0,y0) and all (Xm,ym)
+    """
+    
+    # Develop a single model from the training set (X0_train, y0_train),
+    # using any method (e.g. including cross validation and hyperparameter
+    # tuning) using training set data. This is referred to as D in
+    # stability.py.
+    print("Fitting model-under-test")
+    pipe = clone(model)
+    M0 = pipe.fit(X0, y0)
+
+    # Resample the training set to obtain the new datasets (Xm, ym)
+    print(f"Creating {M} bootstrap resamples of training set")
+    resamples = make_bootstrapped_resamples(X0, y0, M, random_state)
+    
+    # Develop all the bootstrap models to compare with the model-under-test M0
+    print("Fitting bootstrapped models")
+    Mm = []
+    for m in range(M):
+        pipe = clone(model)
+        ym = resamples.ym[m]
+        Xm = resamples.Xm[m]
+        Mm.append(pipe.fit(Xm, ym))
+
+    return FittedModel(M0, Mm)
 
 def predict_bootstrapped_proba(M0, Mn, X_test):
     """
@@ -208,30 +287,4 @@ def plot_instability(ax, probs, y_test, title="Probability stability"):
     ax.set_title(title)
     ax.set_xlabel("Prediction from model-under-test")
     ax.set_ylabel("Bootstrap model predictions")
-
-
-def fit_model(Model, object_column_indices, X0_train, y0_train, M):
-    """
-    Fit the model given in the first argument to the training data
-    (X0_train, y0_train) to produce M0. Then resample the training data M times
-    (with replacement) to obtain M new training sets (Xm_train, ym_train), and
-    fit M other models Mn. return the pair (M0, Mm) (the second element is a list
-    of length M).
-    """
-    # Develop a single model from the training set (X0_train, y0_train),
-    # using any method (e.g. including cross validation and hyperparameter
-    # tuning) using training set data. This is referred to as D in
-    # stability.py.
-    print("Fitting model-under-test")
-    M0 = Model(X0_train, y0_train, object_column_indices)
-
-    # For the purpose of assessing model stability, obtain bootstrap
-    # resamples (Xm_train, ym_train) from the training set (X0, y0).
-    print("Creating bootstrap resamples of X0 for stability checking")
-    Xm_train, ym_train = make_bootstrapped_resamples(X0_train, y0_train, M)
-
-    # Develop all the bootstrap models to compare with the model-under-test M0
-    print("Fitting bootstrapped models")
-    Mm = [Model(X, y, object_column_indices) for (X, y) in zip(Xm_train, ym_train)]
-
-    return (M0, Mm)
+    

@@ -2,20 +2,26 @@
 """
 
 from dataclasses import dataclass
+
 from numpy.random import RandomState
+from pandas import DataFrame
+
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
-from pandas import DataFrame
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
+
 
 @dataclass
 class Dataset:
-    """Stores either the train or test set
-    """
+    """Stores either the train or test set"""
+
     y: DataFrame
     X_manual: DataFrame
     X_reduce: DataFrame
-    
+
 
 def prepare_train_test(
     data_manual: DataFrame, data_reduce: DataFrame, random_state: RandomState
@@ -28,9 +34,9 @@ def prepare_train_test(
         random_state: The random state to pick the test/train split
 
     Returns:
-        A tuple (train, test) containing the datasets to be used for training and 
+        A tuple (train, test) containing the datasets to be used for training and
             testing the models. Both contain the outcome y along with the features
-            for both the manually-chosen code groups and the data for dimension 
+            for both the manually-chosen code groups and the data for dimension
             reduction.
     """
 
@@ -68,8 +74,9 @@ def prepare_train_test(
     # Store the test/train data together
     train = Dataset(y_train, X_train_manual, X_train_reduce)
     test = Dataset(y_test, X_test_manual, X_test_reduce)
-    
+
     return train, test
+
 
 def make_reducer_pipeline(reducer, cols_to_reduce: list[str]) -> Pipeline:
     """Make a wrapper that applies dimension reduction to a subset of columns.
@@ -95,11 +102,12 @@ def make_reducer_pipeline(reducer, cols_to_reduce: list[str]) -> Pipeline:
     )
     return Pipeline([("column_transformer", column_transformer)])
 
+
 def make_full_pipeline(model: Pipeline, reducer: Pipeline = None) -> Pipeline:
     """Make a model pipeline from the model part and dimension reduction
 
     This pipeline has one or two steps:
-    
+
     * If no reduction is performed, the only step is "model"
     * If dimension reduction is performed, the steps are "reducer", "model"
 
@@ -121,4 +129,18 @@ def make_full_pipeline(model: Pipeline, reducer: Pipeline = None) -> Pipeline:
         return Pipeline([("reducer", reducer), ("model", model)])
     else:
         return Pipeline([("model", model)])
-    
+
+
+def make_logistic_regression(random_state: RandomState) -> Pipeline:
+    """Make a new logistic regression model
+
+    The model involves scaling all predictors and then
+    applying a logistic regression model.
+
+    Returns:
+        The unfitted pipeline for the logistic regression model
+    """
+
+    scaler = StandardScaler()
+    logreg = LogisticRegression(verbose=3, random_state=random_state)
+    return Pipeline([("scaler", scaler), ("model", logreg)])

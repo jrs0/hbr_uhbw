@@ -15,6 +15,7 @@
 from numpy.random import RandomState
 from pyhbr.common import load_item
 import pyhbr.analysis.dim_reduce as dim_reduce
+from pyhbr.analysis.stability import fit_model
 
 # This random source controls all processes in this script
 random_state = RandomState(0)
@@ -55,7 +56,28 @@ data_reduce = load_item("data_umap")
 
 train, test = dim_reduce.prepare_train_test(data_manual, data_reduce, random_state)
 
+# Step 2. Fit the manual-codes model
 
+# Dimension reduction
+#reducer_1 = 
+
+# Models
+model_1 = dim_reduce.make_logistic_regression(random_state)
+#model_2 = dim_reduce.make_random_forest(random_state)
+#model_3 = ...
+
+
+
+# Manual-codes model
+model = dim_reduce.make_full_pipeline(dim_reduce.make_logistic_regression(random_state))
+
+# Reduce-dimension model
+#cols_to_reduce = [c for c in train..columns if ("diag" in c) or ("proc" in c)]
+#reducer = reducer_maker(random_state)
+#reducer_wrapper = make_column_transformer(reducer, cols_to_reduce)
+
+
+fitted_model = fit_model(model, train.X_manual, train.y, 10, random_state)
 
 
 
@@ -322,23 +344,6 @@ def single_fit(
         baseline_auc,
         reduce_auc,
     )
-
-
-def make_logistic_regression(random_state: RandomState) -> list:
-    """Make a new logistic regression model
-
-    The model involves scaling all predictors and then
-    applying a logistic regression model.
-
-    Returns:
-        A list of tuples suitable for passing to the
-            scikit learn Pipeline.
-    """
-
-    scaler = StandardScaler()
-    logreg = LogisticRegression(verbose=3, random_state=random_state)
-    model = [("scaler", scaler), ("model", logreg)]
-    return model
 
 
 def make_random_forest(random_state: RandomState) -> list:
