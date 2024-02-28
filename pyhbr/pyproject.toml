@@ -1,6 +1,6 @@
 [project]
 name = "pyhbr"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="John Scott", email="john.scott@uhbw.nhs.uk" },
 ]
@@ -17,6 +17,7 @@ dependencies = [
   "pandas",
   "pyodbc",
   "pyserde[yaml]",
+  "gitpython"
 ]
 
 [project.urls]
