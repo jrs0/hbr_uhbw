@@ -34,6 +34,7 @@ from pandas import DataFrame, Series
 from numpy.random import RandomState
 from numpy import ndarray
 
+from pyhbr.common import load_item
 from pyhbr.clinical_codes import codes_in_any_group, load_from_package
 
 
@@ -302,8 +303,8 @@ def fit_model(
 # 0. Prepare the datasets
 
 # Load both datasets
-data_manual = ds.load_dataset("data_manual", True)
-data_reduce = ds.load_dataset("data_umap", True)
+data_manual = load_item("data_manual")
+data_reduce = load_item("data_umap")
 
 # 1. Test/train split
 
@@ -424,7 +425,7 @@ def make_umap_reducer(random_state: RandomState) -> umap.UMAP:
 
 
 def make_tsvd_reducer(random_state: RandomState) -> TruncatedSVD:
-    return TruncatedSVD(random_state=random_state, n_components=3)
+    return TruncatedSVD(random_state=random_state, n_components=200)
 
 
 def make_grp_reducer(random_state: RandomState) -> GaussianRandomProjection:
@@ -441,7 +442,7 @@ baseline_fit, reduce_fit, baseline_probs, reduce_probs, baseline_auc, reduce_auc
         X0_test,
         X1_test,
         make_logistic_regression,
-        make_tsvd_reducer,
+        make_grp_reducer,
     )
 )
 
@@ -473,15 +474,15 @@ def code_counts_in_rows(group: str, code_groups: DataFrame, data: DataFrame) -> 
 
     Args:
         group: The name of the code group to count
-        code_groups: DataFrame mapping column `group` to a column called `name` which
-            stores all the codes in that group
-        data: Data containing many columns each corresponding to a single code (containing
-            the `name` from the code_groups table as part of the column name).
+        code_groups: DataFrame mapping column `group` to a column called `code` which
+            stores all the codes in that group.
+        data: Data containing many columns, each corresponding to a single code (containing
+            the `code` from the code_groups table as part of the column name).
 
     Returns:
         The result of adding up all the columns for codes in the code group specified.
     """
-    groups = code_groups[code_groups["group"] == group]["name"]
+    groups = code_groups[code_groups["group"] == group]["code"]
     group_regex = "|".join(groups.to_list())
     code_counts = data.filter(regex=group_regex).sum(axis=1)
     return code_counts
@@ -496,9 +497,9 @@ def get_most_common_group(
         groups_map: A map from the group name to the desired column name in the output data
             for that group.
         code_groups: A table mapping the group name in the `group` column to the clinical codes
-            in that group (in the `name` column)
+            in that group (in the `code` column)
         data: A table with one column for each clinical code, where each column name contains
-            the `name` in the code_groups table.
+            the `code` in the code_groups table.
 
     Returns:
         A table with one column showing which was the most common code group in the row,
@@ -506,7 +507,7 @@ def get_most_common_group(
     """
     dfs = []
     for group, group_name in groups_map.items():
-        code_counts = code_counts_in_row(group, code_groups, data)
+        code_counts = code_counts_in_rows(group, code_groups, data)
         code_counts.name = group_name
         dfs.append(code_counts)
 
