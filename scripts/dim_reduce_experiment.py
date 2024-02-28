@@ -144,6 +144,21 @@ for model_name in models.keys():
         reduce_results[model_name][reducer_name]["auc"] = get_auc(probs, test.y)
         reduce_results[model_name][reducer_name]["calibration_curves"] = get_calibration(probs, test.y, 10)
         
+# Prune the fitted models to keep only the model fitted on the 
+# training set (not resample models), to keep the disk usage down.
+
+# Prune manual models
+for model_name in models.keys():
+    main_model = manual_results[model_name]["fitted_model"].M0
+    manual_results[model_name]["fitted_model"] = main_model
+        
+# Prune reduced models
+for model_name in models.keys():
+    for reducer_name in reducers.keys():
+        main_model = reduce_results[model_name][reducer_name]["fitted_model"].M0
+        reduce_results[model_name][reducer_name]["fitted_model"] = main_model
+        
+        
 # SAVE RESULTS HERE
 save_item(manual_results, "dim_reduce_manual_results")
 save_item(reduce_results, "dim_reduce_reduce_results")
