@@ -140,7 +140,7 @@ for model_name in models.keys():
         probs = reduce_results[model_name][reducer_name]["probs"]
         reduce_results[model_name][reducer_name]["roc_curves"] = get_roc_curves(probs, test.y)
         reduce_results[model_name][reducer_name]["auc"] = get_auc(probs, test.y)
-        reduce_results[model_name][reducer_name]["roc_curves"] = get_calibration(probs, test.y, 10)
+        reduce_results[model_name][reducer_name]["calibration_curves"] = get_calibration(probs, test.y, 10)
         
 # SAVE RESULTS HERE
 save_item(manual_results, "dim_reduce_manual_results")
@@ -164,6 +164,7 @@ for model_name in models.keys():
 
     probs = manual_results[model_name]["probs"]
     roc_curves = manual_results[model_name]["roc_curves"]
+    calibration_curves = manual_results[model_name]["calibration_curves"]
     auc = manual_results[model_name]["auc"]
 
     # Plot instability
@@ -180,11 +181,20 @@ for model_name in models.keys():
     plot_roc_curves(ax, roc_curves, auc, title)
     plt.savefig(filename)    
 
+    # Plot calibration curves
+    title = f"Calibration Curves for {pretty_names[model_name]} (Manual Codes)"
+    filename = f"figures/{model_name}_calibration_manual_codes.png"
+    fig, ax = plt.subplots(1,1)
+    plot_calibration_curves(ax, calibration_curves, title)
+    plt.savefig(filename)  
+
+
     for reducer_name in reducers.keys():
 
         probs = reduce_results[model_name][reducer_name]["probs"]
-        roc_curves = manual_results[model_name]["roc_curves"]
-        auc = manual_results[model_name]["auc"]
+        roc_curves = reduce_results[model_name][reducer_name]["roc_curves"]
+        calibration_curves = reduce_results[model_name][reducer_name]["calibration_curves"]
+        auc = reduce_results[model_name][reducer_name]["auc"]
 
         # Plot instability
         title = f"Probability Stability for {pretty_names[model_name]} (Dim. Reduce)"
@@ -200,6 +210,12 @@ for model_name in models.keys():
         plot_roc_curves(ax, roc_curves, auc, title)
         plt.savefig(filename)
 
+        # Plot calibration curves
+        title = f"Calibration Curves for {pretty_names[model_name]} (Dim. Reduce)"
+        filename = f"figures/{model_name}_{reducer_name}_calibration.png"
+        fig, ax = plt.subplots(1,1)
+        plot_calibration_curves(ax, calibration_curves, title)
+        plt.savefig(filename)  
 
 #########################################
 
