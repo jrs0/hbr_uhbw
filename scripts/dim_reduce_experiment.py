@@ -163,7 +163,6 @@ for model_name in models.keys():
     roc_curves = manual_results[model_name]["roc_curves"]
     auc = manual_results[model_name]["auc"]
 
-
     # Plot instability
     title = f"Probability Stability for {pretty_names[model_name]} (Manual Codes)"
     filename = f"figures/{model_name}_stability_manual_codes.png"
@@ -175,34 +174,31 @@ for model_name in models.keys():
     title = f"ROC Curves for {pretty_names[model_name]} (Manual Codes)"
     filename = f"figures/{model_name}_roc_manual_codes.png"
     fig, ax = plt.subplots(1,1)
-    plot_roc_curves(ax, probs, test.y, title)
+    plot_roc_curves(ax, roc_curves, auc, title)
     plt.savefig(filename)    
 
     for reducer_name in reducers.keys():
 
         probs = reduce_results[model_name][reducer_name]["probs"]
+        roc_curves = manual_results[model_name]["roc_curves"]
+        auc = manual_results[model_name]["auc"]
 
         # Plot instability
         title = f"Probability Stability for {pretty_names[model_name]} (Dim. Reduce)"
         filename = f"figures/{model_name}_{reducer_name}_stability.png"
         fig, ax = plt.subplots(1,1)
-        
         plot_instability(ax, probs, test.y, title)
-        plt.savefig(filename)      
-        
+        plt.savefig(filename)
+            
+        # Plot ROC curves
+        title = f"ROC Curves for {pretty_names[model_name]} (Dim. Reduce)"
+        filename = f"figures/{model_name}_{reducer_name}_roc.png"
+        fig, ax = plt.subplots(1,1)
+        plot_roc_curves(ax, roc_curves, auc, title)
+        plt.savefig(filename)
 
 
-model_name = "logistic_regression"
-reduction_name = ""
-
-
-
-
-
-
-plt.save_fig("figures")
-
-
+#########################################
 
 
 

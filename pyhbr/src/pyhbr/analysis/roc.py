@@ -86,7 +86,7 @@ def plot_roc_curves(ax, curves, auc, title = "ROC-stability Curves"):
     ax.axline([0, 0], [1, 1], color="k", linestyle="--")
     ax.legend(
         [
-            f"Model (AUC = {auc[0]:.2f})",
+            f"Model (AUC = {auc.model_under_test_auc:.2f})",
             f"Bootstrapped models",
         ]
     )
