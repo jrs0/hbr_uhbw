@@ -89,7 +89,7 @@ models = {
 
 # Reducer transformers to apply to the reduce data set before fitting a model
 reducers = {
-    #"umap": UMAP(metric="hamming", n_components=3, random_state=random_state, verbose=True),
+    "umap": UMAP(metric="hamming", n_components=3, random_state=random_state),
     "tsvd": TruncatedSVD(random_state=random_state, n_components=200),
     "grp":  GaussianRandomProjection(random_state=random_state, n_components=300)  
 }
@@ -106,6 +106,7 @@ reduce_results = {}
 for model_name, model in models.items():
     
     # Fit the model to the manual codes
+    print(f"Starting fit for model {model_name}")
     fitted_model = fit_model(model, train.X_manual, train.y, M, random_state)
     probs = predict_probabilities(fitted_model, test.X_manual)
     results = {
@@ -117,6 +118,7 @@ for model_name, model in models.items():
     # Fit the reducer + model to the reduce data
     reduce_results[model_name] = {}
     for reducer_name, reducer in reducers.items():
+        print(f"Starting dimension-reduce fit for model {model_name} and reducer {reducer_name}")
         reducer_pipeline = dim_reduce.make_reducer_pipeline(reducer, cols_to_reduce)
         reduce_model = Pipeline([("reducer", reducer_pipeline), ("model", model)])
         fitted_model = fit_model(reduce_model, train.X_reduce, train.y, M, random_state)
@@ -162,10 +164,11 @@ reduce_results = load_item("dim_reduce_reduce_results")
 
 for model_name in models.keys():
 
-    probs = manual_results[model_name]["probs"]
-    roc_curves = manual_results[model_name]["roc_curves"]
-    calibration_curves = manual_results[model_name]["calibration_curves"]
-    auc = manual_results[model_name]["auc"]
+    model_data = manual_results[model_name]
+    probs = model_data["probs"]
+    roc_curves =  model_data["roc_curves"]
+    calibration_curves = model_data["calibration_curves"]
+    auc = model_data["auc"]
 
     # Plot instability
     title = f"Probability Stability for {pretty_names[model_name]} (Manual Codes)"
@@ -191,10 +194,11 @@ for model_name in models.keys():
 
     for reducer_name in reducers.keys():
 
-        probs = reduce_results[model_name][reducer_name]["probs"]
-        roc_curves = reduce_results[model_name][reducer_name]["roc_curves"]
-        calibration_curves = reduce_results[model_name][reducer_name]["calibration_curves"]
-        auc = reduce_results[model_name][reducer_name]["auc"]
+        model_data = reduce_results[model_name][reducer_name]
+        probs = model_data["probs"]
+        roc_curves = model_data["roc_curves"]
+        calibration_curves = model_data["calibration_curves"]
+        auc = model_data["auc"]
 
         # Plot instability
         title = f"Probability Stability for {pretty_names[model_name]} (Dim. Reduce)"

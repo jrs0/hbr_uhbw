@@ -142,7 +142,7 @@ def make_logistic_regression(random_state: RandomState) -> Pipeline:
     """
 
     scaler = StandardScaler()
-    logreg = LogisticRegression(verbose=3, random_state=random_state)
+    logreg = LogisticRegression(random_state=random_state)
     return Pipeline([("scaler", scaler), ("model", logreg)])
 
 
@@ -153,7 +153,7 @@ def make_random_forest(random_state: RandomState) -> Pipeline:
         The unfitted pipeline for the random forest model
     """
     random_forest = RandomForestClassifier(
-        verbose=3, n_estimators=50, max_depth=10, random_state=random_state
+        n_estimators=100, max_depth=10, random_state=random_state
     )
     return Pipeline([("model", random_forest)])
 
