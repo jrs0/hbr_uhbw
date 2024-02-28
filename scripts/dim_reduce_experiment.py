@@ -17,6 +17,7 @@ from pyhbr.common import load_item, save_item
 import pyhbr.analysis.dim_reduce as dim_reduce
 from pyhbr.analysis.stability import fit_model, predict_probabilities, plot_instability
 from pyhbr.analysis.roc import get_roc_curves, get_auc, plot_roc_curves
+from pyhbr.analysis.calibration import get_calibration, plot_calibration_curves
 import matplotlib.pyplot as plt
 
 from umap import UMAP
@@ -126,19 +127,21 @@ for model_name, model in models.items():
         }
         reduce_results[model_name][reducer_name] = results        
 
-# Calculate ROC curves
+# Calculate ROC and calibration curves
 for model_name in models.keys():
 
     probs = manual_results[model_name]["probs"]
     manual_results[model_name]["roc_curves"] = get_roc_curves(probs, test.y)
     manual_results[model_name]["auc"] = get_auc(probs, test.y)
+    manual_results[model_name]["calibration_curves"] = get_calibration(probs, test.y, 10)
 
     for reducer_name in reducers.keys():
 
         probs = reduce_results[model_name][reducer_name]["probs"]
         reduce_results[model_name][reducer_name]["roc_curves"] = get_roc_curves(probs, test.y)
         reduce_results[model_name][reducer_name]["auc"] = get_auc(probs, test.y)
-
+        reduce_results[model_name][reducer_name]["roc_curves"] = get_calibration(probs, test.y, 10)
+        
 # SAVE RESULTS HERE
 save_item(manual_results, "dim_reduce_manual_results")
 save_item(reduce_results, "dim_reduce_reduce_results")
