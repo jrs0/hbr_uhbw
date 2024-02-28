@@ -11,7 +11,7 @@ import pickle
 from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
 from sqlalchemy.exc import NoSuchTableError
 from pandas import DataFrame, read_sql, to_datetime, read_pickle
-from git import Repo
+from git import Repo, InvalidGitRepositoryError
 
 
 def make_engine(
@@ -105,18 +105,21 @@ def get_data(
     stmt = query(engine, *args)
     return read_sql(stmt, engine)
 
-
 def current_commit() -> str:
     """Get current commit.
 
     Returns:
         Get the first 12 characters of the current commit,
             using the first repository found above the current
-            working directory.
+            working directory. If the working directory is not
+            in a git repository, return "nogit".
     """
-    repo = Repo(search_parent_directories=True)
-    sha = repo.head.object.hexsha[0:11]
-    return sha
+    try:
+        repo = Repo(search_parent_directories=True)
+        sha = repo.head.object.hexsha[0:11]
+        return sha
+    except InvalidGitRepositoryError:
+        return "nogit"
 
 
 def current_timestamp() -> int:
@@ -260,13 +263,19 @@ def requires_commit() -> bool:
     To make most effective use of the commit hash stored with a 
     save_item call, the current branch should be clean (all changes
     committed). Call this function to check.
+    
+    Returns False if there is no git repository.
 
     Returns:
-        True if the branch requires a commit
+        True if the working directory is in a git repository that requires
+            a commit; False otherwise.
     """
-    repo = Repo(search_parent_directories=True)
-    return repo.is_dirty(untracked_files=True)
-    
+    try:
+        repo = Repo(search_parent_directories=True)
+        return repo.is_dirty(untracked_files=True)
+    except InvalidGitRepositoryError:
+        # No need to commit if not repository
+        return False
 
 def save_item(item: Any, name: str, save_dir: str = "save_data/", enforce_clean_branch=True) -> None:
     """Save an item to a pickle file
