@@ -69,6 +69,8 @@ from sklearn.base import clone
 from sklearn.pipeline import Pipeline
 from sklearn.utils import resample
 
+from matplotlib.axes import Axes
+
 @dataclass
 class Resamples:
     """Store a training set along with M resamples of it
@@ -258,7 +260,7 @@ def get_average_instability(probs):
 
     return np.mean(smape_over_bootstraps)
 
-def plot_instability(ax, probs, y_test, title="Probability stability"):
+def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probability stability"):
     """
     This function plots a scatter graph of one point
     per value in the test set (row of probs), where the
@@ -283,8 +285,8 @@ def plot_instability(ax, probs, y_test, title="Probability stability"):
     c = []
     for i in range(num_rows):
         for j in range(1, num_cols):
-            x.append(probs[i, 0])  # Model-under-test
-            y.append(probs[i, j])  # Other bootstrapped models
+            x.append(probs.iloc[i, 0])  # Model-under-test
+            y.append(probs.iloc[i, j])  # Other bootstrapped models
             c.append(y_test[i]),  # What was the actual outcome
 
     colour_map = {0: "g", 1: "r"}

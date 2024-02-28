@@ -13,9 +13,10 @@
 # working directory. Ensure save_data is added to the gitignore.
 
 from numpy.random import RandomState
-from pyhbr.common import load_item
+from pyhbr.common import load_item, save_item
 import pyhbr.analysis.dim_reduce as dim_reduce
-from pyhbr.analysis.stability import fit_model, predict_probabilities
+from pyhbr.analysis.stability import fit_model, predict_probabilities, plot_instability
+import matplotlib.pyplot as plt
 
 from umap import UMAP
 
@@ -125,8 +126,17 @@ for model_name, model in models.items():
 
 
 
+# SAVE RESULTS HERE
+save_item(manual_results, "dim_reduce_manual_results")
+save_item(reduce_results, "dim_reduce_reduce_results")
+
+#============================================================
+
+# LOAD RESULTS HERE
 
 
+fig, ax = plt.subplots(1,1)
+plot_instability(ax, manual_results["logistic_regression"]["probs"], test.y)
 
 
 from sklearn.random_projection import GaussianRandomProjection

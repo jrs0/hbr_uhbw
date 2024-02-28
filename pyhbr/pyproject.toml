@@ -18,7 +18,8 @@ dependencies = [
   "pyodbc",
   "pyserde[yaml]",
   "gitpython",
-  "scikit-learn"
+  "scikit-learn",
+  "matplotlib"
 ]
 
 [project.urls]
