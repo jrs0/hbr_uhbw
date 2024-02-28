@@ -287,7 +287,7 @@ def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probabil
         for j in range(1, num_cols):
             x.append(probs.iloc[i, 0])  # Model-under-test
             y.append(probs.iloc[i, j])  # Other bootstrapped models
-            c.append(y_test[i]),  # What was the actual outcome
+            c.append(y_test.iloc[i]),  # What was the actual outcome
 
     colour_map = {0: "g", 1: "r"}
 

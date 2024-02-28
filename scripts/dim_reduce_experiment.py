@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 from umap import UMAP
 
+from sklearn.random_projection import GaussianRandomProjection
 from sklearn.decomposition import TruncatedSVD
 from sklearn.pipeline import Pipeline
 
@@ -81,14 +82,14 @@ train, test = dim_reduce.prepare_train_test(data_manual, data_reduce, random_sta
 # after applying a reducer
 models = {
     "logistic_regression": dim_reduce.make_logistic_regression(random_state),
-    #"random_forest": dim_reduce.make_random_forest(random_state)
+    "random_forest": dim_reduce.make_random_forest(random_state)
 }
 
 # Reducer transformers to apply to the reduce data set before fitting a model
 reducers = {
     #"umap": UMAP(metric="hamming", n_components=3, random_state=random_state, verbose=True),
     "tsvd": TruncatedSVD(random_state=random_state, n_components=200),
-    #"grp":  GaussianRandomProjection(random_state=random_state, n_components=300)  
+    "grp":  GaussianRandomProjection(random_state=random_state, n_components=300)  
 }
 
 # The columns to be reduced (the diagnosis and procedure columns)
@@ -132,14 +133,54 @@ save_item(reduce_results, "dim_reduce_reduce_results")
 
 #============================================================
 
+pretty_names = {
+    "logistic_regression": "Logistic Regression",
+    "tsvd": "Trunc. SVD",
+    "grp": "Gaussian Random Projections"   
+}
+
 # LOAD RESULTS HERE
+manual_results = load_item("dim_reduce_manual_results")
+reduce_results = load_item("dim_reduce_reduce_results")
 
 
-fig, ax = plt.subplots(1,1)
-plot_instability(ax, manual_results["logistic_regression"]["probs"], test.y)
+for model_name in models.keys():
+
+    # Plot instability
+    title = f"Probability Stability for {pretty_names[model_name]} (Manual Codes)"
+    filename = f"figures/{model_name}_manual_codes.png"
+    fig, ax = plt.subplots(1,1)
+    plot_instability(ax, reduce_results["logistic_regression"]["tsvd"]["probs"], test.y, title)
+    plt.savefig(filename)
 
 
-from sklearn.random_projection import GaussianRandomProjection
+
+    for reducer_name in reducers.keys():
+
+        # Plot instability
+        title = f"Probability Stability for {pretty_names[model_name]} (Dim. Reduce)"
+        filename = f"figures/{model_name}_{reducer_name}.png"
+        fig, ax = plt.subplots(1,1)
+        probs = reduce_results[model_name][reducer_name]["probs"]
+        plot_instability(ax, probs, test.y, title)
+        plt.savefig(filename)      
+        
+
+
+model_name = "logistic_regression"
+reduction_name = ""
+
+
+
+
+
+
+plt.save_fig("figures")
+
+
+
+
+
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier

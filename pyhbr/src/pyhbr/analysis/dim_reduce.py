@@ -153,7 +153,7 @@ def make_random_forest(random_state: RandomState) -> Pipeline:
         The unfitted pipeline for the random forest model
     """
     random_forest = RandomForestClassifier(
-        verbose=3, n_estimators=100, max_depth=10, random_state=random_state
+        verbose=3, n_estimators=50, max_depth=10, random_state=random_state
     )
     return Pipeline([("model", random_forest)])
 

@@ -21,3 +21,4 @@ site
 
 # Saved data (datasets, models, etc.)
 save_data/
+figures/
