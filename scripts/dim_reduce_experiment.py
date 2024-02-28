@@ -4,10 +4,13 @@
 # reduction of HES diagnosis/procedure codes can produce good
 # bleeding risk predictions, compared to using manually-chose
 # code groups.
-
-import os
-
-os.chdir("scripts/")
+#
+# You must install pyhbr to run this script (pip install pyhbr).
+#
+# NOTE:
+# This script writes raw data, model data, and other potentially
+# sensitive information to a folder called save_data in the 
+# working directory. Ensure save_data is added to the gitignore.
 
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
@@ -19,23 +22,26 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, roc_auc_score
 import numpy as np
-import save_datasets as ds
 import matplotlib.pyplot as plt
 import umap
-import umap.plot
 import pandas as pd
 import seaborn as sns
 
 sns.set(style="ticks")
 from functools import reduce
 from typing import Callable
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from numpy.random import RandomState
 from numpy import ndarray
 
-from code_group_counts import get_code_groups
-from pandas import Series
+from pyhbr.clinical_codes import codes_in_any_group, load_from_package
 
+
+diagnoses = load_from_package("icd10_dim_reduce.yaml")
+procedures = load_from_package("opcs4_dim_reduce.yaml")
+diagnoses_groups = codes_in_any_group(diagnoses)
+procedures_groups = codes_in_any_group(procedures)
+code_groups = pd.concat([diagnoses_groups, procedures_groups])
 
 def make_column_transformer(reducer, cols_to_reduce: list[str]) -> ColumnTransformer:
     """Make a wrapper that applies dimension reduction to a subset of columns.
@@ -460,9 +466,6 @@ def reduce_dimensions(fitted_pipe: Pipeline, data: DataFrame) -> DataFrame:
     after_reduce.columns = post_reduce_features(fitted_pipe)
     after_reduce.index = data.index
     return after_reduce
-
-
-code_groups = get_code_groups("../codes_files/icd10.yaml", "../codes_files/opcs4.yaml")
 
 
 def code_counts_in_rows(group: str, code_groups: DataFrame, data: DataFrame) -> Series:
