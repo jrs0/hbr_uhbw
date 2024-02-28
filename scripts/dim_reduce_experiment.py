@@ -161,7 +161,6 @@ pretty_names = {
 manual_results = load_item("dim_reduce_manual_results")
 reduce_results = load_item("dim_reduce_reduce_results")
 
-
 for model_name in models.keys():
 
     model_data = manual_results[model_name]
