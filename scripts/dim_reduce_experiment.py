@@ -9,8 +9,59 @@
 #
 # NOTE:
 # This script writes raw data, model data, and other potentially
-# sensitive information to a folder called save_data in the 
+# sensitive information to a folder called save_data in the
 # working directory. Ensure save_data is added to the gitignore.
+
+from numpy.random import RandomState
+from pyhbr.common import load_item
+import pyhbr.analysis.dim_reduce as dim_reduce
+
+# This random source controls all processes in this script
+random_state = RandomState(0)
+
+# Step 0. Load the data and generate the test/train split
+#
+# Load both datasets. These datasets have the following predictors
+# in common:
+#
+#   dem_age: patient age on admission (float64)
+#   dem_gender: patient gender (str, "0": unknown, "1": male, "2": female, "9": not specified)
+#   idx_pci_performed: True if PCI performed in the index episode
+#   idx_stemi: True if the index episode had MI which was a STEMI
+#   idx_nstemi: True if the index episode had MI which was an NSTEMI
+#
+#
+# The data_manual set has 16 other predictors, which are counts of manually
+# chosen code groups that occurred in the 12 months before the index event
+#
+# The data_reduce has 6332 feature columns, instead of the manually-chosen
+# predictor columns, which each correspond to a single ICD-10 or OPCS-4
+# code. These are the columns which will be dimension-reduced.
+#
+# There is a single outcome column "bleeding_al_ani_outcome", which is
+# common to both datasets.
+#
+data_manual = load_item("data_manual")
+data_reduce = load_item("data_umap")
+
+# Step 1. Train/test split
+#
+# This experiment will use a train/test split that agrees between data_manual
+# and data_reduce. 
+#
+# The training set will be further resampled to assess model stability. All model
+# tests will be performed on the test set, which will not be involved in model
+# fitting.
+
+train, test = dim_reduce.prepare_train_test(data_manual, data_reduce, random_state)
+
+
+
+
+
+
+
+
 
 from sklearn.decomposition import TruncatedSVD
 from sklearn.random_projection import GaussianRandomProjection
@@ -32,7 +83,7 @@ from pandas import DataFrame, Series
 from numpy.random import RandomState
 from numpy import ndarray
 
-from pyhbr.common import load_item
+
 from pyhbr.clinical_codes import codes_in_any_group, load_from_package
 
 
@@ -41,6 +92,7 @@ procedures = load_from_package("opcs4_dim_reduce.yaml")
 diagnoses_groups = codes_in_any_group(diagnoses)
 procedures_groups = codes_in_any_group(procedures)
 code_groups = pd.concat([diagnoses_groups, procedures_groups])
+
 
 def logistic_regression_coefficients(fitted_model: LogisticRegression) -> list[float]:
     """Return the list of logistic regression variable coefficients.
@@ -158,55 +210,6 @@ def post_reduce_features(fitted_pipe: Pipeline) -> list[str]:
     return all_vars
 
 
-def prepare_test_train(
-    data_manual: DataFrame, data_reduce: DataFrame, rng: RandomState
-) -> (DataFrame, DataFrame, DataFrame, DataFrame):
-    """Make the test/train datasets for manually-chosen groups and high-dimensional data
-
-    Args:
-        data_manual: The dataset with manually-chosen code groups
-        data_reduce: The high-dimensional dataset
-        rng: The random state to pick the test/train split
-
-    Returns:
-        A tuple (y_train, y_test, X0_train, X0_test, X1_train, X1_test),
-            where the index 0 refers to the manual code groups data and
-            1 refers to the high-dimensional data.
-    """
-
-    # Check number of rows match
-    if data_manual.shape[0] != data_reduce.shape[0]:
-        raise RuntimeError(
-            "The number of rows in data_manual and data_reduce do not match."
-        )
-
-    # First, get the outcomes (y) from the dataframe. This is the
-    # source of test/train outcome data, and is used for both the
-    # manual and UMAP models. Just interested in whether bleeding
-    # occurred (not number of occurrences) for this experiment
-    outcome_name = "bleeding_al_ani_outcome"
-    y = data_manual[outcome_name]
-
-    # Get the set of manual code predictors (X0) to use for the
-    # first logistic regression model (all the columns with names
-    # ending in "_before").
-    X0 = data_manual.drop(columns=[outcome_name])
-
-    # Make a random test/train split.
-    test_set_proportion = 0.25
-    X0_train, X0_test, y_train, y_test = train_test_split(
-        X0, y, test_size=test_set_proportion, random_state=rng
-    )
-
-    # Extract the test/train sets from the UMAP data based on
-    # the index of the training set for the manual codes
-    X1 = data_reduce.drop(columns=[outcome_name])
-    X1_train = X1.loc[X0_train.index]
-    X1_test = X1.loc[X0_test.index]
-
-    return y_train, y_test, X0_train, X0_test, X1_train, X1_test
-
-
 def predict_probabilities(fitted_pipe: Pipeline, X_test: DataFrame) -> ndarray:
     """Predict probabilities of a positive outcome for each row of the test set
 
@@ -257,18 +260,6 @@ def fit_model(
 
 # 0. Prepare the datasets
 
-# Load both datasets
-data_manual = load_item("data_manual")
-data_reduce = load_item("data_umap")
-
-# 1. Test/train split
-
-random_state = None  # RandomState(0)
-
-# Make the test/train split for both datasets
-y_train, y_test, X0_train, X0_test, X1_train, X1_test = prepare_test_train(
-    data_manual, data_reduce, random_state
-)
 
 # 2. Fit logistic regression in the training set using code groups
 
@@ -536,8 +527,8 @@ def plot_reduced_components(
     ax = fig.add_subplot(111, projection="3d")
 
     # Rename for simplicity (subsample for speed)
-    df = reduced_columns#.sample(frac=0.05)
-    
+    df = reduced_columns  # .sample(frac=0.05)
+
     for s in df.Group.unique():
         ax.scatter(
             df["Feature 1"][df["Group"] == s],
