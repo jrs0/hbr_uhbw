@@ -223,7 +223,7 @@ def pick_saved_file_interactive(name: str, save_dir: str) -> str | None:
     while True:
         try:
             raw_choice = input(f"Pick a dataset to load: [{0} - {num_datasets-1}] (type q then Enter to quit): ")
-            if raw_choice == "q":
+            if "exit" in raw_choice or "q" in raw_choice:
                 return None
             choice = int(raw_choice)
         except Exception:
