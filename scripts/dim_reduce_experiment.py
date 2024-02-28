@@ -12,14 +12,12 @@
 # sensitive information to a folder called save_data in the 
 # working directory. Ensure save_data is added to the gitignore.
 
-from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import TruncatedSVD
 from sklearn.random_projection import GaussianRandomProjection
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
 from sklearn.metrics import roc_curve, roc_auc_score
 import numpy as np
 import matplotlib.pyplot as plt
@@ -43,49 +41,6 @@ procedures = load_from_package("opcs4_dim_reduce.yaml")
 diagnoses_groups = codes_in_any_group(diagnoses)
 procedures_groups = codes_in_any_group(procedures)
 code_groups = pd.concat([diagnoses_groups, procedures_groups])
-
-def make_column_transformer(reducer, cols_to_reduce: list[str]) -> ColumnTransformer:
-    """Make a wrapper that applies dimension reduction to a subset of columns.
-
-    Args:
-        reducer: The dimension reduction model to use for reduction
-        cols_to_reduce: The list of column names to reduce
-
-    Returns:
-        The column transformer that applies the dimension reducer
-            to the columns listed.
-    """
-    return ColumnTransformer(
-        [("reducer", reducer, cols_to_reduce)],
-        remainder="passthrough",
-        verbose_feature_names_out=True,
-    )
-
-
-def make_pipe(model: list, column_transformer: ColumnTransformer = None) -> Pipeline:
-    """Make a model pipeline from the model part and dimension reduction
-
-    This function can be used to make the pipeline with no dimension
-    (pass None to reducer). Otherwise, pass the reducer which will reduce
-    a subset of the columns before fitting the model.
-
-    Args:
-        model: A list of model fitting steps that should be applied
-            after the (optional) dimension reduction.
-        column_transformer: If non-None, this reduction (which applies only to the
-            subset of columns listed in the ColumnTransformer -- other
-            columns are passed-through)
-
-    Returns:
-        A scikit-learn pipeline that can be fitted to training data.
-    """
-    if column_transformer is not None:
-        reducer_part = [("column_transformer", column_transformer)]
-        pipe = Pipeline(reducer_part + model)
-    else:
-        pipe = Pipeline(model)
-    return pipe
-
 
 def logistic_regression_coefficients(fitted_model: LogisticRegression) -> list[float]:
     """Return the list of logistic regression variable coefficients.
