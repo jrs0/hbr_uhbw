@@ -58,16 +58,16 @@ model M0 and Mn on one graph). Any other accuracy metric of interest
 can be calculated from this information (i.e. for step 4 above).
 """
 
-from sklearn.base import clone
-from typing import Callable
-from sklearn.pipeline import Pipeline
+import warnings
+from dataclasses import dataclass
+
 import numpy as np
 from numpy.random import RandomState
-from sklearn.utils import resample
-import warnings
-import pandas as pd
 from pandas import DataFrame, Series
-from dataclasses import dataclass
+
+from sklearn.base import clone
+from sklearn.pipeline import Pipeline
+from sklearn.utils import resample
 
 @dataclass
 class Resamples:
@@ -119,6 +119,15 @@ class FittedModel:
     """
     M0: Pipeline
     Mm: list[Pipeline]
+    
+    def flatten(self) -> list[Pipeline]:
+        """Get a flat list of all the models
+
+        Returns:
+            The list of fitted models, with M0 at the front
+        """
+        return [self.M0] + self.Mm    
+    
 
 def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: RandomState) -> FittedModel:
     """Fit a model to a training set and resamples of the training set.
@@ -171,8 +180,9 @@ def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: 
 
     return FittedModel(M0, Mm)
 
-def predict_bootstrapped_proba(M0, Mn, X_test):
-    """
+def predict_probabilities(fitted_model: FittedModel, X_test: DataFrame) -> DataFrame:
+    """Predict outcome probabilities using the fitted models on the test set
+    
     Aggregating function which finds the predicted probability
     from the model-under-test M0 and all the bootstrapped models
     Mn on each sample of the training set features X_test. The
@@ -183,15 +193,28 @@ def predict_bootstrapped_proba(M0, Mn, X_test):
 
     Note: the numbers in the matrix are the probabilities of 1 in the
     test set y_test.
-
-    Testing: not yet tested
+    
+    Args:
+        fitted_model: The model fitted on the training set and resamples
+    
+    Returns:
+        An table of probabilities of the positive outcome in the class,
+            where each column comes from a different model. Column zero 
+            corresponds to the training set, and the other columns are
+            from the resamples. The index for the DataFrame is the same
+            as X_test
     """
     columns = []
-    for m, M in enumerate([M0] + Mn):
+    for m, M in enumerate(fitted_model.flatten()):
         print(f"Predicting test-set probabilities {m}")
-        columns.append(M.model().predict_proba(X_test)[:, 1])
+        columns.append(M.predict_proba(X_test)[:, 1])
 
-    return np.column_stack(columns)
+    raw_probs = np.column_stack(columns)
+
+    df = DataFrame(raw_probs)
+    df.columns = [f"prob_M{m}" for m in range(len(fitted_model.Mm) + 1)]
+    df.index = X_test.index
+    return df
 
 def smape(A, F):
     terms = []

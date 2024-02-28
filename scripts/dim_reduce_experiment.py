@@ -15,7 +15,12 @@
 from numpy.random import RandomState
 from pyhbr.common import load_item
 import pyhbr.analysis.dim_reduce as dim_reduce
-from pyhbr.analysis.stability import fit_model
+from pyhbr.analysis.stability import fit_model, predict_probabilities
+
+from umap import UMAP
+
+from sklearn.decomposition import TruncatedSVD
+from sklearn.pipeline import Pipeline
 
 # This random source controls all processes in this script
 random_state = RandomState(0)
@@ -56,36 +61,74 @@ data_reduce = load_item("data_umap")
 
 train, test = dim_reduce.prepare_train_test(data_manual, data_reduce, random_state)
 
-# Step 2. Fit the manual-codes model
+# Step 2. Fit the models
+#
+# The experiment tests a set of models 
+#
+#   * Logistic regression
+#   * Random Forest
+# 
+# Each model type T is tested on the manual_codes set (the baseline), and then
+# on the reduce training set with the following dimension reduction methods:
+#
+#   * UMAP
+#   * Truncated Singular Value Decomposition (like PCA, but suitable for large sparse matrices)
+#   * Gaussian random projects
+#
 
-# Dimension reduction
-#reducer_1 = 
+# Models to apply directly to manual codes, or apply to the reduce data set
+# after applying a reducer
+models = {
+    "logistic_regression": dim_reduce.make_logistic_regression(random_state),
+    #"random_forest": dim_reduce.make_random_forest(random_state)
+}
 
-# Models
-model_1 = dim_reduce.make_logistic_regression(random_state)
-#model_2 = dim_reduce.make_random_forest(random_state)
-#model_3 = ...
+# Reducer transformers to apply to the reduce data set before fitting a model
+reducers = {
+    #"umap": UMAP(metric="hamming", n_components=3, random_state=random_state, verbose=True),
+    "tsvd": TruncatedSVD(random_state=random_state, n_components=200),
+    #"grp":  GaussianRandomProjection(random_state=random_state, n_components=300)  
+}
+
+# The columns to be reduced (the diagnosis and procedure columns)
+cols_to_reduce = [c for c in train.X_reduce.columns if ("diag" in c) or ("proc" in c)]
+
+# Number of times to resample the training set for stability analysis
+M = 10
+
+manual_results = {}
+reduce_results = {}
+
+for model_name, model in models.items():
+    
+    # Fit the model to the manual codes
+    fitted_model = fit_model(model, train.X_manual, train.y, M, random_state)
+    probs = predict_probabilities(fitted_model, test.X_manual)
+    results = {
+        "fitted_model": fitted_model,
+        "probs": probs
+    }
+    manual_results[model_name] = results
+    
+    # Fit the reducer + model to the reduce data
+    reduce_results[model_name] = {}
+    for reducer_name, reducer in reducers.items():
+        reducer_pipeline = dim_reduce.make_reducer_pipeline(reducer, cols_to_reduce)
+        reduce_model = Pipeline([("reducer", reducer_pipeline), ("model", model)])
+        fitted_model = fit_model(reduce_model, train.X_reduce, train.y, M, random_state)
+        probs = predict_probabilities(fitted_model, test.X_reduce)
+        results = {
+            "fitted_model": fitted_model,
+            "probs": probs
+        }
+        reduce_results[model_name][reducer_name] = results        
 
 
 
-# Manual-codes model
-model = dim_reduce.make_full_pipeline(dim_reduce.make_logistic_regression(random_state))
-
-# Reduce-dimension model
-#cols_to_reduce = [c for c in train..columns if ("diag" in c) or ("proc" in c)]
-#reducer = reducer_maker(random_state)
-#reducer_wrapper = make_column_transformer(reducer, cols_to_reduce)
-
-
-fitted_model = fit_model(model, train.X_manual, train.y, 10, random_state)
 
 
 
 
-
-
-
-from sklearn.decomposition import TruncatedSVD
 from sklearn.random_projection import GaussianRandomProjection
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -344,43 +387,6 @@ def single_fit(
         baseline_auc,
         reduce_auc,
     )
-
-
-def make_random_forest(random_state: RandomState) -> list:
-    """Make a new random forest model
-
-    Returns:
-        A list of tuples suitable for passing to the
-            scikit learn Pipeline.
-    """
-    random_forest = RandomForestClassifier(
-        verbose=3, n_estimators=100, max_depth=10, random_state=random_state
-    )
-    model = [("model", random_forest)]
-    return model
-
-
-def make_umap_reducer(random_state: RandomState) -> umap.UMAP:
-    """Make a UMAP reducer for use as dimension reduction.
-
-    Args:
-        random_state: Source of randomness
-
-    Returns:
-        umap.UMAP: The reducer object
-    """
-    # Dimension reduce model and columns to reduce
-    return umap.UMAP(
-        metric="hamming", n_components=3, random_state=random_state, verbose=True
-    )
-
-
-def make_tsvd_reducer(random_state: RandomState) -> TruncatedSVD:
-    return TruncatedSVD(random_state=random_state, n_components=200)
-
-
-def make_grp_reducer(random_state: RandomState) -> GaussianRandomProjection:
-    return GaussianRandomProjection(random_state=random_state, n_components=300)
 
 
 baseline_fit, reduce_fit, baseline_probs, reduce_probs, baseline_auc, reduce_auc = (
