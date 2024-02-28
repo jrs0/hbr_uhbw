@@ -7,7 +7,7 @@ models (for assessing ROC curve stability; see stability.py).
 import numpy as np
 from sklearn.metrics import roc_curve, roc_auc_score
 from pandas import DataFrame, Series
-
+from dataclasses import dataclass
 
 def get_roc_curves(probs: DataFrame, y_test: Series) -> list[DataFrame]:
     """Get the ROC curves for the fitted models
