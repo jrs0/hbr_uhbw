@@ -1,6 +1,7 @@
-from pyhbr.common import save_dataset, load_item
+from pyhbr.common import save_item, load_item
+import pandas as pd
 
-#df = pd.DataFrame({"a": [1,2,3], "b": [4,5,6]})
-#save_dataset(df, "test_data")
+df = pd.DataFrame({"a": [1,2,3], "b": [4,5,6]})
+save_item(df, "test_data")
 
-df = load_item("test_data")
+df2 = load_item("test_data", True)
