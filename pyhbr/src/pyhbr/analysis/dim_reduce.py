@@ -11,8 +11,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
-
 
 @dataclass
 class Dataset:
@@ -153,6 +153,18 @@ def make_random_forest(random_state: RandomState) -> Pipeline:
         The unfitted pipeline for the random forest model
     """
     random_forest = RandomForestClassifier(
+        n_estimators=100, max_depth=10, random_state=random_state
+    )
+    return Pipeline([("model", random_forest)])
+
+
+def make_grad_boost(random_state: RandomState) -> Pipeline:
+    """Make a new gradient boosting classifier
+
+    Returns:
+        The unfitted pipeline for the gradient boosting classifier
+    """
+    random_forest = GradientBoostingClassifier(
         n_estimators=100, max_depth=10, random_state=random_state
     )
     return Pipeline([("model", random_forest)])

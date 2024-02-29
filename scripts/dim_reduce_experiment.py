@@ -12,6 +12,7 @@
 # sensitive information to a folder called save_data in the
 # working directory. Ensure save_data is added to the gitignore.
 
+import pandas as pd
 from numpy.random import RandomState
 from pyhbr.common import load_item, save_item
 import pyhbr.analysis.dim_reduce as dim_reduce
@@ -84,7 +85,8 @@ train, test = dim_reduce.prepare_train_test(data_manual, data_reduce, random_sta
 # after applying a reducer
 models = {
     "logistic_regression": dim_reduce.make_logistic_regression(random_state),
-    "random_forest": dim_reduce.make_random_forest(random_state)
+    "random_forest": dim_reduce.make_random_forest(random_state),
+    #"grad_boost": dim_reduce.make_grad_boost(random_state)
 }
 
 # Reducer transformers to apply to the reduce data set before fitting a model
@@ -158,6 +160,11 @@ for model_name in models.keys():
         main_model = reduce_results[model_name][reducer_name]["fitted_model"].M0
         reduce_results[model_name][reducer_name]["fitted_model"] = main_model
         
+
+# Load old data to merge the new data into the same save file
+manual_results_old = load_item("dim_reduce_manual_results")
+reduce_results_old = load_item("dim_reduce_reduce_results")
+
         
 # SAVE RESULTS HERE
 save_item(manual_results, "dim_reduce_manual_results")
@@ -169,13 +176,15 @@ pretty_names = {
     "logistic_regression": "Logistic Regression",
     "random_forest": "Random Forest",
     "tsvd": "Trunc. SVD",
-    "grp": "Gaussian Random Projections"   
+    "grp": "Gaussian Random Projections",
+    "umap": "UMAP"
 }
 
 # LOAD RESULTS HERE
 manual_results = load_item("dim_reduce_manual_results")
 reduce_results = load_item("dim_reduce_reduce_results")
 
+# Save all the figures
 for model_name in models.keys():
 
     model_data = manual_results[model_name]
@@ -235,15 +244,37 @@ for model_name in models.keys():
         plot_calibration_curves(ax, calibration_curves, title)
         plt.savefig(filename)  
 
+# Print the ROC AUC of all models combinations
+model = [] # What model is used
+reducer = [] # What reducer is used
+data = [] # What dataset is used (manual codes/all codes)
+auc = []
+for model_name in models.keys():
+    
+    # Store manual codes data
+    model_data = manual_results[model_name]
+    auc_data = model_data["auc"]
+    model.append(pretty_names[model_name])
+    reducer.append("None")
+    data.append("Manual codes")
+    auc.append(auc_data.model_under_test_auc)
+    
+    # Store all the dimension reduction data
+    for reducer_name in reducers.keys():
+        
+        model_data = reduce_results[model_name][reducer_name]
+        auc_data = model_data["auc"]
+        model.append(pretty_names[model_name])
+        reducer.append(pretty_names[reducer_name])
+        data.append("All codes")
+        auc.append(auc_data.model_under_test_auc)
+
+summary = pd.DataFrame({"Model": model, "Reducer": reducer, "Dataset": data, "AUC": auc})
+
+
+
 #########################################
 
-
-
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import roc_curve, roc_auc_score
 import numpy as np
 import matplotlib.pyplot as plt
 import umap
