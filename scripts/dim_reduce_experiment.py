@@ -271,7 +271,27 @@ for model_name in models.keys():
 
 summary = pd.DataFrame({"Model": model, "Reducer": reducer, "Dataset": data, "AUC": auc})
 
+from importlib import reload
+import pyhbr.analysis.calibration as cal
+reload(cal)
 
+model_name = "random_forest"
+reducer_name = "umap"
+manual_model_data = manual_results[model_name]
+reduce_model_data = reduce_results[model_name][reducer_name]
+manual_calibration_curves = manual_model_data["calibration_curves"]
+reduce_calibration_curves = reduce_model_data["calibration_curves"]
+
+fig, ax = plt.subplots(1, 1)
+cal.plot_calibration_curves(ax, manual_calibration_curves, "b", "Manual codes", "")
+cal.plot_calibration_curves(ax, reduce_calibration_curves, "r", "Dim. reduced", "Calibration of Random Forest: Manual Codes vs. UMAP")
+ax.axline([0, 0], [1, 1], color="k", linestyle="--")
+
+handles, labels = ax.get_legend_handles_labels()
+legend_list = [handles[0], handles[1], handles[11], handles[12]]
+ax.legend(legend_list, ["Manual Codes", "Stability Resamples", "Dimension Reduction", "Stability Resamples"])
+
+plt.show()
 
 #########################################
 
