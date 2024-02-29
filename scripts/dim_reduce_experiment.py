@@ -91,7 +91,7 @@ models = {
 
 # Reducer transformers to apply to the reduce data set before fitting a model
 reducers = {
-    "umap": UMAP(metric="hamming", n_components=3, random_state=random_state),
+    "umap": UMAP(metric="hamming", n_components=3, random_state=random_state, verbose=3),
     "tsvd": TruncatedSVD(random_state=random_state, n_components=200),
     "grp":  GaussianRandomProjection(random_state=random_state, n_components=300)  
 }
@@ -293,6 +293,12 @@ ax.legend(legend_list, ["Manual Codes", "Stability Resamples", "Dimension Reduct
 
 plt.show()
 
+# To run UMAP manually to plot the distribution of code groups
+reducer_pipeline = dim_reduce.make_reducer_pipeline(reducers["umap"], cols_to_reduce)
+reduce_fit = reducer_pipeline.fit(train.X_reduce, train.y)
+after_reduce = reduce_dimensions(reduce_fit, train.X_reduce)
+plot_reduced_components(train.X_reduce, after_reduce, groups_map)
+
 #########################################
 
 import numpy as np
@@ -308,6 +314,7 @@ from pandas import DataFrame, Series
 from numpy.random import RandomState
 from numpy import ndarray
 
+from sklearn.linear_model import LogisticRegression
 
 from pyhbr.clinical_codes import codes_in_any_group, load_from_package
 
@@ -629,7 +636,7 @@ def get_most_common_group(
         dfs.append(code_counts)
 
     full = reduce(lambda left, right: pd.merge(left, right, on="idx_episode_id"), dfs)
-    full["None"] = 0.1  # trick to make idxmax identify where a row has no code
+    full["Other"] = 0.1  # trick to make idxmax identify where a row has no code
     most_common = full.astype(float).idxmax(axis=1)
     return most_common
 
@@ -713,7 +720,8 @@ def plot_reduced_components(
     ax.set_xlabel("Feature 1")
     ax.set_ylabel("Feature 2")
     ax.set_zlabel("Feature 3")
-    ax.legend()
+    ax.legend(title="Superimposed Manual Code Group", ncol=2)
+    ax.set_title("UMAP Unsupervised Grouping of Bleeding Risk Factors in ACS Patients")
     plt.show()
 
 
