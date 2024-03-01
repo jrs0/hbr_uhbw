@@ -19,8 +19,12 @@ dependencies = [
   "pyserde[yaml]",
   "gitpython",
   "scikit-learn",
-  "matplotlib"
+  "matplotlib",
+  "pyqt6"
 ]
+
+[project.gui-scripts]
+codes-editor = "pyhbr.clinical_codes.codes_editor.codes_editor:run_app"
 
 [project.urls]
 Homepage = "https://github.com/jrs0/hbr_uhbw"
