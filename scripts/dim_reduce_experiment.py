@@ -611,6 +611,11 @@ def code_counts_in_rows(group: str, code_groups: DataFrame, data: DataFrame) -> 
     code_counts = data.filter(regex=group_regex).sum(axis=1)
     return code_counts
 
+# Count the average number of codes in each row (cut to first 10,000
+# to speed up the calculation)
+only_codes = data_reduce.filter(regex="diag|proc")
+total_codes_count = only_codes.head(10000).sum(axis=1).mean()
+
 
 def get_most_common_group(
     groups_map: dict, code_groups: DataFrame, data: DataFrame
