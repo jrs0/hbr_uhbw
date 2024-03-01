@@ -66,3 +66,12 @@ The following are some tips for building statements using the `CheckedTable` obj
 ## Saving Results
 
 TODO write me-- about save_item/load_item.
+
+## Clinical Codes
+
+When processing Hospital Episode Statistics containing ICD-10 and OPCS-4 codes, it is useful to be able to create and maintain groups of codes corresponding to particular diagnoses and procedures.
+
+PyHBR contains a program called `codes_editor`, which you can run from the console after installing the package, which creates and maintains lists of codes.
+
+
+
