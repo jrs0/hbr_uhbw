@@ -69,9 +69,31 @@ TODO write me-- about save_item/load_item.
 
 ## Clinical Codes
 
-When processing Hospital Episode Statistics containing ICD-10 and OPCS-4 codes, it is useful to be able to create and maintain groups of codes corresponding to particular diagnoses and procedures.
+PyHBR has functions for creating and using lists of ICD-10 and OPCS-4 codes. A prototype version of the graphical program to create the code lists was written in Tauri [here](https://github.com/jrs0/hbr_models). However, it is simpler and more portable to have the codes editor bundled in this python package, and written in python.
 
-PyHBR contains a program called `codes_editor`, which you can run from the console after installing the package, which creates and maintains lists of codes.
+Users should be able to do the following things with the codes editor GUI:
+
+* Open the GUI program, and select a blank ICD-10 or OPCS-4 codes tree to begin creating code groups.
+* Create new code groups starting from the blank template.
+* Search for strings within the ICD-10/OPCS-4 descriptions to make creation of groups easier.
+* Save the resulting codes file to a working directory.
+* Open and edit a previously saved codes file from a working directory.
+
+Once the groups have been defined, the user should be able to perform the following actions with the code groups files:
+
+* Import codes files from the package (i.e. predefined code groups).
+* Import codes files (containing custom groups) from a working directory.
+* Extract the code groups, and show which codes are in which groups.
+* Use the code groups in analysis (i.e. get a Pandas DataFrame showing which codes are in which groups)
+
+Multiple code groups are stored in a single file, which means that only two codes files are necessary: `icd10-yaml` and `opcs4.yaml`. There is no limit to the number of code groups.
+
+Previously implemented functionality to check whether a clinical code is valid will not be implemented here, because sufficiently performant code cannot be written in pure python (and this package is intended to contain only pure Python to maximise portability).
+
+Instead, all codes are converted to a standard "normal form" where upper-case letters are replaced with lower-case, and dots/whitespace is removed. Codes can then be compared, and most codes will match under this condition. (Codes that will not match include those with suffixes, such as dagger or asterix, or codes that contain further qualifying suffixes that are not present in the codes tree.).
+
+
+
 
 
 
