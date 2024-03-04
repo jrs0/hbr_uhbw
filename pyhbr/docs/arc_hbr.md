@@ -47,3 +47,8 @@ A complication with this process is that episodes sometimes overlap (i.e. the st
 ### Identify Index Events
 
 Inclusion criteria for calculation of the ARC HBR score is having a hospital visit (spell) where the first episode of the spell contains an ACS diagnosis in the primary position, or a PCI procedure in any position.
+
+The table is indexed by the episode ID, and contains flag columns `acs_index` for `pci_index` for which inclusion condition is satisfied.
+
+### Calculating the Score
+

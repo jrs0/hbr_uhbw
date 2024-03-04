@@ -11,6 +11,7 @@ from pyhbr.clinical_codes import (
 )
 from pyhbr.common import get_data
 from pyhbr.data_source import hic
+from datetime import date, timedelta
 
 
 def filter_to_groups(
@@ -377,9 +378,7 @@ def link_to_episodes(
     # being associated with more than one episode. Remove any
     # duplicates by associating only with the earliest episode.
     deduplicated = (
-        overlapping_episodes.sort_values("episode_start")
-        .groupby("item_id")
-        .head(1)
+        overlapping_episodes.sort_values("episode_start").groupby("item_id").head(1)
     )
 
     # Keep episode_id, drop other episodes/unnecessary columns
@@ -406,7 +405,7 @@ def get_prescriptions(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
             `patient_id`, `episode_id`, `episode_start` and `episode_end`.
 
     Returns:
-        The table of prescriptions, including the prescription name, 
+        The table of prescriptions, including the prescription name,
             prescription group (oac or nsaid), frequency (in doses per day),
             and link to the associated episode.
     """
@@ -436,3 +435,65 @@ def get_lab_results(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
     """
     lab_results = get_unlinked_lab_results(engine)
     return link_to_episodes(lab_results, episodes, "sample_date")
+
+
+def get_episodes(engine: Engine, start_date: date, end_date: date) -> pd.DataFrame:
+    """Get the table of episodes
+
+    Args:
+        engine: The connection to the database
+        start_date: The start date (inclusive) for returned episodes
+        end_date:  The end date (inclusive) for returned episodes
+
+    Returns:
+        The episode date, indexed by episode_id
+    """
+    df = get_data(engine, hic.episodes_query, start_date, end_date)
+    return df.set_index("episode_id", drop=True)
+
+
+def get_demographics(engine: Engine) -> pd.DataFrame:
+    """Get patient demographic information
+
+    In the HIC data, only the birth year is stored. This
+    is converted to a datetime by adding 182 days (roughly
+    half a year), in order to make an unbiased estimate of
+    the true date of birth. Dates will come out as first/second
+    of July.
+
+    Gender is encoded using the NHS data dictionary values, which
+    is mapped to a category column in the table. (Note that initial
+    values are strings, not integers.)
+
+    * "0": Not known. Mapped to "unknown"
+    * "1": Male: Mapped to "male"
+    * "2": Female. Mapped to "female"
+    * "9": Not specified. Mapped to "unknown".
+
+    Not mapping 0/9 to NA in case either is related to non-binary
+    genders (i.e. the results should not be excluded).
+
+    Args:
+        engine: The connection to the database
+
+    Returns:
+        A table indexed by patient_id, containing gender, birth
+            year, and death_date (if applicable).
+
+    """
+    df = get_data(engine, hic.demographics_query)
+    df.set_index("patient_id", drop=True, inplace=True)
+
+    # Estimate date of birth by using middle of birth year
+    df["year_of_birth"] = pd.to_datetime(df["year_of_birth"], format="%Y") + timedelta(
+        days=182
+    )
+
+    # Convert gender to categories (note that 
+    df["gender"] = df["gender"].replace("9", "0")
+    df["gender"] = df["gender"].astype("category")
+    df["gender"] = df["gender"].cat.rename_categories(
+        {"0": "unknown", "1": "male", "2": "female"}
+    )
+
+    return df
