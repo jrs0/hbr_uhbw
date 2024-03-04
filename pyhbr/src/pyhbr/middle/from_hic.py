@@ -353,13 +353,16 @@ def link_to_episodes(
             `episode_start` and `episode_end`.
 
     Returns:
-        The items table with the extra column `episode_id`.
+        The items table with the index `episode_id`.
     """
 
     # Before linking to episodes, add an item ID. This is to
     # remove duplicated items in the last step of linking,
     # due ot overlapping episode time windows.
     items["item_id"] = range(items.shape[0])
+
+    # Move the episode_id to a column instead of the index
+    episodes.reset_index(inplace=True)
 
     # Join together all items and episode information by patient. Use
     # a left join on items (assuming items is narrowed to the item types
@@ -385,7 +388,7 @@ def link_to_episodes(
     return (
         deduplicated.drop(columns=["item_id"])
         .drop(columns=[c for c in episodes.columns if c != "episode_id"])
-        .reset_index(drop=True)
+        .set_index("episode_id", drop=True)
     )
 
 
