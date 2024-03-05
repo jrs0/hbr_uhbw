@@ -87,14 +87,31 @@ def arc_hbr_age(has_age: DataFrame) -> Series:
 index_episodes["age"] = calculate_age(index_episodes, demographics)
 arc_hbr_score["age"] = arc_hbr_age(index_episodes)
 
-
 def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
-    pass
+    """Calculate the oral-anticoagulant ARC HBR criterion
 
-df = index_episodes.merge(prescriptions, how="left", on="episode_id")
-df[df["on_admission"] == True]
+    1.0 point if an one of the OACs "warfarin", "apixaban", 
+    "rivaroxaban", "edoxaban", "dabigatran", is present on
+    admission in the index episode.
+    
+    Note: The number of OAC medicines present on admission in the HIC
+    data is zero in a small sample. Needs checking.
+
+    Args:
+        index_episodes: Index `episode_id` is used to narrow prescriptions.
+        prescriptions: Contains `name` (of medicine0 and `on_admission` (bool).
+
+    Returns:
+        Series: The OAC ARC score for each index event.
+    """
+    df = index_episodes.merge(prescriptions, how="left", on="episode_id")
+    oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
+    oac_criterion = (df["name"].isin(oac_list) & df["on_admission"]).astype("float")
+    return Series(oac_criterion, index=index_episodes.index)
 
 ## OAC ARC HBR
-#arc_hbr_score["oac"] =
+arc_hbr_score["oac"] = arc_hbr_oac(index_episodes, prescriptions)
 
 
+
+arc_hbr_score

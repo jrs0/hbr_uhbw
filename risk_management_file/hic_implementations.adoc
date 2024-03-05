@@ -80,6 +80,8 @@ Presence of any of the following medications on admission (at the index ACS/PCI 
 * Warfarin
 * Apixaban, rivaroxaban, edoxaban, dabigatran
 
+#In a small sample of the HIC (2,379 index events), there are no OAC medicines on admission. There are 23 prescriptions of these drugs in total (presumably prescribed at index)#
+
 NOTE: Dose is not considered in this implementation of the ARC HBR score.
 
 == Chronic Kidney Disease
