@@ -277,3 +277,4 @@ def arc_hbr_tcp(has_index_platelets: DataFrame) -> Series:
         np.where(has_index_platelets["index_platelets"] < 100, 1.0, 0),
         index=has_index_platelets.index,
     )
+

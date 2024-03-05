@@ -53,6 +53,21 @@ index_episodes["index_platelets"] = arc_hbr.get_lowest_index_lab_result(
     index_episodes, lab_results, "platelets"
 )
 
+# Add patient_id to the codes, and prepare to join to index episodes
+codes_by_patient = codes.merge(
+    episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
+).rename(
+    columns={"episode_start": "other_episode_start", "episode_id": "other_episode_id"}
+)
+
+# Join index episodes to all codes
+all_other_codes = (
+    index_episodes[["patient_id", "episode_start"]]
+    .reset_index()
+    .merge(codes_by_patient, how="left", on="patient_id")
+    .set_index(["episode_id", "other_episode_id", "type", "position"])
+)
+
 
 # Calculate the ARC HBR score
 arc_hbr_score = pd.DataFrame()
