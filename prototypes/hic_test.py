@@ -45,6 +45,19 @@ index_episodes = arc_hbr.index_episodes(episodes, codes)
 arc_hbr_score = pd.DataFrame()
 
 
+def get_gender(index_episodes: DataFrame, demographics: DataFrame) -> Series:
+    """Get gender from the demographics table for each index event
+
+    Args:
+        index_episodes: Indexed by `episode_id` and having column `patient_id`
+        demographics: Having columns `patient_id` and `gender`.
+
+    Returns:
+        A series containing gender indexed by `episode_id`
+    """
+    return index_episodes.merge(demographics, how="left", on="patient_id")["gender"]
+
+
 def calculate_age(index_episodes: DataFrame, demographics: DataFrame) -> Series:
     """Calculate the patient age at index
 
@@ -87,6 +100,9 @@ def arc_hbr_age(has_age: DataFrame) -> Series:
 ## Age ARC HBR
 index_episodes["age"] = calculate_age(index_episodes, demographics)
 arc_hbr_score["age"] = arc_hbr_age(index_episodes)
+
+# Add gender to the index_episodes table
+index_episodes["gender"] = get_gender(index_episodes, demographics)
 
 
 def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
@@ -132,7 +148,7 @@ def get_lowest_index_lab_result(
 
     Returns:
         A series containing the minimum value of test_name in the index
-            episode. Contains NaN if test_name was not recorded in the 
+            episode. Contains NaN if test_name was not recorded in the
             index episode.
     """
     df = index_episodes.merge(lab_results, how="left", on="episode_id")
@@ -152,7 +168,7 @@ def get_lowest_index_lab_result(
 
 
 def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
-    """Calculation the ARC HBR chronic kidey disease (CKD) criterion
+    """Calculate the ARC HBR chronic kidney disease (CKD) criterion
 
     The ARC HBR CKD criterion is calculated based on the eGFR as
     follows:
@@ -168,7 +184,7 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
 
     Args:
         has_index_egfr: Dataframe having the column "index_egfr" (in units of mL/min)
-            with the eGFR measurement at index, or NaN which means no eGFR
+            with the lowest eGFR measurement at index, or NaN which means no eGFR
             measurement was taken on the index episode.
 
     Returns:
@@ -182,6 +198,22 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     # Using a high upper limit to catch any high eGFR values. In practice,
     # the highest value is 90 (which comes from the string ">90" in the database).
     return pd.cut(df, [0, 30, 60, 10000], right=False, labels=[1.0, 0.5, 0.0])
+
+
+def arc_hbr_anaemia(has_index_hb: DataFrame, demographics: DataFrame) -> Series:
+    """Calculate the ARC HBR anaemia (low Hb) criterion
+
+
+
+    Args:
+        has_index_hb: Dataframe having the column `index_hb` containing the
+            lowest Hb measurement at the index event, or NaN if no Hb measurement
+            was made.
+        demographics:
+
+    Returns:
+        A series containing the HBR score for the index episode.
+    """
 
 
 ## CKD ARC HBR
