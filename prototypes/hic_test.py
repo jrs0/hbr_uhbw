@@ -238,6 +238,24 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
     )
 
 
+def arc_hbr_tcp(has_index_platelets: DataFrame) -> Series:
+    """Calculate the ARC HBR thrombocytopenia (low platelet count) criterion
+
+    The score is 1.0 if platelet count < 100e9/L, otherwise it is 0.0.
+
+    Args:
+        has_index_platelets: Has column `index_platelets`, which is the worst-case
+            platelet count measurement seen in the index episode.
+
+    Returns:
+        Series containing the ARC score
+    """
+    return Series(
+        np.where(has_index_platelets["index_platelets"] < 100, 1.0, 0),
+        index=has_index_platelets.index,
+    )
+
+
 ## CKD ARC HBR
 index_episodes["index_egfr"] = get_lowest_index_lab_result(
     index_episodes, lab_results, "egfr"
@@ -249,3 +267,9 @@ index_episodes["index_hb"] = get_lowest_index_lab_result(
     index_episodes, lab_results, "hb"
 )
 arc_hbr_score["anaemia"] = arc_hbr_anaemia(index_episodes)
+
+## Thrombocytopenia ARC HBR
+index_episodes["index_platelets"] = get_lowest_index_lab_result(
+    index_episodes, lab_results, "platelets"
+)
+arc_hbr_score["tcp"] = arc_hbr_tcp(index_episodes)
