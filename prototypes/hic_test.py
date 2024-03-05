@@ -68,6 +68,7 @@ def calculate_age(index_episodes: DataFrame, demographics: DataFrame) -> Series:
     age_at_index.index = index_episodes.index
     return age_at_index
 
+
 def arc_hbr_age(has_age: DataFrame) -> Series:
     """Calculate the age ARC-HBR criterion
 
@@ -87,13 +88,14 @@ def arc_hbr_age(has_age: DataFrame) -> Series:
 index_episodes["age"] = calculate_age(index_episodes, demographics)
 arc_hbr_score["age"] = arc_hbr_age(index_episodes)
 
+
 def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     """Calculate the oral-anticoagulant ARC HBR criterion
 
-    1.0 point if an one of the OACs "warfarin", "apixaban", 
+    1.0 point if an one of the OACs "warfarin", "apixaban",
     "rivaroxaban", "edoxaban", "dabigatran", is present on
     admission in the index episode.
-    
+
     Note: The number of OAC medicines present on admission in the HIC
     data is zero in a small sample. Needs checking.
 
@@ -102,16 +104,65 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
         prescriptions: Contains `name` (of medicine0 and `on_admission` (bool).
 
     Returns:
-        Series: The OAC ARC score for each index event.
+        The OAC ARC score for each index event.
     """
     df = index_episodes.merge(prescriptions, how="left", on="episode_id")
     oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
     oac_criterion = (df["name"].isin(oac_list) & df["on_admission"]).astype("float")
     return Series(oac_criterion, index=index_episodes.index)
 
+
 ## OAC ARC HBR
 arc_hbr_score["oac"] = arc_hbr_oac(index_episodes, prescriptions)
 
 
+def get_egfr(index_episodes: DataFrame, lab_results: DataFrame) -> Series:
+    df = index_episodes.merge(lab_results, how="left", on="episode_id")
+    index_egfr = df[df["test_name"] == "egfr"]
+    min_index_egfr = index_egfr.groupby("episode_id").min("result")
 
-arc_hbr_score
+    # Some index episodes do not have an egfr measurement, so join
+    # to get all index episodes (NaN means no egfr measurement)
+    egfr_or_nan = pd.merge(
+        index_episodes, min_index_egfr["result"], how="left", on="episode_id"
+    )
+
+    return egfr_or_nan["result"].rename("egfr")
+
+
+def arc_hbr_ckd(has_egfr: DataFrame) -> Series:
+    """Calculation the ARC HBR chronic kidey disease (CKD) criterion
+
+    The ARC HBR CKD criterion is calculated based on the eGFR as
+    follows:
+
+    | eGFR                           | Score |
+    |--------------------------------|-------|
+    | eGFR < 30 mL/min               | 1.0   |
+    | 30 mL/min \<= eGFR < 60 mL/min | 0.5   |
+    | eGFR >= 60 mL/min              | 0.0   |
+
+    If the eGFR is NaN, set score to zero (TODO: fall back to ICD-10
+    codes in this case)
+
+    Args:
+        has_egfr: Dataframe having the column "egfr" (in units of mL/min)
+            with the eGFR measurement at index, or NaN which means no eGFR
+            measurement was taken on the index episode.
+
+    Returns:
+        A series containing the CKD ARC criterion, based on the eGFR at
+            index.
+    """
+
+    # Replace NaN values for now with 100 (meaning score 0.0)
+    df = has_egfr["egfr"].fillna(90)
+
+    # Using a high upper limit to catch any high eGFR values. In practice,
+    # the highest value is 90 (which comes from the string ">90" in the database).
+    return pd.cut(df, [0, 30, 60, 10000], right=False, labels=[1.0, 0.5, 0.0])
+
+## CKD ARC HBR
+index_episodes["egfr"] = get_egfr(index_episodes, lab_results)
+arc_hbr_score["ckd"] = arc_hbr_ckd(index_episodes)
+
