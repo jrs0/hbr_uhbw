@@ -2,7 +2,7 @@
 """
 
 import numpy as np
-from pandas import DataFrame, Series
+from pandas import DataFrame, Series, cut
 
 
 def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
@@ -47,8 +47,8 @@ def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
 
     # Join the diagnosis/procedure codes (inner join reduces to episodes which
     # have codes in any group, which is a superset of the index episodes)
-    first_episodes_with_codes = pd.merge(
-        first_episodes, codes, how="inner", on="episode_id"
+    first_episodes_with_codes = first_episodes.merge(
+        codes, how="inner", on="episode_id"
     )
 
     # ACS matches based on a primary diagnosis of ACS (this is to rule out
@@ -82,6 +82,7 @@ def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
     return index_episodes.merge(
         episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
     )
+
 
 def get_gender(index_episodes: DataFrame, demographics: DataFrame) -> Series:
     """Get gender from the demographics table for each index event
@@ -136,6 +137,7 @@ def arc_hbr_age(has_age: DataFrame) -> Series:
     """
     return Series(np.where(has_age["age"] > 75, 0.5, 0), index=has_age.index)
 
+
 def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     """Calculate the oral-anticoagulant ARC HBR criterion
 
@@ -157,6 +159,7 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
     oac_criterion = (df["name"].isin(oac_list) & df["on_admission"]).astype("float")
     return Series(oac_criterion, index=index_episodes.index)
+
 
 def get_lowest_index_lab_result(
     index_episodes: DataFrame, lab_results: DataFrame, test_name: str
@@ -186,11 +189,12 @@ def get_lowest_index_lab_result(
 
     # Some index episodes do not have an measurement, so join
     # to get all index episodes (NaN means no index measurement)
-    min_result_or_nan = pd.merge(
-        index_episodes, min_index_lab_result["result"], how="left", on="episode_id"
+    min_result_or_nan = index_episodes.merge(
+        min_index_lab_result["result"], how="left", on="episode_id"
     )
 
     return min_result_or_nan["result"].rename(f"index_{test_name}")
+
 
 def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     """Calculate the ARC HBR chronic kidney disease (CKD) criterion
@@ -222,7 +226,7 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
 
     # Using a high upper limit to catch any high eGFR values. In practice,
     # the highest value is 90 (which comes from the string ">90" in the database).
-    return pd.cut(df, [0, 30, 60, 10000], right=False, labels=[1.0, 0.5, 0.0])
+    return cut(df, [0, 30, 60, 10000], right=False, labels=[1.0, 0.5, 0.0])
 
 
 def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
@@ -277,4 +281,3 @@ def arc_hbr_tcp(has_index_platelets: DataFrame) -> Series:
         np.where(has_index_platelets["index_platelets"] < 100, 1.0, 0),
         index=has_index_platelets.index,
     )
-
