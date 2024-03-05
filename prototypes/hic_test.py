@@ -4,7 +4,7 @@
 import datetime as dt
 import numpy as np
 
-from pyhbr.common import make_engine, get_data
+from pyhbr.common import make_engine
 from pyhbr.middle import from_hic
 from pyhbr.analysis import arc_hbr
 

@@ -361,13 +361,11 @@ def link_to_episodes(
     # due ot overlapping episode time windows.
     items["item_id"] = range(items.shape[0])
 
-    # Move the episode_id to a column instead of the index
-    episodes.reset_index(inplace=True)
-
     # Join together all items and episode information by patient. Use
     # a left join on items (assuming items is narrowed to the item types
-    # of interest) to keep the result smaller.
-    with_episodes = pd.merge(items, episodes, how="left", on="patient_id")
+    # of interest) to keep the result smaller. Reset the index to move
+    # episode_id to a column.
+    with_episodes = pd.merge(items, episodes.reset_index(), how="left", on="patient_id")
 
     # Thinking of each row as both an episode and a item, drop any
     # rows where the item date does not fall within the start
@@ -492,7 +490,7 @@ def get_demographics(engine: Engine) -> pd.DataFrame:
         days=182
     )
 
-    # Convert gender to categories (note that 
+    # Convert gender to categories (note that
     df["gender"] = df["gender"].replace("9", "0")
     df["gender"] = df["gender"].astype("category")
     df["gender"] = df["gender"].cat.rename_categories(
