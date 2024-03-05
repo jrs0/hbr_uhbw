@@ -55,7 +55,9 @@ def get_gender(index_episodes: DataFrame, demographics: DataFrame) -> Series:
     Returns:
         A series containing gender indexed by `episode_id`
     """
-    return index_episodes.merge(demographics, how="left", on="patient_id")["gender"]
+    gender = index_episodes.merge(demographics, how="left", on="patient_id")["gender"]
+    gender.index = index_episodes.index
+    return gender
 
 
 def calculate_age(index_episodes: DataFrame, demographics: DataFrame) -> Series:
@@ -200,20 +202,40 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     return pd.cut(df, [0, 30, 60, 10000], right=False, labels=[1.0, 0.5, 0.0])
 
 
-def arc_hbr_anaemia(has_index_hb: DataFrame, demographics: DataFrame) -> Series:
+def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
     """Calculate the ARC HBR anaemia (low Hb) criterion
 
-
+    Calculates anaemia based on the worst (lowest) index Hb measurement
+    and gender currently. Should be modified to take most recent Hb value
+    or clinical code.
 
     Args:
-        has_index_hb: Dataframe having the column `index_hb` containing the
-            lowest Hb measurement at the index event, or NaN if no Hb measurement
-            was made.
-        demographics:
+        has_index_hb_and_gender: Dataframe having the column `index_hb` containing the
+            lowest Hb measurement (g/dL) at the index event, or NaN if no Hb measurement
+            was made. Also contains `gender` (categorical with categories "male",
+            "female", and "unknown").
 
     Returns:
         A series containing the HBR score for the index episode.
     """
+
+    df = has_index_hb_and_gender
+
+    # Evaluated in order
+    arc_score_conditions = [
+        df["index_hb"] < 11.0,  # Major for any gender
+        df["index_hb"] < 11.9,  # Minor for any gender
+        (df["index_hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
+        df["index_hb"] >= 12.9,  # None for any gender
+    ]
+    arc_scores = [1.0, 0.5, 0.5, 0.0]
+
+    # Default is used to fill missing Hb score with 0.0 for now. TODO: replace with
+    # fall-back to recent Hb, or codes.
+    return Series(
+        np.select(arc_score_conditions, arc_scores, default=0.0),
+        index=df.index,
+    )
 
 
 ## CKD ARC HBR
@@ -226,3 +248,4 @@ arc_hbr_score["ckd"] = arc_hbr_ckd(index_episodes)
 index_episodes["index_hb"] = get_lowest_index_lab_result(
     index_episodes, lab_results, "hb"
 )
+arc_hbr_score["anaemia"] = arc_hbr_anaemia(index_episodes)

@@ -123,10 +123,10 @@ Use the first Hb measurement from the index presentation for the purposes of the
 [cols="1,1,1"]
 |===
 | Hb Level/(g/dL) | Male | Female
-| < 11.0         | 1    | 1
-| < 11.9         | 0.5  | 0.5
-| < 12.9         | 0.5  | 0
-| >= 12.9        | 0    | 0 
+| < 11.0          | 1    | 1
+| < 11.9          | 0.5  | 0.5
+| < 12.9          | 0.5  | 0
+| >= 12.9         | 0    | 0 
 |===
 
 If no Hb measurement is available in the patient history, fall back on ICD-10 codes:
