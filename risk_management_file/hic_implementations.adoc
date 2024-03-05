@@ -1,4 +1,4 @@
-# #Implementing Risk Scores on HIC Data#
+= #Implementing Risk Scores on HIC Data#
 
 This section describes implementations of the already-existing risk scores using data from the Hospital Information Collaborative (HIC) dataset, which is formed from finished consultant episode data, British Cardiovascular Intervention Society (BCIS) audit data from the BHI, and prescription information from the BHI.
 

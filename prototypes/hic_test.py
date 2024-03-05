@@ -9,6 +9,7 @@ from pyhbr.middle import from_hic
 from pyhbr.analysis import arc_hbr
 
 import importlib
+
 importlib.reload(arc_hbr)
 importlib.reload(from_hic)
 
@@ -41,14 +42,12 @@ index_episodes = arc_hbr.index_episodes(episodes, codes)
 arc_hbr_score = pd.DataFrame()
 
 
+def calculate_age(index_episodes: DataFrame, demographics: DataFrame) -> Series:
+    """Calculate the patient age at index
 
-def arc_hbr_age(index_episodes: DataFrame, demographics: DataFrame) -> Series:
-    """Calculate the age ARC-HBR criterion
-
-    Does not take account of the varying length of a year, so
-    the estimate of age from index start date and demographics is slightly
-    wrong. This is not important, because (in the HIC date), the date of 
-    birth could be out by 6 months (only birth year is specified).
+    The HIC data contains only year_of_birth, which is used here. In order
+    to make an unbiased estimate of the age, birthday is assumed to be
+    2nd july (halfway through the year).
 
     Args:
         index_episodes: Contains `episode_start` date and column `patient_id`,
@@ -56,19 +55,43 @@ def arc_hbr_age(index_episodes: DataFrame, demographics: DataFrame) -> Series:
         demographics: Contains `year_of_birth` date and index `patient_id`.
 
     Returns:
+        A series containing age, indexed by `episode_id`.
+    """
+    df = index_episodes.merge(demographics, how="left", on="patient_id")
+    age_offset = np.where(
+        (df["episode_start"].dt.month < 7) & (df["episode_start"].dt.day < 2), 1, 0
+    )
+    age_at_index = df["episode_start"].dt.year - df["year_of_birth"] - age_offset
+    age_at_index.index = index_episodes.index
+    return age_at_index
+
+def arc_hbr_age(has_age: DataFrame) -> Series:
+    """Calculate the age ARC-HBR criterion
+
+    Calculate the age ARC HBR criterion (0.5 points if > 75 at index, 0 otherwise.
+
+    Args:
+        has_age: Dataframe indexed by episode_id which has a column `age`
+
+    Returns:
         A series of values 0.5 (if age > 75 at index) or 0 otherwise, indexed
             by `episode_id`.
     """
-    df = index_episodes.merge(demographics, how="left", on="patient_id")
-    ns_in_year = 365 * 24 * 60 * 60 * 1e9
-    age_at_index = (df["episode_start"] - df["year_of_birth"]).astype("int64") / ns_in_year
-    return Series(np.where(age_at_index > 75, 0.5, 0), index=index_episodes.index)
+    return Series(np.where(has_age["age"] > 75, 0.5, 0), index=has_age.index)
+
 
 ## Age ARC HBR
-arc_hbr_score["age"] = arc_hbr_age(index_episodes, demographics)
+index_episodes["age"] = calculate_age(index_episodes, demographics)
+arc_hbr_score["age"] = arc_hbr_age(index_episodes)
 
 
-#arc_hbr_score["oac"] = 
+def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
+    pass
 
-index_episode
-demographics
+df = index_episodes.merge(prescriptions, how="left", on="episode_id")
+df[df["on_admission"] == True]
+
+## OAC ARC HBR
+#arc_hbr_score["oac"] =
+
+

@@ -36,6 +36,8 @@ Before identifying patients/index events, or calculating the score, some preproc
 
 4. For demographics, retain age and gender. This calculation may be postoned until after index events are calculated (for example, if the demographics table contains year of birth instead of age).
 
+NOTE: The `episodes`, `prescriptions`, and `lab_results` tables have `episode_id` as Pandas index. The `demographics` table uses `patient_id` as index. The `episodes` table contains `patient_id` as a column for linking to `demographics`.
+
 #### Link Laboratory Results and Prescriptions to Episodes
 
 In the HIC data, laboratory results and prescriptions do not contain an episode_id; instead, they contain a date/time (either a sample date for laboratory tests or an order date for prescriptions).
@@ -49,6 +51,8 @@ A complication with this process is that episodes sometimes overlap (i.e. the st
 Inclusion criteria for calculation of the ARC HBR score is having a hospital visit (spell) where the first episode of the spell contains an ACS diagnosis in the primary position, or a PCI procedure in any position.
 
 The table is indexed by the episode ID, and contains flag columns `acs_index` for `pci_index` for which inclusion condition is satisfied.
+
+NOTE: The `index_event` table is indexed by `episode_id`, and also contains the `patient_id` as a column.
 
 ### Calculating the Score
 

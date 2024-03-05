@@ -456,12 +456,6 @@ def get_episodes(engine: Engine, start_date: date, end_date: date) -> pd.DataFra
 def get_demographics(engine: Engine) -> pd.DataFrame:
     """Get patient demographic information
 
-    In the HIC data, only the birth year is stored. This
-    is converted to a datetime by adding 182 days (roughly
-    half a year), in order to make an unbiased estimate of
-    the true date of birth. Dates will come out as first/second
-    of July.
-
     Gender is encoded using the NHS data dictionary values, which
     is mapped to a category column in the table. (Note that initial
     values are strings, not integers.)
@@ -472,7 +466,7 @@ def get_demographics(engine: Engine) -> pd.DataFrame:
     * "9": Not specified. Mapped to "unknown".
 
     Not mapping 0/9 to NA in case either is related to non-binary
-    genders (i.e. the results should not be excluded).
+    genders (i.e. it contains information, rather than being a NULL field).
 
     Args:
         engine: The connection to the database
@@ -485,12 +479,7 @@ def get_demographics(engine: Engine) -> pd.DataFrame:
     df = get_data(engine, hic.demographics_query)
     df.set_index("patient_id", drop=True, inplace=True)
 
-    # Estimate date of birth by using middle of birth year
-    df["year_of_birth"] = pd.to_datetime(df["year_of_birth"], format="%Y") + timedelta(
-        days=182
-    )
-
-    # Convert gender to categories (note that
+    # Convert gender to categories
     df["gender"] = df["gender"].replace("9", "0")
     df["gender"] = df["gender"].astype("category")
     df["gender"] = df["gender"].cat.rename_categories(
