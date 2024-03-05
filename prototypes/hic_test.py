@@ -8,10 +8,13 @@ from pyhbr.common import make_engine
 from pyhbr.middle import from_hic
 from pyhbr.analysis import arc_hbr
 
+from pyhbr.data_source import hic
+
 import importlib
 
 importlib.reload(arc_hbr)
 importlib.reload(from_hic)
+importlib.reload(hic)
 
 import pandas as pd
 from pandas import DataFrame, Series

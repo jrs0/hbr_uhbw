@@ -275,8 +275,8 @@ def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
     df["name"] = df["name"].str.replace("indomethacin", "indometacin")
 
     # Replace admission medicine column with bool
-    on_admission_map = {"y": True, "n": False}
-    df["on_admission"] = df["on_medicine"].map(on_admission_map)
+    #on_admission_map = {"y": True, "n": False}
+    #df["on_admission"] = df["on_medicine"].map(on_admission_map)
 
     # Extra spaces are not typos.
     per_day = {
