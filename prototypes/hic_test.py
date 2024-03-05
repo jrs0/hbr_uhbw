@@ -116,21 +116,42 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
 arc_hbr_score["oac"] = arc_hbr_oac(index_episodes, prescriptions)
 
 
-def get_egfr(index_episodes: DataFrame, lab_results: DataFrame) -> Series:
-    df = index_episodes.merge(lab_results, how="left", on="episode_id")
-    index_egfr = df[df["test_name"] == "egfr"]
-    min_index_egfr = index_egfr.groupby("episode_id").min("result")
+def get_lowest_index_lab_result(
+    index_episodes: DataFrame, lab_results: DataFrame, test_name: str
+) -> Series:
+    """Get the lowest lab result associated to the index episode
 
-    # Some index episodes do not have an egfr measurement, so join
-    # to get all index episodes (NaN means no egfr measurement)
-    egfr_or_nan = pd.merge(
-        index_episodes, min_index_egfr["result"], how="left", on="episode_id"
+    Getting the lowest value corresponds to the worst severity for
+    measurements such as eGFR, Hb and platelet count.
+
+    Args:
+        index_episodes: Has an `episode_id` for filtering lab_results
+        lab_results: Has a `test_name` column matching the `test_name` argument,
+            and a `result` column for the numerical test result
+        test_name: Which lab measurement to get.
+
+    Returns:
+        A series containing the minimum value of test_name in the index
+            episode. Contains NaN if test_name was not recorded in the 
+            index episode.
+    """
+    df = index_episodes.merge(lab_results, how="left", on="episode_id")
+    index_lab_result = df[df["test_name"] == test_name]
+
+    # Pick the lowest result. For measurements such as platelet count,
+    # eGFR, and Hb, lower is more severe.
+    min_index_lab_result = index_lab_result.groupby("episode_id").min("result")
+
+    # Some index episodes do not have an measurement, so join
+    # to get all index episodes (NaN means no index measurement)
+    min_result_or_nan = pd.merge(
+        index_episodes, min_index_lab_result["result"], how="left", on="episode_id"
     )
 
-    return egfr_or_nan["result"].rename("egfr")
+    return min_result_or_nan["result"].rename(f"index_{test_name}")
 
 
-def arc_hbr_ckd(has_egfr: DataFrame) -> Series:
+def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     """Calculation the ARC HBR chronic kidey disease (CKD) criterion
 
     The ARC HBR CKD criterion is calculated based on the eGFR as
@@ -146,7 +167,7 @@ def arc_hbr_ckd(has_egfr: DataFrame) -> Series:
     codes in this case)
 
     Args:
-        has_egfr: Dataframe having the column "egfr" (in units of mL/min)
+        has_index_egfr: Dataframe having the column "index_egfr" (in units of mL/min)
             with the eGFR measurement at index, or NaN which means no eGFR
             measurement was taken on the index episode.
 
@@ -156,13 +177,20 @@ def arc_hbr_ckd(has_egfr: DataFrame) -> Series:
     """
 
     # Replace NaN values for now with 100 (meaning score 0.0)
-    df = has_egfr["egfr"].fillna(90)
+    df = has_index_egfr["index_egfr"].fillna(90)
 
     # Using a high upper limit to catch any high eGFR values. In practice,
     # the highest value is 90 (which comes from the string ">90" in the database).
     return pd.cut(df, [0, 30, 60, 10000], right=False, labels=[1.0, 0.5, 0.0])
 
+
 ## CKD ARC HBR
-index_episodes["egfr"] = get_egfr(index_episodes, lab_results)
+index_episodes["index_egfr"] = get_lowest_index_lab_result(
+    index_episodes, lab_results, "egfr"
+)
 arc_hbr_score["ckd"] = arc_hbr_ckd(index_episodes)
 
+## Anaemia ARC HBR
+index_episodes["index_hb"] = get_lowest_index_lab_result(
+    index_episodes, lab_results, "hb"
+)
