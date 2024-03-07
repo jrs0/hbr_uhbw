@@ -284,18 +284,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#basic-episode-code-data" class="md-nav__link">
+  <a href="#getting-clinical-code-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic Episode Code Data
+      Getting Clinical Code Data
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#codes" class="md-nav__link">
+  <a href="#codes-in-other-episodes-relative-to-a-base-episode" class="md-nav__link">
     <span class="md-ellipsis">
-      Codes
+      Codes in Other Episodes Relative to a Base Episode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#counting-codes-group-occurrences" class="md-nav__link">
+    <span class="md-ellipsis">
+      Counting Codes Group Occurrences
     </span>
   </a>
   
@@ -448,18 +457,27 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#basic-episode-code-data" class="md-nav__link">
+  <a href="#getting-clinical-code-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Basic Episode Code Data
+      Getting Clinical Code Data
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#codes" class="md-nav__link">
+  <a href="#codes-in-other-episodes-relative-to-a-base-episode" class="md-nav__link">
     <span class="md-ellipsis">
-      Codes
+      Codes in Other Episodes Relative to a Base Episode
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#counting-codes-group-occurrences" class="md-nav__link">
+    <span class="md-ellipsis">
+      Counting Codes Group Occurrences
     </span>
   </a>
   
@@ -572,7 +590,7 @@
 <h3 id="counting-codes">Counting Codes</h3>
 <p>Diagnosis and procedure codes can be grouped together and used as features for building models. One way to do this is to count the codes in a particular time window (for example, one year before an index event), and use that as a predictor for subsequent outcomes.</p>
 <p>This sections describes how raw episode data is converted into this counted form in PyHBR.</p>
-<h4 id="basic-episode-code-data">Basic Episode Code Data</h4>
+<h4 id="getting-clinical-code-data">Getting Clinical Code Data</h4>
 <p>Hospital episodes contain multiple diagnosis and procedure codes. The starting point for counting codes is using the <code>pyhbr.middle.*.get_clinical_codes</code> function, which returns a data frame with the following columns:</p>
 <ul>
 <li><code>episode_id</code>: Which episode the code was in</li>
@@ -768,7 +786,232 @@ diagnosis positions, and associated episode ID.</p>
   </div>
 
 </div></details>
-<h4 id="codes">Codes</h4>
+<h4 id="codes-in-other-episodes-relative-to-a-base-episode">Codes in Other Episodes Relative to a Base Episode</h4>
+<p>To count up codes that occur in a time window before or after a particular base episode, it is necessary to join together each base episode with all the other episodes for the same patient.</p>
+<p>To do this, three tables are needed:</p>
+<ul>
+<li><code>base_episodes</code>: A table of the base episodes of interest, containing <code>episode_id</code> as an index.</li>
+<li><code>episodes</code>: A table of episode information (all episodes), which is indexed by <code>episode_id</code> and contains <code>patient_id</code> and <code>episode_start</code> as columns.</li>
+<li><code>codes</code>: The table of diagnosis/procedure codes from the previous section, containing a column <code>episode_id</code> and other code data columns.</li>
+</ul>
+<p>A function which combines these into a table containing all codes for other episodes relative to a base episode is <code>pyhbr.clinical_codes.counting.get_all_other_codes</code>:</p>
+<details class="note">
+<summary>Function that gets data from other episodes relative to a base episode</summary>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h100 id="pyhbr.clinical_codes.counting.get_all_other_codes" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>          <code class="highlight language-python"><span class="n">get_all_other_codes</span><span class="p">(</span><span class="n">base_episodes</span><span class="p">,</span> <span class="n">episodes</span><span class="p">,</span> <span class="n">codes</span><span class="p">)</span></code>
+
+</h100>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>For each patient, get clinical codes in other episodes before/after the base</p>
+<p>This makes a table of base episodes along with all other episodes for a patient.
+Two columns <code>base_episode_id</code> and <code>other_episode_id</code> identify the two episodes
+for each row (they may be equal), and other information is stored such as the
+time of the base episode, the time to the other episode, and clinical code information
+for the other episode.</p>
+<p>This table is used as the basis for all processing involving counting codes before
+and after an episode.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>base_episodes</code></td>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Contains <code>episode_id</code> as an index.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>episodes</code></td>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Contains <code>episode_id</code> as an index, and <code>patient_id</code> and <code>episode_start</code> as columns</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>codes</code></td>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Contains <code>episode_id</code> and other code data as columns</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A table containing columns <code>base_episode_id</code>, <code>other_episode_id</code>,
+<code>base_episode_start</code>, <code>time_to_other_episode</code>, and code data columns
+for the other episode. Note that the base episode itself is included
+as an other episode.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>src\pyhbr\clinical_codes\counting.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span>
+<span class="normal"><a href="#__codelineno-0-16">16</a></span>
+<span class="normal"><a href="#__codelineno-0-17">17</a></span>
+<span class="normal"><a href="#__codelineno-0-18">18</a></span>
+<span class="normal"><a href="#__codelineno-0-19">19</a></span>
+<span class="normal"><a href="#__codelineno-0-20">20</a></span>
+<span class="normal"><a href="#__codelineno-0-21">21</a></span>
+<span class="normal"><a href="#__codelineno-0-22">22</a></span>
+<span class="normal"><a href="#__codelineno-0-23">23</a></span>
+<span class="normal"><a href="#__codelineno-0-24">24</a></span>
+<span class="normal"><a href="#__codelineno-0-25">25</a></span>
+<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+<span class="normal"><a href="#__codelineno-0-27">27</a></span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span>
+<span class="normal"><a href="#__codelineno-0-31">31</a></span>
+<span class="normal"><a href="#__codelineno-0-32">32</a></span>
+<span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span>
+<span class="normal"><a href="#__codelineno-0-38">38</a></span>
+<span class="normal"><a href="#__codelineno-0-39">39</a></span>
+<span class="normal"><a href="#__codelineno-0-40">40</a></span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span>
+<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span>
+<span class="normal"><a href="#__codelineno-0-47">47</a></span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span>
+<span class="normal"><a href="#__codelineno-0-51">51</a></span>
+<span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span>
+<span class="normal"><a href="#__codelineno-0-54">54</a></span>
+<span class="normal"><a href="#__codelineno-0-55">55</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="k">def</span> <span class="nf">get_all_other_codes</span><span class="p">(</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a>    <span class="n">base_episodes</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">episodes</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">codes</span><span class="p">:</span> <span class="n">DataFrame</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;For each patient, get clinical codes in other episodes before/after the base</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="sd">    This makes a table of base episodes along with all other episodes for a patient.</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Two columns `base_episode_id` and `other_episode_id` identify the two episodes</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="sd">    for each row (they may be equal), and other information is stored such as the</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    time of the base episode, the time to the other episode, and clinical code information</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    for the other episode.</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    This table is used as the basis for all processing involving counting codes before</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    and after an episode.</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">    Args:</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        base_episodes: Contains `episode_id` as an index.</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">        episodes: Contains `episode_id` as an index, and `patient_id` and `episode_start` as columns</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">        codes: Contains `episode_id` and other code data as columns</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    Returns:</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">        A table containing columns `base_episode_id`, `other_episode_id`,</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">            `base_episode_start`, `time_to_other_episode`, and code data columns</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">            for the other episode. Note that the base episode itself is included</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">            as an other episode.</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="c1"># Remove everything but the index episode_id (in case base_episodes</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="c1"># already has the columns)</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">df</span> <span class="o">=</span> <span class="n">base_episodes</span><span class="p">[[]]</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">base_episode_info</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38"></a>        <span class="n">episodes</span><span class="p">[[</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span> <span class="s2">&quot;episode_start&quot;</span><span class="p">]],</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;episode_id&quot;</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;episode_start&quot;</span><span class="p">:</span> <span class="s2">&quot;base_episode_start&quot;</span><span class="p">})</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40"></a>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="n">other_episodes</span> <span class="o">=</span> <span class="n">base_episode_info</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;base_episode_id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42"></a>        <span class="n">episodes</span><span class="p">[[</span><span class="s2">&quot;episode_start&quot;</span><span class="p">,</span> <span class="s2">&quot;patient_id&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="s2">&quot;other_episode_id&quot;</span><span class="p">),</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43"></a>        <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44"></a>        <span class="n">on</span><span class="o">=</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="p">)</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">other_episodes</span><span class="p">[</span><span class="s2">&quot;time_to_other_episode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48"></a>        <span class="n">other_episodes</span><span class="p">[</span><span class="s2">&quot;episode_start&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">other_episodes</span><span class="p">[</span><span class="s2">&quot;base_episode_start&quot;</span><span class="p">]</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="p">)</span>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50"></a>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="n">with_codes</span> <span class="o">=</span> <span class="n">other_episodes</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52"></a>        <span class="n">codes</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;other_episode_id&quot;</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;episode_id&quot;</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;patient_id&quot;</span><span class="p">,</span> <span class="s2">&quot;episode_start&quot;</span><span class="p">,</span> <span class="s2">&quot;episode_id&quot;</span><span class="p">])</span>
+</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a>
+</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="k">return</span> <span class="n">with_codes</span>
+</span></code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div></details>
+<h4 id="counting-codes-group-occurrences">Counting Codes Group Occurrences</h4>
+<p>In any table that has ``</p>
 
 
 
