@@ -6,7 +6,7 @@ import datetime as dt
 from pyhbr.common import make_engine
 from pyhbr.middle import from_hic
 from pyhbr.analysis import arc_hbr
-
+from pyhbr.clinical_codes import counting
 from pyhbr.data_source import hic
 
 import importlib
@@ -14,6 +14,7 @@ import importlib
 importlib.reload(arc_hbr)
 importlib.reload(from_hic)
 importlib.reload(hic)
+importlib.reload(counting)
 
 import pandas as pd
 
@@ -53,21 +54,8 @@ index_episodes["index_platelets"] = arc_hbr.get_lowest_index_lab_result(
     index_episodes, lab_results, "platelets"
 )
 
-# Add patient_id to the codes, and prepare to join to index episodes
-codes_by_patient = codes.merge(
-    episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
-).rename(
-    columns={"episode_start": "other_episode_start", "episode_id": "other_episode_id"}
-)
+all_other_codes = counting.get_all_other_codes(index_episodes, episodes, codes)
 
-# # Join index episodes to all codes
-all_other_codes = (
-    index_episodes[["patient_id", "episode_start"]]
-    .reset_index()
-    .merge(codes_by_patient, how="left", on="patient_id")
-)[["episode_id", "episode_start", "other_episode_id", "other_episode_start","code", "group", "position", "type"]]
-df = all_other_codes
-df[df.episode_id != df.other_episode_id]
 
 pd.get_dummies(all_other_codes, columns=["group"])
 
@@ -84,6 +72,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from pandas import DataFrame
 
+
 def plot_index_measurement_distribution(index_episodes: DataFrame):
     """Plot a histogram of measurement results at the index
 
@@ -96,19 +85,23 @@ def plot_index_measurement_distribution(index_episodes: DataFrame):
     # Make a plot showing the three lab results as histograms
     df = index_episodes.copy()
     df["index_hb"] = 10 * df["index_hb"]  # Convert from g/dL to g/L
-    df = df.filter(regex="^index").rename(
-        columns={
-            "index_egfr": "eGFR (mL/min)",
-            "index_hb": "Hb (g/L)",
-            "index_platelets": "Plt (x10^9/L)",
-        }
-    ).melt(value_name="Lowest test result at index episode", var_name="Test")
+    df = (
+        df.filter(regex="^index")
+        .rename(
+            columns={
+                "index_egfr": "eGFR (mL/min)",
+                "index_hb": "Hb (g/L)",
+                "index_platelets": "Plt (x10^9/L)",
+            }
+        )
+        .melt(value_name="Lowest test result at index episode", var_name="Test")
+    )
     g = sns.displot(
         df,
         x="Lowest test result at index episode",
         hue="Test",
     )
-    g.figure.subplots_adjust(top=.95)
+    g.figure.subplots_adjust(top=0.95)
     g.ax.set_title("Distribution of Laboratory Test Results in ACS/PCI index events")
 
 

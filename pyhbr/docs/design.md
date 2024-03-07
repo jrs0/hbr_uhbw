@@ -125,13 +125,34 @@ An example of this function in `pyhbr.middle.from_hic` is:
     ::: pyhbr.middle.from_hic.get_clinical_codes
         options:
             # If the root heading is shown, then a TOC entry will be
-            # present too. Set a very high heading level to hide it
+            # present too. Set a very high heading level to hide it.
             heading_level: 100
             show_root_heading: true
             show_root_full_path: false
             show_symbol_type_heading: true
             show_root_toc_entry: false
 
+#### Analysing Codes Before/After an Episode
 
+To count up codes that occur in a time window before or after a particular base episode, it is necessary to join together each base episode with all the other episodes for the same patient.
 
-#### Codes
+To do this, three tables are needed:
+
+* `base_episodes`: A table of the base episodes of interest, containing `episode_id` as an index.
+* `episodes`: A table of episode information (all episodes), which is indexed by `episode_id` and contains `patient_id` and `episode_start` as columns.
+* `codes`: The table of diagnosis/procedure codes from the previous section, containing a column `episode_id` and other code data columns.
+
+A function which combines these into a table containing all codes for other episodes relative to a base episode is `pyhbr.clinical_codes.counting.get_all_other_codes`:
+
+??? note "Create table for code-counting before/after a base episode"
+
+    ::: pyhbr.clinical_codes.counting.get_all_other_codes
+        options:
+            # If the root heading is shown, then a TOC entry will be
+            # present too. Set a very high heading level to hide it.
+            heading_level: 100
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_root_toc_entry: false
+
