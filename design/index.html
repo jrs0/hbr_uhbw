@@ -1,0 +1,825 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../arc_hbr/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.7">
+    
+    
+      
+        <title>PyHBR Design - PyHBR Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.f2e4d321.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pyhbr-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PyHBR Docs" class="md-header__button md-logo" aria-label="PyHBR Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyHBR Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              PyHBR Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PyHBR Docs" class="md-nav__button md-logo" aria-label="PyHBR Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    PyHBR Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Welcome to the PyHBR Docs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    PyHBR Design
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    PyHBR Design
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Sources and Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Sources and Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sql-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      SQL Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#middle-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Middle Layer
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saving-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saving Results
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clinical-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clinical Codes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Clinical Codes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#counting-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Counting Codes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Counting Codes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-episode-code-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Episode Code Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Codes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../arc_hbr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ARC HBR Calculation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Sources and Analysis
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Sources and Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sql-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      SQL Queries
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#middle-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      Middle Layer
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#saving-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      Saving Results
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clinical-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clinical Codes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Clinical Codes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#counting-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Counting Codes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Counting Codes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-episode-code-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Episode Code Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Codes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="pyhbr-design">PyHBR Design</h1>
+<p>This section describes the design of PyHBR and how the code is structured.</p>
+<h2 id="data-sources-and-analysis">Data Sources and Analysis</h2>
+<p>The package contains routines for performing data analysis and fitting models. The source data for this analysis are tables stored in Microsoft SQL Server.</p>
+<p>In order to make the models reusable, the analysis/model code expects the tables in a particular format, which is documented for each analysis/model script. The code for analysis is in the <code>pyhbr.analysis</code> module.</p>
+<p>The database query and data fetch is performed by separate code, which is expected to be modified to port this package to a new data source. These data collection scripts are stored in the <code>pyhbr.data_source</code> module.</p>
+<p>A middle preprocessing layer <code>pyhbr.middle</code> is used to converted raw data from the data sources into the form expected by analysis. This helps keep the raw data sources clean (there is no need for extensive transformations in the SQL layer).</p>
+<h3 id="sql-queries">SQL Queries</h3>
+<p>The approach taken to prepare SQL statements is to use SQLAlchemy to prepare a query, and then pass it to Pandas <a href="https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html">read_sql</a> for execution. The advantage of using SQLAlchemy statements instead of raw strings in <code>read_sql</code> is the ability to construct statements using a declarative syntax (including binding parameters), and increased opportunity for error checking (which may be useful for porting the scripts to new databases).</p>
+<p>An example of how SQL statements are built is shown below:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">select</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span> <span class="nn">pyhbr.common</span> <span class="kn">import</span> <span class="n">make_engine</span><span class="p">,</span> <span class="n">CheckedTable</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># All interactions with the database (including building queries,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># which queries the server to check columns) needs an sqlalchemy </span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># engine</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">engine</span> <span class="o">=</span> <span class="n">make_engine</span><span class="p">()</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># The CheckedTable is a simple wrapper around sqlalchemy.Table,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1"># for the purpose of checking for missing columns. It replaces</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># sqlalchemy syntax table.c.column_name with table.col(&quot;column_name&quot;)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">table</span> <span class="o">=</span> <span class="n">CheckedTable</span><span class="p">(</span><span class="s2">&quot;cv1_episodes&quot;</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># The SQL statement is built up using the sqlalchemy select function.</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># The declarative syntax reduces the chance of errors typing a raw</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># SQL string. This line will throw an error if any of the columns are</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># wrong.</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;subject&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">&quot;patient_id&quot;</span><span class="p">),</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>    <span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;episode_identifier&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">&quot;episode_id&quot;</span><span class="p">),</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>    <span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;spell_identifier&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">&quot;spell_id&quot;</span><span class="p">),</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    <span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;episode_start_time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">&quot;episode_start&quot;</span><span class="p">),</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>    <span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;episode_end_time&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="s2">&quot;episode_end&quot;</span><span class="p">),</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>    <span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;episode_start_time&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>    <span class="n">table</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;episode_end_time&quot;</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2005</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="p">)</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="c1"># The SQL query can be printed for inspection if required,</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="c1"># or for using directly in a SQL script</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="nb">print</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="c1"># Otherwise, execute the query using pandas to get a dataframe</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+</span></code></pre></div>
+<p>See the <code>pyhbr.data_source</code> module for more examples of functions that return the <code>stmt</code> variable for different tables.</p>
+<p>The following are some tips for building statements using the <code>CheckedTable</code> object:</p>
+<ul>
+<li><code>CheckedTable</code> contains the SQLAlchemy <code>Table</code> as the <code>table</code> member. This means you can use <code>select(table.table)</code> to initially fetch all the columns (useful for seeing what the table contains)</li>
+<li>If you need to rename a column (using <code>AS</code> in SQL), use <code>label</code>; e.g. <code>select(table.col("old_name").label("new_name"))</code>.</li>
+<li>Sometimes (particularly with ID columns which are typed incorrectly), it is useful to be able to cast to a different type. You can do this using <code>select(table.col("col_to_cast").cast(String))</code>. The list of generic types is provided <a href="https://docs.sqlalchemy.org/en/20/core/type_basics.html#generic-camelcase-types">here</a>; import the one you need using a line like <code>from sqlalchemy import String</code>.</li>
+</ul>
+<h3 id="middle-layer">Middle Layer</h3>
+<p>To account for differences in data sources and the analysis, the module <code>pyhbr.middle</code> contains modules like <code>from_hic</code> which contain function that return transformed versions of the data sources more suitable for analysis.</p>
+<p>The outputs from this layer are documented so that it is possible to take a new data source and write a new module in <code>pyhbr.middle</code> which exposes the new data source for analysis. </p>
+<h2 id="saving-results">Saving Results</h2>
+<p>TODO write me-- about save_item/load_item.</p>
+<h2 id="clinical-codes">Clinical Codes</h2>
+<p>PyHBR has functions for creating and using lists of ICD-10 and OPCS-4 codes. A prototype version of the graphical program to create the code lists was written in Tauri <a href="https://github.com/jrs0/hbr_models">here</a>. However, it is simpler and more portable to have the codes editor bundled in this python package, and written in python.</p>
+<p>Users should be able to do the following things with the codes editor GUI:</p>
+<ul>
+<li>Open the GUI program, and select a blank ICD-10 or OPCS-4 codes tree to begin creating code groups.</li>
+<li>Create new code groups starting from the blank template.</li>
+<li>Search for strings within the ICD-10/OPCS-4 descriptions to make creation of groups easier.</li>
+<li>Save the resulting codes file to a working directory.</li>
+<li>Open and edit a previously saved codes file from a working directory.</li>
+</ul>
+<p>Once the groups have been defined, the user should be able to perform the following actions with the code groups files:</p>
+<ul>
+<li>Import codes files from the package (i.e. predefined code groups).</li>
+<li>Import codes files (containing custom groups) from a working directory.</li>
+<li>Extract the code groups, and show which codes are in which groups.</li>
+<li>Use the code groups in analysis (i.e. get a Pandas DataFrame showing which codes are in which groups)</li>
+</ul>
+<p>Multiple code groups are stored in a single file, which means that only two codes files are necessary: <code>icd10-yaml</code> and <code>opcs4.yaml</code>. There is no limit to the number of code groups.</p>
+<p>Previously implemented functionality to check whether a clinical code is valid will not be implemented here, because sufficiently performant code cannot be written in pure python (and this package is intended to contain only pure Python to maximise portability).</p>
+<p>Instead, all codes are converted to a standard "normal form" where upper-case letters are replaced with lower-case, and dots/whitespace is removed. Codes can then be compared, and most codes will match under this condition. (Codes that will not match include those with suffixes, such as dagger or asterix, or codes that contain further qualifying suffixes that are not present in the codes tree.).</p>
+<h3 id="counting-codes">Counting Codes</h3>
+<p>Diagnosis and procedure codes can be grouped together and used as features for building models. One way to do this is to count the codes in a particular time window (for example, one year before an index event), and use that as a predictor for subsequent outcomes.</p>
+<p>This sections describes how raw episode data is converted into this counted form in PyHBR.</p>
+<h4 id="basic-episode-code-data">Basic Episode Code Data</h4>
+<p>Hospital episodes contain multiple diagnosis and procedure codes. The starting point for counting codes is using the <code>pyhbr.middle.*.get_clinical_codes</code> function, which returns a data frame with the following columns:</p>
+<ul>
+<li><code>episode_id</code>: Which episode the code was in</li>
+<li><code>code</code>: The name of the clinical code in normal form (lowercase, no whitespace/dots), e.g. "n183"</li>
+<li><code>group</code>: The group containing the code. The table only contains codes that are defined in a code group, which is based on the codes files from the previous section</li>
+<li><code>position</code>: The priority of the clinical code, where 1 means the primary diagnosis/procedure, and &gt; 1 means a secondary code.</li>
+<li><code>type</code>: Either "diagnosis" or "procedure" depending on the type of code.</li>
+</ul>
+<p>This table does not use <code>episode_id</code> as the index because a single episode ID often has many rows.</p>
+<p>An example of this function in <code>pyhbr.middle.from_hic</code> is:</p>
+<details class="note">
+<summary>Example function which fetches clinical codes</summary>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h100 id="pyhbr.middle.from_hic.get_clinical_codes" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>          <code class="highlight language-python"><span class="n">get_clinical_codes</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">diagnoses_file</span><span class="p">,</span> <span class="n">procedures_file</span><span class="p">)</span></code>
+
+</h100>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Main diagnoses/procedures fetch for the HIC data</p>
+<p>This function wraps the diagnoses/procedures queries and a filtering
+operation to reduce the tables to only those rows which contain a code
+in a group. One table is returned which contains both the diagnoses and
+procedures in long format, along with the associated episode ID and the
+primary/secondary position of the code in the episode.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>engine</code></td>
+          <td>
+                <code><span title="sqlalchemy.Engine">Engine</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The connection to the database</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>diagnoses_file</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The diagnoses codes file name (loaded from the package)</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>procedures_file</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The procedures codes file name (loaded from the package)</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A table containing diagnoses/procedures, normalised codes, code groups,
+diagnosis positions, and associated episode ID.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>src\pyhbr\middle\from_hic.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-186">186</a></span>
+<span class="normal"><a href="#__codelineno-0-187">187</a></span>
+<span class="normal"><a href="#__codelineno-0-188">188</a></span>
+<span class="normal"><a href="#__codelineno-0-189">189</a></span>
+<span class="normal"><a href="#__codelineno-0-190">190</a></span>
+<span class="normal"><a href="#__codelineno-0-191">191</a></span>
+<span class="normal"><a href="#__codelineno-0-192">192</a></span>
+<span class="normal"><a href="#__codelineno-0-193">193</a></span>
+<span class="normal"><a href="#__codelineno-0-194">194</a></span>
+<span class="normal"><a href="#__codelineno-0-195">195</a></span>
+<span class="normal"><a href="#__codelineno-0-196">196</a></span>
+<span class="normal"><a href="#__codelineno-0-197">197</a></span>
+<span class="normal"><a href="#__codelineno-0-198">198</a></span>
+<span class="normal"><a href="#__codelineno-0-199">199</a></span>
+<span class="normal"><a href="#__codelineno-0-200">200</a></span>
+<span class="normal"><a href="#__codelineno-0-201">201</a></span>
+<span class="normal"><a href="#__codelineno-0-202">202</a></span>
+<span class="normal"><a href="#__codelineno-0-203">203</a></span>
+<span class="normal"><a href="#__codelineno-0-204">204</a></span>
+<span class="normal"><a href="#__codelineno-0-205">205</a></span>
+<span class="normal"><a href="#__codelineno-0-206">206</a></span>
+<span class="normal"><a href="#__codelineno-0-207">207</a></span>
+<span class="normal"><a href="#__codelineno-0-208">208</a></span>
+<span class="normal"><a href="#__codelineno-0-209">209</a></span>
+<span class="normal"><a href="#__codelineno-0-210">210</a></span>
+<span class="normal"><a href="#__codelineno-0-211">211</a></span>
+<span class="normal"><a href="#__codelineno-0-212">212</a></span>
+<span class="normal"><a href="#__codelineno-0-213">213</a></span>
+<span class="normal"><a href="#__codelineno-0-214">214</a></span>
+<span class="normal"><a href="#__codelineno-0-215">215</a></span>
+<span class="normal"><a href="#__codelineno-0-216">216</a></span>
+<span class="normal"><a href="#__codelineno-0-217">217</a></span>
+<span class="normal"><a href="#__codelineno-0-218">218</a></span>
+<span class="normal"><a href="#__codelineno-0-219">219</a></span>
+<span class="normal"><a href="#__codelineno-0-220">220</a></span>
+<span class="normal"><a href="#__codelineno-0-221">221</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-186"><a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="k">def</span> <span class="nf">get_clinical_codes</span><span class="p">(</span>
+</span><span id="__span-0-187"><a id="__codelineno-0-187" name="__codelineno-0-187"></a>    <span class="n">engine</span><span class="p">:</span> <span class="n">Engine</span><span class="p">,</span> <span class="n">diagnoses_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">procedures_file</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-188"><a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+</span><span id="__span-0-189"><a id="__codelineno-0-189" name="__codelineno-0-189"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Main diagnoses/procedures fetch for the HIC data</span>
+</span><span id="__span-0-190"><a id="__codelineno-0-190" name="__codelineno-0-190"></a>
+</span><span id="__span-0-191"><a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="sd">    This function wraps the diagnoses/procedures queries and a filtering</span>
+</span><span id="__span-0-192"><a id="__codelineno-0-192" name="__codelineno-0-192"></a><span class="sd">    operation to reduce the tables to only those rows which contain a code</span>
+</span><span id="__span-0-193"><a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="sd">    in a group. One table is returned which contains both the diagnoses and</span>
+</span><span id="__span-0-194"><a id="__codelineno-0-194" name="__codelineno-0-194"></a><span class="sd">    procedures in long format, along with the associated episode ID and the</span>
+</span><span id="__span-0-195"><a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">    primary/secondary position of the code in the episode.</span>
+</span><span id="__span-0-196"><a id="__codelineno-0-196" name="__codelineno-0-196"></a>
+</span><span id="__span-0-197"><a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="sd">    Args:</span>
+</span><span id="__span-0-198"><a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        engine: The connection to the database</span>
+</span><span id="__span-0-199"><a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="sd">        diagnoses_file: The diagnoses codes file name (loaded from the package)</span>
+</span><span id="__span-0-200"><a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="sd">        procedures_file: The procedures codes file name (loaded from the package)</span>
+</span><span id="__span-0-201"><a id="__codelineno-0-201" name="__codelineno-0-201"></a>
+</span><span id="__span-0-202"><a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">    Returns:</span>
+</span><span id="__span-0-203"><a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">        A table containing diagnoses/procedures, normalised codes, code groups,</span>
+</span><span id="__span-0-204"><a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">            diagnosis positions, and associated episode ID.</span>
+</span><span id="__span-0-205"><a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-0-206"><a id="__codelineno-0-206" name="__codelineno-0-206"></a>
+</span><span id="__span-0-207"><a id="__codelineno-0-207" name="__codelineno-0-207"></a>    <span class="n">diagnosis_codes</span> <span class="o">=</span> <span class="n">load_from_package</span><span class="p">(</span><span class="n">diagnoses_file</span><span class="p">)</span>
+</span><span id="__span-0-208"><a id="__codelineno-0-208" name="__codelineno-0-208"></a>    <span class="n">procedures_codes</span> <span class="o">=</span> <span class="n">load_from_package</span><span class="p">(</span><span class="n">procedures_file</span><span class="p">)</span>
+</span><span id="__span-0-209"><a id="__codelineno-0-209" name="__codelineno-0-209"></a>
+</span><span id="__span-0-210"><a id="__codelineno-0-210" name="__codelineno-0-210"></a>    <span class="c1"># Fetch the data from the server</span>
+</span><span id="__span-0-211"><a id="__codelineno-0-211" name="__codelineno-0-211"></a>    <span class="n">diagnoses</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">hic</span><span class="o">.</span><span class="n">diagnoses_query</span><span class="p">)</span>
+</span><span id="__span-0-212"><a id="__codelineno-0-212" name="__codelineno-0-212"></a>    <span class="n">procedures</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">hic</span><span class="o">.</span><span class="n">procedures_query</span><span class="p">)</span>
+</span><span id="__span-0-213"><a id="__codelineno-0-213" name="__codelineno-0-213"></a>
+</span><span id="__span-0-214"><a id="__codelineno-0-214" name="__codelineno-0-214"></a>    <span class="c1"># Reduce data to only code groups, and combine diagnoses/procedures</span>
+</span><span id="__span-0-215"><a id="__codelineno-0-215" name="__codelineno-0-215"></a>    <span class="n">filtered_diagnoses</span> <span class="o">=</span> <span class="n">filter_to_groups</span><span class="p">(</span><span class="n">diagnoses</span><span class="p">,</span> <span class="n">diagnosis_codes</span><span class="p">)</span>
+</span><span id="__span-0-216"><a id="__codelineno-0-216" name="__codelineno-0-216"></a>    <span class="n">filtered_procedures</span> <span class="o">=</span> <span class="n">filter_to_groups</span><span class="p">(</span><span class="n">procedures</span><span class="p">,</span> <span class="n">procedures_codes</span><span class="p">)</span>
+</span><span id="__span-0-217"><a id="__codelineno-0-217" name="__codelineno-0-217"></a>
+</span><span id="__span-0-218"><a id="__codelineno-0-218" name="__codelineno-0-218"></a>    <span class="c1"># Tag the diagnoses/procedures, and combine the tables</span>
+</span><span id="__span-0-219"><a id="__codelineno-0-219" name="__codelineno-0-219"></a>    <span class="n">filtered_diagnoses</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;diagnoses&quot;</span>
+</span><span id="__span-0-220"><a id="__codelineno-0-220" name="__codelineno-0-220"></a>    <span class="n">filtered_procedures</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;procedures&quot;</span>
+</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a>    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">filtered_diagnoses</span><span class="p">,</span> <span class="n">filtered_procedures</span><span class="p">])</span>
+</span></code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div></details>
+<h4 id="codes">Codes</h4>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.caa56a14.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,533 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../design/">
+      
+      
+        <link rel="next" href="../reference/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.7">
+    
+    
+      
+        <title>ARC HBR Calculation - PyHBR Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.f2e4d321.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#arc-hbr-calculation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PyHBR Docs" class="md-header__button md-logo" aria-label="PyHBR Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyHBR Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ARC HBR Calculation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PyHBR Docs" class="md-nav__button md-logo" aria-label="PyHBR Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    PyHBR Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Welcome to the PyHBR Docs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PyHBR Design
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    ARC HBR Calculation
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    ARC HBR Calculation
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#steps-to-calculate-the-arc-hbr-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps to Calculate the ARC HBR Score
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps to Calculate the ARC HBR Score">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Steps
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preprocessing Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-laboratory-results-and-prescriptions-to-episodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Link Laboratory Results and Prescriptions to Episodes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identify-index-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Identify Index Events
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculating-the-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculating the Score
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#steps-to-calculate-the-arc-hbr-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      Steps to Calculate the ARC HBR Score
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps to Calculate the ARC HBR Score">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing Steps
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preprocessing Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-laboratory-results-and-prescriptions-to-episodes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Link Laboratory Results and Prescriptions to Episodes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#identify-index-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Identify Index Events
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calculating-the-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      Calculating the Score
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="arc-hbr-calculation">ARC HBR Calculation</h1>
+<p>The ARC HBR score is a concensus-based risk score to identify patients at high bleeding risk. It is formed from a weighted sum of 13 criteria, involving patient characteristics, patient history, laboratory test results, prescriptions information, and planned healthcare activity. This page describes how the ARC HBR score is calculated and assessed in PyHBR.</p>
+<h2 id="steps-to-calculate-the-arc-hbr-score">Steps to Calculate the ARC HBR Score</h2>
+<p>Using source data that includes diagnosis/procedure codes, laboratory tests, and prescriptions information, the ARC HBR score can be calculated as follows:</p>
+<h3 id="preprocessing-steps">Preprocessing Steps</h3>
+<p>Before identifying patients/index events, or calculating the score, some preprocessing is required. This is the section that is likely to require modification if a new data source is used.</p>
+<ol>
+<li>For diagnosis and procedure codes, add the group they belong to, and drop codes not in any group. Retain the code, the group, and the code position in long format in a table. The following groups are required:<ul>
+<li><code>acs</code>: Diagnosis codes corresponding to acute coronary syndromes (includes myocardial infarction/unstable angina). Used to identify index events.</li>
+<li><code>pci</code>: Percutaneous coronary intervention codes (e.g. stent implantation). Used to identify index events.</li>
+<li><code>ckd</code>: Chronic kidney disease: includes N18.5, N18.4, N18.3, N18.2, N18.1. Used as a fall-back in case eGFR is missing.</li>
+<li><code>anaemia</code>: Used as a fall-back in case Hb measurement is missing.</li>
+<li><code>bleeding</code>: Used to identify prior bleeding.</li>
+<li><code>cbd</code>: Chronic bleeding diatheses.</li>
+<li><code>cph</code>: Cirrhosis with portal hypertension.</li>
+<li><code>cancer_diag</code>: Used to identify cancer diagnoses.</li>
+<li><code>cancer_proc</code>: Used to identify cancer therapy.</li>
+<li><code>bavm</code>: Brain arteriovenous malformation diagnoses.</li>
+<li><code>istroke</code>: Ischaemic stroke.</li>
+<li><code>ich</code>: Intracranial haemorrhage.</li>
+<li><code>csurgery</code>: Cardiac surgery. Used to exclude cardiac surgery for one criterion.</li>
+<li><code>surgery</code>: All surgery. Used as a proxy for "major surgery" criteria</li>
+</ul>
+</li>
+<li>
+<p>For laboratory results, narrow to the subset of results shown below. Convert all tests to the standard unit used in the ARC definition, and drop the unit from the table. Keep the date/time at which the laboratory sample was collected, and the patient ID (in this data, associated episode is not linked, and must be inferred from the date).</p>
+<ul>
+<li><code>egfr</code>: Used to assess kidney function (unit: mL/min)</li>
+<li><code>hb</code>: Haemoglobin, used to assess anaemia (unit: g/dL)</li>
+<li><code>platelets</code>: Platelet count, used to assess thrombocytopenia (unit: <code>x10^9/L</code>)</li>
+</ul>
+</li>
+<li>
+<p>For prescriptions, narrow to the set of medicines shown below. Keep the medicine name, flag for present-on-admission, patient ID, and prescription order date (used to infer link to episode, as above).</p>
+<ul>
+<li><code>oac</code>: any of warfarin, apixaban, edoxaban, dabigatran, rivaroxaban</li>
+<li><code>nsaid</code>: any of ibuprofen, naproxen, diclofenac, celecoxib, mefenamic acid, etoricoxib, indomethacin (high-does aspirin excluded for now).</li>
+</ul>
+</li>
+<li>
+<p>For demographics, retain age and gender. This calculation may be postoned until after index events are calculated (for example, if the demographics table contains year of birth instead of age).</p>
+</li>
+</ol>
+<p>NOTE: The <code>episodes</code>, <code>prescriptions</code>, and <code>lab_results</code> tables have <code>episode_id</code> as Pandas index. The <code>demographics</code> table uses <code>patient_id</code> as index. The <code>episodes</code> table contains <code>patient_id</code> as a column for linking to <code>demographics</code>.</p>
+<h4 id="link-laboratory-results-and-prescriptions-to-episodes">Link Laboratory Results and Prescriptions to Episodes</h4>
+<p>In the HIC data, laboratory results and prescriptions do not contain an episode_id; instead, they contain a date/time (either a sample date for laboratory tests or an order date for prescriptions).</p>
+<p>To link each test/prescription to an episode, use the episode start and end times. If the sample date/order date falls within the episode start and end time, then it should be associated with that episode.</p>
+<p>A complication with this process is that episodes sometimes overlap (i.e. the start time of the next is before the end time of the previous one). This will be solved by associating a test/prescription with the earliest episode containing the time.</p>
+<h3 id="identify-index-events">Identify Index Events</h3>
+<p>Inclusion criteria for calculation of the ARC HBR score is having a hospital visit (spell) where the first episode of the spell contains an ACS diagnosis in the primary position, or a PCI procedure in any position.</p>
+<p>The table is indexed by the episode ID, and contains flag columns <code>acs_index</code> for <code>pci_index</code> for which inclusion condition is satisfied.</p>
+<p>NOTE: The <code>index_event</code> table is indexed by <code>episode_id</code>, and also contains the <code>patient_id</code> as a column.</p>
+<h3 id="calculating-the-score">Calculating the Score</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.caa56a14.min.js"></script>
+      
+    
+  </body>
+</html>
