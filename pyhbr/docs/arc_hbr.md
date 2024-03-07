@@ -56,3 +56,4 @@ NOTE: The `index_event` table is indexed by `episode_id`, and also contains the 
 
 ### Calculating the Score
 
+The score is calculated differently for each different class of critera:

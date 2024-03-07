@@ -1,4 +1,4 @@
-"""Simple testing script for HIC data processing
+"""Calculate the ARC HBR score for the HIC data
 """
 
 import datetime as dt
@@ -41,6 +41,15 @@ if episodes.value_counts("episode_id").max() > 1:
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 index_episodes = arc_hbr.index_episodes(episodes, codes)
 
+# Get other episodes relative to the index episode (for counting code
+# groups before/after the index)
+all_other_codes = counting.get_all_other_codes(index_episodes, episodes, codes)
+
+# Get the episodes that occurred just in the previous year
+max_before = dt.timedelta(days=365)
+min_before = dt.timedelta(days=30)
+previous_year = counting.get_previous_year(all_other_codes, min_before, max_before)
+
 # Add relevant information to the index_episodes
 index_episodes["age"] = arc_hbr.calculate_age(index_episodes, demographics)
 index_episodes["gender"] = arc_hbr.get_gender(index_episodes, demographics)
@@ -54,10 +63,20 @@ index_episodes["index_platelets"] = arc_hbr.get_lowest_index_lab_result(
     index_episodes, lab_results, "platelets"
 )
 
-all_other_codes = counting.get_all_other_codes(index_episodes, episodes, codes)
+bleeding_groups = ["bleeding_al_ani"]
+index_episodes["prior_bleeding"] = counting.count_code_groups(
+    index_episodes, previous_year, bleeding_groups, False
+)
+# TODO: transfusion
+
+cancer_groups = ["cancer"]
+index_episodes["prior_cancer"] = counting.count_code_groups(
+    index_episodes, previous_year, cancer_groups, True
+)
+# TODO: add cancer therapy
 
 
-pd.get_dummies(all_other_codes, columns=["group"])
+
 
 # Calculate the ARC HBR score
 arc_hbr_score = pd.DataFrame()
