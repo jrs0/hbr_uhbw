@@ -106,7 +106,7 @@ Diagnosis and procedure codes can be grouped together and used as features for b
 
 This sections describes how raw episode data is converted into this counted form in PyHBR.
 
-#### Basic Episode Code Data
+#### Getting Clinical Code Data
 
 Hospital episodes contain multiple diagnosis and procedure codes. The starting point for counting codes is using the `pyhbr.middle.*.get_clinical_codes` function, which returns a data frame with the following columns:
 
@@ -132,7 +132,7 @@ An example of this function in `pyhbr.middle.from_hic` is:
             show_symbol_type_heading: true
             show_root_toc_entry: false
 
-#### Analysing Codes Before/After an Episode
+#### Codes in Other Episodes Relative to a Base Episode
 
 To count up codes that occur in a time window before or after a particular base episode, it is necessary to join together each base episode with all the other episodes for the same patient.
 
@@ -144,7 +144,7 @@ To do this, three tables are needed:
 
 A function which combines these into a table containing all codes for other episodes relative to a base episode is `pyhbr.clinical_codes.counting.get_all_other_codes`:
 
-??? note "Create table for code-counting before/after a base episode"
+??? note "Function that gets data from other episodes relative to a base episode"
 
     ::: pyhbr.clinical_codes.counting.get_all_other_codes
         options:
@@ -155,4 +155,8 @@ A function which combines these into a table containing all codes for other epis
             show_root_full_path: false
             show_symbol_type_heading: true
             show_root_toc_entry: false
+
+#### Counting Codes Group Occurrences 
+
+In any table that has ``
 
