@@ -17,7 +17,7 @@ importlib.reload(hic)
 
 import pandas as pd
 
-pd.set_option("display.max_rows", 50)
+pd.set_option("display.max_rows", 100)
 
 start_date = dt.date(1990, 1, 1)
 end_date = dt.date(2030, 1, 1)
@@ -54,20 +54,22 @@ index_episodes["index_platelets"] = arc_hbr.get_lowest_index_lab_result(
 )
 
 # Add patient_id to the codes, and prepare to join to index episodes
-# codes_by_patient = codes.merge(
-#     episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
-# ).rename(
-#     columns={"episode_start": "other_episode_start", "episode_id": "other_episode_id"}
-# )
+codes_by_patient = codes.merge(
+    episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
+).rename(
+    columns={"episode_start": "other_episode_start", "episode_id": "other_episode_id"}
+)
 
 # # Join index episodes to all codes
-# all_other_codes = (
-#     index_episodes[["patient_id", "episode_start"]]
-#     .reset_index()
-#     .merge(codes_by_patient, how="left", on="patient_id")
-#     .set_index(["episode_id", "other_episode_id", "type", "position"])
-# )
+all_other_codes = (
+    index_episodes[["patient_id", "episode_start"]]
+    .reset_index()
+    .merge(codes_by_patient, how="left", on="patient_id")
+)[["episode_id", "episode_start", "other_episode_id", "other_episode_start","code", "group", "position", "type"]]
+df = all_other_codes
+df[df.episode_id != df.other_episode_id]
 
+pd.get_dummies(all_other_codes, columns=["group"])
 
 # Calculate the ARC HBR score
 arc_hbr_score = pd.DataFrame()

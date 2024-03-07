@@ -10,6 +10,8 @@ In order to make the models reusable, the analysis/model code expects the tables
 
 The database query and data fetch is performed by separate code, which is expected to be modified to port this package to a new data source. These data collection scripts are stored in the `pyhbr.data_source` module.
 
+A middle preprocessing layer `pyhbr.middle` is used to converted raw data from the data sources into the form expected by analysis. This helps keep the raw data sources clean (there is no need for extensive transformations in the SQL layer).
+
 ### SQL Queries
 
 The approach taken to prepare SQL statements is to use SQLAlchemy to prepare a query, and then pass it to Pandas [read_sql](https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html) for execution. The advantage of using SQLAlchemy statements instead of raw strings in `read_sql` is the ability to construct statements using a declarative syntax (including binding parameters), and increased opportunity for error checking (which may be useful for porting the scripts to new databases).
@@ -63,6 +65,12 @@ The following are some tips for building statements using the `CheckedTable` obj
 * If you need to rename a column (using `AS` in SQL), use `label`; e.g. `select(table.col("old_name").label("new_name"))`.
 * Sometimes (particularly with ID columns which are typed incorrectly), it is useful to be able to cast to a different type. You can do this using `select(table.col("col_to_cast").cast(String))`. The list of generic types is provided [here](https://docs.sqlalchemy.org/en/20/core/type_basics.html#generic-camelcase-types); import the one you need using a line like `from sqlalchemy import String`.
 
+### Middle Layer
+
+To account for differences in data sources and the analysis, the module `pyhbr.middle` contains modules like `from_hic` which contain function that return transformed versions of the data sources more suitable for analysis.
+
+The outputs from this layer are documented so that it is possible to take a new data source and write a new module in `pyhbr.middle` which exposes the new data source for analysis. 
+
 ## Saving Results
 
 TODO write me-- about save_item/load_item.
@@ -92,8 +100,38 @@ Previously implemented functionality to check whether a clinical code is valid w
 
 Instead, all codes are converted to a standard "normal form" where upper-case letters are replaced with lower-case, and dots/whitespace is removed. Codes can then be compared, and most codes will match under this condition. (Codes that will not match include those with suffixes, such as dagger or asterix, or codes that contain further qualifying suffixes that are not present in the codes tree.).
 
+### Counting Codes
+
+Diagnosis and procedure codes can be grouped together and used as features for building models. One way to do this is to count the codes in a particular time window (for example, one year before an index event), and use that as a predictor for subsequent outcomes.
+
+This sections describes how raw episode data is converted into this counted form in PyHBR.
+
+#### Basic Episode Code Data
+
+Hospital episodes contain multiple diagnosis and procedure codes. The starting point for counting codes is using the `pyhbr.middle.*.get_clinical_codes` function, which returns a data frame with the following columns:
+
+* `episode_id`: Which episode the code was in
+* `code`: The name of the clinical code in normal form (lowercase, no whitespace/dots), e.g. "n183"
+* `group`: The group containing the code. The table only contains codes that are defined in a code group, which is based on the codes files from the previous section
+* `position`: The priority of the clinical code, where 1 means the primary diagnosis/procedure, and > 1 means a secondary code.
+* `type`: Either "diagnosis" or "procedure" depending on the type of code.
+
+This table does not use `episode_id` as the index because a single episode ID often has many rows.
+
+An example of this function in `pyhbr.middle.from_hic` is:
+
+??? note "Example function which fetches clinical codes"
+
+    ::: pyhbr.middle.from_hic.get_clinical_codes
+        options:
+            # If the root heading is shown, then a TOC entry will be
+            # present too. Set a very high heading level to hide it
+            heading_level: 100
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_root_toc_entry: false
 
 
 
-
-
+#### Codes
