@@ -4,8 +4,11 @@
 import numpy as np
 from pandas import DataFrame, Series, cut
 import seaborn as sns
+from pyhbr.middle.from_hic import HicData
+from pyhbr.clinical_codes.counting import count_code_groups
 
-def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
+
+def index_episodes(data: HicData) -> DataFrame:
     """Get the index episodes for ACS/PCI patients
 
     Index episodes are defined by the contents of the first episode of
@@ -30,12 +33,13 @@ def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
     is indexed from 1.
 
     Args:
-        episodes: All patient episodes. Must contain `episode_id`, `spell_id`
-            and `episode_start`.
-        codes: All diagnosis/procedure codes by episode. Must contain
-            `episode_id`, `position` (indexed from 1 which is the primary
-            code, >1 are secondary codes), and `group` (containing either `acs`
-            or `pci`).
+        data: A class containing two DataFrame attributes:
+            * episodes: All patient episodes. Must contain `episode_id`, `spell_id`
+                and `episode_start`.
+            * codes: All diagnosis/procedure codes by episode. Must contain
+                `episode_id`, `position` (indexed from 1 which is the primary
+                code, >1 are secondary codes), and `group` (containing either `acs`
+                or `pci`).
 
     Returns:
         The index episodes.
@@ -43,12 +47,14 @@ def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
 
     # Index episodes are defined by the contents of the first episode in the
     # spell (to capture to cause of admission to hospital).
-    first_episodes = episodes.sort_values("episode_start").groupby("spell_id").head(1)
+    first_episodes = (
+        data.episodes.sort_values("episode_start").groupby("spell_id").head(1)
+    )
 
     # Join the diagnosis/procedure codes (inner join reduces to episodes which
     # have codes in any group, which is a superset of the index episodes)
     first_episodes_with_codes = first_episodes.merge(
-        codes, how="inner", on="episode_id"
+        data.codes, how="inner", on="episode_id"
     )
 
     # ACS matches based on a primary diagnosis of ACS (this is to rule out
@@ -80,7 +86,7 @@ def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
 
     # Join some useful information about the episode
     return index_episodes.merge(
-        episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
+        data.episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
     )
 
 
@@ -327,7 +333,51 @@ def arc_hbr_cancer(has_prior_cancer: DataFrame) -> Series:
     )
 
 
-def get_arc_hbr_score(features: DataFrame, prescriptions: DataFrame) -> DataFrame:
+def get_features(index_episodes: DataFrame, previous_year: DataFrame, data: HicData) -> DataFrame:
+    """Index/prior history features for calculating ARC HBR
+
+    Make table of general features (more granular than the ARC-HBR criteria,
+    from which the ARC score will be computed)
+
+    Args:
+        index_episodes: Contains `acs_index` and `pci_index` columns (indexed
+            by `episode_id`)
+        previous_year: Contains the all_other_codes table narrowed to the previous
+            year (for the purposes of counting code groups).
+        data (HicData): Contains DataFrame attributes `demographics` and
+            `lab_results`.
+
+    Returns:
+        The table of features (used for calculating the ARC HBR score).
+    """
+
+    bleeding_groups = ["bleeding_al_ani"]
+    cancer_groups = ["cancer"]
+    feature_data = {
+        "age": calculate_age(index_episodes, data.demographics),
+        "gender": get_gender(index_episodes, data.demographics),
+        "min_index_egfr": min_index_result("egfr", index_episodes, data.lab_results),
+        "min_index_hb": min_index_result(
+           "hb", index_episodes, data.lab_results
+        ),
+        "min_index_platelets": min_index_result(
+            "platelets", index_episodes, data.lab_results
+        ),
+        "prior_bleeding_12": count_code_groups(
+            index_episodes, previous_year, bleeding_groups, False
+        ),
+        # TODO: transfusion
+        "prior_cancer": count_code_groups(
+            index_episodes, previous_year, cancer_groups, True
+        ),
+        # TODO: add cancer therapy
+    }
+    features = DataFrame(feature_data)
+    features[["acs_index", "pci_index"]] = index_episodes[["acs_index", "pci_index"]]
+    return features
+
+
+def get_arc_hbr_score(features: DataFrame, data: HicData) -> DataFrame:
     """Calculate the ARC HBR score
 
     The `features` table has one row per index event, and must have the
@@ -349,13 +399,13 @@ def get_arc_hbr_score(features: DataFrame, prescriptions: DataFrame) -> DataFram
     * `prior_cancer` column containing the total number of cancer diagnosis
         codes seen in the previous 12 months before the index event.
 
-    The prescriptions table must be indexed by `episode_id`, and needs a `name`
+    The data.prescriptions table must be indexed by `episode_id`, and needs a `name`
     column (str, for medicine name), and an `on_admission` column (bool) for
     whether the medicine was present on hospital admission.
 
     Args:
         features: Table of index-episode data for calculating the ARC HBR score
-        prescriptions: Prescription information linked to episode.
+        prescriptions: A class containing a DataFrame attribute prescriptions.
 
     Returns:
         A table with one column per ARC HBR criterion, containing the score (0.0,
@@ -365,7 +415,7 @@ def get_arc_hbr_score(features: DataFrame, prescriptions: DataFrame) -> DataFram
     # Calculate the ARC HBR score
     arc_score_data = {
         "arc_hbr_age": arc_hbr_age(features),
-        "arc_hbr_oac": arc_hbr_oac(features, prescriptions),
+        "arc_hbr_oac": arc_hbr_oac(features, data.prescriptions),
         "arc_hbr_ckd": arc_hbr_ckd(features),
         "arc_hbr_anaemia": arc_hbr_anaemia(features),
         "arc_hbr_tcp": arc_hbr_tcp(features),

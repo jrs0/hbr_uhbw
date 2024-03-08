@@ -3,10 +3,10 @@
 
 from pandas import DataFrame, Series
 from datetime import timedelta
+from pyhbr.middle.from_hic import HicData
 
-def get_all_other_codes(
-    base_episodes: DataFrame, episodes: DataFrame, codes: DataFrame
-) -> DataFrame:
+
+def get_all_other_codes(base_episodes: DataFrame, data: HicData) -> DataFrame:
     """For each patient, get clinical codes in other episodes before/after the base
 
     This makes a table of base episodes along with all other episodes for a patient.
@@ -20,8 +20,9 @@ def get_all_other_codes(
 
     Args:
         base_episodes: Contains `episode_id` as an index.
-        episodes: Contains `episode_id` as an index, and `patient_id` and `episode_start` as columns
-        codes: Contains `episode_id` and other code data as columns
+        data: A class containing two DataFrame attributes:
+            * episodes: Contains `episode_id` as an index, and `patient_id` and `episode_start` as columns
+            * codes: Contains `episode_id` and other code data as columns
 
     Returns:
         A table containing columns `base_episode_id`, `other_episode_id`,
@@ -35,11 +36,11 @@ def get_all_other_codes(
     df = base_episodes[[]]
 
     base_episode_info = df.merge(
-        episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
+        data.episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
     ).rename(columns={"episode_start": "base_episode_start"})
-    
+
     other_episodes = base_episode_info.reset_index(names="base_episode_id").merge(
-        episodes[["episode_start", "patient_id"]].reset_index(names="other_episode_id"),
+        data.episodes[["episode_start", "patient_id"]].reset_index(names="other_episode_id"),
         how="left",
         on="patient_id",
     )
@@ -49,10 +50,11 @@ def get_all_other_codes(
     )
 
     with_codes = other_episodes.merge(
-        codes, how="left", left_on="other_episode_id", right_on="episode_id"
+        data.codes, how="left", left_on="other_episode_id", right_on="episode_id"
     ).drop(columns=["patient_id", "episode_start", "episode_id"])
 
     return with_codes
+
 
 def get_time_window(
     all_other_codes: DataFrame, window_start: timedelta, window_end: timedelta
@@ -60,7 +62,7 @@ def get_time_window(
     """Get the episodes that occurred in a time window with respect to the base episode
 
     Use the time_to_other_episode column to filter the all_other_codes
-    table to just those that occurred between window_start and window_end 
+    table to just those that occurred between window_start and window_end
     with respect to the the base episode.
 
     The arguments window_start and window_end are time differences between the other
@@ -68,7 +70,7 @@ def get_time_window(
     and use negative values for a window before the base.
 
     Episodes on the boundary of the window are included.
-        
+
     Note that the base episode itself will be included as a row if window_start
     is negative and window_end is positive (i.e. the window includes episodes before
     and after the base).
@@ -81,7 +83,7 @@ def get_time_window(
 
         window_end: The largest value of time_to_other_episode that will be included in
             the returned table. Can be negative, meaning only episodes before the base
-            will be included. 
+            will be included.
 
     Returns:
         The episodes within the specified window range.
@@ -91,7 +93,6 @@ def get_time_window(
         (df["time_to_other_episode"] <= window_end)
         & (df["time_to_other_episode"] >= window_start)
     ]
-
 
 
 def count_code_groups(
@@ -143,5 +144,5 @@ def count_code_groups(
     return (
         index_episodes[[]]
         .merge(code_group_count, how="left", left_index=True, right_index=True)
-        .fillna(0.0)
+        .fillna(0.0)["code_group_count"]
     )

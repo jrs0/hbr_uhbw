@@ -165,7 +165,7 @@ TODO
 
 If the patient has any ICD-10 code for cirrhosis with portal hypertension at any point in their history, add 1 to the ARC HBR score. The relevant ICD-10 codes are shown below:
 
-TODO CODES
+TODO CODES"""
 
 === Cancer
 

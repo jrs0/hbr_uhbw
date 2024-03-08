@@ -487,3 +487,30 @@ def get_demographics(engine: Engine) -> pd.DataFrame:
     )
 
     return df
+
+
+class HicData:
+    def __init__(self, engine: Engine, start_date: date, end_date: date):
+        """Get the HIC dataset (collection of 5 tables)
+
+        Args:
+            engine: The connection to the database
+            start_date: The start date (inclusive) for returned episodes
+            end_date:  The end date (inclusive) for returned episodes
+
+        Raises:
+            RuntimeError: if the episode_id is not unique
+        """
+
+        self.codes = get_clinical_codes(
+            engine, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml"
+        )  # slow
+        self.episodes = get_episodes(engine, start_date, end_date)  # fast
+        self.prescriptions = get_prescriptions(engine, self.episodes)  # fast
+        self.lab_results = get_lab_results(engine, self.episodes)  # really slow
+        self.demographics = get_demographics(engine)
+
+        if self.episodes.value_counts("episode_id").max() > 1:
+            raise RuntimeError(
+                "Found non-unique episode IDs; subsequent script will be invalid"
+            )
