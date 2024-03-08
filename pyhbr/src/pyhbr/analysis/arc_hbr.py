@@ -3,7 +3,7 @@
 
 import numpy as np
 from pandas import DataFrame, Series, cut
-
+import seaborn as sns
 
 def index_episodes(episodes: DataFrame, codes: DataFrame) -> DataFrame:
     """Get the index episodes for ACS/PCI patients
@@ -161,8 +161,8 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     return Series(oac_criterion, index=index_episodes.index)
 
 
-def get_lowest_index_lab_result(
-    index_episodes: DataFrame, lab_results: DataFrame, test_name: str
+def min_index_result(
+    test_name: str, index_episodes: DataFrame, lab_results: DataFrame
 ) -> Series:
     """Get the lowest lab result associated to the index episode
 
@@ -212,7 +212,7 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     codes in this case)
 
     Args:
-        has_index_egfr: Dataframe having the column "index_egfr" (in units of mL/min)
+        has_index_egfr: Dataframe having the column `min_index_egfr` (in units of mL/min)
             with the lowest eGFR measurement at index, or NaN which means no eGFR
             measurement was taken on the index episode.
 
@@ -222,7 +222,7 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     """
 
     # Replace NaN values for now with 100 (meaning score 0.0)
-    df = has_index_egfr["index_egfr"].fillna(90)
+    df = has_index_egfr["min_index_egfr"].fillna(90)
 
     # Using a high upper limit to catch any high eGFR values. In practice,
     # the highest value is 90 (which comes from the string ">90" in the database).
@@ -237,7 +237,7 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
     or clinical code.
 
     Args:
-        has_index_hb_and_gender: Dataframe having the column `index_hb` containing the
+        has_index_hb_and_gender: Dataframe having the column `min_index_hb` containing the
             lowest Hb measurement (g/dL) at the index event, or NaN if no Hb measurement
             was made. Also contains `gender` (categorical with categories "male",
             "female", and "unknown").
@@ -250,10 +250,10 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
 
     # Evaluated in order
     arc_score_conditions = [
-        df["index_hb"] < 11.0,  # Major for any gender
-        df["index_hb"] < 11.9,  # Minor for any gender
-        (df["index_hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
-        df["index_hb"] >= 12.9,  # None for any gender
+        df["min_index_hb"] < 11.0,  # Major for any gender
+        df["min_index_hb"] < 11.9,  # Minor for any gender
+        (df["min_index_hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
+        df["min_index_hb"] >= 12.9,  # None for any gender
     ]
     arc_scores = [1.0, 0.5, 0.5, 0.0]
 
@@ -271,13 +271,137 @@ def arc_hbr_tcp(has_index_platelets: DataFrame) -> Series:
     The score is 1.0 if platelet count < 100e9/L, otherwise it is 0.0.
 
     Args:
-        has_index_platelets: Has column `index_platelets`, which is the worst-case
+        has_index_platelets: Has column `min_index_platelets`, which is the worst-case
             platelet count measurement seen in the index episode.
 
     Returns:
         Series containing the ARC score
     """
     return Series(
-        np.where(has_index_platelets["index_platelets"] < 100, 1.0, 0),
+        np.where(has_index_platelets["min_index_platelets"] < 100, 1.0, 0),
         index=has_index_platelets.index,
     )
+
+
+def arc_hbr_prior_bleeding(has_prior_bleeding: DataFrame) -> Series:
+    """Calculate the prior bleeding/transfusion ARC HBR criterion
+
+    This function takes a dataframe with a column prior_bleeding_12
+    with a count of the prior bleeding events in the previous year.
+
+    TODO: Input needs a separate column for bleeding in 6 months and
+    bleeding in a year, so distinguish 0.5 from 1. Also need to add
+    transfusion.
+
+    Args:
+        has_prior_bleeding: Has a column `prior_bleeding_12` with a count
+            of the number of bleeds occurring one year before the index.
+            Has `episode_id` as the index.
+
+    Returns:
+        The ARC HBR bleeding/transfusion criterion (0.0, 0.5, or 1.0)
+    """
+    return Series(
+        np.where(has_prior_bleeding["prior_bleeding_12"] > 0, 0.5, 0),
+        index=has_prior_bleeding.index,
+    )
+
+
+def arc_hbr_cancer(has_prior_cancer: DataFrame) -> Series:
+    """Calculate the cancer ARC HBR criterion
+
+    This function takes a dataframe with a column prior_cancer
+    with a count of the cancer diagnoses in the previous year.
+
+    Args:
+        has_prior_cancer: Has a column `prior_cancer` with a count
+            of the number of cancer diagnoses occurring in the
+            year before the index event.
+
+    Returns:
+        The ARC HBR cancer criterion (0.0, 1.0)
+    """
+    return Series(
+        np.where(has_prior_cancer["prior_cancer"] > 0, 1.0, 0),
+        index=has_prior_cancer.index,
+    )
+
+
+def get_arc_hbr_score(features: DataFrame, prescriptions: DataFrame) -> DataFrame:
+    """Calculate the ARC HBR score
+
+    The `features` table has one row per index event, and must have the
+    following data:
+
+    * `episode_id` as Pandas index.
+    * `age` column for age at index.
+    * `gender` column for patient gender (category with values "male", "female"
+        or "unknown")
+    * `min_index_egfr` column containing the minimum eGFR measurement at
+        the index episode, in mL/min
+    * `min_index_hb` column containing the minimum Hb measurement at the
+        index episode, in g/dL.
+    * `min_index_platelets` column containing the minimum platelet count
+        measurement at the index episode, in units 100e9/L.
+    * `prior_bleeding_12` column containing the total number of qualifying
+        prior bleeding events that occurred in the previous 12 months before
+        the index event.
+    * `prior_cancer` column containing the total number of cancer diagnosis
+        codes seen in the previous 12 months before the index event.
+
+    The prescriptions table must be indexed by `episode_id`, and needs a `name`
+    column (str, for medicine name), and an `on_admission` column (bool) for
+    whether the medicine was present on hospital admission.
+
+    Args:
+        features: Table of index-episode data for calculating the ARC HBR score
+        prescriptions: Prescription information linked to episode.
+
+    Returns:
+        A table with one column per ARC HBR criterion, containing the score (0.0,
+            0.5, or 1.0)
+    """
+
+    # Calculate the ARC HBR score
+    arc_score_data = {
+        "arc_hbr_age": arc_hbr_age(features),
+        "arc_hbr_oac": arc_hbr_oac(features, prescriptions),
+        "arc_hbr_ckd": arc_hbr_ckd(features),
+        "arc_hbr_anaemia": arc_hbr_anaemia(features),
+        "arc_hbr_tcp": arc_hbr_tcp(features),
+        "arc_hbr_prior_bleeding": arc_hbr_prior_bleeding(features),
+        "arc_hbr_cancer": arc_hbr_cancer(features),
+    }
+    return DataFrame(arc_score_data)
+
+
+def plot_index_measurement_distribution(features: DataFrame):
+    """Plot a histogram of measurement results at the index
+
+    Args:
+        index_episodes: Must contain `min_index_hb`, `min_index_egfr`,
+        and `min_index_platelets`. The index_hb column is multiplied
+        by 10 to get units g/L.
+    """
+
+    # Make a plot showing the three lab results as histograms
+    df = features.copy()
+    df["min_index_hb"] = 10 * df["min_index_hb"]  # Convert from g/dL to g/L
+    df = (
+        df.filter(regex="^min_index")
+        .rename(
+            columns={
+                "min_index_egfr": "eGFR (mL/min)",
+                "min_index_hb": "Hb (g/L)",
+                "min_index_platelets": "Plt (x10^9/L)",
+            }
+        )
+        .melt(value_name="Lowest test result at index episode", var_name="Test")
+    )
+    g = sns.displot(
+        df,
+        x="Lowest test result at index episode",
+        hue="Test",
+    )
+    g.figure.subplots_adjust(top=0.95)
+    g.ax.set_title("Distribution of Laboratory Test Results in ACS/PCI index events")

@@ -54,31 +54,42 @@ def get_all_other_codes(
 
     return with_codes
 
-def get_previous_year(
-    all_other_codes: DataFrame, min_before: timedelta, max_before: timedelta
+def get_time_window(
+    all_other_codes: DataFrame, window_start: timedelta, window_end: timedelta
 ) -> DataFrame:
-    """Get the episodes that occurred before the base episode
+    """Get the episodes that occurred in a time window with respect to the base episode
 
     Use the time_to_other_episode column to filter the all_other_codes
-    table to just those that occurred between max_before and min_before
-    the base episode.
+    table to just those that occurred between window_start and window_end 
+    with respect to the the base episode.
 
-    Both min_before and max_before are positive-valued.
+    The arguments window_start and window_end are time differences between the other
+    episode and the base episode. Use positive values for a window after the base,
+    and use negative values for a window before the base.
+
+    Episodes on the boundary of the window are included.
+        
+    Note that the base episode itself will be included as a row if window_start
+    is negative and window_end is positive (i.e. the window includes episodes before
+    and after the base).
 
     Args:
         all_other_codes: Table containing at least `time_to_other_episode`
-        min_before: Other episodes will be included if they occurred at least min_before
-            time before the base episode
-        max_before: Other episodes will be included if they occurred at most max_before
-            time before the base episode
+        window_start: The smallest value of time_to_other_episode that will be included
+            in the returned table. Can be negative, meaning episode before the base
+            will be included.
+
+        window_end: The largest value of time_to_other_episode that will be included in
+            the returned table. Can be negative, meaning only episodes before the base
+            will be included. 
 
     Returns:
-        The episodes within the specified date range.
+        The episodes within the specified window range.
     """
     df = all_other_codes
     return df[
-        (df["time_to_other_episode"] <= -min_before)
-        & (df["time_to_other_episode"] >= -max_before)
+        (df["time_to_other_episode"] <= window_end)
+        & (df["time_to_other_episode"] >= window_start)
     ]
 
 

@@ -2,6 +2,7 @@
 """
 
 import datetime as dt
+import matplotlib.pyplot as plt
 
 from pyhbr.common import make_engine
 from pyhbr.middle import from_hic
@@ -45,84 +46,47 @@ index_episodes = arc_hbr.index_episodes(episodes, codes)
 # groups before/after the index)
 all_other_codes = counting.get_all_other_codes(index_episodes, episodes, codes)
 
-# Get the episodes that occurred just in the previous year
+# Get the episodes that occurred in the previous year (for clinical code features)
 max_before = dt.timedelta(days=365)
 min_before = dt.timedelta(days=30)
-previous_year = counting.get_previous_year(all_other_codes, min_before, max_before)
+previous_year = counting.get_time_window(all_other_codes, -max_before, -min_before)
 
-# Add relevant information to the index_episodes
-index_episodes["age"] = arc_hbr.calculate_age(index_episodes, demographics)
-index_episodes["gender"] = arc_hbr.get_gender(index_episodes, demographics)
-index_episodes["index_egfr"] = arc_hbr.get_lowest_index_lab_result(
-    index_episodes, lab_results, "egfr"
-)
-index_episodes["index_hb"] = arc_hbr.get_lowest_index_lab_result(
-    index_episodes, lab_results, "hb"
-)
-index_episodes["index_platelets"] = arc_hbr.get_lowest_index_lab_result(
-    index_episodes, lab_results, "platelets"
+# Get the episodes that occurred in the following year (for clinical code outcomes)
+min_after = dt.timedelta(hours=72)  # Exclude periprocedural events
+max_after = dt.timedelta(days=365)
+following_year = counting.get_time_window(all_other_codes, min_after, max_after)
+
+# Begin a table of general features (more granular than the ARC-HBR criteria,
+# from which the ARC score will be computed)
+features = pd.DataFrame()
+features[["acs_index", "pci_index"]] = index_episodes[["acs_index", "pci_index"]]
+features["age"] = arc_hbr.calculate_age(index_episodes, demographics)
+features["gender"] = arc_hbr.get_gender(index_episodes, demographics)
+features["min_index_egfr"] = arc_hbr.min_index_result("egfr", index_episodes, lab_results)
+features["min_index_hb"] = arc_hbr.min_index_result("hb", index_episodes, lab_results)
+features["min_index_platelets"] = arc_hbr.min_index_result(
+    "platelets", index_episodes, lab_results
 )
 
 bleeding_groups = ["bleeding_al_ani"]
-index_episodes["prior_bleeding"] = counting.count_code_groups(
+features["prior_bleeding_12"] = counting.count_code_groups(
     index_episodes, previous_year, bleeding_groups, False
 )
 # TODO: transfusion
 
 cancer_groups = ["cancer"]
-index_episodes["prior_cancer"] = counting.count_code_groups(
+features["prior_cancer"] = counting.count_code_groups(
     index_episodes, previous_year, cancer_groups, True
 )
 # TODO: add cancer therapy
 
+# Calculate the ARC HBR score from the more granular features.
+arc_hbr_score = arc_hbr.get_arc_hbr_score(features, prescriptions)
 
+# Get the bleeding outcome
+bleeding_outcome = counting.count_code_groups(
+    index_episodes, following_year, bleeding_groups, True
+)
 
-
-# Calculate the ARC HBR score
-arc_hbr_score = pd.DataFrame()
-arc_hbr_score["arc_hbr_age"] = arc_hbr.arc_hbr_age(index_episodes)
-arc_hbr_score["arc_hbr_oac"] = arc_hbr.arc_hbr_oac(index_episodes, prescriptions)
-arc_hbr_score["arc_hbr_ckd"] = arc_hbr.arc_hbr_ckd(index_episodes)
-arc_hbr_score["arc_hbr_anaemia"] = arc_hbr.arc_hbr_anaemia(index_episodes)
-arc_hbr_score["arc_hbr_tcp"] = arc_hbr.arc_hbr_tcp(index_episodes)
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-from matplotlib.axes import Axes
-from pandas import DataFrame
-
-
-def plot_index_measurement_distribution(index_episodes: DataFrame):
-    """Plot a histogram of measurement results at the index
-
-    Args:
-        index_episodes: Must contain `index_hb`, `index_egfr`,
-        and `index_platelets`. The index_hb column is multipled
-        by 10 to get units g/L.
-    """
-
-    # Make a plot showing the three lab results as histograms
-    df = index_episodes.copy()
-    df["index_hb"] = 10 * df["index_hb"]  # Convert from g/dL to g/L
-    df = (
-        df.filter(regex="^index")
-        .rename(
-            columns={
-                "index_egfr": "eGFR (mL/min)",
-                "index_hb": "Hb (g/L)",
-                "index_platelets": "Plt (x10^9/L)",
-            }
-        )
-        .melt(value_name="Lowest test result at index episode", var_name="Test")
-    )
-    g = sns.displot(
-        df,
-        x="Lowest test result at index episode",
-        hue="Test",
-    )
-    g.figure.subplots_adjust(top=0.95)
-    g.ax.set_title("Distribution of Laboratory Test Results in ACS/PCI index events")
-
-
-plot_index_measurement_distribution(index_episodes)
+arc_hbr.plot_index_measurement_distribution(features)
 plt.show()
