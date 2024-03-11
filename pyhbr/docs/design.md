@@ -71,6 +71,37 @@ To account for differences in data sources and the analysis, the module `pyhbr.m
 
 The outputs from this layer are documented so that it is possible to take a new data source and write a new module in `pyhbr.middle` which exposes the new data source for analysis. 
 
+### Table Formats
+
+The following tables are produced by the middle layer. These tables are grouped together into classes and (where the table name is used as the attribute name) used as the argument to analysis functions.
+
+All tables are Pandas DataFrames.
+
+#### Episodes
+
+Most analysis is performed in terms of episodes, which correspond to individual consultant interactions within a hospital visit (called a spell). Episode information is stored in a table called `episodes`, which has the following columns:
+
+* `episode_id` (`str`, Pandas index): uniquely identifies the episode.
+* `spell_id` (`str`): identifies the spell containing the episode.
+* `episode_start` (`datetime.date`): the episode start time.
+
+#### Codes
+
+Episodes contain clinical code data, which lists the diagnoses made and the procedures performed in an episode. This is stored in a table called `codes`, with the following columns:
+
+* `episode_id` (`str`): which episode contains this clinical code.
+* `code` (`str`): the clinical code, all lowercase with no whitespace or dot, e.g. `i212`
+* `position` (`int`): the position of the code in the episode. 1 means the primary position (e.g. for a primary diagnosis), and >1 means a secondary code. Often episodes contain 5-10 clinical codes, and the maximum number depends on the data source.
+* `type` (`category`): either "diagnosis" (for ICD-10 diagnosis codes) or "procedure" (for OPCS-4 codes)
+* `group` (`str`): which group contains this clinical code.
+
+The Pandas index is a unique integer (note that `episode_id` is not unique, since a single episode can contain many codes).
+
+!!! note
+
+    This table only contains codes that are in a code group (i.e. the function making `codes` should filter out codes not in any group). If all codes are required, make a code group "all" which contains every code. Codes are duplicated in the `codes` table if they are in more than one group (take care when counting rows).
+
+
 ## Saving Results
 
 TODO write me-- about save_item/load_item.

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from pyhbr.common import make_engine
 from pyhbr.middle import from_hic
 from pyhbr.analysis import arc_hbr
+from pyhbr.analysis import acs
 from pyhbr.clinical_codes import counting
 from pyhbr.data_source import hic
 
@@ -30,7 +31,7 @@ engine = make_engine()
 hic_data = from_hic.HicData(engine, start_date, end_date)
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_episodes = arc_hbr.index_episodes(hic_data)
+index_episodes = acs.index_episodes(hic_data)
 
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index)

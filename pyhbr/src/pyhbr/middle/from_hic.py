@@ -85,9 +85,13 @@ def get_clinical_codes(
     filtered_procedures = filter_to_groups(procedures, procedures_codes)
 
     # Tag the diagnoses/procedures, and combine the tables
-    filtered_diagnoses["type"] = "diagnoses"
-    filtered_procedures["type"] = "procedures"
-    return pd.concat([filtered_diagnoses, filtered_procedures])
+    filtered_diagnoses["type"] = "diagnosis"
+    filtered_procedures["type"] = "procedure"
+    
+    codes =  pd.concat([filtered_diagnoses, filtered_procedures])
+    codes["type"] = codes["type"].astype("category")
+    
+    return codes
 
 
 def check_const_column(df: pd.DataFrame, col_name: str, expect: str):
