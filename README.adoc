@@ -1,3 +1,11 @@
 = BHF HBR Bleeding/Ischaemia Risk Tool (UHBW)
 
 This repository contains development logs/information of a high bleeding risk tools for use in the Bristol Heart Institute at UHBW.
+
+The repository contains these items:
+
+* *Project Description:* The file `risk_management_file.pdf`, which describes the purpose of the tool. The source code is stored in the folder `risk_management_file/`
+* *Project Code:* A python package `pyhbr` (under development), containing all the code/model-development/analysis for this project. The documentation for this package is hosted https://jrs0.github.io/hbr_uhbw/[here].
+* *Analysis/Modelling Scripts:* A folder `scripts/`, containing (work-in-progress) scripts that use `pyhbr`. The `prototypes/` folder contains code that is more related to testing/development.
+
+NOTE: This repository is work in progress and code is not fully tested.
