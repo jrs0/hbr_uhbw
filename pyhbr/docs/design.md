@@ -69,11 +69,7 @@ The following are some tips for building statements using the `CheckedTable` obj
 
 To account for differences in data sources and the analysis, the module `pyhbr.middle` contains modules like `from_hic` which contain function that return transformed versions of the data sources more suitable for analysis.
 
-The outputs from this layer are documented so that it is possible to take a new data source and write a new module in `pyhbr.middle` which exposes the new data source for analysis. 
-
-### Table Formats
-
-The following tables are produced by the middle layer. These tables are grouped together into classes and (where the table name is used as the attribute name) used as the argument to analysis functions.
+The outputs from this layer are documented here so that it is possible to take a new data source and write a new module in `pyhbr.middle` which exposes the new data source for analysis. These tables are grouped together into classes and (where the table name is used as the attribute name) used as the argument to analysis functions. Analysis functions may not use all the columns of each table, but when a column is present it should have the name and meaning given below.
 
 All tables are Pandas DataFrames.
 
@@ -82,8 +78,12 @@ All tables are Pandas DataFrames.
 Most analysis is performed in terms of episodes, which correspond to individual consultant interactions within a hospital visit (called a spell). Episode information is stored in a table called `episodes`, which has the following columns:
 
 * `episode_id` (`str`, Pandas index): uniquely identifies the episode.
+* `patient_id` (`str`): the unique identifier for the patient.
 * `spell_id` (`str`): identifies the spell containing the episode.
 * `episode_start` (`datetime.date`): the episode start time.
+
+!!! note
+    Consider filtering the episodes table based on a date range of interest when it is fetched from the data source. This will speed up subsequent processing.
 
 #### Codes
 
@@ -99,7 +99,14 @@ The Pandas index is a unique integer (note that `episode_id` is not unique, sinc
 
 !!! note
 
-    This table only contains codes that are in a code group (i.e. the function making `codes` should filter out codes not in any group). If all codes are required, make a code group "all" which contains every code. Codes are duplicated in the `codes` table if they are in more than one group (take care when counting rows).
+    This table only contains codes that are in a code group (i.e. the function making `codes` should filter out codes not in any group). If all codes are required, make a code group "all" which contains every code. Note that codes occupy multiple rows in the `codes` table if they are in more than one group (take care when counting rows). In these cases, a duplicate code is identified by having the same `code`, `position` and `type` values, but a different group.
+
+#### Demographics
+
+Demographic information is stored in a table called `demographics`, which has the following columns:
+
+* `patient_id` (`str`, Pandas index): the unique patient identifier
+* `gender` (`category`): One of "male", "female", or "unknown". 
 
 
 ## Saving Results
