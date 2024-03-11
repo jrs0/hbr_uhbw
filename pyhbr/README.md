@@ -7,7 +7,7 @@ This package will contain all the data analysis, model development, and other ut
 The intention is to host `pyhbr` on PyPI. For now, it is available on TestPyPi, and can be installed using:
 
 ```bash
-pip install --index-url https://test.pypi.org/simple/ pyhbr
+pip install -i https://test.pypi.org/simple/ pyhbr
 ```
 
 Dependency versions have not yet been worked out in detail, so you might encounter problems. For now, the dependencies used in the development environment are stored in `requirements.txt`. 
