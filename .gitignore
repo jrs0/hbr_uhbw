@@ -22,3 +22,6 @@ site
 # Saved data (datasets, models, etc.)
 save_data/
 figures/
+
+# Make an exception for the tool_description.pdf file
+!tool_description.pdf
