@@ -25,3 +25,8 @@ figures/
 
 # Make an exception for the tool_description.pdf file
 !tool_description.pdf
+
+# Quarto output directory
+_output
+.quarto/
+*.tex

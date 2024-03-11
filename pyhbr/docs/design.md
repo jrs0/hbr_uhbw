@@ -115,7 +115,7 @@ To support saving intermediate results of calculations, `pyhbr.common` includes 
 
 The scripts in [hbr_uhbw](https://github.com/jrs0/hbr_uhbw) use these functions to create these checkpoints:
 
-* **Data**: After fetching data from databases or data sources and converting it into the raw format suitable for modelling or analysis. These files have the name `_data` in the file name. This data is then loaded again for modelling or analysis
+* **Data**: After fetching data from databases or data sources and converting it into the raw format suitable for modelling or analysis. These files have `_data` in the file name. This data is then loaded again for modelling or analysis
 * **Model**: After training models using the data stored in the `_data` files. These files have `_model` in the file name. This data is loaded for analysis.
 * **Analysis**: After performing analysis using the `_data` or `_model` files. These files have `_analysis` in the file name. This data can be loaded and used to generate reports/outputs.
 

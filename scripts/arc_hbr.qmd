@@ -1,0 +1,117 @@
+---
+title: "ARC HBR Score from HIC Data"
+jupyter: python3
+---
+
+```{python}
+#| output: false
+
+# Change up one level to access default location of `save_data/` directory
+import os
+os.chdir("../")
+
+from pyhbr import common
+from pyhbr.analysis import arc_hbr
+
+arc_hbr_data = common.load_item("arc_hbr_data")
+
+index_episodes = arc_hbr_data["index_episodes"]
+features = arc_hbr_data["features"]
+arc_hbr_score = arc_hbr_data["arc_hbr_score"]
+
+num_index = len(index_episodes)
+first_index_date = f'{index_episodes["episode_start"].min(): %b %d, %Y}'
+last_index_date = f'{index_episodes["episode_start"].max(): %b %d, %Y}'
+```
+
+This is an initial attempt to calculation the ARC HBR score using the HIC dataset. There are `{python} num_index` index events in the HIC data between the dates `{python} first_index_date` and `{python} last_index_date`.
+
+::: {.callout-note}
+This analysis uses a version of the HIC data which has not been fully tested by Mike yet, and which contains a reduced patient count. In addition, the code is still work in progress, so results might change.
+:::
+
+# Index Events
+
+```{python}
+
+from pandas import Series
+from typing import Any
+
+def percent_value(series: Series, value: Any) -> float:
+    """Find the proportion of a particular value in a Series.
+    """
+    return series.value_counts(normalize=True).loc[value]
+
+def percent_value_str(series: Series, value: Any) -> str:
+    """Find the proportion of a particular value in a Series
+    to 1.d.p as a string, for printing (includes %)
+    """
+    return f'{100*percent_value(series, value):.1f}%'
+
+
+pcnt_acs = percent_value_str(features["acs_index"], True)
+pcnt_pci = percent_value_str(features["pci_index"], True)
+pcnt_male = percent_value_str(features["gender"], "male")
+
+# Narrow to only the ACS index events (TODO stemi/nstemi)
+acs_features = features[features["acs_index"] == True]
+num_acs_index = len(acs_features)
+#pcnt_acs_nstemi = percent_value_str(acs_features["nstemi_index"], True)
+#pcnt_acs_stemi = percent_value_str(acs_features["stemi_index"], True)
+```
+
+Index events are defined as containing an ACS diagnosis in the primary position, or a PCI in any position. Of the `{python} num_index` `{python} pcnt_acs` of the index events met the ACS inclusion criterion, and `{python} pcnt_pci` met the PCI criterion (note that many index events meet both criteria). `{python} pcnt_male` of the index events where males.
+
+A plot of the distribution of age in the index events in shown below.
+
+```{python}
+import seaborn as sns
+
+age = features[["age"]].rename(columns={"age": "Age at Index"})
+sns.histplot(age, x="Age at Index")
+```
+
+# Laboratory Measurements
+
+Three of the ARC HBR criteria are derived from the minimum value of a laboratory measurements at the index episode:
+
+* Anaemia is derived from the haemoglobin measurement.
+* Chronic kidney disease is derived from the eGFR.
+* Thrombocytopenia is derived from the platelet count.
+
+The distribution of these measurements for the index episodes is shown below.
+
+```{python}
+arc_hbr.plot_index_measurement_distribution(features)
+```
+
+# ARC HBR Score
+
+The breakdown of different ARC HBR scores is shown in the graph below.
+
+```{python}
+import matplotlib.pyplot as plt
+
+arc_hbr_pretty = arc_hbr_score.rename(columns = {
+    "arc_hbr_age": "Age",
+    "arc_hbr_oac": "OAC",
+    "arc_hbr_ckd": "CKD",
+    "arc_hbr_anaemia": "Anaemia",
+    "arc_hbr_cancer": "Cancer",
+    "arc_hbr_tcp": "Thrombocytopenia",
+    "arc_hbr_prior_bleeding": "Prior Bleeding"
+})
+for_bar_plot = arc_hbr_pretty.melt(var_name="ARC HBR Criterion", value_name="ARC Score")
+plt.xticks(rotation=30)
+sns.countplot(for_bar_plot, x="ARC HBR Criterion", hue="ARC Score")
+```
+
+Some notes (work in progress):
+
+* In general, bleeding rates (both prior and subsequent) is much lower than in the ICB HES datasets. I'm attributing it to the UHBW-only nature of the data in HIC, so maybe missing some patient history/follow up if they end up at a different hospital.
+
+* OAC is zero because the criterion we have picked is that it should be present on admission, and there are no instances where an OAC is already present on admission in the HIC data (there are only cases where it is newly prescribed).
+
+* The low TCP does line up with the distribution of plt count which is encouraging (not a high proportion with plt < 100e9/L)
+
+* Will be interesting to test out the difference in performance using the ARC score as predictors vs. using the underlying lab results etc.
