@@ -4,12 +4,21 @@ This package will contain all the data analysis, model development, and other ut
 
 ## Package Installation
 
-For now, the dependencies are stored in `requirements.txt` (they will eventually be moved into the package itself). To install the package on Windows, using VS Code:
+The intention is to host `pyhbr` on PyPI. For now, it is available on TestPyPi, and can be installed using:
+
+```bash
+pip install --index-url https://test.pypi.org/simple/ pyhbr
+```
+
+Dependency versions have not yet been worked out in detail, so you might encounter problems. For now, the dependencies used in the development environment are stored in `requirements.txt`. 
+
+To install the package on Windows, using VS Code:
 
 1. Install Python 3 (>= 3.11)
 2. Create a new virtual environment (`Ctrl-Shift-P`, run `Python: Create Environment...`, pick `Venv`). Ensure it is activated
-3. In the VS Code terminal, install from the requirements file using `pip install -r requirements.txt`
-4. To install the package, run `pip install .` (If you want to make edits, using `pip install -e .`)
+3. Clone this repository and change directory to the `pyhbr/` folder.
+4. In the VS Code terminal, install from the requirements file using `pip install -r requirements.txt`
+5. To install the package, run `pip install .` (If you want to make edits, use `pip install -e .`)
 
 ## Development Instructions
 
