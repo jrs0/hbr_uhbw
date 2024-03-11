@@ -123,9 +123,9 @@ Splitting up the scripts in this way makes them easier to develop, because each 
 
 Multiple objects can be saved under one file by including them in a dictionary. It is up to the script to determine the format of the items being saved and loaded.
 
-!!! important
+!!! warning
 
-    By default, `save_item` puts the saved files into a directory called `save_data/` relative to your current working directory. Ensure that this is added to the .gitignore if the files contain sensitive data.
+    By default, `save_item` puts the saved files into a directory called `save_data/` relative to your current working directory. Ensure that this is added to the .gitignore if the files contain sensitive data, to avoid committing them to your repository.
 
 #### Saving Data
 
