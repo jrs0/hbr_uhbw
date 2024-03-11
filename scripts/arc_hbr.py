@@ -4,7 +4,7 @@
 import datetime as dt
 import matplotlib.pyplot as plt
 
-from pyhbr.common import make_engine
+from pyhbr import common
 from pyhbr.middle import from_hic
 from pyhbr.analysis import arc_hbr
 from pyhbr.analysis import acs
@@ -13,6 +13,7 @@ from pyhbr.data_source import hic
 
 import importlib
 
+importlib.reload(common)
 importlib.reload(arc_hbr)
 importlib.reload(from_hic)
 importlib.reload(hic)
@@ -27,7 +28,7 @@ start_date = dt.date(1990, 1, 1)
 end_date = dt.date(2030, 1, 1)
 
 # Fetch data
-engine = make_engine()
+engine = common.make_engine()
 hic_data = from_hic.HicData(engine, start_date, end_date)
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
@@ -62,6 +63,16 @@ bleeding_outcome = counting.count_code_groups(
 
 arc_hbr.plot_index_measurement_distribution(features)
 plt.show()
+
+# Package the data up for saving
+data = {
+    "index_episodes": index_episodes,
+    "features": features,
+    "arc_hbr_score": arc_hbr_score,
+    "bleeding_outcome": bleeding_outcome
+}
+
+common.save_item(data, "arc_hbr_data")
 
 # ======= QUICK MODEL =======
 

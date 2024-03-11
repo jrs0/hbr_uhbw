@@ -105,6 +105,7 @@ def get_data(
     stmt = query(engine, *args)
     return read_sql(stmt, engine)
 
+
 def current_commit() -> str:
     """Get current commit.
 
@@ -130,6 +131,7 @@ def current_timestamp() -> int:
             to the nearest second.
     """
     return int(time())
+
 
 def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
     """Get all saved data files matching name
@@ -201,19 +203,20 @@ def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
     ]
     return recent_first
 
+
 def pick_saved_file_interactive(name: str, save_dir: str) -> str | None:
     """Select a file matching name interactively
-    
+
     Print a list of the saved items in the save_dir folder, along
     with the date and time it was generated, and the commit hash,
     and let the user pick which item should be loaded interactively.
     The full filename of the resulting file is returned, which can
     then be read by the user.
-    
+
     Args:
         name: The name of the saved file to list
         save_dir: The directory to search for files
-        
+
     Returns:
         The absolute path to the interactively selected file, or None
             if the interactive load was aborted.
@@ -225,7 +228,9 @@ def pick_saved_file_interactive(name: str, save_dir: str) -> str | None:
     num_datasets = recent_first.shape[0]
     while True:
         try:
-            raw_choice = input(f"Pick a dataset to load: [{0} - {num_datasets-1}] (type q[uit]/exit, then Enter, to quit): ")
+            raw_choice = input(
+                f"Pick a dataset to load: [{0} - {num_datasets-1}] (type q[uit]/exit, then Enter, to quit): "
+            )
             if "exit" in raw_choice or "q" in raw_choice:
                 return None
             choice = int(raw_choice)
@@ -240,16 +245,17 @@ def pick_saved_file_interactive(name: str, save_dir: str) -> str | None:
     full_path = os.path.join(save_dir, recent_first.loc[choice, "path"])
     return full_path
 
+
 def pick_most_recent_saved_file(name: str, save_dir: str) -> str:
     """Get the path to the most recent file matching name.
-    
+
     Like pick_saved_file_interactive, but automatically selects the most
     recent file in save_data.
 
     Args:
         name: The name of the saved file to list
         save_dir: The directory to search for files
-        
+
     Returns:
         The absolute path to the most recent matching file.
     """
@@ -257,13 +263,14 @@ def pick_most_recent_saved_file(name: str, save_dir: str) -> str:
     full_path = os.path.join(save_dir, recent_first.loc[0, "path"])
     return full_path
 
+
 def requires_commit() -> bool:
-    """Check whether changes need committing 
-    
-    To make most effective use of the commit hash stored with a 
+    """Check whether changes need committing
+
+    To make most effective use of the commit hash stored with a
     save_item call, the current branch should be clean (all changes
     committed). Call this function to check.
-    
+
     Returns False if there is no git repository.
 
     Returns:
@@ -277,13 +284,16 @@ def requires_commit() -> bool:
         # No need to commit if not repository
         return False
 
-def save_item(item: Any, name: str, save_dir: str = "save_data/", enforce_clean_branch=True) -> None:
+
+def save_item(
+    item: Any, name: str, save_dir: str = "save_data/", enforce_clean_branch=True
+) -> None:
     """Save an item to a pickle file
 
     Saves a python object (e.g. a pandas DataFrame) dataframe in the save_dir
-    folder, using a filename that includes the current timestamp and the current 
+    folder, using a filename that includes the current timestamp and the current
     commit hash. Use load_item to retrieve the file.
-    
+
     By storing the commit hash and timestamp, it is possible to identify when items
     were created and what code created them. To make most effective use of the
     commit hash, ensure that you commit, and do not make any further code edits,
@@ -302,7 +312,9 @@ def save_item(item: Any, name: str, save_dir: str = "save_data/", enforce_clean_
     """
 
     if enforce_clean_branch and requires_commit():
-        raise RuntimeError("Aborting save_item() because branch is not clean. Commit changes and try again.")
+        raise RuntimeError(
+            "Aborting save_item() because branch is not clean. Commit your changes before saving item to increase the chance of reproducing the item based on the filename commit hash."
+        )
 
     if not os.path.isdir(save_dir):
         print(f"Creating missing folder '{save_dir}' for storing item")
@@ -316,15 +328,16 @@ def save_item(item: Any, name: str, save_dir: str = "save_data/", enforce_clean_
     with open(path, "wb") as file:
         pickle.dump(item, file)
 
+
 def load_item(name: str, interactive: bool = False, save_dir: str = "save_data") -> Any:
     """Load a previously saved item from file
-    
+
     Use this function to load a file that was previously saved using
     save_item(). By default, the latest version of the item will be returned
     (the one with the most recent timestamp).
-    
+
     None is returned if an interactive load is cancelled by the user.
-    
+
     To load an item that is an object from a library (e.g. a pandas DataFrame),
     the library must be installed (otherwise you will get a ModuleNotFound
     exception). However, you do not have to import the library before calling this
@@ -352,7 +365,7 @@ def load_item(name: str, interactive: bool = False, save_dir: str = "save_data")
         return
 
     print(f"Loading {item_path}")
-    
+
     # Load a generic pickle. Note that if this is a pandas dataframe,
     # pandas must be installed (otherwise you will get module not found).
     # The same goes for a pickle storing an object from any other library.
