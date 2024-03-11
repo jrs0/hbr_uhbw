@@ -10,9 +10,11 @@ The intention is to host `pyhbr` on PyPI. For now, it is available on TestPyPi, 
 pip install -i https://test.pypi.org/simple/ pyhbr
 ```
 
-Dependency versions have not yet been worked out in detail, so you might encounter problems. For now, the dependencies used in the development environment are stored in `requirements.txt`. 
+Dependency versions have not yet been worked out in detail, so you might encounter problems. For now, the dependencies used in the development environment are stored in `requirements.txt`. (This is a wider set of dependencies than is required for `pyhbr`, and includes the dependencies for all scripts in this repository.)
 
-To install the package on Windows, using VS Code:
+
+
+Instead of using pip, it is possible to install the package on from this git repository. On Windows, using VS Code, follow these steps:
 
 1. Install Python 3 (>= 3.11)
 2. Create a new virtual environment (`Ctrl-Shift-P`, run `Python: Create Environment...`, pick `Venv`). Ensure it is activated
