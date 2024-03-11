@@ -109,9 +109,66 @@ Demographic information is stored in a table called `demographics`, which has th
 * `gender` (`category`): One of "male", "female", or "unknown". 
 
 
-## Saving Results
+## Data/Model/Analysis Save Points
 
-TODO write me-- about save_item/load_item.
+To support saving intermediate results of calculations, `pyhbr.common` includes two functions `save_item` and `load_item`, which save a Python object to a directory (by default `save_data/` in your working directory).
+
+The scripts in [hbr_uhbw](https://github.com/jrs0/hbr_uhbw) use these functions to create these checkpoints:
+
+* **Data**: After fetching data from databases or data sources and converting it into the raw format suitable for modelling or analysis. These files have the name `_data` in the file name. This data is then loaded again for modelling or analysis
+* **Model**: After training models using the data stored in the `_data` files. These files have `_model` in the file name. This data is loaded for analysis.
+* **Analysis**: After performing analysis using the `_data` or `_model` files. These files have `_analysis` in the file name. This data can be loaded and used to generate reports/outputs.
+
+Splitting up the scripts in this way makes them easier to develop, because each of the three parts above can take quite long to run.
+
+Multiple objects can be saved under one file by including them in a dictionary. It is up to the script to determine the format of the items being saved and loaded.
+
+!!! important
+
+    By default, `save_item` puts the saved files into a directory called `save_data/` relative to your current working directory. Ensure that this is added to the .gitignore if the files contain sensitive data.
+
+#### Saving Data
+
+In addition to saving the item, `pyhbr.common.save_item` also includes in the file name:
+
+* The commit hash of the git repository at the time `save_item` is called. This is intended to make it easier to reproduce the state of the repository that generated the file. By default, `save_item` requires you to commit any changes before saving a file. (The cleanest/most reproducible thing to do is commit changes, and then run a script non-interactively from the top.) If you are not using a git repository, then "nogit" is used in place of the commit hash.
+* The timestamp when `save_item` was called, which is more granular than the commit hash (or useful in case you do not have a git repository).
+
+!!! note
+    You can save multiple items with the same name, because the file names will use different timestamps. By default, `load_item` will load the most recently saved file with a given name.
+
+The `save_item` function is shown below. The simplest way to call it is `save_item(df, "my_df")`, which will save the DataFrame `df` to the directory `save_data/` using the name "my_df".
+
+??? note "Use this function to save a Python object (e.g. a DataFrame)"
+
+    ::: pyhbr.common.save_item
+        options:
+            # If the root heading is shown, then a TOC entry will be
+            # present too. Set a very high heading level to hide it.
+            heading_level: 100
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_root_toc_entry: false
+
+#### Loading Data
+
+To load a previously saved item, using `pyhbr.common.load_item`. It can be called most simply using `load_item("my_df")`, assuming you previously saved an object in the default directory (`save_data`) with the name "my_df". By default, the most recent item is loaded, but using `load_item("my_df", True)` will let you pick which file you want to load.
+
+The function `load_item` is shown below:
+
+??? note "Use this function to load a previously saved Python object"
+
+    ::: pyhbr.common.load_item
+        options:
+            # If the root heading is shown, then a TOC entry will be
+            # present too. Set a very high heading level to hide it.
+            heading_level: 100
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_root_toc_entry: false
+
 
 ## Clinical Codes
 

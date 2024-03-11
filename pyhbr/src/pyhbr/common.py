@@ -294,6 +294,10 @@ def save_item(
     folder, using a filename that includes the current timestamp and the current
     commit hash. Use load_item to retrieve the file.
 
+    !!! important
+        Ensure that `save_data/` (or your chosen `save_dir`) is added to the
+        .gitignore of your repository to ensure sensitive data is not committed.
+
     By storing the commit hash and timestamp, it is possible to identify when items
     were created and what code created them. To make most effective use of the
     commit hash, ensure that you commit, and do not make any further code edits,
