@@ -86,6 +86,31 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     oac_criterion = df["name"].isin(oac_list).astype("float")
     return Series(oac_criterion, index=index_episodes.index)
 
+def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
+    """Calculate the non-steroidal anti-inflamatory drug (NSAID) ARC HBR criterion
+
+    1.0 point is added if an one of the following NSAIDs is present
+    on admission:
+
+    * Ibuprofen
+    * Naproxen
+    * Diclofenac
+    * Celecoxib
+    * Mefenamic acid
+    * Etoricoxib
+    * Indomethacin
+
+
+    Args:
+        index_episodes: Index `episode_id` is used to narrow prescriptions.
+        prescriptions: Contains `name` (of medicine).
+
+    Returns:
+        The OAC ARC score for each index event.
+    """
+    df = index_episodes.merge(prescriptions, how="left", on="episode_id")
+    nsaid_criterion = ((df["group"] == "nsaid") & (df["on_admission"] == True)).astype("float")
+    return Series(nsaid_criterion, index=index_episodes.index)
 
 def min_index_result(
     test_name: str, index_episodes: DataFrame, lab_results: DataFrame
@@ -341,6 +366,7 @@ def get_arc_hbr_score(features: DataFrame, data: HicData) -> DataFrame:
         "arc_hbr_tcp": arc_hbr_tcp(features),
         "arc_hbr_prior_bleeding": arc_hbr_prior_bleeding(features),
         "arc_hbr_cancer": arc_hbr_cancer(features),
+        "arc_hbr_nsaid": arc_hbr_nsaid(features, data.prescriptions)
     }
     return DataFrame(arc_score_data)
 

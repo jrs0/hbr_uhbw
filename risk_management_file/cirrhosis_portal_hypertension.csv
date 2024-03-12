@@ -1,0 +1,13 @@
+Code,Diagnosis,Notes
+K70.3,Cirrhosis,Combines .30 and .31 dagger
+K70.4,Cirrhosis,
+K71.7,Cirrhosis,
+K74.3,Cirrhosis,
+K74.4,Cirrhosis,
+K74.5,Cirrhosis,
+K74.6,Cirrhosis,Combines .60 and .69
+K70.3,Portal hypertension,Only .31 dagger
+I85.0,Portal hypertension,Includes .00 but not .01
+I85.1,Portal hypertension,Includes .10 but not .11
+I86.4,Portal hypertension,
+K76.6,Portal hypertension,

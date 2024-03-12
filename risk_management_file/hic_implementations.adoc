@@ -162,9 +162,15 @@ TODO
 
 === Cirrhosis with Portal Hypertension
 
-If the patient has any ICD-10 code for cirrhosis with portal hypertension at any point in their history, add 1 to the ARC HBR score. The relevant ICD-10 codes are shown below:
+If the patient has any ICD-10 code for cirrhosis with portal hypertension at any point in their history, add 1 to the ARC HBR score.
 
-TODO CODES"""
+The accuracy of ICD-10 codes for liver cirrhosis and portal hypertension is discussed in a USA-based study cite:[burkholder2022accuracy]. The following codes for cirrhosis and portal hypertension is taken from their supplementary material, Table 1:
+
+.Cirrhosis and portal hypertension ICD-10 codes
+[format=csv, options="header"]
+|===
+include::cirrhosis_portal_hypertension.csv[]
+|===
 
 === Cancer
 
@@ -217,3 +223,5 @@ Presence of any of the following medications on admission (at the index ACS/PCI 
 * Indomethacin
 * Aspirin (high-dose, for pain-relief)
 * #Anything else?#
+
+NOTE: In the HIC data, all prescriptions of NSAIDs in the data set indicate a frequency of at least once per day, and therefore qualify.
