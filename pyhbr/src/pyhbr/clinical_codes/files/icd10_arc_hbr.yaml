@@ -3036,6 +3036,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - A00
     - B99
@@ -5913,6 +5915,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - C00
     - D48
@@ -6573,6 +6577,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - D50
     - D89
@@ -7975,6 +7981,8 @@ categories:
     - ckd
     - cancer
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - E00
     - E90
@@ -8024,6 +8032,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - portal_hypertension
       index:
       - I00
       - I02
@@ -8138,6 +8147,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - portal_hypertension
       index:
       - I05
       - I09
@@ -8212,6 +8222,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - portal_hypertension
       index:
       - I10
       - I15
@@ -8442,6 +8453,7 @@ categories:
       exclude:
       - bleeding_al_ani
       - bleeding_cadth
+      - portal_hypertension
       index:
       - I20
       - I25
@@ -8503,6 +8515,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - portal_hypertension
       index:
       - I26
       - I28
@@ -8961,6 +8974,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - portal_hypertension
       index:
       - I30
       - I52
@@ -9252,6 +9266,7 @@ categories:
       - mi_schnier
       - acs_bezin
       - ihd_bezin
+      - portal_hypertension
       index:
       - I60
       - I69
@@ -9456,6 +9471,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - portal_hypertension
       index:
       - I70
       - I79
@@ -9484,12 +9500,14 @@ categories:
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - portal_hypertension
         index: I80
         name: I80
       - docs: Portal vein thrombosis
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - portal_hypertension
         index: I81
         name: I81
       - categories:
@@ -9515,6 +9533,7 @@ categories:
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - portal_hypertension
         index: I82
         name: I82
       - categories:
@@ -9534,6 +9553,7 @@ categories:
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - portal_hypertension
         index: I83
         name: I83
       - categories:
@@ -9544,6 +9564,7 @@ categories:
           exclude:
           - bleeding_al_ani
           - bleeding_cadth
+          - portal_hypertension
           index: I859
           name: I85.9
         docs: Oesophageal varices
@@ -9551,21 +9572,31 @@ categories:
         name: I85
       - categories:
         - docs: Sublingual varices
+          exclude:
+          - portal_hypertension
           index: I860
           name: I86.0
         - docs: Scrotal varices
+          exclude:
+          - portal_hypertension
           index: I861
           name: I86.1
         - docs: Pelvic varices
+          exclude:
+          - portal_hypertension
           index: I862
           name: I86.2
         - docs: Vulval varices
+          exclude:
+          - portal_hypertension
           index: I863
           name: I86.3
         - docs: Gastric varices
           index: I864
           name: I86.4
         - docs: Varicose veins of other specified sites
+          exclude:
+          - portal_hypertension
           index: I868
           name: I86.8
         docs: Varicose veins of other sites
@@ -9594,6 +9625,7 @@ categories:
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - portal_hypertension
         index: I87
         name: I87
       - categories:
@@ -9613,6 +9645,7 @@ categories:
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - portal_hypertension
         index: I88
         name: I88
       - categories:
@@ -9632,6 +9665,7 @@ categories:
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - portal_hypertension
         index: I89
         name: I89
       docs: Diseases of veins, lymphatic vessels and lymph nodes, not elsewhere classified
@@ -9719,6 +9753,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - portal_hypertension
       index:
       - I95
       - I99
@@ -9730,6 +9765,7 @@ categories:
     - cancer
     - diabetes_type1
     - diabetes_type2
+    - liver_cirrhosis
     index:
     - I00
     - I99
@@ -11278,6 +11314,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - F00
     - F99
@@ -12590,6 +12628,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - G00
     - G99
@@ -13682,6 +13722,8 @@ categories:
     - cancer
     - diabetes_type1
     - diabetes_type2
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - H00
     - H59
@@ -14154,6 +14196,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - H60
     - H95
@@ -15117,6 +15161,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - J00
     - J99
@@ -15515,6 +15561,8 @@ categories:
       - bleeding_al_ani
       - bleeding_cadth
       - bleeding_adaptt
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K00
       - K14
@@ -15931,6 +15979,9 @@ categories:
         index: K31
         name: K31
       docs: Diseases of oesophagus, stomach and duodenum
+      exclude:
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K20
       - K31
@@ -15982,6 +16033,8 @@ categories:
       - bleeding_al_ani
       - bleeding_cadth
       - bleeding_adaptt
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K35
       - K38
@@ -16119,6 +16172,8 @@ categories:
       - bleeding_al_ani
       - bleeding_cadth
       - bleeding_adaptt
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K40
       - K46
@@ -16195,6 +16250,8 @@ categories:
       exclude:
       - bleeding_cadth
       - bleeding_adaptt
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K50
       - K52
@@ -16520,6 +16577,9 @@ categories:
         index: K64
         name: K64
       docs: Other diseases of intestines
+      exclude:
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K55
       - K64
@@ -16591,6 +16651,8 @@ categories:
       docs: Diseases of peritoneum
       exclude:
       - bleeding_al_ani
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K65
       - K67
@@ -16598,21 +16660,35 @@ categories:
     - categories:
       - categories:
         - docs: Alcoholic fatty liver
+          exclude:
+          - liver_cirrhosis
+          - portal_hypertension
           index: K700
           name: K70.0
         - docs: Alcoholic hepatitis
+          exclude:
+          - liver_cirrhosis
+          - portal_hypertension
           index: K701
           name: K70.1
         - docs: Alcoholic fibrosis and sclerosis of liver
+          exclude:
+          - liver_cirrhosis
+          - portal_hypertension
           index: K702
           name: K70.2
         - docs: Alcoholic cirrhosis of liver
           index: K703
           name: K70.3
         - docs: Alcoholic hepatic failure
+          exclude:
+          - portal_hypertension
           index: K704
           name: K70.4
         - docs: Alcoholic liver disease, unspecified
+          exclude:
+          - liver_cirrhosis
+          - portal_hypertension
           index: K709
           name: K70.9
         docs: Alcoholic liver disease
@@ -16620,36 +16696,56 @@ categories:
         name: K70
       - categories:
         - docs: Toxic liver disease with cholestasis
+          exclude:
+          - liver_cirrhosis
           index: K710
           name: K71.0
         - docs: Toxic liver disease with hepatic necrosis
+          exclude:
+          - liver_cirrhosis
           index: K711
           name: K71.1
         - docs: Toxic liver disease with acute hepatitis
+          exclude:
+          - liver_cirrhosis
           index: K712
           name: K71.2
         - docs: Toxic liver disease with chronic persistent hepatitis
+          exclude:
+          - liver_cirrhosis
           index: K713
           name: K71.3
         - docs: Toxic liver disease with chronic lobular hepatitis
+          exclude:
+          - liver_cirrhosis
           index: K714
           name: K71.4
         - docs: Toxic liver disease with chronic active hepatitis
+          exclude:
+          - liver_cirrhosis
           index: K715
           name: K71.5
         - docs: Toxic liver disease with hepatitis, not elsewhere classified
+          exclude:
+          - liver_cirrhosis
           index: K716
           name: K71.6
         - docs: Toxic liver disease with fibrosis and cirrhosis of liver
           index: K717
           name: K71.7
         - docs: Toxic liver disease with other disorders of liver
+          exclude:
+          - liver_cirrhosis
           index: K718
           name: K71.8
         - docs: Toxic liver disease, unspecified
+          exclude:
+          - liver_cirrhosis
           index: K719
           name: K71.9
         docs: Toxic liver disease
+        exclude:
+        - portal_hypertension
         index: K71
         name: K71
       - categories:
@@ -16663,6 +16759,9 @@ categories:
           index: K729
           name: K72.9
         docs: Hepatic failure, not elsewhere classified
+        exclude:
+        - liver_cirrhosis
+        - portal_hypertension
         index: K72
         name: K72
       - categories:
@@ -16682,16 +16781,25 @@ categories:
           index: K739
           name: K73.9
         docs: Chronic hepatitis, not elsewhere classified
+        exclude:
+        - liver_cirrhosis
+        - portal_hypertension
         index: K73
         name: K73
       - categories:
         - docs: Hepatic fibrosis
+          exclude:
+          - liver_cirrhosis
           index: K740
           name: K74.0
         - docs: Hepatic sclerosis
+          exclude:
+          - liver_cirrhosis
           index: K741
           name: K74.1
         - docs: Hepatic fibrosis with hepatic sclerosis
+          exclude:
+          - liver_cirrhosis
           index: K742
           name: K74.2
         - docs: Primary biliary cirrhosis
@@ -16707,6 +16815,8 @@ categories:
           index: K746
           name: K74.6
         docs: Fibrosis and cirrhosis of liver
+        exclude:
+        - portal_hypertension
         index: K74
         name: K74
       - categories:
@@ -16732,40 +16842,63 @@ categories:
           index: K759
           name: K75.9
         docs: Other inflammatory liver diseases
+        exclude:
+        - liver_cirrhosis
+        - portal_hypertension
         index: K75
         name: K75
       - categories:
         - docs: Fatty (change of) liver, not elsewhere classified
+          exclude:
+          - portal_hypertension
           index: K760
           name: K76.0
         - docs: Chronic passive congestion of liver
+          exclude:
+          - portal_hypertension
           index: K761
           name: K76.1
         - docs: Central haemorrhagic necrosis of liver
+          exclude:
+          - portal_hypertension
           index: K762
           name: K76.2
         - docs: Infarction of liver
+          exclude:
+          - portal_hypertension
           index: K763
           name: K76.3
         - docs: Peliosis hepatis
+          exclude:
+          - portal_hypertension
           index: K764
           name: K76.4
         - docs: Hepatic veno-occlusive disease
+          exclude:
+          - portal_hypertension
           index: K765
           name: K76.5
         - docs: Portal hypertension
           index: K766
           name: K76.6
         - docs: Hepatorenal syndrome
+          exclude:
+          - portal_hypertension
           index: K767
           name: K76.7
         - docs: Other specified diseases of liver
+          exclude:
+          - portal_hypertension
           index: K768
           name: K76.8
         - docs: Liver disease, unspecified
+          exclude:
+          - portal_hypertension
           index: K769
           name: K76.9
         docs: Other diseases of liver
+        exclude:
+        - liver_cirrhosis
         index: K76
         name: K76
       - categories:
@@ -16776,6 +16909,9 @@ categories:
           index: K778
           name: K77.8
         docs: Liver disorders in diseases classified elsewhere
+        exclude:
+        - liver_cirrhosis
+        - portal_hypertension
         index: K77
         name: K77
       docs: Diseases of liver
@@ -16941,6 +17077,8 @@ categories:
       - bleeding_al_ani
       - bleeding_cadth
       - bleeding_adaptt
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K80
       - K87
@@ -17054,6 +17192,9 @@ categories:
         index: K93
         name: K93
       docs: Other diseases of the digestive system
+      exclude:
+      - liver_cirrhosis
+      - portal_hypertension
       index:
       - K90
       - K93
@@ -18398,6 +18539,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - L00
     - L99
@@ -20480,6 +20623,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - M00
     - M99
@@ -22245,6 +22390,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - N00
     - N99
@@ -27035,6 +27182,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - S00
     - T98
@@ -28674,6 +28823,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - O00
     - O99
@@ -29970,6 +30121,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - P00
     - P96
@@ -32258,6 +32411,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - Q00
     - Q99
@@ -33713,6 +33868,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - R00
     - R99
@@ -38680,6 +38837,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - V01
     - Y98
@@ -40961,6 +41120,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - Z00
     - Z99
@@ -41138,6 +41299,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - liver_cirrhosis
+    - portal_hypertension
     index:
     - U00
     - U85
