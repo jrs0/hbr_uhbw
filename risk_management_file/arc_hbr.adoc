@@ -119,7 +119,7 @@ NOTE: There are many conditions which fall within the scope of this criterion; i
 
 Presence of liver cirrhosis with portal hypertension is a major criterion. 
 
-NOTE: THe ARC HBR official app states "liver cirrhosis" only on the main page of critera, but qualifies "with portal hypertension" on the next page. Applying the ARC HBR score strictly, liver cirrhosis alone is not an ARC criteria, but further granularity or predictivity in the score may be achievable by considering liver cirrhosis without portal hypertension to be a risk factor. Similarly, esophageal varices could also be considered in this category.
+NOTE: The ARC HBR official app states "liver cirrhosis" only on the main page of critera, but qualifies "with portal hypertension" on the next page. Applying the ARC HBR score strictly, liver cirrhosis alone is not an ARC criteria, but further granularity or predictivity in the score may be achievable by considering liver cirrhosis without portal hypertension to be a risk factor. Similarly, esophageal varices could also be considered in this category.
 
 === Cancer
 

@@ -172,6 +172,8 @@ The accuracy of ICD-10 codes for liver cirrhosis and portal hypertension is disc
 include::cirrhosis_portal_hypertension.csv[]
 |===
 
+NOTE: Other related codes listed in the study (Table 1, supplementary material) could be used to provide related predictors.
+
 === Cancer
 
 If the patient has a cancer diagnosis code (ICD-10) in the previous 12 months before the index ACS/PCI, add 1 to the ARC HBR score. The relevant ICD-10 codes are shown below:
