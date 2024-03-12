@@ -66,6 +66,7 @@ plt.show()
 
 # Package the data up for saving
 data = {
+    "hic_data": hic_data,
     "index_episodes": index_episodes,
     "features": features,
     "arc_hbr_score": arc_hbr_score,

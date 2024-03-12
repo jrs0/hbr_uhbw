@@ -73,6 +73,12 @@ sns.histplot(age, x="Age at Index")
 
 # Laboratory Measurements
 
+Laboratory measurements are not associated to an episode in the HIC data. Instead, a measurement result is linked to the episode containing the sample-collected date/time of the laboratory test in its start/end date range.
+
+:::{.callout-note}
+There may be a more refined way to link laboratory test results to index episodes (the same comment applies to prescriptions below)
+:::
+
 Three of the ARC HBR criteria are derived from the minimum value of a laboratory measurements at the index episode:
 
 * Anaemia is derived from the haemoglobin measurement.
@@ -84,6 +90,14 @@ The distribution of these measurements for the index episodes is shown below.
 ```{python}
 arc_hbr.plot_index_measurement_distribution(features)
 ```
+
+Show a plot of the proportion of patients with these measurements in their index event.
+
+# Prescriptions
+
+Like laboratory tests, prescriptions are not associated with an episode ID. The prescriptions have been linked to episodes by associating a prescription to the episode containing the order data/time of the prescription.
+
+Show proportion of each kind of prescription in the index episode.
 
 # ARC HBR Score
 

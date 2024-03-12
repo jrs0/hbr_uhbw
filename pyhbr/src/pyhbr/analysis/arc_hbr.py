@@ -65,15 +65,18 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     """Calculate the oral-anticoagulant ARC HBR criterion
 
     1.0 point if an one of the OACs "warfarin", "apixaban",
-    "rivaroxaban", "edoxaban", "dabigatran", is present on
-    admission in the index episode.
+    "rivaroxaban", "edoxaban", "dabigatran", is present
+    in the index episode (meaning it was present on admission,
+    or was prescribed in that episode).
 
-    Note: The number of OAC medicines present on admission in the HIC
-    data is zero in a small sample. Needs checking.
+    !!! note
+        The on admission flag could be used to imply expected
+        chronic/extended use, but this is not included as it filters
+        out all OAC prescriptions in the HIC data.
 
     Args:
         index_episodes: Index `episode_id` is used to narrow prescriptions.
-        prescriptions: Contains `name` (of medicine0 and `on_admission` (bool).
+        prescriptions: Contains `name` (of medicine).
 
     Returns:
         The OAC ARC score for each index event.

@@ -75,14 +75,14 @@ If age \> 75 years, 0.5 is added to the score.
 
 === Oral Anticoagulant Use
 
-Presence of any of the following medications on admission (at the index ACS/PCI episode) will add 1 to the ARC HBR score:
+Presence of any of the following medications (at the index ACS/PCI episode) will add 1 to the ARC HBR score:
 
 * Warfarin
 * Apixaban, rivaroxaban, edoxaban, dabigatran
 
-#In a small sample of the HIC (2,379 index events), there are no OAC medicines on admission. There are 23 prescriptions of these drugs in total (presumably prescribed at index)#
-
 NOTE: Dose is not considered in this implementation of the ARC HBR score.
+
+NOTE: Initially, an attempt was made to use the "on admission" flag to identify chronic/long-term use. This filtered out all prescriptions in the HIC data, so this requirement was dropped.
 
 == Chronic Kidney Disease
 
