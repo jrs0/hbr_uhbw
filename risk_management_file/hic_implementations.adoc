@@ -98,7 +98,6 @@ If a laboratory test for eGFR was taken during the index presentation #or at any
 |  >= 60 mL/min | 0
 |===
 
-#Approx. 25% of patients do not have an eGFR measurement in their index episode. Sounds quite high? Could be a programming error.#
 
 If no eGFR result is available, fall back on presence of an ICD-10 code #at any time in patient history#:
 

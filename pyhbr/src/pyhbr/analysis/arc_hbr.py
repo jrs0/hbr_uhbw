@@ -83,7 +83,7 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     """
     df = index_episodes.merge(prescriptions, how="left", on="episode_id")
     oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
-    oac_criterion = (df["name"].isin(oac_list) & df["on_admission"]).astype("float")
+    oac_criterion = df["name"].isin(oac_list).astype("float")
     return Series(oac_criterion, index=index_episodes.index)
 
 

@@ -91,7 +91,7 @@ The distribution of these measurements for the index episodes is shown below.
 arc_hbr.plot_index_measurement_distribution(features)
 ```
 
-Show a plot of the proportion of patients with these measurements in their index event.
+Show a plot of the proportion of patients with these measurements present in their index event.
 
 # Prescriptions
 
