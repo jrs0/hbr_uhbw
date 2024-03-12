@@ -7,6 +7,7 @@ import seaborn as sns
 from pyhbr.middle.from_hic import HicData
 from pyhbr.clinical_codes.counting import count_code_groups
 
+
 def get_gender(index_episodes: DataFrame, demographics: DataFrame) -> Series:
     """Get gender from the demographics table for each index event
 
@@ -86,6 +87,7 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     oac_criterion = df["name"].isin(oac_list).astype("float")
     return Series(oac_criterion, index=index_episodes.index)
 
+
 def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     """Calculate the non-steroidal anti-inflamatory drug (NSAID) ARC HBR criterion
 
@@ -109,8 +111,11 @@ def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series
         The OAC ARC score for each index event.
     """
     df = index_episodes.merge(prescriptions, how="left", on="episode_id")
-    nsaid_criterion = ((df["group"] == "nsaid") & (df["on_admission"] == True)).astype("float")
+    nsaid_criterion = ((df["group"] == "nsaid") & (df["on_admission"] == True)).astype(
+        "float"
+    )
     return Series(nsaid_criterion, index=index_episodes.index)
+
 
 def min_index_result(
     test_name: str, index_episodes: DataFrame, lab_results: DataFrame
@@ -278,7 +283,34 @@ def arc_hbr_cancer(has_prior_cancer: DataFrame) -> Series:
     )
 
 
-def get_features(index_episodes: DataFrame, previous_year: DataFrame, data: HicData) -> DataFrame:
+def arc_hbr_cirrhosis_ptl_hyp(has_prior_cirrhosis: DataFrame) -> Series:
+    """Calculate the liver cirrhosis with portal hypertension ARC HBR criterion
+
+    This function takes a dataframe with two columns prior_cirrhosis
+    and prior_portal_hyp, which count the number of diagnosis of
+    liver cirrhosis and portal hypertension seen in the previous
+    year.
+
+    Args:
+        has_prior_cancer: Has a column `prior_cancer` with a count
+            of the number of cancer diagnoses occurring in the
+            year before the index event.
+
+    Returns:
+        The ARC HBR criterion (0.0, 1.0)
+    """
+    cirrhosis = has_prior_cirrhosis["prior_cirrhosis"] > 0
+    portal_hyp = has_prior_cirrhosis["prior_cirrhosis"] > 0
+
+    return Series(
+        np.where(cirrhosis & portal_hyp, 1.0, 0),
+        index=has_prior_cirrhosis.index,
+    )
+
+
+def get_features(
+    index_episodes: DataFrame, previous_year: DataFrame, data: HicData
+) -> DataFrame:
     """Index/prior history features for calculating ARC HBR
 
     Make table of general features (more granular than the ARC-HBR criteria,
@@ -296,20 +328,26 @@ def get_features(index_episodes: DataFrame, previous_year: DataFrame, data: HicD
         The table of features (used for calculating the ARC HBR score).
     """
 
+    cirrhosis_groups = ["cirrhosis"]
+    portal_hyp_groups = ["portal_hypertension"]
     bleeding_groups = ["bleeding_al_ani"]
     cancer_groups = ["cancer"]
     feature_data = {
         "age": calculate_age(index_episodes, data.demographics),
         "gender": get_gender(index_episodes, data.demographics),
         "min_index_egfr": min_index_result("egfr", index_episodes, data.lab_results),
-        "min_index_hb": min_index_result(
-           "hb", index_episodes, data.lab_results
-        ),
+        "min_index_hb": min_index_result("hb", index_episodes, data.lab_results),
         "min_index_platelets": min_index_result(
             "platelets", index_episodes, data.lab_results
         ),
         "prior_bleeding_12": count_code_groups(
             index_episodes, previous_year, bleeding_groups, False
+        ),
+        "prior_cirrhosis": count_code_groups(
+            index_episodes, previous_year, cirrhosis_groups, False
+        ),
+        "prior_portal_hyp": count_code_groups(
+            index_episodes, previous_year, portal_hyp_groups, False
         ),
         # TODO: transfusion
         "prior_cancer": count_code_groups(
@@ -365,8 +403,9 @@ def get_arc_hbr_score(features: DataFrame, data: HicData) -> DataFrame:
         "arc_hbr_anaemia": arc_hbr_anaemia(features),
         "arc_hbr_tcp": arc_hbr_tcp(features),
         "arc_hbr_prior_bleeding": arc_hbr_prior_bleeding(features),
+        "arc_hbr_cirrhosis_portal_hyp": arc_hbr_cirrhosis_ptl_hyp(features),
         "arc_hbr_cancer": arc_hbr_cancer(features),
-        "arc_hbr_nsaid": arc_hbr_nsaid(features, data.prescriptions)
+        "arc_hbr_nsaid": arc_hbr_nsaid(features, data.prescriptions),
     }
     return DataFrame(arc_score_data)
 
