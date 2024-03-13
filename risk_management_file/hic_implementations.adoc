@@ -190,19 +190,17 @@ NOTE: The ARC HBR definition refers to "ongoing" cancer therapy. The assumption 
 
 Add 1 to the ARC HBR score if either of these two conditions are present anywhere in the patient's history (ICD-10 codes):
 
-* Brain arteriovenous malformation
-* Prior intracranial haemorrhage at any time
+* Brain arteriovenous malformation (ICD-10 code Q28.2)
+* Prior intracranial haemorrhage at any time (ICD-10 I60.\*, I61.\*, I62.\* cite:[park2019validation])
 
-The relevant codes are shown below:
-
-Alternatively, identify all ischaemic stroke events in the patient's history, using ICD-10 codes:
+If no match above, identify all ischaemic stroke events in the patient's history, using ICD-10 codes:
 
 * If a moderate/severe ischaemic stroke occurred within 6 months before ACS/PCI, then add 1 to the ARC HBR score; or
 * If there is at least one ischaemic stroke, add 0.5 to the ARC HBR score
 
-The relevant ICD-10 codes for ischaemic strokes, along with severity, are shown in the table below:
+Although it is possible for modern versions of ICD-10 to contain stroke-severity information cite:[Taha2024.02.21.24303177], it is more likely that the severity of the stroke is not present in the HIC data ICD-10 codes. 
 
-TODO CODES
+As a result, we assume all strokes are in the second category listed above, and add 0.5 to the score if any code is I63.\* is seen cite:[hsieh2020performance].
 
 === Planned Major Non-cardiac Surgery
 

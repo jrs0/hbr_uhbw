@@ -3038,6 +3038,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - A00
     - B99
@@ -5917,6 +5919,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - C00
     - D48
@@ -6579,6 +6583,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - D50
     - D89
@@ -7983,6 +7989,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - E00
     - E90
@@ -8033,6 +8041,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - portal_hypertension
+      - ich
       index:
       - I00
       - I02
@@ -8148,6 +8157,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - portal_hypertension
+      - ich
       index:
       - I05
       - I09
@@ -8223,6 +8233,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - portal_hypertension
+      - ich
       index:
       - I10
       - I15
@@ -8454,6 +8465,7 @@ categories:
       - bleeding_al_ani
       - bleeding_cadth
       - portal_hypertension
+      - ich
       index:
       - I20
       - I25
@@ -8516,6 +8528,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - portal_hypertension
+      - ich
       index:
       - I26
       - I28
@@ -8975,6 +8988,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - portal_hypertension
+      - ich
       index:
       - I30
       - I52
@@ -9101,6 +9115,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - bleeding_adaptt
+        - ich
         index: I63
         name: I63
       - docs: Stroke, not specified as haemorrhage or infarction
@@ -9108,6 +9123,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - bleeding_adaptt
+        - ich
         index: I64
         name: I64
       - categories:
@@ -9135,6 +9151,7 @@ categories:
         - bleeding_cadth
         - bleeding_adaptt
         - hussain_ami_stroke
+        - ich
         index: I65
         name: I65
       - categories:
@@ -9165,6 +9182,7 @@ categories:
         - bleeding_cadth
         - bleeding_adaptt
         - hussain_ami_stroke
+        - ich
         index: I66
         name: I66
       - categories:
@@ -9204,6 +9222,7 @@ categories:
         - bleeding_cadth
         - bleeding_adaptt
         - hussain_ami_stroke
+        - ich
         index: I67
         name: I67
       - categories:
@@ -9225,6 +9244,7 @@ categories:
         - bleeding_cadth
         - bleeding_adaptt
         - hussain_ami_stroke
+        - ich
         index: I68
         name: I68
       - categories:
@@ -9257,6 +9277,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - hussain_ami_stroke
+        - ich
         index: I69
         name: I69
       docs: Cerebrovascular diseases
@@ -9472,6 +9493,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - portal_hypertension
+      - ich
       index:
       - I70
       - I79
@@ -9677,6 +9699,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - hussain_ami_stroke
+      - ich
       index:
       - I80
       - I89
@@ -9754,6 +9777,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - portal_hypertension
+      - ich
       index:
       - I95
       - I99
@@ -9766,6 +9790,7 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - liver_cirrhosis
+    - bavm
     index:
     - I00
     - I99
@@ -11316,6 +11341,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - F00
     - F99
@@ -12630,6 +12657,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - G00
     - G99
@@ -13724,6 +13753,8 @@ categories:
     - diabetes_type2
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - H00
     - H59
@@ -14198,6 +14229,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - H60
     - H95
@@ -15163,6 +15196,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - J00
     - J99
@@ -17212,6 +17247,8 @@ categories:
     - diabetes_type1
     - diabetes_type2
     - hussain_ami_stroke
+    - bavm
+    - ich
     index:
     - K00
     - K93
@@ -18541,6 +18578,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - L00
     - L99
@@ -20625,6 +20664,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - M00
     - M99
@@ -22392,6 +22433,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - N00
     - N99
@@ -27184,6 +27227,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - S00
     - T98
@@ -28825,6 +28870,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - O00
     - O99
@@ -30123,6 +30170,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - P00
     - P96
@@ -30284,6 +30333,8 @@ categories:
         index: Q07
         name: Q07
       docs: Congenital malformations of the nervous system
+      exclude:
+      - bavm
       index:
       - Q00
       - Q07
@@ -30509,6 +30560,8 @@ categories:
         index: Q18
         name: Q18
       docs: Congenital malformations of eye, ear, face and neck
+      exclude:
+      - bavm
       index:
       - Q10
       - Q18
@@ -30543,6 +30596,8 @@ categories:
           index: Q209
           name: Q20.9
         docs: Congenital malformations of cardiac chambers and connections
+        exclude:
+        - bavm
         index: Q20
         name: Q20
       - categories:
@@ -30568,6 +30623,8 @@ categories:
           index: Q219
           name: Q21.9
         docs: Congenital malformations of cardiac septa
+        exclude:
+        - bavm
         index: Q21
         name: Q21
       - categories:
@@ -30599,6 +30656,8 @@ categories:
           index: Q229
           name: Q22.9
         docs: Congenital malformations of pulmonary and tricuspid valves
+        exclude:
+        - bavm
         index: Q22
         name: Q22
       - categories:
@@ -30624,6 +30683,8 @@ categories:
           index: Q239
           name: Q23.9
         docs: Congenital malformations of aortic and mitral valves
+        exclude:
+        - bavm
         index: Q23
         name: Q23
       - categories:
@@ -30655,6 +30716,8 @@ categories:
           index: Q249
           name: Q24.9
         docs: Other congenital malformations of heart
+        exclude:
+        - bavm
         index: Q24
         name: Q24
       - categories:
@@ -30689,6 +30752,8 @@ categories:
           index: Q259
           name: Q25.9
         docs: Congenital malformations of great arteries
+        exclude:
+        - bavm
         index: Q25
         name: Q25
       - categories:
@@ -30720,6 +30785,8 @@ categories:
           index: Q269
           name: Q26.9
         docs: Congenital malformations of great veins
+        exclude:
+        - bavm
         index: Q26
         name: Q26
       - categories:
@@ -30745,25 +30812,37 @@ categories:
           index: Q279
           name: Q27.9
         docs: Other congenital malformations of peripheral vascular system
+        exclude:
+        - bavm
         index: Q27
         name: Q27
       - categories:
         - docs: Arteriovenous malformation of precerebral vessels
+          exclude:
+          - bavm
           index: Q280
           name: Q28.0
         - docs: Other malformations of precerebral vessels
+          exclude:
+          - bavm
           index: Q281
           name: Q28.1
         - docs: Arteriovenous malformation of cerebral vessels
           index: Q282
           name: Q28.2
         - docs: Other malformations of cerebral vessels
+          exclude:
+          - bavm
           index: Q283
           name: Q28.3
         - docs: Other specified congenital malformations of circulatory system
+          exclude:
+          - bavm
           index: Q288
           name: Q28.8
         - docs: Congenital malformation of circulatory system, unspecified
+          exclude:
+          - bavm
           index: Q289
           name: Q28.9
         docs: Other congenital malformations of circulatory system
@@ -30889,6 +30968,8 @@ categories:
         index: Q34
         name: Q34
       docs: Congenital malformations of the respiratory system
+      exclude:
+      - bavm
       index:
       - Q30
       - Q34
@@ -30955,6 +31036,8 @@ categories:
         index: Q37
         name: Q37
       docs: Cleft lip and cleft palate
+      exclude:
+      - bavm
       index:
       - Q35
       - Q37
@@ -31170,6 +31253,8 @@ categories:
         index: Q45
         name: Q45
       docs: Other congenital malformations of the digestive system
+      exclude:
+      - bavm
       index:
       - Q38
       - Q45
@@ -31360,6 +31445,8 @@ categories:
         index: Q56
         name: Q56
       docs: Congenital malformations of genital organs
+      exclude:
+      - bavm
       index:
       - Q50
       - Q56
@@ -31506,6 +31593,8 @@ categories:
         index: Q64
         name: Q64
       docs: Congenital malformations of the urinary system
+      exclude:
+      - bavm
       index:
       - Q60
       - Q64
@@ -31929,6 +32018,8 @@ categories:
         index: Q79
         name: Q79
       docs: Congenital malformations and deformations of the musculoskeletal system
+      exclude:
+      - bavm
       index:
       - Q65
       - Q79
@@ -32145,6 +32236,8 @@ categories:
         index: Q89
         name: Q89
       docs: Other congenital malformations
+      exclude:
+      - bavm
       index:
       - Q80
       - Q89
@@ -32391,6 +32484,8 @@ categories:
         index: Q99
         name: Q99
       docs: Chromosomal abnormalities, not elsewhere classified
+      exclude:
+      - bavm
       index:
       - Q90
       - Q99
@@ -32413,6 +32508,7 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - ich
     index:
     - Q00
     - Q99
@@ -33870,6 +33966,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - R00
     - R99
@@ -38839,6 +38937,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - V01
     - Y98
@@ -41122,6 +41222,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - Z00
     - Z99
@@ -41301,6 +41403,8 @@ categories:
     - hussain_ami_stroke
     - liver_cirrhosis
     - portal_hypertension
+    - bavm
+    - ich
     index:
     - U00
     - U85
@@ -41327,3 +41431,6 @@ groups:
 - hussain_ami_stroke
 - liver_cirrhosis
 - portal_hypertension
+- bavm
+- ich
+- ischaemic_stroke
