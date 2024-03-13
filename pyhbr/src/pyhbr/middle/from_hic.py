@@ -186,45 +186,6 @@ def get_unlinked_lab_results(engine: Engine) -> pd.DataFrame:
 
     return df[["patient_id", "sample_date", "test_name", "result"]]
 
-
-def get_clinical_codes(
-    engine: Engine, diagnoses_file: str, procedures_file: str
-) -> pd.DataFrame:
-    """Main diagnoses/procedures fetch for the HIC data
-
-    This function wraps the diagnoses/procedures queries and a filtering
-    operation to reduce the tables to only those rows which contain a code
-    in a group. One table is returned which contains both the diagnoses and
-    procedures in long format, along with the associated episode ID and the
-    primary/secondary position of the code in the episode.
-
-    Args:
-        engine: The connection to the database
-        diagnoses_file: The diagnoses codes file name (loaded from the package)
-        procedures_file: The procedures codes file name (loaded from the package)
-
-    Returns:
-        A table containing diagnoses/procedures, normalised codes, code groups,
-            diagnosis positions, and associated episode ID.
-    """
-
-    diagnosis_codes = load_from_package(diagnoses_file)
-    procedures_codes = load_from_package(procedures_file)
-
-    # Fetch the data from the server
-    diagnoses = get_data(engine, hic.diagnoses_query)
-    procedures = get_data(engine, hic.procedures_query)
-
-    # Reduce data to only code groups, and combine diagnoses/procedures
-    filtered_diagnoses = filter_to_groups(diagnoses, diagnosis_codes)
-    filtered_procedures = filter_to_groups(procedures, procedures_codes)
-
-    # Tag the diagnoses/procedures, and combine the tables
-    filtered_diagnoses["type"] = "diagnoses"
-    filtered_procedures["type"] = "procedures"
-    return pd.concat([filtered_diagnoses, filtered_procedures])
-
-
 def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
     """Get relevant prescriptions from the HIC data (unlinked to episode)
 

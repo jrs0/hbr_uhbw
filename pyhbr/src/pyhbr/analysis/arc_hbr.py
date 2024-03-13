@@ -102,7 +102,6 @@ def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series
     * Etoricoxib
     * Indomethacin
 
-
     Args:
         index_episodes: Index `episode_id` is used to narrow prescriptions.
         prescriptions: Contains `name` (of medicine).
