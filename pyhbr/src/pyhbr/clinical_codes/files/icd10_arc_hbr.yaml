@@ -3040,6 +3040,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - A00
     - B99
@@ -5921,6 +5922,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - C00
     - D48
@@ -6585,6 +6587,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - D50
     - D89
@@ -7991,6 +7994,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - E00
     - E90
@@ -8042,6 +8046,7 @@ categories:
       - hussain_ami_stroke
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I00
       - I02
@@ -8158,6 +8163,7 @@ categories:
       - hussain_ami_stroke
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I05
       - I09
@@ -8234,6 +8240,7 @@ categories:
       - hussain_ami_stroke
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I10
       - I15
@@ -8466,6 +8473,7 @@ categories:
       - bleeding_cadth
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I20
       - I25
@@ -8529,6 +8537,7 @@ categories:
       - hussain_ami_stroke
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I26
       - I28
@@ -8989,6 +8998,7 @@ categories:
       - hussain_ami_stroke
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I30
       - I52
@@ -9028,6 +9038,7 @@ categories:
         docs: Subarachnoid haemorrhage
         exclude:
         - bleeding_cadth
+        - ischaemic_stroke
         index: I60
         name: I60
       - categories:
@@ -9061,6 +9072,7 @@ categories:
         docs: Intracerebral haemorrhage
         exclude:
         - bleeding_cadth
+        - ischaemic_stroke
         index: I61
         name: I61
       - categories:
@@ -9078,6 +9090,8 @@ categories:
           index: I629
           name: I62.9
         docs: Other nontraumatic intracranial haemorrhage
+        exclude:
+        - ischaemic_stroke
         index: I62
         name: I62
       - categories:
@@ -9124,6 +9138,7 @@ categories:
         - bleeding_cadth
         - bleeding_adaptt
         - ich
+        - ischaemic_stroke
         index: I64
         name: I64
       - categories:
@@ -9152,6 +9167,7 @@ categories:
         - bleeding_adaptt
         - hussain_ami_stroke
         - ich
+        - ischaemic_stroke
         index: I65
         name: I65
       - categories:
@@ -9183,6 +9199,7 @@ categories:
         - bleeding_adaptt
         - hussain_ami_stroke
         - ich
+        - ischaemic_stroke
         index: I66
         name: I66
       - categories:
@@ -9223,6 +9240,7 @@ categories:
         - bleeding_adaptt
         - hussain_ami_stroke
         - ich
+        - ischaemic_stroke
         index: I67
         name: I67
       - categories:
@@ -9245,6 +9263,7 @@ categories:
         - bleeding_adaptt
         - hussain_ami_stroke
         - ich
+        - ischaemic_stroke
         index: I68
         name: I68
       - categories:
@@ -9278,6 +9297,7 @@ categories:
         - bleeding_cadth
         - hussain_ami_stroke
         - ich
+        - ischaemic_stroke
         index: I69
         name: I69
       docs: Cerebrovascular diseases
@@ -9494,6 +9514,7 @@ categories:
       - hussain_ami_stroke
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I70
       - I79
@@ -9700,6 +9721,7 @@ categories:
       - ihd_bezin
       - hussain_ami_stroke
       - ich
+      - ischaemic_stroke
       index:
       - I80
       - I89
@@ -9778,6 +9800,7 @@ categories:
       - hussain_ami_stroke
       - portal_hypertension
       - ich
+      - ischaemic_stroke
       index:
       - I95
       - I99
@@ -11343,6 +11366,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - F00
     - F99
@@ -12659,6 +12683,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - G00
     - G99
@@ -13755,6 +13780,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - H00
     - H59
@@ -14231,6 +14257,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - H60
     - H95
@@ -15198,6 +15225,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - J00
     - J99
@@ -17249,6 +17277,7 @@ categories:
     - hussain_ami_stroke
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - K00
     - K93
@@ -18580,6 +18609,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - L00
     - L99
@@ -20666,6 +20696,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - M00
     - M99
@@ -22435,6 +22466,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - N00
     - N99
@@ -27229,6 +27261,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - S00
     - T98
@@ -28872,6 +28905,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - O00
     - O99
@@ -30172,6 +30206,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - P00
     - P96
@@ -32509,6 +32544,7 @@ categories:
     - liver_cirrhosis
     - portal_hypertension
     - ich
+    - ischaemic_stroke
     index:
     - Q00
     - Q99
@@ -33968,6 +34004,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - R00
     - R99
@@ -38939,6 +38976,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - V01
     - Y98
@@ -41224,6 +41262,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - Z00
     - Z99
@@ -41405,6 +41444,7 @@ categories:
     - portal_hypertension
     - bavm
     - ich
+    - ischaemic_stroke
     index:
     - U00
     - U85
