@@ -331,6 +331,7 @@ def get_features(
     portal_hyp_groups = ["portal_hypertension"]
     bleeding_groups = ["bleeding_al_ani"]
     cancer_groups = ["cancer"]
+    bavm_ich_groups = ["bavm", "ich"]
     feature_data = {
         "age": calculate_age(index_episodes, data.demographics),
         "gender": get_gender(index_episodes, data.demographics),
@@ -347,6 +348,9 @@ def get_features(
         ),
         "prior_portal_hyp": count_code_groups(
             index_episodes, previous_year, portal_hyp_groups, False
+        ),
+        "prior_bavm_ich": count_code_groups(
+            index_episodes, previous_year, bavm_ich_groups, False
         ),
         # TODO: transfusion
         "prior_cancer": count_code_groups(
