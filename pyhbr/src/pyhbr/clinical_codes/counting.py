@@ -103,7 +103,7 @@ def count_code_groups(
 ) -> Series:
     """Count occurrences of prior code group in the previous year
 
-    Count the total occurrences of a codes in any of code_groups in
+    Count the total occurrences of the codes in any of code_groups in
     the other episodes before the index episode specified in
     previous_year.
 
@@ -125,6 +125,10 @@ def count_code_groups(
 
     TODO: add another argument for first_episode (bool), to narrow to
     first episode of spell. Needs spell_id in the all_other_codes table.
+
+    BUG: This function probably double-counts codes if they appear in
+    two groups. Can be fixed by dropping code duplicates after narrowing
+    by group, and then counting the result of that. Needs some testing.
 
     Returns:
         A series containing the number of code group occurrences in the

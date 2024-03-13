@@ -5,7 +5,7 @@ import numpy as np
 from pandas import DataFrame, Series, cut
 import seaborn as sns
 from pyhbr.middle.from_hic import HicData
-from pyhbr.clinical_codes.counting import count_code_groups
+from pyhbr.clinical_codes import counting
 
 
 def get_gender(index_episodes: DataFrame, demographics: DataFrame) -> Series:
@@ -291,21 +291,53 @@ def arc_hbr_cirrhosis_ptl_hyp(has_prior_cirrhosis: DataFrame) -> Series:
     year.
 
     Args:
-        has_prior_cancer: Has a column `prior_cancer` with a count
-            of the number of cancer diagnoses occurring in the
-            year before the index event.
+        has_prior_cirrhosis: Has columns `prior_cirrhosis` and 
+            `prior_portal_hyp`.
 
     Returns:
         The ARC HBR criterion (0.0, 1.0)
     """
     cirrhosis = has_prior_cirrhosis["prior_cirrhosis"] > 0
-    portal_hyp = has_prior_cirrhosis["prior_cirrhosis"] > 0
+    portal_hyp = has_prior_cirrhosis["prior_portal_hyp"] > 0
 
     return Series(
         np.where(cirrhosis & portal_hyp, 1.0, 0),
         index=has_prior_cirrhosis.index,
     )
 
+def arc_hbr_ischaemic_stroke_ich(has_prior_ischaemic_stroke: DataFrame) -> Series:
+    """Calculate the ischaemic stroke/intracranial haemorrhage ARC HBR criterion
+
+    This function takes a dataframe with two columns prior_bavm_ich
+    and prior_portal_hyp, which count the number of diagnosis of
+    liver cirrhosis and portal hypertension seen in the previous
+    year.
+
+    If bAVM/ICH is present, 1.0 is added to the score. Else, if
+    ischaemic stroke is present, add 0.5. Otherwise add 0.
+
+    Args:
+        has_prior_ischaemic_stroke: Has a column `prior_ischaemic_stroke` containing
+            the number of any-severity ischaemic strokes in the previous
+            year, and a column `prior_bavm_ich` containing a count of 
+            any diagnosis of brain arteriovenous malformation or 
+            intracranial haemorrhage.
+
+
+    Returns:
+        The ARC HBR criterion (0.0, 1.0)
+    """
+    ischaemic_stroke = has_prior_ischaemic_stroke["prior_ischaemic_stroke"] > 0
+    bavm_ich = has_prior_ischaemic_stroke["prior_bavm_ich"] > 0
+
+    score_one = np.where(bavm_ich, 1, 0)
+    score_half = np.where(ischaemic_stroke, 0.5, 0)
+    score_zero = np.zeros(len(has_prior_ischaemic_stroke))
+
+    return Series(
+        np.maximum(score_one, score_half, score_zero),
+        index=has_prior_ischaemic_stroke.index,
+    )
 
 def get_features(
     index_episodes: DataFrame, previous_year: DataFrame, data: HicData
@@ -332,6 +364,7 @@ def get_features(
     bleeding_groups = ["bleeding_al_ani"]
     cancer_groups = ["cancer"]
     bavm_ich_groups = ["bavm", "ich"]
+    ischaemic_stroke_groups = ["ischaemic_stroke"]
     feature_data = {
         "age": calculate_age(index_episodes, data.demographics),
         "gender": get_gender(index_episodes, data.demographics),
@@ -340,20 +373,26 @@ def get_features(
         "min_index_platelets": min_index_result(
             "platelets", index_episodes, data.lab_results
         ),
-        "prior_bleeding_12": count_code_groups(
+        # Only use primary position, as proxy for "requiring hospitalisation".
+        # Note: logic will need to account for "first episode" when multiple
+        # episodes are used.
+        "prior_bleeding_12": counting.count_code_groups(
             index_episodes, previous_year, bleeding_groups, False
         ),
-        "prior_cirrhosis": count_code_groups(
-            index_episodes, previous_year, cirrhosis_groups, False
+        "prior_cirrhosis": counting.count_code_groups(
+            index_episodes, previous_year, cirrhosis_groups, True
         ),
-        "prior_portal_hyp": count_code_groups(
-            index_episodes, previous_year, portal_hyp_groups, False
+        "prior_portal_hyp": counting.count_code_groups(
+            index_episodes, previous_year, portal_hyp_groups, True
         ),
-        "prior_bavm_ich": count_code_groups(
-            index_episodes, previous_year, bavm_ich_groups, False
+        "prior_bavm_ich": counting.count_code_groups(
+            index_episodes, previous_year, bavm_ich_groups, True
         ),
+        "prior_ischaemic_stroke": counting.count_code_groups(
+            index_episodes, previous_year, ischaemic_stroke_groups, True
+        ),        
         # TODO: transfusion
-        "prior_cancer": count_code_groups(
+        "prior_cancer": counting.count_code_groups(
             index_episodes, previous_year, cancer_groups, True
         ),
         # TODO: add cancer therapy
@@ -407,6 +446,7 @@ def get_arc_hbr_score(features: DataFrame, data: HicData) -> DataFrame:
         "arc_hbr_tcp": arc_hbr_tcp(features),
         "arc_hbr_prior_bleeding": arc_hbr_prior_bleeding(features),
         "arc_hbr_cirrhosis_portal_hyp": arc_hbr_cirrhosis_ptl_hyp(features),
+        "arc_hbr_ischaemic_stroke_ich": arc_hbr_ischaemic_stroke_ich(features),
         "arc_hbr_cancer": arc_hbr_cancer(features),
         "arc_hbr_nsaid": arc_hbr_nsaid(features, data.prescriptions),
     }
