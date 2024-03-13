@@ -204,7 +204,7 @@ The relevant ICD-10 codes for ischaemic strokes, along with severity, are shown 
 
 TODO CODES
 
-=== Prior Major Non-cardiac Surgery
+=== Planned Major Non-cardiac Surgery
 
 TODO
 
