@@ -99,7 +99,7 @@ The Pandas index is a unique integer (note that `episode_id` is not unique, sinc
 
 !!! note
 
-    This table only contains codes that are in a code group (i.e. the function making `codes` should filter out codes not in any group). If all codes are required, make a code group "all" which contains every code. Note that codes occupy multiple rows in the `codes` table if they are in more than one group (take care when counting rows). In these cases, a duplicate code is identified by having the same `code`, `position` and `type` values, but a different group.
+    This table only contains codes that are in a code group (i.e. the function making `codes` should filter out codes not in any group; the `group` column is not NaN). If all codes are required, make a code group "all" which contains every code. Note that codes occupy multiple rows in the `codes` table if they are in more than one group (take care when counting rows). In these cases, a duplicate code is identified by having the same `code`, `position` and `type` values, but a different group.
 
 #### Demographics
 

@@ -3041,6 +3041,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - A00
     - B99
@@ -5923,6 +5924,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - C00
     - D48
@@ -6588,6 +6590,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - D50
     - D89
@@ -7995,6 +7998,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - E00
     - E90
@@ -8047,6 +8051,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I00
       - I02
@@ -8164,6 +8169,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I05
       - I09
@@ -8241,6 +8247,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I10
       - I15
@@ -8474,6 +8481,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I20
       - I25
@@ -8538,6 +8546,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I26
       - I28
@@ -8999,6 +9008,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I30
       - I52
@@ -9030,9 +9040,13 @@ categories:
           index: I607
           name: I60.7
         - docs: Other subarachnoid haemorrhage
+          exclude:
+          - bleeding_barc
           index: I608
           name: I60.8
         - docs: Subarachnoid haemorrhage, unspecified
+          exclude:
+          - bleeding_barc
           index: I609
           name: I60.9
         docs: Subarachnoid haemorrhage
@@ -9043,18 +9057,26 @@ categories:
         name: I60
       - categories:
         - docs: Intracerebral haemorrhage in hemisphere, subcortical
+          exclude:
+          - bleeding_barc
           index: I610
           name: I61.0
         - docs: Intracerebral haemorrhage in hemisphere, cortical
+          exclude:
+          - bleeding_barc
           index: I611
           name: I61.1
         - docs: Intracerebral haemorrhage in hemisphere, unspecified
+          exclude:
+          - bleeding_barc
           index: I612
           name: I61.2
         - docs: Intracerebral haemorrhage in brain stem
           index: I613
           name: I61.3
         - docs: Intracerebral haemorrhage in cerebellum
+          exclude:
+          - bleeding_barc
           index: I614
           name: I61.4
         - docs: Intracerebral haemorrhage, intraventricular
@@ -9064,9 +9086,13 @@ categories:
           index: I616
           name: I61.6
         - docs: Other intracerebral haemorrhage
+          exclude:
+          - bleeding_barc
           index: I618
           name: I61.8
         - docs: Intracerebral haemorrhage, unspecified
+          exclude:
+          - bleeding_barc
           index: I619
           name: I61.9
         docs: Intracerebral haemorrhage
@@ -9087,6 +9113,8 @@ categories:
           index: I621
           name: I62.1
         - docs: Intracranial haemorrhage (nontraumatic), unspecified
+          exclude:
+          - bleeding_barc
           index: I629
           name: I62.9
         docs: Other nontraumatic intracranial haemorrhage
@@ -9130,6 +9158,7 @@ categories:
         - bleeding_cadth
         - bleeding_adaptt
         - ich
+        - bleeding_barc
         index: I63
         name: I63
       - docs: Stroke, not specified as haemorrhage or infarction
@@ -9139,6 +9168,7 @@ categories:
         - bleeding_adaptt
         - ich
         - ischaemic_stroke
+        - bleeding_barc
         index: I64
         name: I64
       - categories:
@@ -9168,6 +9198,7 @@ categories:
         - hussain_ami_stroke
         - ich
         - ischaemic_stroke
+        - bleeding_barc
         index: I65
         name: I65
       - categories:
@@ -9200,6 +9231,7 @@ categories:
         - hussain_ami_stroke
         - ich
         - ischaemic_stroke
+        - bleeding_barc
         index: I66
         name: I66
       - categories:
@@ -9241,6 +9273,7 @@ categories:
         - hussain_ami_stroke
         - ich
         - ischaemic_stroke
+        - bleeding_barc
         index: I67
         name: I67
       - categories:
@@ -9264,6 +9297,7 @@ categories:
         - hussain_ami_stroke
         - ich
         - ischaemic_stroke
+        - bleeding_barc
         index: I68
         name: I68
       - categories:
@@ -9298,6 +9332,7 @@ categories:
         - hussain_ami_stroke
         - ich
         - ischaemic_stroke
+        - bleeding_barc
         index: I69
         name: I69
       docs: Cerebrovascular diseases
@@ -9515,6 +9550,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I70
       - I79
@@ -9544,6 +9580,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - portal_hypertension
+        - bleeding_barc
         index: I80
         name: I80
       - docs: Portal vein thrombosis
@@ -9551,6 +9588,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - portal_hypertension
+        - bleeding_barc
         index: I81
         name: I81
       - categories:
@@ -9577,6 +9615,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - portal_hypertension
+        - bleeding_barc
         index: I82
         name: I82
       - categories:
@@ -9597,6 +9636,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - portal_hypertension
+        - bleeding_barc
         index: I83
         name: I83
       - categories:
@@ -9608,6 +9648,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - portal_hypertension
+          - bleeding_barc
           index: I859
           name: I85.9
         docs: Oesophageal varices
@@ -9646,6 +9687,7 @@ categories:
         exclude:
         - bleeding_al_ani
         - bleeding_cadth
+        - bleeding_barc
         index: I86
         name: I86
       - categories:
@@ -9669,6 +9711,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - portal_hypertension
+        - bleeding_barc
         index: I87
         name: I87
       - categories:
@@ -9689,6 +9732,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - portal_hypertension
+        - bleeding_barc
         index: I88
         name: I88
       - categories:
@@ -9709,6 +9753,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - portal_hypertension
+        - bleeding_barc
         index: I89
         name: I89
       docs: Diseases of veins, lymphatic vessels and lymph nodes, not elsewhere classified
@@ -9801,6 +9846,7 @@ categories:
       - portal_hypertension
       - ich
       - ischaemic_stroke
+      - bleeding_barc
       index:
       - I95
       - I99
@@ -11367,6 +11413,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - F00
     - F99
@@ -12684,6 +12731,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - G00
     - G99
@@ -13781,6 +13829,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - H00
     - H59
@@ -14258,6 +14307,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - H60
     - H95
@@ -15226,6 +15276,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - J00
     - J99
@@ -15626,6 +15677,7 @@ categories:
       - bleeding_adaptt
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K00
       - K14
@@ -15636,6 +15688,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - bleeding_adaptt
+        - bleeding_barc
         index: K20
         name: K20
       - categories:
@@ -15650,6 +15703,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - bleeding_adaptt
+        - bleeding_barc
         index: K21
         name: K21
       - categories:
@@ -15703,6 +15757,7 @@ categories:
         exclude:
         - bleeding_cadth
         - bleeding_adaptt
+        - bleeding_barc
         index: K22
         name: K22
       - categories:
@@ -15720,10 +15775,13 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - bleeding_adaptt
+        - bleeding_barc
         index: K23
         name: K23
       - categories:
         - docs: 'Gastric ulcer : acute with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K250
           name: K25.0
         - docs: 'Gastric ulcer : acute with perforation'
@@ -15731,6 +15789,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K251
           name: K25.1
         - docs: 'Gastric ulcer : acute with both haemorrhage and perforation'
@@ -15741,9 +15800,12 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K253
           name: K25.3
         - docs: 'Gastric ulcer : chronic or unspecified with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K254
           name: K25.4
         - docs: 'Gastric ulcer : chronic or unspecified with perforation'
@@ -15751,6 +15813,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K255
           name: K25.5
         - docs: 'Gastric ulcer : chronic or unspecified with both haemorrhage and perforation'
@@ -15761,6 +15824,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K257
           name: K25.7
         - docs: 'Gastric ulcer : unspecified as acute or chronic, without haemorrhage or perforation'
@@ -15768,6 +15832,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K259
           name: K25.9
         docs: Gastric ulcer
@@ -15775,6 +15840,8 @@ categories:
         name: K25
       - categories:
         - docs: 'Duodenal ulcer : acute with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K260
           name: K26.0
         - docs: 'Duodenal ulcer : acute with perforation'
@@ -15782,6 +15849,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K261
           name: K26.1
         - docs: 'Duodenal ulcer : acute with both haemorrhage and perforation'
@@ -15792,9 +15860,12 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K263
           name: K26.3
         - docs: 'Duodenal ulcer : chronic or unspecified with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K264
           name: K26.4
         - docs: 'Duodenal ulcer : chronic or unspecified with perforation'
@@ -15802,6 +15873,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K265
           name: K26.5
         - docs: 'Duodenal ulcer : chronic or unspecified with both haemorrhage and perforation'
@@ -15812,6 +15884,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K267
           name: K26.7
         - docs: 'Duodenal ulcer : unspecified as acute or chronic, without haemorrhage or perforation'
@@ -15819,6 +15892,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K269
           name: K26.9
         docs: Duodenal ulcer
@@ -15826,6 +15900,8 @@ categories:
         name: K26
       - categories:
         - docs: 'Peptic ulcer, site unspecified : acute with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K270
           name: K27.0
         - docs: 'Peptic ulcer, site unspecified : acute with perforation'
@@ -15833,6 +15909,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K271
           name: K27.1
         - docs: 'Peptic ulcer, site unspecified : acute with both haemorrhage and perforation'
@@ -15843,9 +15920,12 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K273
           name: K27.3
         - docs: 'Peptic ulcer, site unspecified : chronic or unspecified with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K274
           name: K27.4
         - docs: 'Peptic ulcer, site unspecified : chronic or unspecified with perforation'
@@ -15853,6 +15933,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K275
           name: K27.5
         - docs: 'Peptic ulcer, site unspecified : chronic or unspecified with both haemorrhage and perforation'
@@ -15863,6 +15944,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K277
           name: K27.7
         - docs: 'Peptic ulcer, site unspecified : unspecified as acute or chronic, without haemorrhage or perforation'
@@ -15870,6 +15952,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K279
           name: K27.9
         docs: Peptic ulcer, site unspecified
@@ -15877,6 +15960,8 @@ categories:
         name: K27
       - categories:
         - docs: 'Gastrojejunal ulcer : acute with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K280
           name: K28.0
         - docs: 'Gastrojejunal ulcer : acute with perforation'
@@ -15884,6 +15969,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K281
           name: K28.1
         - docs: 'Gastrojejunal ulcer : acute with both haemorrhage and perforation'
@@ -15894,9 +15980,12 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K283
           name: K28.3
         - docs: 'Gastrojejunal ulcer : chronic or unspecified with haemorrhage'
+          exclude:
+          - bleeding_barc
           index: K284
           name: K28.4
         - docs: 'Gastrojejunal ulcer : chronic or unspecified with perforation'
@@ -15904,6 +15993,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K285
           name: K28.5
         - docs: 'Gastrojejunal ulcer : chronic or unspecified with both haemorrhage and perforation'
@@ -15914,6 +16004,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K287
           name: K28.7
         - docs: 'Gastrojejunal ulcer : unspecified as acute or chronic, without haemorrhage or perforation'
@@ -15921,6 +16012,7 @@ categories:
           - bleeding_al_ani
           - bleeding_cadth
           - bleeding_adaptt
+          - bleeding_barc
           index: K289
           name: K28.9
         docs: Gastrojejunal ulcer
@@ -15994,6 +16086,8 @@ categories:
           index: K299
           name: K29.9
         docs: Gastritis and duodenitis
+        exclude:
+        - bleeding_barc
         index: K29
         name: K29
       - docs: Functional dyspepsia
@@ -16001,6 +16095,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - bleeding_adaptt
+        - bleeding_barc
         index: K30
         name: K30
       - categories:
@@ -16039,6 +16134,7 @@ categories:
         - bleeding_al_ani
         - bleeding_cadth
         - bleeding_adaptt
+        - bleeding_barc
         index: K31
         name: K31
       docs: Diseases of oesophagus, stomach and duodenum
@@ -16098,6 +16194,7 @@ categories:
       - bleeding_adaptt
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K35
       - K38
@@ -16237,6 +16334,7 @@ categories:
       - bleeding_adaptt
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K40
       - K46
@@ -16315,6 +16413,7 @@ categories:
       - bleeding_adaptt
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K50
       - K52
@@ -16643,6 +16742,7 @@ categories:
       exclude:
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K55
       - K64
@@ -16716,6 +16816,7 @@ categories:
       - bleeding_al_ani
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K65
       - K67
@@ -16982,6 +17083,7 @@ categories:
       - bleeding_al_ani
       - bleeding_cadth
       - bleeding_adaptt
+      - bleeding_barc
       index:
       - K70
       - K77
@@ -17142,6 +17244,7 @@ categories:
       - bleeding_adaptt
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K80
       - K87
@@ -17258,6 +17361,7 @@ categories:
       exclude:
       - liver_cirrhosis
       - portal_hypertension
+      - bleeding_barc
       index:
       - K90
       - K93
@@ -18610,6 +18714,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - L00
     - L99
@@ -20697,6 +20802,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - M00
     - M99
@@ -22467,6 +22573,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - N00
     - N99
@@ -27262,6 +27369,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - S00
     - T98
@@ -28906,6 +29014,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - O00
     - O99
@@ -30207,6 +30316,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - P00
     - P96
@@ -32545,6 +32655,7 @@ categories:
     - portal_hypertension
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - Q00
     - Q99
@@ -34005,6 +34116,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - R00
     - R99
@@ -38977,6 +39089,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - V01
     - Y98
@@ -41263,6 +41376,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - Z00
     - Z99
@@ -41445,6 +41559,7 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - bleeding_barc
     index:
     - U00
     - U85
@@ -41458,6 +41573,7 @@ groups:
 - bleeding_al_ani
 - bleeding_cadth
 - bleeding_adaptt
+- bleeding_barc
 - mi_stemi_schnier
 - mi_nstemi_schnier
 - mi_schnier
