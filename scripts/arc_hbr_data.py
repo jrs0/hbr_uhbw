@@ -12,6 +12,7 @@ from pyhbr.clinical_codes import counting
 from pyhbr.data_source import hic
 
 import importlib
+
 importlib.reload(common)
 importlib.reload(arc_hbr)
 importlib.reload(from_hic)
@@ -37,6 +38,15 @@ index_episodes = acs.index_episodes(hic_data)
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index)
 all_other_codes = counting.get_all_other_codes(index_episodes, hic_data)
+
+# Compare missingness
+min_index_hb = arc_hbr.min_index_result("hb", index_episodes, hic_data.lab_results)
+min_index_hb.isna().value_counts()
+first_index_spell_hb = arc_hbr.first_index_spell_result(
+    "hb", index_episodes, hic_data.lab_results, hic_data.episodes
+)
+first_index_spell_hb.isna().value_counts()
+
 
 # Get the episodes that occurred in the previous year (for clinical code features)
 max_before = dt.timedelta(days=365)
@@ -70,7 +80,7 @@ data = {
     "index_episodes": index_episodes,
     "features": features,
     "arc_hbr_score": arc_hbr_score,
-    "bleeding_outcome": bleeding_outcome
+    "bleeding_outcome": bleeding_outcome,
 }
 
 common.save_item(data, "arc_hbr_data")

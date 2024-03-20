@@ -150,22 +150,27 @@ def min_index_result(
 
     return min_result_or_nan["result"].rename(f"index_{test_name}")
 
+
 def first_index_spell_result(
-    test_name: str, index_episodes: DataFrame, lab_results: DataFrame
+    test_name: str,
+    index_episodes: DataFrame,
+    lab_results: DataFrame,
+    episodes: DataFrame,
 ) -> Series:
     """Get the (first) lab result associated to the index spell
 
     Compared to min_index_result, this function accounts for the
-    possibility that a lab results was not associated with the first
+    possibility that a lab result was not associated with the first
     episode of the spell, and is therefore missed. The minimum value
     is not taken, because of the possibility that a value in a later
     episode is smaller due to some other cause.
 
     Args:
-        index_episodes: Has an `episode_id` and a `spell_id`. The spell
-            ID is required identify 
+        index_episodes: Has an `episode_id` index.
         lab_results: Has a `test_name` column matching the `test_name` argument,
-            and a `result` column for the numerical test result
+            and a `result` column for the numerical test result.
+        episodes: Required to obtain the other episodes in the same spell as
+            the index episode. Has a `spell_id` column and an `episode_id` index.
         test_name: Which lab measurement to get.
 
     Returns:
@@ -173,20 +178,33 @@ def first_index_spell_result(
             episode. Contains NaN if test_name was not recorded in the
             index episode.
     """
-    df = index_episodes.merge(lab_results, how="left", on="episode_id")
-    index_lab_result = df[df["test_name"] == test_name]
 
-    # Pick the lowest result. For measurements such as platelet count,
+    # Find the spells that contain the index episodes. This is
+    # used to get a list of all episodes in the index spells.
+    index_spells = index_episodes[[]].merge(
+        episodes["spell_id"], how="left", on="episode_id"
+    ).set_index("spell_id")
+    all_spell_episodes = index_spells.merge(
+        episodes.reset_index(), how="left", on="spell_id"
+    )[["episode_id", "spell_id"]]
+
+    # Get the lab tests specified by test_name for all the episodes
+    # which occur in the index spell.
+    df = all_spell_episodes.merge(lab_results, how="left", on="episode_id")
+    index_lab_result = df[df["test_name"] == "hb"]
+
+    # Pick the first result. For measurements such as platelet count,
     # eGFR, and Hb, lower is more severe.
-    min_index_lab_result = index_lab_result.groupby("episode_id").min("result")
+    first_lab_result = index_lab_result.sort_values("sample_date").groupby("spell_id").head(1)
 
     # Some index episodes do not have an measurement, so join
     # to get all index episodes (NaN means no index measurement)
-    min_result_or_nan = index_episodes.merge(
-        min_index_lab_result["result"], how="left", on="episode_id"
+    first_result_or_nan = index_episodes.merge(
+        first_lab_result[["result", "episode_id"]], how="left", on="episode_id"
     )
 
-    return min_result_or_nan["result"].rename(f"index_{test_name}")
+    return first_result_or_nan["result"].rename(f"index_{test_name}")
+
 
 def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     """Calculate the ARC HBR chronic kidney disease (CKD) criterion
@@ -328,7 +346,7 @@ def arc_hbr_cirrhosis_ptl_hyp(has_prior_cirrhosis: DataFrame) -> Series:
     year.
 
     Args:
-        has_prior_cirrhosis: Has columns `prior_cirrhosis` and 
+        has_prior_cirrhosis: Has columns `prior_cirrhosis` and
             `prior_portal_hyp`.
 
     Returns:
@@ -341,6 +359,7 @@ def arc_hbr_cirrhosis_ptl_hyp(has_prior_cirrhosis: DataFrame) -> Series:
         np.where(cirrhosis & portal_hyp, 1.0, 0),
         index=has_prior_cirrhosis.index,
     )
+
 
 def arc_hbr_ischaemic_stroke_ich(has_prior_ischaemic_stroke: DataFrame) -> Series:
     """Calculate the ischaemic stroke/intracranial haemorrhage ARC HBR criterion
@@ -356,8 +375,8 @@ def arc_hbr_ischaemic_stroke_ich(has_prior_ischaemic_stroke: DataFrame) -> Serie
     Args:
         has_prior_ischaemic_stroke: Has a column `prior_ischaemic_stroke` containing
             the number of any-severity ischaemic strokes in the previous
-            year, and a column `prior_bavm_ich` containing a count of 
-            any diagnosis of brain arteriovenous malformation or 
+            year, and a column `prior_bavm_ich` containing a count of
+            any diagnosis of brain arteriovenous malformation or
             intracranial haemorrhage.
 
 
@@ -375,6 +394,7 @@ def arc_hbr_ischaemic_stroke_ich(has_prior_ischaemic_stroke: DataFrame) -> Serie
         np.maximum(score_one, score_half, score_zero),
         index=has_prior_ischaemic_stroke.index,
     )
+
 
 def get_features(
     index_episodes: DataFrame, previous_year: DataFrame, data: HicData
@@ -427,7 +447,7 @@ def get_features(
         ),
         "prior_ischaemic_stroke": counting.count_code_groups(
             index_episodes, previous_year, ischaemic_stroke_groups, True
-        ),        
+        ),
         # TODO: transfusion
         "prior_cancer": counting.count_code_groups(
             index_episodes, previous_year, cancer_groups, True
