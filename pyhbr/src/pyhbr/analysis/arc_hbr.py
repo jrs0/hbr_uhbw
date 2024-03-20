@@ -150,6 +150,43 @@ def min_index_result(
 
     return min_result_or_nan["result"].rename(f"index_{test_name}")
 
+def first_index_spell_result(
+    test_name: str, index_episodes: DataFrame, lab_results: DataFrame
+) -> Series:
+    """Get the (first) lab result associated to the index spell
+
+    Compared to min_index_result, this function accounts for the
+    possibility that a lab results was not associated with the first
+    episode of the spell, and is therefore missed. The minimum value
+    is not taken, because of the possibility that a value in a later
+    episode is smaller due to some other cause.
+
+    Args:
+        index_episodes: Has an `episode_id` and a `spell_id`. The spell
+            ID is required identify 
+        lab_results: Has a `test_name` column matching the `test_name` argument,
+            and a `result` column for the numerical test result
+        test_name: Which lab measurement to get.
+
+    Returns:
+        A series containing the minimum value of test_name in the index
+            episode. Contains NaN if test_name was not recorded in the
+            index episode.
+    """
+    df = index_episodes.merge(lab_results, how="left", on="episode_id")
+    index_lab_result = df[df["test_name"] == test_name]
+
+    # Pick the lowest result. For measurements such as platelet count,
+    # eGFR, and Hb, lower is more severe.
+    min_index_lab_result = index_lab_result.groupby("episode_id").min("result")
+
+    # Some index episodes do not have an measurement, so join
+    # to get all index episodes (NaN means no index measurement)
+    min_result_or_nan = index_episodes.merge(
+        min_index_lab_result["result"], how="left", on="episode_id"
+    )
+
+    return min_result_or_nan["result"].rename(f"index_{test_name}")
 
 def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     """Calculate the ARC HBR chronic kidney disease (CKD) criterion

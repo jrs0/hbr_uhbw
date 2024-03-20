@@ -87,10 +87,10 @@ def get_clinical_codes(
     # Tag the diagnoses/procedures, and combine the tables
     filtered_diagnoses["type"] = "diagnosis"
     filtered_procedures["type"] = "procedure"
-    
-    codes =  pd.concat([filtered_diagnoses, filtered_procedures])
+
+    codes = pd.concat([filtered_diagnoses, filtered_procedures])
     codes["type"] = codes["type"].astype("category")
-    
+
     return codes
 
 
@@ -185,6 +185,7 @@ def get_unlinked_lab_results(engine: Engine) -> pd.DataFrame:
     df.loc[df["test_name"] == "hb", "result"] /= 10.0
 
     return df[["patient_id", "sample_date", "test_name", "result"]]
+
 
 def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
     """Get relevant prescriptions from the HIC data (unlinked to episode)
@@ -309,6 +310,9 @@ def link_to_episodes(
     the item with the earliest episode (the returned table will
     not contain duplicate items).
 
+    The final table does not use episode_id as an index, because an episode
+    may contain multiple items.
+
     Args:
         items: The prescriptions or laboratory tests table. Must contain a
             `date_col_name` column, which is used to compare with episode
@@ -318,7 +322,7 @@ def link_to_episodes(
             `episode_start` and `episode_end`.
 
     Returns:
-        The items table with the index `episode_id`.
+        The items table with additional `episode_id` and `spell_id` columns.
     """
 
     # Before linking to episodes, add an item ID. This is to
@@ -347,12 +351,8 @@ def link_to_episodes(
         overlapping_episodes.sort_values("episode_start").groupby("item_id").head(1)
     )
 
-    # Keep episode_id, drop other episodes/unnecessary columns
-    return (
-        deduplicated.drop(columns=["item_id"])
-        .drop(columns=[c for c in episodes.columns if c != "episode_id"])
-        .set_index("episode_id", drop=True)
-    )
+    # Keep episode_id, drop other episodes/unnecessary columns.
+    return deduplicated.drop(columns=["item_id"]).drop(columns=episodes.columns)
 
 
 def get_prescriptions(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:

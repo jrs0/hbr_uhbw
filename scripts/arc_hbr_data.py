@@ -17,6 +17,7 @@ importlib.reload(arc_hbr)
 importlib.reload(from_hic)
 importlib.reload(hic)
 importlib.reload(counting)
+importlib.reload(acs)
 
 import pandas as pd
 

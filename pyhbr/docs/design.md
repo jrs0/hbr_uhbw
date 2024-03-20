@@ -108,6 +108,13 @@ Demographic information is stored in a table called `demographics`, which has th
 * `patient_id` (`str`, Pandas index): the unique patient identifier
 * `gender` (`category`): One of "male", "female", or "unknown". 
 
+#### Laboratory Tests
+
+Write me please
+
+#### Prescriptions
+
+Write me please
 
 ## Data/Model/Analysis Save Points
 
