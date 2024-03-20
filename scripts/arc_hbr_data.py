@@ -12,7 +12,6 @@ from pyhbr.clinical_codes import counting
 from pyhbr.data_source import hic
 
 import importlib
-
 importlib.reload(common)
 importlib.reload(arc_hbr)
 importlib.reload(from_hic)
