@@ -65,9 +65,6 @@ bleeding_outcome = counting.count_code_groups(
     index_episodes, following_year, bleeding_groups, True
 )
 
-
-
-
 arc_hbr.plot_index_measurement_distribution(features)
 plt.show()
 
