@@ -86,7 +86,7 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     df = index_episodes.merge(prescriptions, how="left", on="episode_id")
     oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
     oac_criterion = df["name"].isin(oac_list).astype("float")
-    return Series(oac_criterion, index=index_episodes.index)
+    return oac_criterion.set_axis(index_episodes.index)
 
 
 def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
@@ -114,7 +114,7 @@ def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series
     nsaid_criterion = ((df["group"] == "nsaid") & (df["on_admission"] == True)).astype(
         "float"
     )
-    return Series(nsaid_criterion, index=index_episodes.index)
+    return nsaid_criterion.set_axis(index_episodes.index)
 
 
 def min_index_result(
@@ -226,9 +226,9 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     codes in this case)
 
     Args:
-        has_index_egfr: Dataframe having the column `min_index_egfr` (in units of mL/min)
-            with the lowest eGFR measurement at index, or NaN which means no eGFR
-            measurement was taken on the index episode.
+        has_index_egfr: Dataframe having the column `index_egfr` (in units of mL/min)
+            with the eGFR measurement at index, or NaN which means no eGFR
+            measurement was found at the index.
 
     Returns:
         A series containing the CKD ARC criterion, based on the eGFR at
@@ -236,7 +236,7 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     """
 
     # Replace NaN values for now with 100 (meaning score 0.0)
-    df = has_index_egfr["min_index_egfr"].fillna(90)
+    df = has_index_egfr["index_egfr"].fillna(90)
 
     # Using a high upper limit to catch any high eGFR values. In practice,
     # the highest value is 90 (which comes from the string ">90" in the database).
@@ -251,8 +251,8 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
     or clinical code.
 
     Args:
-        has_index_hb_and_gender: Dataframe having the column `min_index_hb` containing the
-            lowest Hb measurement (g/dL) at the index event, or NaN if no Hb measurement
+        has_index_hb_and_gender: Dataframe having the column `index_hb` containing the
+            Hb measurement (g/dL) at the index event, or NaN if no Hb measurement
             was made. Also contains `gender` (categorical with categories "male",
             "female", and "unknown").
 
@@ -264,10 +264,10 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
 
     # Evaluated in order
     arc_score_conditions = [
-        df["min_index_hb"] < 11.0,  # Major for any gender
-        df["min_index_hb"] < 11.9,  # Minor for any gender
-        (df["min_index_hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
-        df["min_index_hb"] >= 12.9,  # None for any gender
+        df["index_hb"] < 11.0,  # Major for any gender
+        df["index_hb"] < 11.9,  # Minor for any gender
+        (df["index_hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
+        df["index_hb"] >= 12.9,  # None for any gender
     ]
     arc_scores = [1.0, 0.5, 0.5, 0.0]
 
@@ -278,21 +278,20 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
         index=df.index,
     )
 
-
 def arc_hbr_tcp(has_index_platelets: DataFrame) -> Series:
     """Calculate the ARC HBR thrombocytopenia (low platelet count) criterion
 
     The score is 1.0 if platelet count < 100e9/L, otherwise it is 0.0.
 
     Args:
-        has_index_platelets: Has column `min_index_platelets`, which is the worst-case
-            platelet count measurement seen in the index episode.
+        has_index_platelets: Has column `index_platelets`, which is the
+            platelet count measurement in the index.
 
     Returns:
         Series containing the ARC score
     """
     return Series(
-        np.where(has_index_platelets["min_index_platelets"] < 100, 1.0, 0),
+        np.where(has_index_platelets["index_platelets"] < 100, 1.0, 0),
         index=has_index_platelets.index,
     )
 
@@ -520,7 +519,6 @@ def get_arc_hbr_score(features: DataFrame, data: HicData) -> DataFrame:
         "arc_hbr_nsaid": arc_hbr_nsaid(features, data.prescriptions),
     }
     return DataFrame(arc_score_data)
-
 
 def plot_index_measurement_distribution(features: DataFrame):
     """Plot a histogram of measurement results at the index

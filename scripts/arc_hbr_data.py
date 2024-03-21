@@ -68,6 +68,8 @@ bleeding_outcome = counting.count_code_groups(
 arc_hbr.plot_index_measurement_distribution(features)
 plt.show()
 
+
+
 # Package the data up for saving
 data = {
     "hic_data": hic_data,
