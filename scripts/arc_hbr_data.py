@@ -65,25 +65,7 @@ bleeding_outcome = counting.count_code_groups(
     index_episodes, following_year, bleeding_groups, True
 )
 
-# Get all the episodes in the index spell (not just the index
-# episode), and then get a map from spell_id back to to the index
-# episode_id
-all_spell_episodes = arc_hbr.all_index_spell_episodes(index_episodes, hic_data.episodes)
-spell_id_to_index_episode = index_episodes.merge(
-    all_spell_episodes, how="left", on="episode_id"
-)[["spell_id", "episode_id"]]
 
-# Get all the prescriptions that happened in the index spell, and keep
-# track of which index episode is linked to the spell
-df = all_spell_episodes.merge(hic_data.prescriptions, how="left", on="episode_id")
-
-# Find which index spells have an OAC prescription anywhere
-oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
-df["oac"] = df["name"].isin(oac_list)
-index_spells_with_oac = pd.DataFrame(df.groupby("spell_id")["oac"].any())
-oac_criterion = index_spells_with_oac.merge(
-    spell_id_to_index_episode, how="left", on="spell_id"
-).set_index("episode_id")["oac"]
 
 
 arc_hbr.plot_index_measurement_distribution(features)

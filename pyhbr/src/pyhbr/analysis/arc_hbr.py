@@ -64,13 +64,13 @@ def arc_hbr_age(has_age: DataFrame) -> Series:
     return Series(np.where(has_age["age"] > 75, 0.5, 0), index=has_age.index)
 
 
-def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
+def arc_hbr_oac(index_episodes: DataFrame, data: HicData) -> Series:
     """Calculate the oral-anticoagulant ARC HBR criterion
 
     1.0 point if an one of the OACs "warfarin", "apixaban",
     "rivaroxaban", "edoxaban", "dabigatran", is present
-    in the index episode (meaning it was present on admission,
-    or was prescribed in that episode).
+    in the index spell (meaning the index episode, or any
+    other episode in the spell).
 
     !!! note
         The on admission flag could be used to imply expected
@@ -84,11 +84,28 @@ def arc_hbr_oac(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     Returns:
         The OAC ARC score for each index event.
     """
-    df = index_episodes.merge(prescriptions, how="left", on="episode_id")
-    oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
-    oac_criterion = df["name"].isin(oac_list).astype("float")
-    return oac_criterion.set_axis(index_episodes.index)
 
+    # Get all the episodes in the index spell (not just the index
+    # episode), and then get a map from spell_id back to to the index
+    # episode_id
+    all_spell_episodes = all_index_spell_episodes(index_episodes, data.episodes)
+    spell_id_to_index_episode = index_episodes.merge(
+        all_spell_episodes, how="left", on="episode_id"
+    )[["spell_id", "episode_id"]]
+
+    # Get all the prescriptions that happened in the index spell, and keep
+    # track of which index episode is linked to the spell
+    df = all_spell_episodes.merge(data.prescriptions, how="left", on="episode_id")
+
+    # Find which index spells have an OAC prescription anywhere
+    oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
+    df["oac"] = df["name"].isin(oac_list)
+    index_spells_with_oac = DataFrame(df.groupby("spell_id")["oac"].any())
+    oac_criterion = index_spells_with_oac.merge(
+        spell_id_to_index_episode, how="left", on="spell_id"
+    ).set_index("episode_id")["oac"]
+
+    return oac_criterion.astype("float")
 
 def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     """Calculate the non-steroidal anti-inflamatory drug (NSAID) ARC HBR criterion
@@ -528,7 +545,7 @@ def get_arc_hbr_score(features: DataFrame, data: HicData) -> DataFrame:
     # Calculate the ARC HBR score
     arc_score_data = {
         "arc_hbr_age": arc_hbr_age(features),
-        "arc_hbr_oac": arc_hbr_oac(features, data.prescriptions),
+        "arc_hbr_oac": arc_hbr_oac(features, data),
         "arc_hbr_ckd": arc_hbr_ckd(features),
         "arc_hbr_anaemia": arc_hbr_anaemia(features),
         "arc_hbr_tcp": arc_hbr_tcp(features),
