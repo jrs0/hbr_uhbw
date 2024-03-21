@@ -101,15 +101,15 @@ The graph below shows the proportion of index episodes where a measurement was m
 ```{python}
 import matplotlib.pyplot as plt
 
-min_index_results = features.filter(regex="^min_index")
+min_index_results = features.filter(regex="^index_(hb|egfr|platelets)")
 missingness = (
     min_index_results.isna()
     .replace([True, False], ["Missing", "Present"])
     .rename(
         columns={
-            "min_index_egfr": "eGFR",
-            "min_index_hb": "Hb",
-            "min_index_platelets": "Platelets",
+            "index_egfr": "eGFR",
+            "index_hb": "Hb",
+            "index_platelets": "Platelets",
         }
     )
     .melt()
@@ -133,27 +133,7 @@ Like laboratory tests, prescriptions are not associated with an episode ID. The 
 The proportion of different prescriptions in all the episodes in the HIC data (not just the index events) is shown below. The proportion of these medicines with the on-admission flag set is `{python} pcnt_on_admission`.
 
 ```{python}
-import matplotlib.pyplot as plt
-
-pretty_presc = prescriptions[["name", "group", "on_admission"]]
-pretty_presc = pretty_presc.rename(
-    columns={
-        "name": "Medicine",
-        "group": "Class",
-        "on_admission": "On Admission",
-    }
-)
-pretty_presc["Medicine"] = pretty_presc["Medicine"].str.title()
-pretty_presc["Class"] = pretty_presc["Class"].str.upper()
-
-plt.title("Medicines Prescribed in All HIC Episodes")
-plt.xticks(rotation=90)
-sns.countplot(
-    pretty_presc,
-    x="Medicine",
-    hue="Class",
-    order=pretty_presc["Medicine"].value_counts().index,
-)
+arc_hbr.plot_prescriptions_distribution(hic_data)
 ```
 
 # ARC HBR Score
@@ -161,29 +141,7 @@ sns.countplot(
 The breakdown of different ARC HBR scores is shown in the graph below.
 
 ```{python}
-import matplotlib.pyplot as plt
-
-arc_hbr_pretty = arc_hbr_score.rename(
-    columns={
-        "arc_hbr_age": "Age",
-        "arc_hbr_oac": "OAC",
-        "arc_hbr_ckd": "CKD",
-        "arc_hbr_anaemia": "Anaemia",
-        "arc_hbr_cancer": "Cancer",
-        "arc_hbr_tcp": "Thrombocytopenia",
-        "arc_hbr_prior_bleeding": "Prior Bleeding",
-        "arc_hbr_cirrhosis_portal_hyp": "Cirrhosis + Portal Hyp.",
-        "arc_hbr_nsaid": "NSAID",
-    }
-)
-for_bar_plot = arc_hbr_pretty.melt(var_name="ARC HBR Criterion", value_name="ARC Score")
-plt.xticks(rotation=90)
-plt.title("Proportion of Index Episodes Meeting ARC HBR Criteria")
-sns.countplot(
-    for_bar_plot,
-    x="ARC HBR Criterion",
-    hue="ARC Score",
-)
+arc_hbr.plot_arc_score_distribution(arc_hbr_score)
 ```
 
 Some notes (work in progress):
