@@ -193,7 +193,7 @@ def first_index_spell_result(
     # Get the lab tests specified by test_name for all the episodes
     # which occur in the index spell.
     df = all_spell_episodes.merge(lab_results, how="left", on="episode_id")
-    index_lab_result = df[df["test_name"] == "hb"]
+    index_lab_result = df[df["test_name"] == test_name]
 
     # Pick the first result. For measurements such as platelet count,
     # eGFR, and Hb, lower is more severe.
