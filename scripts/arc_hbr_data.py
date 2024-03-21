@@ -50,8 +50,11 @@ max_after = dt.timedelta(days=365)
 following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 
 # Calculate more granular features as an intermediate step for calculating the
-# ARC HBR score
-features = arc_hbr.get_features(index_episodes, previous_year, hic_data)
+# ARC HBR score. Choose a function to extract the a value for the laboratory
+# measurements at index.
+features = arc_hbr.get_features(
+    index_episodes, previous_year, hic_data, arc_hbr.first_index_spell_result
+)
 
 # Calculate the ARC HBR score from the more granular features.
 arc_hbr_score = arc_hbr.get_arc_hbr_score(features, hic_data)

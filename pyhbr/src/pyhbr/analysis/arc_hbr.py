@@ -1,6 +1,7 @@
 """Calculation of the ARC HBR score
 """
 
+from typing import Callable
 import numpy as np
 from pandas import DataFrame, Series, cut
 import seaborn as sns
@@ -117,7 +118,7 @@ def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series
 
 
 def min_index_result(
-    test_name: str, index_episodes: DataFrame, lab_results: DataFrame
+    test_name: str, index_episodes: DataFrame, data: HicData
 ) -> Series:
     """Get the lowest lab result associated to the index episode
 
@@ -135,7 +136,7 @@ def min_index_result(
             episode. Contains NaN if test_name was not recorded in the
             index episode.
     """
-    df = index_episodes.merge(lab_results, how="left", on="episode_id")
+    df = index_episodes.merge(data.lab_results, how="left", on="episode_id")
     index_lab_result = df[df["test_name"] == test_name]
 
     # Pick the lowest result. For measurements such as platelet count,
@@ -154,8 +155,7 @@ def min_index_result(
 def first_index_spell_result(
     test_name: str,
     index_episodes: DataFrame,
-    lab_results: DataFrame,
-    episodes: DataFrame,
+    data: HicData,
 ) -> Series:
     """Get the (first) lab result associated to the index spell
 
@@ -183,16 +183,16 @@ def first_index_spell_result(
     # used to get a list of all episodes in the index spells.
     index_spells = (
         index_episodes[[]]
-        .merge(episodes["spell_id"], how="left", on="episode_id")
+        .merge(data.episodes["spell_id"], how="left", on="episode_id")
         .set_index("spell_id")
     )
     all_spell_episodes = index_spells.merge(
-        episodes.reset_index(), how="left", on="spell_id"
+        data.episodes.reset_index(), how="left", on="spell_id"
     )[["episode_id", "spell_id"]]
 
     # Get the lab tests specified by test_name for all the episodes
     # which occur in the index spell.
-    df = all_spell_episodes.merge(lab_results, how="left", on="episode_id")
+    df = all_spell_episodes.merge(data.lab_results, how="left", on="episode_id")
     index_lab_result = df[df["test_name"] == test_name]
 
     # Pick the first result. For measurements such as platelet count,
@@ -401,7 +401,10 @@ def arc_hbr_ischaemic_stroke_ich(has_prior_ischaemic_stroke: DataFrame) -> Serie
 
 
 def get_features(
-    index_episodes: DataFrame, previous_year: DataFrame, data: HicData
+    index_episodes: DataFrame,
+    previous_year: DataFrame,
+    data: HicData,
+    index_result_fn: Callable[[str, DataFrame, HicData], Series]
 ) -> DataFrame:
     """Index/prior history features for calculating ARC HBR
 
@@ -413,8 +416,15 @@ def get_features(
             by `episode_id`)
         previous_year: Contains the all_other_codes table narrowed to the previous
             year (for the purposes of counting code groups).
-        data (HicData): Contains DataFrame attributes `demographics` and
+        data: Contains DataFrame attributes `demographics` and
             `lab_results`.
+        index_result_fn: The function to calculate the value of an index
+            laboratory measurement. Can be any function which takes the
+            measurement name as the first argument, the index_episodes as
+            the second, and the HicData as the third argument. You can
+            pass min_index_result to get the lowest test result from the
+            index episode, or first_index_spell_result to get the first
+            measurement value from any episode in the spell.
 
     Returns:
         The table of features (used for calculating the ARC HBR score).
@@ -429,15 +439,9 @@ def get_features(
     feature_data = {
         "age": calculate_age(index_episodes, data.demographics),
         "gender": get_gender(index_episodes, data.demographics),
-        "min_index_egfr": first_index_spell_result(
-            "egfr", index_episodes, data.lab_results, data.episodes
-        ),
-        "min_index_hb": first_index_spell_result(
-            "hb", index_episodes, data.lab_results, data.episodes
-        ),
-        "min_index_platelets": first_index_spell_result(
-            "platelets", index_episodes, data.lab_results, data.episodes
-        ),
+        "index_egfr": index_result_fn("egfr", index_episodes, data),
+        "index_hb": index_result_fn("hb", index_episodes, data),
+        "index_platelets": index_result_fn("platelets", index_episodes, data),
         # Only use primary position, as proxy for "requiring hospitalisation".
         # Note: logic will need to account for "first episode" when multiple
         # episodes are used.
@@ -522,28 +526,28 @@ def plot_index_measurement_distribution(features: DataFrame):
     """Plot a histogram of measurement results at the index
 
     Args:
-        index_episodes: Must contain `min_index_hb`, `min_index_egfr`,
-        and `min_index_platelets`. The index_hb column is multiplied
+        index_episodes: Must contain `index_hb`, `index_egfr`,
+        and `index_platelets`. The index_hb column is multiplied
         by 10 to get units g/L.
     """
 
     # Make a plot showing the three lab results as histograms
     df = features.copy()
-    df["min_index_hb"] = 10 * df["min_index_hb"]  # Convert from g/dL to g/L
+    df["index_hb"] = 10 * df["index_hb"]  # Convert from g/dL to g/L
     df = (
-        df.filter(regex="^min_index")
+        df.filter(regex="^index_(egfr|hb|platelets)")
         .rename(
             columns={
-                "min_index_egfr": "eGFR (mL/min)",
-                "min_index_hb": "Hb (g/L)",
-                "min_index_platelets": "Plt (x10^9/L)",
+                "index_egfr": "eGFR (mL/min)",
+                "index_hb": "Hb (g/L)",
+                "index_platelets": "Plt (x10^9/L)",
             }
         )
-        .melt(value_name="Lowest test result at index episode", var_name="Test")
+        .melt(value_name="Test result at index episode", var_name="Test")
     )
     g = sns.displot(
         df,
-        x="Lowest test result at index episode",
+        x="Test result at index episode",
         hue="Test",
     )
     g.figure.subplots_adjust(top=0.95)
