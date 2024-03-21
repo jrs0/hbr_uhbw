@@ -39,43 +39,6 @@ index_episodes = acs.index_episodes(hic_data)
 # groups before/after the index)
 all_other_codes = counting.get_all_other_codes(index_episodes, hic_data)
 
-# Compare missingness
-min_index_hb = arc_hbr.min_index_result("hb", index_episodes, hic_data.lab_results)
-min_index_hb.isna().value_counts()
-first_index_spell_hb = arc_hbr.first_index_spell_result(
-    "hb", index_episodes, hic_data.lab_results, hic_data.episodes
-)
-first_index_spell_hb.isna().value_counts()
-
-
-# Find the spells that contain the index episodes. This is
-# used to get a list of all episodes in the index spells.
-index_spells = index_episodes[[]].merge(
-    hic_data.episodes["spell_id"], how="left", on="episode_id"
-).set_index("spell_id")
-
-all_spell_episodes = index_spells.merge(
-    hic_data.episodes.reset_index(), how="left", on="spell_id"
-)[["episode_id", "spell_id"]]
-
-# Get the lab tests specified by test_name for all the episodes
-# which occur in the index spell.
-df = all_spell_episodes.merge(hic_data.lab_results, how="left", on="episode_id")
-index_lab_result = df[df["test_name"] == "hb"]
-
-index_lab_result[["episode_id","spell_id"]].drop_duplicates()
-
-
-# Pick the first result. For measurements such as platelet count,
-# eGFR, and Hb, lower is more severe.
-first_lab_result = index_lab_result.sort_values("sample_date").groupby("spell_id").head(1)
-
-# Some index episodes do not have an measurement, so join
-# to get all index episodes (NaN means no index measurement)
-first_result_or_nan = index_episodes.merge(
-    first_lab_result[["result", "episode_id"]], how="left", on="episode_id"
-)
-
 # Get the episodes that occurred in the previous year (for clinical code features)
 max_before = dt.timedelta(days=365)
 min_before = dt.timedelta(days=30)
