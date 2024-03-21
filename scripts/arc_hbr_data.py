@@ -68,6 +68,8 @@ bleeding_outcome = counting.count_code_groups(
 arc_hbr.plot_index_measurement_distribution(features)
 plt.show()
 
+arc_hbr.plot_arc_score_distribution(arc_hbr_score)
+plt.show()
 
 
 # Package the data up for saving

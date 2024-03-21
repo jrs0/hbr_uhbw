@@ -3,6 +3,7 @@
 
 from typing import Callable
 import numpy as np
+import matplotlib.pyplot as plt
 from pandas import DataFrame, Series, cut
 import seaborn as sns
 from pyhbr.middle.from_hic import HicData
@@ -550,3 +551,26 @@ def plot_index_measurement_distribution(features: DataFrame):
     )
     g.figure.subplots_adjust(top=0.95)
     g.ax.set_title("Distribution of Laboratory Test Results in ACS/PCI index events")
+
+def plot_arc_score_distribution(arc_hbr_score: DataFrame):
+    arc_hbr_pretty = arc_hbr_score.rename(
+    columns={
+        "arc_hbr_age": "Age",
+        "arc_hbr_oac": "OAC",
+        "arc_hbr_ckd": "CKD",
+        "arc_hbr_anaemia": "Anaemia",
+        "arc_hbr_cancer": "Cancer",
+        "arc_hbr_tcp": "Thrombocytopenia",
+        "arc_hbr_prior_bleeding": "Prior Bleeding",
+        "arc_hbr_cirrhosis_portal_hyp": "Cirrhosis + Portal Hyp.",
+        "arc_hbr_nsaid": "NSAID",
+        }
+    )
+    for_bar_plot = arc_hbr_pretty.melt(var_name="ARC HBR Criterion", value_name="ARC Score")
+    plt.xticks(rotation=90)
+    plt.title("Proportion of Index Episodes Meeting ARC HBR Criteria")
+    sns.countplot(
+        for_bar_plot,
+        x="ARC HBR Criterion",
+        hue="ARC Score",
+    )
