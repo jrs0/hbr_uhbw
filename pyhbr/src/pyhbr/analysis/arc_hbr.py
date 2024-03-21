@@ -181,9 +181,11 @@ def first_index_spell_result(
 
     # Find the spells that contain the index episodes. This is
     # used to get a list of all episodes in the index spells.
-    index_spells = index_episodes[[]].merge(
-        episodes["spell_id"], how="left", on="episode_id"
-    ).set_index("spell_id")
+    index_spells = (
+        index_episodes[[]]
+        .merge(episodes["spell_id"], how="left", on="episode_id")
+        .set_index("spell_id")
+    )
     all_spell_episodes = index_spells.merge(
         episodes.reset_index(), how="left", on="spell_id"
     )[["episode_id", "spell_id"]]
@@ -195,13 +197,15 @@ def first_index_spell_result(
 
     # Pick the first result. For measurements such as platelet count,
     # eGFR, and Hb, lower is more severe.
-    first_lab_result = index_lab_result.sort_values("sample_date").groupby("spell_id").head(1)
+    first_lab_result = (
+        index_lab_result.sort_values("sample_date").groupby("spell_id").head(1)
+    )
 
     # Some index episodes do not have an measurement, so join
     # to get all index episodes (NaN means no index measurement)
     first_result_or_nan = index_episodes.merge(
         first_lab_result[["result", "episode_id"]], how="left", on="episode_id"
-    )
+    ).set_index("episode_id")
 
     return first_result_or_nan["result"].rename(f"index_{test_name}")
 
@@ -425,10 +429,14 @@ def get_features(
     feature_data = {
         "age": calculate_age(index_episodes, data.demographics),
         "gender": get_gender(index_episodes, data.demographics),
-        "min_index_egfr": min_index_result("egfr", index_episodes, data.lab_results),
-        "min_index_hb": min_index_result("hb", index_episodes, data.lab_results),
-        "min_index_platelets": min_index_result(
-            "platelets", index_episodes, data.lab_results
+        "min_index_egfr": first_index_spell_result(
+            "egfr", index_episodes, data.lab_results, data.episodes
+        ),
+        "min_index_hb": first_index_spell_result(
+            "hb", index_episodes, data.lab_results, data.episodes
+        ),
+        "min_index_platelets": first_index_spell_result(
+            "platelets", index_episodes, data.lab_results, data.episodes
         ),
         # Only use primary position, as proxy for "requiring hospitalisation".
         # Note: logic will need to account for "first episode" when multiple
