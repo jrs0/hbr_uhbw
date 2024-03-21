@@ -152,6 +152,32 @@ def min_index_result(
 
     return min_result_or_nan["result"].rename(f"index_{test_name}")
 
+def all_index_spell_episodes(index_episodes: DataFrame, episodes: DataFrame) -> DataFrame:
+    """Get all the other episodes in the index spell
+
+    This is a dataframe of index spells (defined as the spell containing 
+    an episode in index_episodes), along with all the episodes in that
+    spell (including the index episode itself). This is useful for 
+    performing operations at index-spell granularity
+
+    Args:
+        index_episodes: Must contain Pandas index `episode_id`
+        episodes: Must contain Pandas index `episode_id` and have a columne
+            `spell_id`.
+
+    Returns:
+        A dataframe with a column `spell_id` for index spells, and `episode_id`
+            for all episodes in that spell. A column `index_episode` shows which
+            of the episodes is the first episode in the spell.
+    """
+    index_spells = (
+        index_episodes[[]]
+        .merge(episodes["spell_id"], how="left", on="episode_id")
+        .set_index("spell_id")
+    )
+    return index_spells.merge(
+        episodes.reset_index(), how="left", on="spell_id"
+    )[["episode_id", "spell_id"]]
 
 def first_index_spell_result(
     test_name: str,
@@ -182,14 +208,7 @@ def first_index_spell_result(
 
     # Find the spells that contain the index episodes. This is
     # used to get a list of all episodes in the index spells.
-    index_spells = (
-        index_episodes[[]]
-        .merge(data.episodes["spell_id"], how="left", on="episode_id")
-        .set_index("spell_id")
-    )
-    all_spell_episodes = index_spells.merge(
-        data.episodes.reset_index(), how="left", on="spell_id"
-    )[["episode_id", "spell_id"]]
+    all_spell_episodes = all_index_spell_episodes(index_episodes, data.episodes)
 
     # Get the lab tests specified by test_name for all the episodes
     # which occur in the index spell.
@@ -573,4 +592,31 @@ def plot_arc_score_distribution(arc_hbr_score: DataFrame):
         for_bar_plot,
         x="ARC HBR Criterion",
         hue="ARC Score",
+    )
+
+def plot_prescriptions_distribution(data: HicData):
+    
+    # Join all the episodes to get a reflection of the amount
+    # of episodes missing any prescriptions.
+    df = data.episodes.merge(data.prescriptions, how="left", on="episode_id")[
+        ["name", "group", "on_admission"]
+    ]
+    pretty_presc = df.rename(
+        columns={
+            "name": "Medicine",
+            "group": "Class",
+            "on_admission": "On Admission",
+        }
+    )
+    pretty_presc["Medicine"] = pretty_presc["Medicine"].str.title()
+    pretty_presc["Class"] = pretty_presc["Class"].str.upper()
+
+    plt.title("Medicines Prescribed in All HIC Episodes")
+    plt.xticks(rotation=90)
+    sns.countplot(
+        pretty_presc,
+        x="Medicine",
+        hue="Class",
+        order=pretty_presc["Medicine"].value_counts().index,
+        stat="percent"
     )
