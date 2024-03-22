@@ -217,7 +217,8 @@ def codes_in_any_group(codes: ClinicalCodeTree) -> pd.DataFrame:
     for g in codes.groups:
         clinical_codes = codes.codes_in_group(g)
         normalised_codes = [c.normalise() for c in clinical_codes]
-        df = pd.DataFrame({"code": normalised_codes, "group": g})
+        docs = [c.docs for c in clinical_codes]
+        df = pd.DataFrame({"code": normalised_codes, "docs": docs, "group": g})
         dfs.append(df)
 
     return pd.concat(dfs).reset_index()

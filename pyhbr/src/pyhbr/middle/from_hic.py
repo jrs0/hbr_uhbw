@@ -47,7 +47,7 @@ def filter_to_groups(
     codes_with_groups = codes_in_any_group(codes)
     codes_table["code"] = codes_table["code"].apply(normalise_code)
     codes_table = pd.merge(codes_table, codes_with_groups, on="code", how="inner")
-    codes_table = codes_table[["episode_id", "code", "group", "position"]]
+    codes_table = codes_table[["episode_id", "code", "docs", "group", "position"]]
 
     return codes_table
 

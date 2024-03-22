@@ -11,6 +11,7 @@ from pyhbr.analysis import acs
 from pyhbr.clinical_codes import counting
 from pyhbr.data_source import hic
 from pyhbr.data_source import hic_covid
+from pyhbr.analysis import patient_viewer
 
 import importlib
 
@@ -44,16 +45,33 @@ index_episodes = acs.index_episodes(hic_data)
 # groups before/after the index)
 all_other_codes = counting.get_all_other_codes(index_episodes, hic_data)
 
+# Global code-to-group mapping
+code_to_group = hic_data.codes[["code", "type", "group"]].drop_duplicates()
+
+# Pick a patient index
+patient_id = "171613"
+patient_viewer.get_patient_history(patient_id, hic_data)
+
+
+import seaborn as sns
+import matplotlib.pyplot as plot
+df = hic_data.lab_results.merge(hic_data.episodes["patient_id"], how="left", on="episode_id")
+this_patient = df[df["patient_id"] == patient_id]
+sns.scatterplot(this_patient, x="sample_date", y="result", hue="test_name")
+plt.show()
+
 # Get the episodes that occurred in the following year (for clinical code outcomes)
 min_after = dt.timedelta(hours=72)  # Exclude periprocedural events
 max_after = dt.timedelta(days=365)
 following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 
 # Get the bleeding outcome
-bleeding_groups = ["bleeding_al_ani"]
+bleeding_groups = ["bleeding_adaptt"]
 bleeding_outcome = counting.count_code_groups(
     index_episodes, following_year, bleeding_groups, True
 )
+df = pd.DataFrame(bleeding_outcome).merge(hic_data.episodes[["patient_id"]], how="left", on="episode_id")
+df[df["code_group_count"] > 0]
 
 # Join the T-number onto the subsequent episodes
 with_t_number = following_year.merge(
@@ -64,7 +82,9 @@ with_t_number = following_year.merge(
 subsequent_bleeds = with_t_number[with_t_number["group"].isin(bleeding_groups)]
 num_subsequent_bleeds = subsequent_bleeds.groupby("base_episode_id").size()
 
-sorted = with_t_number[with_t_number["group"].isin(bleeding_groups)].sort_values("base_episode_id")
+sorted = with_t_number[with_t_number["group"].isin(bleeding_groups)].sort_values(
+    "base_episode_id"
+)
 sorted.to_csv("bleeding_outcomes.csv")
 
 arc_hbr.plot_index_measurement_distribution(features)
