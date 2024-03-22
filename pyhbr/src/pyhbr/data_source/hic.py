@@ -1,4 +1,4 @@
-"""SQL queries and functions for HIC (UHBW) data.
+"""SQL queries and functions for HIC (v3, UHBW) data.
 
 Most data available in the HIC tables is fetched in the 
 queries below, apart from columns which are all-NULL,
