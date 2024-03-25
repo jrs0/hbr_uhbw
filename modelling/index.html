@@ -1,0 +1,937 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../arc_hbr/">
+      
+      
+        <link rel="next" href="../reference/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.7">
+    
+    
+      
+        <title>Bleeding/Ischaemia Risk Modelling - PyHBR Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.f2e4d321.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bleedingischaemia-risk-modelling" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PyHBR Docs" class="md-header__button md-logo" aria-label="PyHBR Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyHBR Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bleeding/Ischaemia Risk Modelling
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PyHBR Docs" class="md-nav__button md-logo" aria-label="PyHBR Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    PyHBR Docs
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Welcome to the PyHBR Docs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PyHBR Design
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../arc_hbr/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ARC HBR Calculation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Bleeding/Ischaemia Risk Modelling
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Bleeding/Ischaemia Risk Modelling
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#index-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Index Events
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcome-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outcome Definition
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outcome Definition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bleeding-outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bleeding Outcome
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predictors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Predictors
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Testing
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PyHBR Function Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#index-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Index Events
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outcome-definition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Outcome Definition
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Outcome Definition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bleeding-outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bleeding Outcome
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predictors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Predictors
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Models
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Testing
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="bleedingischaemia-risk-modelling">Bleeding/Ischaemia Risk Modelling</h1>
+<p>Bleeding and ischaemia risk prediction models contained in PyHBR are trained to predict a bleeding and ischaemia outcome defined by clinical codes (ICD-10 and OPCS-4), and are trained on a number of different datasets. The methodology used to develop and test the models is explained below.</p>
+<h2 id="index-events">Index Events</h2>
+<p>The target cohort for risk prediction is patients who present in hospital with an acute coronary syndrome (ACS), or receive a percutaneous coronary intervention (PCI), such as a stent implant, and are to be placed on a blood thinning medication such as dual antiplatelet therapy. </p>
+<p>These patients are identified using diagnosis (ICD-10) and procedure (OPCS-4) code data, which is generated by clinical coders who transcribe written patient notes. Hospital visits are structured into groups of episodes called spells, where each episode contains a list of diagnoses and procedures. Of these, one diagnosis and one procedure is marked as primary.</p>
+<p>To capture acute presentation for ACS, patients are included if the ACS diagnosis is listed as the primary diagnosis in any episode of the spell. This is to rule out episodes where a historical ACS is coded. A PCI is allowed in any primary or secondary position, on the assumption that inclusion of the procedure means that the procedure was performed.</p>
+<h2 id="outcome-definition">Outcome Definition</h2>
+<p>Bleeding and ischaemia outcomes are defined by looking for ICD-10 codes in the spells that occur after the index presentation, up to one year.</p>
+<h3 id="bleeding-outcome">Bleeding Outcome</h3>
+<p>The bleeding outcome definition should map to a clinically relevant definition of bleeding for patients on anticoagulant therapy. One such definition is bleeding academic research consortium (BARC) 3 or 5 bleeding<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, which is the basis of the high bleeding risk definition by the Academic Research Consortium (ARC)<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>.</p>
+<p>According to BARC criteria, many ICD-10-coded bleeding events may qualify for BARC-2, because being written explicitly in the patient notes (a criterion for coding) could imply that an "overt" bleed is present, or that the bleed is "more than would be expected for the clinical circumstance". </p>
+<p>Determining that a bleed qualifies for BARC-3 requires a haemoglobin drop due to the bleed of greater than 3 g/dL. This cannot be determined from an analysis of ICD-10 codes alone. </p>
+<p>Several attempts to capture "severe" bleeding from administrative codes exist in the literature. For example, one study identifies a group of ICD-10 codes with a particularly high positive predictive value (PPV; chance that a ICD-10-coded bleed is in fact a clinically relevant bleed), of 88%<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>. The list of ICD-10 codes is shown below:</p>
+<details class="note">
+<summary>List of major bleeding codes<sup id="fnref2:3"><a class="footnote-ref" href="#fn:3">3</a></sup></summary>
+<table>
+<thead>
+<tr>
+<th>Description</th>
+<th>ICD-10CM Codes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subarachnoid hemorrhage</td>
+<td>I60</td>
+</tr>
+<tr>
+<td>Intracranial hemorrhage</td>
+<td>I61</td>
+</tr>
+<tr>
+<td>Subdural hemorrhage</td>
+<td>I62</td>
+</tr>
+<tr>
+<td>Upper gastrointestinal bleeding</td>
+<td>I85.0, K22.1, K22.6, K25.0, K25.2, K25.4, K25.6,K26.0, K26.2, K26.4, K26.6, K27.0, K27.2, K27.4,K27.6, K28.0, K28.2, K28.4, K28.6, K29.0, K31.80,K63.80, K92.0, K92.1, K92.2</td>
+</tr>
+<tr>
+<td>Lower gastrointestinal bleeding</td>
+<td>K55.2, K51, K57, K62.5, K92.0, K92.1, K92.2</td>
+</tr>
+</tbody>
+</table>
+<p>This groups has been interpreted as the following set of (UK) ICD-10 codes:</p>
+<table>
+<thead>
+<tr>
+<th>ICD-10</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I60</td>
+<td>Subarachnoid haemorrhage</td>
+</tr>
+<tr>
+<td>I61</td>
+<td>Intracerebral haemorrhage</td>
+</tr>
+<tr>
+<td>I62</td>
+<td>Other nontraumatic intracranial haemorrhage</td>
+</tr>
+<tr>
+<td>I85.0</td>
+<td>Oesophageal varices with bleeding</td>
+</tr>
+<tr>
+<td>K22.1</td>
+<td>Ulcer of oesophagus</td>
+</tr>
+<tr>
+<td>K22.6</td>
+<td>Gastro-oesophageal laceration-haemorrhage syndrome</td>
+</tr>
+<tr>
+<td>K25.0</td>
+<td>Gastric ulcer : acute with haemorrhage</td>
+</tr>
+<tr>
+<td>K25.2</td>
+<td>Gastric ulcer : acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K25.4</td>
+<td>Gastric ulcer : chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td>K25.6</td>
+<td>Gastric ulcer : chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K26.0</td>
+<td>Duodenal ulcer : acute with haemorrhage</td>
+</tr>
+<tr>
+<td>K26.2</td>
+<td>Duodenal ulcer : acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K26.4</td>
+<td>Duodenal ulcer : chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td>K26.6</td>
+<td>Duodenal ulcer : chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K27.0</td>
+<td>Peptic ulcer, site unspecified : acute with haemorrhage</td>
+</tr>
+<tr>
+<td>K27.2</td>
+<td>Peptic ulcer, site unspecified : acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K27.4</td>
+<td>Peptic ulcer, site unspecified : chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td>K27.6</td>
+<td>Peptic ulcer, site unspecified : chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K28.0</td>
+<td>Gastrojejunal ulcer : acute with haemorrhage</td>
+</tr>
+<tr>
+<td>K28.2</td>
+<td>Gastrojejunal ulcer : acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K28.4</td>
+<td>Gastrojejunal ulcer : chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td>K28.6</td>
+<td>Gastrojejunal ulcer : chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td>K29.0</td>
+<td>Acute haemorrhagic gastritis</td>
+</tr>
+<tr>
+<td>K92.0</td>
+<td>Haematemesis</td>
+</tr>
+<tr>
+<td>K92.1</td>
+<td>Melaena</td>
+</tr>
+<tr>
+<td>K92.2</td>
+<td>Gastrointestinal haemorrhage, unspecified</td>
+</tr>
+<tr>
+<td>K55.2</td>
+<td>Angiodysplasia of colon</td>
+</tr>
+<tr>
+<td>K51</td>
+<td>Ulcerative colitis</td>
+</tr>
+<tr>
+<td>K57</td>
+<td>Diverticular disease of intestine</td>
+</tr>
+<tr>
+<td>K62.5</td>
+<td>Haemorrhage of anus and rectum</td>
+</tr>
+</tbody>
+</table>
+</details>
+<p>The primary rationale for adopting such a code group is that</p>
+<ul>
+<li>It originates from a study where the PPV of the code group was measured (offsetting the risk that coded bleeding definitions do not correspond to real bleeds)</li>
+<li>The study qualifies the group as "major" bleeds (so that it might be taken as a reasonable proxy for BARC 3 or 5 bleeding).</li>
+</ul>
+<p>Disadvantages, however, include differences in coding between the UK and Canada (the location of the study), particularly the difference between ICD-10 (UK) and ICD-10CM (Canada). In addition, the presence of unqualified diverticulosis within the bleeding group is not directly a bleeding condition, and may significantly reduce the PPV in older patients.</p>
+<p>As a result, we define a bleeding outcome based on the BARC 2-5 criteria<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup>.</p>
+<details class="note">
+<summary>Bleeding codes corresponding to BARC 2-5</summary>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>ICD-10</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gastrointestinal</td>
+<td>I85.0</td>
+<td>Oesophageal varices with bleeding</td>
+</tr>
+<tr>
+<td></td>
+<td>K25.0</td>
+<td>Gastric ulcer, acute with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K25.2</td>
+<td>Gastric ulcer, acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K25.4</td>
+<td>Gastric ulcer, chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K25.6</td>
+<td>Chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K26.0</td>
+<td>Duodenal ulcer, acute with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K26.2</td>
+<td>Duodenal ulcer, acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K26.4</td>
+<td>Duodenal ulcer, chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K26.6</td>
+<td>Chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K27.0</td>
+<td>Peptic ulcer, acute with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K27.2</td>
+<td>Peptic ulcer, acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K27.4</td>
+<td>Peptic ulcer, chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K27.6</td>
+<td>Chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K28.0</td>
+<td>Gastrojejunal ulcer, acute with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K28.2</td>
+<td>Acute with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K28.4</td>
+<td>Gastrojejunal ulcer, chronic or unspecified with haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>K28.6</td>
+<td>Chronic or unspecified with both haemorrhage and perforation</td>
+</tr>
+<tr>
+<td></td>
+<td>K29.0</td>
+<td>Acute haemorrhagic gastritis</td>
+</tr>
+<tr>
+<td></td>
+<td>K62.5</td>
+<td>Haemorrhage of anus and rectum</td>
+</tr>
+<tr>
+<td></td>
+<td>K66.1</td>
+<td>Haemoperitoneum</td>
+</tr>
+<tr>
+<td></td>
+<td>K92.0</td>
+<td>Haematemesis</td>
+</tr>
+<tr>
+<td></td>
+<td>K92.1</td>
+<td>Melaena</td>
+</tr>
+<tr>
+<td></td>
+<td>K92.2</td>
+<td>Gastrointestinal haemorrhage, unspecified</td>
+</tr>
+<tr>
+<td>Intracerebral</td>
+<td>I60.*</td>
+<td>Subarachnoid haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>I61.*</td>
+<td>Intracerebral haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>I62.*</td>
+<td>Other nontraumatic intracranial haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>I69.0</td>
+<td>Sequelae of subarachnoid haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>I69.1</td>
+<td>Sequelae of intracerebral haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>I69.2</td>
+<td>Sequelae of other nontraumatic intracranial haemorrhage</td>
+</tr>
+<tr>
+<td></td>
+<td>S06.4</td>
+<td>Epidural haemorrhage</td>
+</tr>
+<tr>
+<td>Genitourinary</td>
+<td>N93.8</td>
+<td>Other specified abnormal uterine and vaginal bleeding</td>
+</tr>
+<tr>
+<td></td>
+<td>N93.9</td>
+<td>Abnormal uterine and vaginal bleeding, unspecified</td>
+</tr>
+<tr>
+<td>Other</td>
+<td>R04.*</td>
+<td>Haemorrhage from respiratory passages</td>
+</tr>
+<tr>
+<td></td>
+<td>I23.0</td>
+<td>Haemopericardium as current complication following acute myocardial infarction</td>
+</tr>
+</tbody>
+</table>
+</details>
+<p>The group is generated based on UK ICD-10 data, which is likely to reduce coding discrepancies, and does not contain the generic diverticulosis category. </p>
+<p>Further, the lack of attempt to distinguish "major" bleeding (i.e. more bleeding codes are included) inherently makes the group more likely to be robust. Coded events are likely to correspond to a bleed written on the chart, with the only mechanism to reduce to positive predictive being coding errors.</p>
+<p>The primary disadvantage is the use of an all-hospital-bleeding definition. However, this is justified as a simple starting point for modelling, that can be refined later by the inclusion of factors to distinguish major bleeds.</p>
+<p>No PPV is available for this code group. A basic chart review should be performed on the patients identified by this bleeding group to increase confidence that they match relevant bleeding events.</p>
+<h2 id="predictors">Predictors</h2>
+<p>Predictors are defined based on data that is available in the index presentation, if that data would be available to the clinician.</p>
+<p>Clinical codes are used to define predictors, but an exclusion period of one month is applied to avoid using ICD-10 and OPCS-4 codes that would not have been coded yet before the index (clinical coding happens monthly, and clinical codes are not available until this processing has occurred). </p>
+<h2 id="models">Models</h2>
+<h2 id="model-testing">Model Testing</h2>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Mehran R, Rao SV, Bhatt DL, Gibson CM, Caixeta A, Eikelboom J, et al. Standardized bleeding definitions for cardiovascular clinical trials: A consensus report from the bleeding academic research consortium. Circulation [Internet]. 2011;123(23):2736–47. Available from: <a href="https://www.ahajournals.org/doi/10.1161/circulationaha.110.009449">https://www.ahajournals.org/doi/10.1161/circulationaha.110.009449</a>&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>Urban P, Mehran R, Colleran R, Angiolillo DJ, Byrne RA, Capodanno D, et al. Defining high bleeding risk in patients undergoing percutaneous coronary intervention: A consensus document from the academic research consortium for high bleeding risk. Circulation [Internet]. 2019;140(3):240–61. Available from: <a href="https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.119.040167">https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.119.040167</a>&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p>Al-Ani F, Shariff S, Siqueira L, Seyam A, Lazo-Langner A. Identifying venous thromboembolism and major bleeding in emergency room discharges using administrative data. Thrombosis research [Internet]. 2015;136(6):1195–8. Available from: <a href="https://www.thrombosisresearch.com/article/S0049-3848(15)30167-5/abstract">https://www.thrombosisresearch.com/article/S0049-3848(15)30167-5/abstract</a>&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:4">
+<p>Pufulete M, Harris J, Sterne JA, Johnson TW, Lasserson D, Mumford A, et al. Comprehensive ascertainment of bleeding in patients prescribed different combinations of dual antiplatelet therapy (DAPT) and triple therapy (TT) in the UK: Study protocol for three population-based cohort studies emulating “target trials”(the ADAPTT study). BMJ open [Internet]. 2019;9(6):e029388. Available from: <a href="https://bmjopen.bmj.com/content/9/6/e029388">https://bmjopen.bmj.com/content/9/6/e029388</a>&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.caa56a14.min.js"></script>
+      
+    
+  </body>
+</html>
