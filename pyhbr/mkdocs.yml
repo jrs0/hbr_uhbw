@@ -1,12 +1,19 @@
 site_name: PyHBR Docs
 
 plugins:
+- search
+- bibtex:
+    bib_file: ../risk_management_file/ref.bib
+    csl_file: https://raw.githubusercontent.com/citation-style-language/styles/master/vancouver.csl
+    cite_style: pandoc
+    
 - mkdocstrings:
     handlers:
       python:
         paths: [src]
 
 markdown_extensions:
+- footnotes
 - pymdownx.highlight:
     anchor_linenums: true
     line_spans: __span
@@ -21,10 +28,12 @@ nav:
   - 'index.md'
   - 'design.md'
   - 'arc_hbr.md'
+  - 'modelling.md'
   - 'reference.md'
 
 watch:
 - src
+- ../risk_management_file/ref.bib
 
 theme:
   name: "material"
