@@ -57,10 +57,12 @@ def clinical_code_column_name(kind: str, position: int) -> str:
         return f"Procedure{ordinal(position+1)}_OPCS"
 
 
-def episodes_query(engine: Engine, start_date: date, end_date: date) -> Select:
+def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
     """Get the episodes list in the HES data
 
-    This table contains
+    This table contains one episode per row. Diagnosis/procedure clinical
+    codes are represented in wide format (one clinical code position per
+    columns), and patient demographic information is also included.
 
     Args:
         engine: the connection to the database
@@ -70,11 +72,13 @@ def episodes_query(engine: Engine, start_date: date, end_date: date) -> Select:
     Returns:
         SQL query to retrieve episodes table
     """
-    table = CheckedTable("tbl_apc_sem_all", engine)
+    table = CheckedTable("vw_apc_sem_001", engine)
 
     # Standard columns containing IDs, dates, patient demographics, etc
     columns = [
         table.col("AIMTC_Pseudo_NHS").cast(String).label("patient_id"),
+        table.col("AIMTC_Age").cast(String).label("age"),
+        table.col("Sex").cast(String).label("gender"),
         table.col("PBRspellID").cast(String).label("spell_id"),
         table.col("StartDate_ConsultantEpisode").label("episode_start"),
         table.col("EndDate_ConsultantEpisode").label("episode_end"),

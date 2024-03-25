@@ -20,7 +20,16 @@ end_date = dt.date(2023, 2, 1)
 
 # Fetch data
 engine = common.make_engine(database="abi")
-data = common.get_data(engine, icb.episodes_query, start_date, end_date)
+data = common.get_data(engine, icb.sus_query, start_date, end_date)
+
+
+
+
+
+
+####### OLD
+
+
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 index_episodes = acs.index_episodes(hic_data)
