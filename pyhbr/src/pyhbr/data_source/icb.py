@@ -100,7 +100,14 @@ def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
     # Append the clinical code columns to the other data columns
     columns += clinical_code_columns
 
+    # Valid rows must have one of the following commissioner codes
+    valid_list = ["5M8","11T","5QJ","11H","5A3","12A","15C","14F","Q65"]
+
     return select(*columns).where(
         table.col("StartDate_ConsultantEpisode") >= start_date,
         table.col("EndDate_ConsultantEpisode") <= end_date,
+        table.col("AIMTC_Pseudo_NHS").is_not(None),
+        table.col("AIMTC_Pseudo_NHS") != 9000219621, # Invalid-patient marker
+        table.col("AIMTC_OrganisationCode_Codeofcommissioner").in_(valid_list),
     )
+
