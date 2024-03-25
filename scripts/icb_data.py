@@ -25,9 +25,14 @@ sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
 
 # Primary care patient information
 engine = common.make_engine(database="modelling_sql_area")
-primary_care_attr_data = common.get_data(engine, icb.primary_care_attributes_query, start_date, end_date)
+primary_care_attributes = common.get_data(engine, icb.primary_care_attributes_query, start_date, end_date)
 
-#
+# Primary care prescriptions
+primary_care_prescriptions = common.get_data(engine, icb.primary_care_prescriptions_query, start_date, end_date)
+
+# Primary care measurements
+primary_care_measurements = common.get_data(engine, icb.primary_care_measurements_query, start_date, end_date)
+
 
 
 

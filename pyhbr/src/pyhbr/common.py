@@ -44,7 +44,7 @@ def make_engine(
 class CheckedTable:
     """Wrapper for sqlalchemy table with checks for table/columns"""
 
-    def __init__(self, table_name: str, engine: Engine) -> None:
+    def __init__(self, table_name: str, engine: Engine, schema = "dbo") -> None:
         """Get a CheckedTable by reading from the remote server
 
         This is a wrapper around the sqlalchemy Table for
@@ -59,7 +59,7 @@ class CheckedTable:
             The table data for use in SQL queries
         """
         self.name = table_name
-        metadata_obj = MetaData()
+        metadata_obj = MetaData(schema=schema)
         try:
             self.table = Table(self.name, metadata_obj, autoload_with=engine)
         except NoSuchTableError as e:

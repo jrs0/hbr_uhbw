@@ -101,7 +101,7 @@ def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
     columns += clinical_code_columns
 
     # Valid rows must have one of the following commissioner codes
-    valid_list = ["5M8","11T","5QJ","11H","5A3","12A","15C","14F","Q65"]
+    valid_list = ["5M8", "11T", "5QJ", "11H", "5A3", "12A", "15C", "14F", "Q65"]
 
     return select(*columns).where(
         table.col("StartDate_ConsultantEpisode") >= start_date,
@@ -119,8 +119,8 @@ def primary_care_attributes_query(
 
     Args:
         engine: the connection to the database
-        start_date: first valid consultant-episode start date
-        end_date: last valid consultant-episode start date
+        start_date: first valid attribute_period
+        end_date: last valid attribute_period
 
     Returns:
         SQL query to retrieve episodes table
@@ -317,10 +317,69 @@ def primary_care_attributes_query(
         table.col("qof_learndis"),
         table.col("qof_mental"),
         table.col("qof_osteoporosis"),
-        table.col("qof_rheumarth")
+        table.col("qof_rheumarth"),
     ).where(
         table.col("attribute_period") >= start_date,
         table.col("attribute_period") <= end_date,
+        table.col("nhs_number").is_not(None),
+        table.col("nhs_number") != 9000219621,  # Invalid-patient marker
+    )
+
+
+def primary_care_prescriptions_query(
+    engine: Engine, start_date: date, end_date: date
+) -> Select:
+    """Get medications dispensed in primary care
+
+    Args:
+        engine: the connection to the database
+        start_date: first valid prescription date
+        end_date: last valid prescription date
+
+    Returns:
+        SQL query to retrieve episodes table
+    """
+    table = CheckedTable("prescription", engine, schema="swd")
+
+    return select(
+        table.col("nhs_number").cast(String).label("patient_id"),
+        table.col("prescription_date").label("date"),
+        table.col("prescription_name").label("name"),
+        table.col("prescription_quantity").label("quantity"),
+        table.col("prescription_type").label("acute_or_repeat")
+    ).where(
+        table.col("prescription_date") >= start_date,
+        table.col("prescription_date") <= end_date,
+        table.col("nhs_number").is_not(None),
+        table.col("nhs_number") != 9000219621,  # Invalid-patient marker
+    )
+
+
+def primary_care_measurements_query(
+    engine: Engine, start_date: date, end_date: date
+) -> Select:
+    """Get physiological measurements performed in primary care
+
+    Args:
+        engine: the connection to the database
+        start_date: first valid measurement date
+        end_date: last valid measurement date
+
+    Returns:
+        SQL query to retrieve episodes table
+    """
+    table = CheckedTable("measurement", engine, schema="swd")
+
+    return select(
+        table.col("nhs_number").cast(String).label("patient_id"),
+        table.col("measurement_date").label("date"),
+        table.col("measurement_name").label("name"),
+        table.col("measurement_value").label("result"),
+        table.col("measurement_group").label("group"),
+        
+    ).where(
+        table.col("measurement_date") >= start_date,
+        table.col("measurement_date") <= end_date,
         table.col("nhs_number").is_not(None),
         table.col("nhs_number") != 9000219621,  # Invalid-patient marker
     )
