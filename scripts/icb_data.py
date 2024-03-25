@@ -18,12 +18,16 @@ pd.set_option("display.max_rows", 100)
 start_date = dt.date(2023, 1, 1)
 end_date = dt.date(2023, 2, 1)
 
-# Fetch data
+
+# HES data + patient demographics
 engine = common.make_engine(database="abi")
-data = common.get_data(engine, icb.sus_query, start_date, end_date)
+sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
 
+# Primary care patient information
+engine = common.make_engine(database="modelling_sql_area")
+primary_care_attr_data = common.get_data(engine, icb.primary_care_attributes_query, start_date, end_date)
 
-
+#
 
 
 
