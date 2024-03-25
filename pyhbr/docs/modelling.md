@@ -69,7 +69,10 @@ Several attempts to capture "severe" bleeding from administrative codes exist in
     | K57 | Diverticular disease of intestine |
     | K62.5 | Haemorrhage of anus and rectum |
 
-The primary rationale for adopting a code group such as that it originates from a study where the PPV of the code group was measured, and that the study qualifies the group as "major" bleeds (so that it might be taken as a reasonable proxy for BARC 3 or 5 bleeding).
+The primary rationale for adopting such a code group is that
+
+* It originates from a study where the PPV of the code group was measured (offsetting the risk that coded bleeding definitions do not correspond to real bleeds)
+* The study qualifies the group as "major" bleeds (so that it might be taken as a reasonable proxy for BARC 3 or 5 bleeding).
 
 Disadvantages, however, include differences in coding between the UK and Canada (the location of the study), particularly the difference between ICD-10 (UK) and ICD-10CM (Canada). In addition, the presence of unqualified diverticulosis within the bleeding group is not directly a bleeding condition, and may significantly reduce the PPV in older patients.
 
@@ -118,7 +121,7 @@ The group is generated based on UK ICD-10 data, which is likely to reduce coding
 
 Further, the lack of attempt to distinguish "major" bleeding (i.e. more bleeding codes are included) inherently makes the group more likely to be robust. Coded events are likely to correspond to a bleed written on the chart, with the only mechanism to reduce to positive predictive being coding errors.
 
-The use of an all-hospital-bleeding definition is justified as a simple starting point for modelling, that can be refined later by the inclusion of factors to distinguish major bleeds.
+The primary disadvantage is the use of an all-hospital-bleeding definition. However, this is justified as a simple starting point for modelling, that can be refined later by the inclusion of factors to distinguish major bleeds.
 
 No PPV is available for this code group. A basic chart review should be performed on the patients identified by this bleeding group to increase confidence that they match relevant bleeding events.
 
