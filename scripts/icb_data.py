@@ -39,6 +39,7 @@ episodes_and_demographics = common.load_item("episodes_and_demographics")
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 index_spells = acs.get_index_spells(episodes_and_demographics)
+index_episodes = acs.index_episodes(episodes_and_demographics)
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()

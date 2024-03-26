@@ -91,6 +91,8 @@ def get_long_clincial_codes(raw_sus_data: DataFrame) -> DataFrame:
         "_", expand=True
     )
 
+    long_codes["position"] = long_codes["position"].astype(int)
+
     # Collect columns of interest and sort for ease of viewing
     return (
         long_codes[["episode_id", "code", "type", "position"]]
@@ -159,10 +161,15 @@ def get_episodes_and_demographics(
     Returns:
         A dictionary containing "episode"," codes" and "demographics" tables.
     """
+    
+    # The fetch is very slow (and varies depending on the internet connection).
+    # Fetching 5 years of data takes approximately 20 minutes (about 2m episodes).
     print("Starting SUS data fetch...")
     raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
     print("SUS data fetch finished.")
 
+    # Compared to the data fetch, this part is relatively fast, but still very
+    # slow (approximately 10% of the total runtime).
     episodes = get_episodes(raw_sus_data)
     codes = get_clinical_codes(raw_sus_data, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml")
     demographics = get_demographics(raw_sus_data)
