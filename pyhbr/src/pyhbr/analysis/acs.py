@@ -1,7 +1,6 @@
 from pandas import DataFrame
-from pyhbr.middle.from_hic import HicData
 
-def index_episodes(data: HicData) -> DataFrame:
+def index_episodes(data: dict[str, DataFrame]) -> DataFrame:
     """Get the index episodes for ACS/PCI patients
 
     Index episodes are defined by the contents of the first episode of
@@ -26,7 +25,7 @@ def index_episodes(data: HicData) -> DataFrame:
     is indexed from 1.
 
     Args:
-        data: A class containing two DataFrame attributes:
+        data: A dictionary containing at least these keys:
             * episodes: All patient episodes. Must contain `episode_id`, `spell_id`
                 and `episode_start`.
             * codes: All diagnosis/procedure codes by episode. Must contain
@@ -41,13 +40,13 @@ def index_episodes(data: HicData) -> DataFrame:
     # Index episodes are defined by the contents of the first episode in the
     # spell (to capture to cause of admission to hospital).
     first_episodes = (
-        data.episodes.sort_values("episode_start").groupby("spell_id").head(1)
+        data["episodes"].sort_values("episode_start").groupby("spell_id").head(1)
     )
 
     # Join the diagnosis/procedure codes (inner join reduces to episodes which
     # have codes in any group, which is a superset of the index episodes)
     first_episodes_with_codes = first_episodes.merge(
-        data.codes, how="inner", on="episode_id"
+        data["codes"], how="inner", on="episode_id"
     )
 
     # ACS matches based on a primary diagnosis of ACS (this is to rule out
@@ -79,5 +78,5 @@ def index_episodes(data: HicData) -> DataFrame:
 
     # Join some useful information about the episode
     return index_episodes.merge(
-        data.episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
+        data["episodes"][["patient_id", "episode_start"]], how="left", on="episode_id"
     )

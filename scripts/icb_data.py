@@ -5,12 +5,18 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from pyhbr import common
+from pyhbr import common, clinical_codes
+from pyhbr.analysis import acs
 from pyhbr.data_source import icb
+from pyhbr.middle import from_icb
 
 import importlib
+
 importlib.reload(common)
+importlib.reload(acs)
+importlib.reload(from_icb)
 importlib.reload(icb)
+importlib.reload(clinical_codes)
 
 pd.set_option("display.max_rows", 100)
 
@@ -21,30 +27,38 @@ end_date = dt.date(2023, 2, 1)
 
 # HES data + patient demographics
 engine = common.make_engine(database="abi")
-sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
+raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
 
-patient_ids = sus_data["patient_id"].unique()
+episodes = from_icb.get_episodes(raw_sus_data)
+codes = from_icb.get_clinical_codes(
+    raw_sus_data, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml"
+)
+
+data = {"episodes": episodes, "codes": codes}
+
+# Get the index episodes (primary ACS or PCI anywhere in first episode)
+index_episodes = acs.index_episodes(data)
 
 # Primary care patient information
 engine = common.make_engine(database="modelling_sql_area")
 
-primary_care_attributes = common.get_data(engine, icb.primary_care_attributes_query, patient_ids[:499])
+primary_care_attributes = common.get_data(
+    engine, icb.primary_care_attributes_query, patient_ids[:499]
+)
 
 # Primary care prescriptions
-primary_care_prescriptions = common.get_data(engine, icb.primary_care_prescriptions_query, start_date, end_date)
+primary_care_prescriptions = common.get_data(
+    engine, icb.primary_care_prescriptions_query, start_date, end_date
+)
 
 # Primary care measurements
-primary_care_measurements = common.get_data(engine, icb.primary_care_measurements_query, start_date, end_date)
-
-
+primary_care_measurements = common.get_data(
+    engine, icb.primary_care_measurements_query, start_date, end_date
+)
 
 
 ####### OLD
 
-
-
-# Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_episodes = acs.index_episodes(hic_data)
 
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index)
@@ -77,8 +91,10 @@ bleeding_outcome = counting.count_code_groups(
 )
 
 # Get the bleed episodes (for chart review) -- bleeding in any position
-groups = following_year[following_year["group"].isin(bleeding_groups)].groupby("base_episode_id")
-for key, _  in groups:
+groups = following_year[following_year["group"].isin(bleeding_groups)].groupby(
+    "base_episode_id"
+)
+for key, _ in groups:
     print(groups.get_group(key), "\n\n")
 
 arc_hbr.plot_index_measurement_distribution(features)

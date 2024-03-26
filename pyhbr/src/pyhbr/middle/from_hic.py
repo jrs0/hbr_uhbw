@@ -3,53 +3,10 @@
 
 import pandas as pd
 from sqlalchemy import Engine
-from pyhbr.clinical_codes import (
-    ClinicalCodeTree,
-    codes_in_any_group,
-    normalise_code,
-    load_from_package,
-)
+from pyhbr import clinical_codes
 from pyhbr.common import get_data
 from pyhbr.data_source import hic
 from datetime import date, timedelta
-
-
-def filter_to_groups(
-    codes_table: pd.DataFrame, codes: ClinicalCodeTree
-) -> pd.DataFrame:
-    """Filter a table of raw clinical codes to only keep codes in groups
-
-    Use this function to drop clinical codes which are not of interest,
-    and convert all codes to normalised form (lowercase, no whitespace, no dot).
-
-    This function is tested on the HIC dataset, but should be modifiable
-    for use with any data source returning diagnoses and procedures as
-    separate tables in long format. Consider modifying the columns of
-    codes_table that are contained in the output.
-
-    Args:
-        codes_table: Either a diagnoses or procedures table. For this
-            function to work, it needs:
-
-            * A `code` column containing the clinical code.
-            * An `episode_id` identifying which episode contains the code.
-            * A `position` identifying the primary/secondary position of the
-                code in the episode.
-
-        codes: The clinical codes object (previously loaded from a file)
-            containing code groups to use.
-
-    Returns:
-        A table containing the episode ID, the clinical code (normalised),
-        the group containing the code, and the code position.
-
-    """
-    codes_with_groups = codes_in_any_group(codes)
-    codes_table["code"] = codes_table["code"].apply(normalise_code)
-    codes_table = pd.merge(codes_table, codes_with_groups, on="code", how="inner")
-    codes_table = codes_table[["episode_id", "code", "docs", "group", "position"]]
-
-    return codes_table
 
 
 def get_clinical_codes(
@@ -73,16 +30,16 @@ def get_clinical_codes(
             diagnosis positions, and associated episode ID.
     """
 
-    diagnosis_codes = load_from_package(diagnoses_file)
-    procedures_codes = load_from_package(procedures_file)
+    diagnosis_codes = clinical_codes.load_from_package(diagnoses_file)
+    procedures_codes = clinical_codes.load_from_package(procedures_file)
 
     # Fetch the data from the server
     diagnoses = get_data(engine, hic.diagnoses_query)
     procedures = get_data(engine, hic.procedures_query)
 
     # Reduce data to only code groups, and combine diagnoses/procedures
-    filtered_diagnoses = filter_to_groups(diagnoses, diagnosis_codes)
-    filtered_procedures = filter_to_groups(procedures, procedures_codes)
+    filtered_diagnoses = clinical_codes.filter_to_groups(diagnoses, diagnosis_codes)
+    filtered_procedures = clinical_codes.filter_to_groups(procedures, procedures_codes)
 
     # Tag the diagnoses/procedures, and combine the tables
     filtered_diagnoses["type"] = "diagnosis"

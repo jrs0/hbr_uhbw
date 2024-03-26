@@ -116,6 +116,10 @@ Write me please
 
 Write me please
 
+#### Collections of DataFrames
+
+Once the data source has been converted into the standard form described above, multiple tables are collected together into a dictionary mapping strings to Pandas DataFrames. The value of the keys matches the table name in the sections above.
+
 ## Data/Model/Analysis Save Points
 
 To support saving intermediate results of calculations, `pyhbr.common` includes two functions `save_item` and `load_item`, which save a Python object to a directory (by default `save_data/` in your working directory).
