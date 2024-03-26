@@ -1,7 +1,105 @@
 from pandas import DataFrame
 
+
+def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
+    """Get the index spells for ACS/PCI patients
+
+    Index spells are defined by the contents of the first episode of
+    the spell (i.e. the cause of admission to hospital). Spells are
+    considered an index event if either of the following hold:
+
+    * The primary diagnosis of the first episode contains an
+      ACS ICD-10 code.
+    * There is a PCI procedure in any primary or secondary position
+      in the first episode of the spell.
+
+    A prerequisite for spell to be an index spell is that it contains
+    episodes present in both the episodes and codes tables. The episodes table
+    contains start-time/spell information, and the codes table contains
+    information about what diagnoses/procedures occurred in each episode.
+
+    The table returned contains one row per index spell (and is indexed by
+    spell id). It also contains other information about the index spell,
+    which is derived from the first episode of the spell.
+
+    If you need to modify this function, note that the group names used to
+    identify ACS/PCI groups are called `acs` and `pci` (present in the
+    codes table). Also note that the position column in the codes table
+    is indexed from 1.
+
+    Args:
+        data: A dictionary containing at least these keys:
+            * episodes: All patient episodes. Must contain `episode_id`, `spell_id`
+                and `episode_start`.
+            * codes: All diagnosis/procedure codes by episode. Must contain
+                `episode_id`, `position` (indexed from 1 which is the primary
+                code, >1 are secondary codes), and `group` (containing either `acs`
+                or `pci`).
+
+    Returns:
+        A table of index spells and associated information about the
+            first episode of the spell.
+    """
+    # Index spells are defined by the contents of the first episode in the
+    # spell (to capture to cause of admission to hospital).
+    first_episodes = (
+        data["episodes"].sort_values("episode_start").groupby("spell_id").head(1)
+    )
+
+    # Join the diagnosis/procedure codes (inner join reduces to episodes which
+    # have codes in any group, which is a superset of the index episodes)
+    first_episodes_with_codes = first_episodes.merge(
+        data["codes"], how="inner", on="episode_id"
+    )
+
+    # ACS matches based on a primary diagnosis of ACS (this is to rule out
+    # cases where patient history may contain ACS recorded as a secondary
+    # diagnosis).
+    acs_match = (first_episodes_with_codes["group"] == "acs_bezin") & (
+        first_episodes_with_codes["position"] == 1
+    )
+
+    # A PCI match is allowed anywhere in the procedures list, but must still
+    # be present in the first episode of the index spell.
+    pci_match = first_episodes_with_codes["group"] == "pci"
+
+    # Get all the episodes matching the ACS or PCI condition (multiple rows
+    # per episode)
+    matching_episodes = first_episodes_with_codes[acs_match | pci_match]
+    matching_episodes.set_index("episode_id", drop=True, inplace=True)
+
+    # Reduce to one row per episode, and store a flag for whether the ACS
+    # or PCI condition was present
+    index_spells = DataFrame()
+    index_spells["acs_index"] = (
+        matching_episodes["group"].eq("acs_bezin").groupby("episode_id").any()
+    )
+    index_spells["pci_index"] = (
+        matching_episodes["group"].eq("pci").groupby("episode_id").any()
+    )
+
+    # Join some useful information about the episode
+    return (
+        index_spells.merge(
+            data["episodes"][["patient_id", "episode_start", "spell_id"]],
+            how="left",
+            on="episode_id",
+        )
+        .rename(columns={"episode_start": "spell_start"})
+        .reset_index("episode_id")
+        .set_index("spell_id")
+    )
+
+
 def index_episodes(data: dict[str, DataFrame]) -> DataFrame:
     """Get the index episodes for ACS/PCI patients
+
+    !!! warning
+        This function is deprecated. Use get_index_spells() instead.
+        Defining index events and subsequent outcomes at an episode
+        level is not a good idea, because several episodes in the
+        same spell (whose clinical codes may be duplicates of the
+        same clinical event) will cause double-counting.
 
     Index episodes are defined by the contents of the first episode of
     the spell (i.e. the cause of admission to hospital). Episodes are

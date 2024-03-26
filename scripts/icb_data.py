@@ -18,7 +18,7 @@ importlib.reload(from_icb)
 importlib.reload(icb)
 importlib.reload(clinical_codes)
 
-pd.set_option("display.max_rows", 100)
+pd.set_option("display.max_rows", 20)
 
 # Set a date range for episode fetch
 start_date = dt.date(2023, 1, 1)
@@ -38,6 +38,7 @@ data = {"episodes": episodes, "codes": codes}
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 index_episodes = acs.index_episodes(data)
+index_spells = acs.get_index_spells(data)
 
 # Primary care patient information
 engine = common.make_engine(database="modelling_sql_area")
