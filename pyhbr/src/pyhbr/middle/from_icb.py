@@ -159,7 +159,9 @@ def get_episodes_and_demographics(
     Returns:
         A dictionary containing "episode"," codes" and "demographics" tables.
     """
+    print("Starting SUS data fetch...")
     raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
+    print("SUS data fetch finished.")
 
     episodes = get_episodes(raw_sus_data)
     codes = get_clinical_codes(raw_sus_data, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml")

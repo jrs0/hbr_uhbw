@@ -21,8 +21,8 @@ importlib.reload(clinical_codes)
 pd.set_option("display.max_rows", 20)
 
 # Set a date range for episode fetch
-start_date = dt.date(2023, 1, 1)
-end_date = dt.date(2023, 2, 1)
+start_date = dt.date(2018, 1, 1)
+end_date = dt.date(2023, 1, 1)
 
 # HES data + patient demographics
 engine = common.make_engine(database="abi")
@@ -34,8 +34,11 @@ episodes_and_demographics = from_icb.get_episodes_and_demographics(
 # to speed up script development
 common.save_item(episodes_and_demographics, "episodes_and_demographics")
 
+# Load from the save point
+episodes_and_demographics = common.load_item("episodes_and_demographics")
+
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_spells = acs.get_index_spells(episodes_and_codes)
+index_spells = acs.get_index_spells(episodes_and_demographics)
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
