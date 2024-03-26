@@ -10,7 +10,7 @@ import pickle
 
 from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
 from sqlalchemy.exc import NoSuchTableError
-from pandas import DataFrame, read_sql, to_datetime, read_pickle
+from pandas import DataFrame, read_sql, to_datetime, read_pickle, concat
 from git import Repo, InvalidGitRepositoryError
 
 
@@ -105,6 +105,35 @@ def get_data(
     stmt = query(engine, *args)
     return read_sql(stmt, engine)
 
+def get_data_by_patient(
+    engine: Engine, query: Callable[[Engine, ...], Select], patient_ids: list[str]
+) -> DataFrame:
+    """Fetch data using a query restricted by patient ID
+    
+    The patient_id list is chunked into 2000 long batches to fit
+    within an SQL IN clause, and each chunk is run as a separate
+    query. The results are assembled into a single DataFrame.
+
+    Args:
+        engine: The database connection
+        query: A function returning a sqlalchemy Select statement. Must
+            take a list[str] as an argument after engine.
+        patient_ids: A list of patient IDs to restrict the query.
+
+    Returns:
+        The result of the query filtered to the patient_ids
+    """
+    dataframes = []
+    patient_id_chunks = chunks(patient_ids, 2000)
+    num_chunks = len(patient_id_chunks)
+    chunk_count = 1
+    for chunk in patient_id_chunks:
+        print(f"Fetching chunk {chunk_count}/{num_chunks}")
+        dataframes.append(
+            get_data(engine, query, chunk)
+        )
+        chunk_count += 1
+    return concat(dataframes)
 
 def current_commit() -> str:
     """Get current commit.
@@ -375,3 +404,17 @@ def load_item(name: str, interactive: bool = False, save_dir: str = "save_data")
     # The same goes for a pickle storing an object from any other library.
     with open(item_path, "rb") as file:
         return pickle.load(file)
+
+def chunks(patient_ids: list[str], n: int) -> list[list[str]]:
+    """Divide a list of patient ids into n-sized chunks
+    
+    The last chunk may be shorter.
+
+    Args:
+        patient_ids: The List of IDs to chunk
+        n: The chunk size.
+
+    Returns:
+        A list containing chunks (list) of patient IDs
+    """
+    return [patient_ids[i:i+n] for i in range(0, len(patient_ids), n)]

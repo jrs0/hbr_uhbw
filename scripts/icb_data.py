@@ -11,14 +11,11 @@ from pyhbr.data_source import icb
 from pyhbr.middle import from_icb
 
 import importlib
-
 importlib.reload(common)
 importlib.reload(acs)
 importlib.reload(from_icb)
 importlib.reload(icb)
 importlib.reload(clinical_codes)
-
-pd.set_option("display.max_rows", 20)
 
 # Set a date range for episode fetch
 start_date = dt.date(2018, 1, 1)
@@ -30,7 +27,7 @@ episodes_and_demographics = from_icb.get_episodes_and_demographics(
     engine, start_date, end_date
 )
 
-# The full dataset is enormous, so using a save point
+# The full dataset is large, so using a save point
 # to speed up script development
 common.save_item(episodes_and_demographics, "episodes_and_demographics")
 
@@ -39,27 +36,33 @@ episodes_and_demographics = common.load_item("episodes_and_demographics")
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 index_spells = acs.get_index_spells(episodes_and_demographics)
-index_episodes = acs.index_episodes(episodes_and_demographics)
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
 
-# Primary care patient information
+# Fetch all the primary care data, narrowed by patient
 engine = common.make_engine(database="modelling_sql_area")
+primary_care_data = from_icb.get_primary_care_data(engine, patient_ids)
 
-primary_care_attributes = common.get_data(
-    engine, icb.primary_care_attributes_query, patient_ids
-)
+# Combine the data into a single dictionary. This dataset is
+# the standard HES + SWD data available at the ICB (not including
+# the HIC data)
+icb_basic_data = episodes_and_demographics | primary_care_data
 
-# Primary care prescriptions
-primary_care_prescriptions = common.get_data(
-    engine, icb.primary_care_prescriptions_query, start_date, end_date
-)
+# Store metadata
+icb_basic_data["start_date"] = start_date
+icb_basic_data["end_date"] = end_date
 
-# Primary care measurements
-primary_care_measurements = common.get_data(
-    engine, icb.primary_care_measurements_query, start_date, end_date
-)
+# Store the index events that were used to subset
+# the primary care data (based on the patient_ids in 
+# the index spells)
+icb_basic_data["index_spells"] = index_spells
+
+# Save point for the primary care data
+common.save_item(icb_basic_data, "icb_basic_data")
+
+# Load the data
+icb_basic_data = common.load_item("icb_basic_data")
 
 
 ####### OLD

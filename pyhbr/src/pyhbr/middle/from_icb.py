@@ -175,3 +175,37 @@ def get_episodes_and_demographics(
     demographics = get_demographics(raw_sus_data)
 
     return {"episodes": episodes, "codes": codes, "demographics": demographics}
+
+def get_primary_care_data(engine: Engine, patient_ids: list[str]) -> dict[str, DataFrame]:
+    """Fetch primary care information from the database
+
+    Args:
+        engine: The database connection
+        patient_ids: A list of patient IDs to restrict the query.
+
+    Returns:
+        A map from table name to table containing
+            "primary_care_attributes", "primary_care_prescriptions",
+            and "primary_care_measurements".
+    """
+
+    # Primary care prescriptions
+    primary_care_prescriptions = common.get_data_by_patient(
+        engine, icb.primary_care_prescriptions_query, patient_ids
+    )
+
+    # Primary care measurements
+    primary_care_measurements = common.get_data_by_patient(
+        engine, icb.primary_care_measurements_query, patient_ids
+    )
+
+    # Primary care attributes
+    primary_care_attributes = common.get_data_by_patient(
+        engine, icb.primary_care_attributes_query, patient_ids
+    )
+
+    return {
+        "primary_care_attributes": primary_care_attributes,
+        "primary_care_prescriptions": primary_care_prescriptions,
+        "primary_care_measurements": primary_care_measurements   
+    }

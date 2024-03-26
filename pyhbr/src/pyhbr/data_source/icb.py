@@ -116,9 +116,9 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
     """Get primary care patient information
 
     This is translated into an IN clause, which has an item limit. 
-    If patient_ids is longer than 500, an error is raised (a 
-    conservative estimate of the limit). If more patient IDs are
-    needed, split patient_ids and call this function multiple times.
+    If patient_ids is longer than 2000, an error is raised. If 
+    more patient IDs are needed, split patient_ids and call this
+    function multiple times.
     
     The values in patient_ids must be valid (they should come from
     a query such as sus_query).
@@ -131,8 +131,8 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
     Returns:
         SQL query to retrieve episodes table
     """
-    if len(patient_ids) > 500:
-        raise ValueError("The list patient_ids must be less than 500 long.")
+    if len(patient_ids) > 2000:
+        raise ValueError("The list patient_ids must be less than 2000 long.")
     
     table = CheckedTable("primary_care_attributes", engine)
 
@@ -331,14 +331,14 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
 
 
 def primary_care_prescriptions_query(
-    engine: Engine, start_date: date, end_date: date
+    engine: Engine, patient_ids: list[str]
 ) -> Select:
     """Get medications dispensed in primary care
 
     Args:
         engine: the connection to the database
-        start_date: first valid prescription date
-        end_date: last valid prescription date
+        patient_ids: The list of patient identifiers to filter
+            the nhs_number column.
 
     Returns:
         SQL query to retrieve episodes table
@@ -352,22 +352,19 @@ def primary_care_prescriptions_query(
         table.col("prescription_quantity").label("quantity"),
         table.col("prescription_type").label("acute_or_repeat"),
     ).where(
-        table.col("prescription_date") >= start_date,
-        table.col("prescription_date") <= end_date,
-        table.col("nhs_number").is_not(None),
-        table.col("nhs_number") != 9000219621,  # Invalid-patient marker
+        table.col("nhs_number").in_(patient_ids)
     )
 
 
 def primary_care_measurements_query(
-    engine: Engine, start_date: date, end_date: date
+    engine: Engine, patient_ids: list[str]
 ) -> Select:
     """Get physiological measurements performed in primary care
 
     Args:
         engine: the connection to the database
-        start_date: first valid measurement date
-        end_date: last valid measurement date
+        patient_ids: The list of patient identifiers to filter
+            the nhs_number column.
 
     Returns:
         SQL query to retrieve episodes table
@@ -381,8 +378,5 @@ def primary_care_measurements_query(
         table.col("measurement_value").label("result"),
         table.col("measurement_group").label("group"),
     ).where(
-        table.col("measurement_date") >= start_date,
-        table.col("measurement_date") <= end_date,
-        table.col("nhs_number").is_not(None),
-        table.col("nhs_number") != 9000219621,  # Invalid-patient marker
+        table.col("nhs_number").in_(patient_ids)
     )
