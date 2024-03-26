@@ -26,19 +26,18 @@ end_date = dt.date(2023, 2, 1)
 
 # HES data + patient demographics
 engine = common.make_engine(database="abi")
-raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
-
-episodes = from_icb.get_episodes(raw_sus_data)
-codes = from_icb.get_clinical_codes(
-    raw_sus_data, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml"
+episodes_and_demographics = from_icb.get_episodes_and_demographics(
+    engine, start_date, end_date
 )
 
-data = {"episodes": episodes, "codes": codes}
+# The full dataset is enormous, so using a save point
+# to speed up script development
+common.save_item(episodes_and_demographics, "episodes_and_demographics")
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_episodes = acs.index_episodes(data)
-index_spells = acs.get_index_spells(data)
+index_spells = acs.get_index_spells(episodes_and_codes)
 
+# Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
 
 # Primary care patient information

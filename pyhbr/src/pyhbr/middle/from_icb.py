@@ -1,5 +1,8 @@
 from pandas import DataFrame, concat
-from pyhbr import clinical_codes
+from pyhbr import clinical_codes, common
+from pyhbr.data_source import icb
+from sqlalchemy import Engine
+from datetime import date
 
 
 def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
@@ -13,10 +16,46 @@ def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
             `episode_start`, `spell_id` and `patient_id`.
     """
     return (
-        raw_sus_data[["spell_id", "patient_id", "episode_start"]]
+        raw_sus_data[["spell_id", "patient_id", "episode_start", "age"]]
         .reset_index(names="episode_id")
         .set_index("episode_id")
     )
+
+
+def get_demographics(raw_sus_data: DataFrame) -> DataFrame:
+    """Get patient demographic information
+
+    Gender is encoded using the NHS data dictionary values, which
+    is mapped to a category column in the table. (Note that initial
+    values are strings, not integers.)
+
+    * "0": Not known. Mapped to "unknown"
+    * "1": Male: Mapped to "male"
+    * "2": Female. Mapped to "female"
+    * "9": Not specified. Mapped to "unknown".
+
+    Not mapping 0/9 to NA in case either is related to non-binary
+    genders (i.e. it contains information, rather than being a NULL field).
+
+    Args:
+        engine: The connection to the database
+
+    Returns:
+        A table indexed by patient_id, containing gender, birth
+            year, and death_date (if applicable).
+
+    """
+    df = raw_sus_data[["gender", "patient_id"]].copy()
+    df.set_index("patient_id", drop=True, inplace=True)
+
+    # Convert gender to categories
+    df["gender"] = df["gender"].replace("9", "0")
+    df["gender"] = df["gender"].astype("category")
+    df["gender"] = df["gender"].cat.rename_categories(
+        {"0": "unknown", "1": "male", "2": "female"}
+    )
+
+    return df
 
 
 def get_long_clincial_codes(raw_sus_data: DataFrame) -> DataFrame:
@@ -98,5 +137,32 @@ def get_clinical_codes(
 
     codes = concat([filtered_diagnoses, filtered_procedures])
     codes["type"] = codes["type"].astype("category")
-    
+
     return codes
+
+
+def get_episodes_and_demographics(
+    engine: Engine, start_date: date, end_date: date
+) -> dict[str, DataFrame]:
+    """Get episode and clinical code data
+
+    This batch of data must be fetched first to find index events,
+    which establishes the patient group of interest. This can then
+    be used to narrow subsequent queries to the data base, to speed
+    them up.
+
+    Args:
+        engine: The connection to the database
+        start_date: The start date (inclusive) for returned episodes
+        end_date:  The end date (inclusive) for returned episodes
+
+    Returns:
+        A dictionary containing "episode"," codes" and "demographics" tables.
+    """
+    raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
+
+    episodes = get_episodes(raw_sus_data)
+    codes = get_clinical_codes(raw_sus_data, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml")
+    demographics = get_demographics(raw_sus_data)
+
+    return {"episodes": episodes, "codes": codes, "demographics": demographics}
