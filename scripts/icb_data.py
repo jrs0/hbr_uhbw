@@ -24,7 +24,6 @@ pd.set_option("display.max_rows", 20)
 start_date = dt.date(2023, 1, 1)
 end_date = dt.date(2023, 2, 1)
 
-
 # HES data + patient demographics
 engine = common.make_engine(database="abi")
 raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
@@ -40,11 +39,13 @@ data = {"episodes": episodes, "codes": codes}
 index_episodes = acs.index_episodes(data)
 index_spells = acs.get_index_spells(data)
 
+patient_ids = index_spells["patient_id"].unique()
+
 # Primary care patient information
 engine = common.make_engine(database="modelling_sql_area")
 
 primary_care_attributes = common.get_data(
-    engine, icb.primary_care_attributes_query, patient_ids[:499]
+    engine, icb.primary_care_attributes_query, patient_ids
 )
 
 # Primary care prescriptions
