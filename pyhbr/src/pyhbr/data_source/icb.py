@@ -112,19 +112,28 @@ def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
     )
 
 
-def primary_care_attributes_query(
-    engine: Engine, start_date: date, end_date: date
-) -> Select:
+def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Select:
     """Get primary care patient information
 
+    This is translated into an IN clause, which has an item limit. 
+    If patient_ids is longer than 500, an error is raised (a 
+    conservative estimate of the limit). If more patient IDs are
+    needed, split patient_ids and call this function multiple times.
+    
+    The values in patient_ids must be valid (they should come from
+    a query such as sus_query).
+
     Args:
-        engine: the connection to the database
-        start_date: first valid attribute_period
-        end_date: last valid attribute_period
+        engine: The connection to the database
+        patient_ids: The list of patient identifiers to filter
+            the nhs_number column.
 
     Returns:
         SQL query to retrieve episodes table
     """
+    if len(patient_ids) > 500:
+        raise ValueError("The list patient_ids must be less than 500 long.")
+    
     table = CheckedTable("primary_care_attributes", engine)
 
     return select(
@@ -318,12 +327,7 @@ def primary_care_attributes_query(
         table.col("qof_mental"),
         table.col("qof_osteoporosis"),
         table.col("qof_rheumarth"),
-    ).where(
-        table.col("attribute_period") >= start_date,
-        table.col("attribute_period") <= end_date,
-        table.col("nhs_number").is_not(None),
-        table.col("nhs_number") != 9000219621,  # Invalid-patient marker
-    )
+    ).where(table.col("nhs_number").in_(patient_ids))
 
 
 def primary_care_prescriptions_query(
@@ -346,7 +350,7 @@ def primary_care_prescriptions_query(
         table.col("prescription_date").label("date"),
         table.col("prescription_name").label("name"),
         table.col("prescription_quantity").label("quantity"),
-        table.col("prescription_type").label("acute_or_repeat")
+        table.col("prescription_type").label("acute_or_repeat"),
     ).where(
         table.col("prescription_date") >= start_date,
         table.col("prescription_date") <= end_date,
@@ -376,7 +380,6 @@ def primary_care_measurements_query(
         table.col("measurement_name").label("name"),
         table.col("measurement_value").label("result"),
         table.col("measurement_group").label("group"),
-        
     ).where(
         table.col("measurement_date") >= start_date,
         table.col("measurement_date") <= end_date,

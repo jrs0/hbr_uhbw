@@ -23,9 +23,12 @@ end_date = dt.date(2023, 2, 1)
 engine = common.make_engine(database="abi")
 sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
 
+patient_ids = sus_data["patient_id"].unique()
+
 # Primary care patient information
 engine = common.make_engine(database="modelling_sql_area")
-primary_care_attributes = common.get_data(engine, icb.primary_care_attributes_query, start_date, end_date)
+
+primary_care_attributes = common.get_data(engine, icb.primary_care_attributes_query, patient_ids[:499])
 
 # Primary care prescriptions
 primary_care_prescriptions = common.get_data(engine, icb.primary_care_prescriptions_query, start_date, end_date)
