@@ -19,7 +19,7 @@ importlib.reload(clinical_codes)
 pd.set_option('future.no_silent_downcasting', True)
 
 # Set a date range for episode fetch
-start_date = dt.date(2013, 1, 1)
+start_date = dt.date(2018, 1, 1)
 end_date = dt.date(2023, 1, 1)
 
 # Get the raw HES data
