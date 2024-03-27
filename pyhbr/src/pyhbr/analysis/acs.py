@@ -1,4 +1,6 @@
+import datetime as dt
 from pandas import DataFrame
+from pyhbr.clinical_codes import counting
 
 
 def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
@@ -177,4 +179,62 @@ def index_episodes(data: dict[str, DataFrame]) -> DataFrame:
     # Join some useful information about the episode
     return index_episodes.merge(
         data["episodes"][["patient_id", "episode_start"]], how="left", on="episode_id"
+    )
+
+
+def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
+    """Get bleeding and ischaemia outcomes
+
+    The bleeding outcome is defined by the ADAPTT trial bleeding code group,
+    which matches BARC 2-5 bleeding events. Subsequent events occurring more than
+    3 days (to attempt to exclude periprocedural events) and less than 365 days are
+    included. Outcomes are allowed to occur in any episode of any spell (including
+    the index spell), but must occur in the primary position (to avoid matching
+    historical/duplicate coding within a spell).
+
+    Args:
+        index_spells: A table containing `spell_id` as Pandas index and a
+            column `episode_id` for the first episode in the index spell.
+        all_other_codes: A table of other episodes (and their clinical codes)
+            relative to the index spell, output from counting.get_all_other_codes.
+
+    Returns:
+        A table with two columns `bleeding_outcome` and `ischaemia_outcome`, which
+            count the number of subsequent events in the other episodes after
+            the index.
+    """
+
+    bleeding_groups = ["bleeding_adaptt"]
+    ischaemia_groups = ["hussain_ami_stroke"]
+    primary_only = True
+    exclude_index_spell = False
+    first_episode_only = False
+    min_after = dt.timedelta(days=3)
+    max_after = dt.timedelta(days=365)
+
+    # Get the episodes (and all their codes) in the follow-up window
+    following_year = counting.get_time_window(all_other_codes, min_after, max_after)
+
+    # Count bleeding outcomes
+    bleeding_episodes = counting.filter_by_code_groups(
+        following_year,
+        bleeding_groups,
+        primary_only,
+        exclude_index_spell,
+        first_episode_only,
+    )
+    bleeding_outcome = counting.count_code_groups(index_spells, bleeding_episodes)
+
+    # Count ischaemia outcomes
+    ischaemia_episodes = counting.filter_by_code_groups(
+        following_year,
+        ischaemia_groups,
+        primary_only,
+        exclude_index_spell,
+        first_episode_only,
+    )
+    ischaemia_outcome = counting.count_code_groups(index_spells, ischaemia_episodes)
+
+    return DataFrame(
+        {"bleeding_outcome": bleeding_outcome, "ischaemia_outcome": ischaemia_outcome}
     )

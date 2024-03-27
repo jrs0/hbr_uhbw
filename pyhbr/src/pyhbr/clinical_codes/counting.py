@@ -112,34 +112,42 @@ def get_time_window(
     ]
 
 
-def count_code_groups(
-    index_spells: DataFrame,
-    other_episodes: DataFrame,
+def filter_by_code_groups(
+    episodes: DataFrame,
     code_groups: list[str],
-    any_position: bool,
+    primary_only: bool,
     exclude_index_spell: bool,
     first_episode_only: bool,
-) -> Series:
-    """Count occurrences of a code group in a set of other episodes
+) -> DataFrame:
+    """Filter based on matching code conditions occurring in other episodes
 
-    Count the total occurrences of the codes in any of a list of
-    code groups in the other episodes relative to the index spells.
+    From any table derived from get_all_other_episodes (e.g. the
+    output of get_time_window), filter to only the other episodes
+    which contain codes matching particular conditions.
 
-    Note that the index episode itself will not necessarily be
-    excluded from the count (if other_episodes contains the index
-    episode, and exclude_index_spell is False).
+    This function is intended to be used in conjunction with
 
     Args:
-        index_episodes: Any DataFrame with `spell_id` as Pandas index and
-            containing an `episode_id` column.
-        other_episodes: Table of other episodes (relative to the index).
+        episodes: Table of other episodes to filter.
             This can be narrowed to either the previous or subsequent
             year, or a different time frame. (In particular, exclude the
-            index event if required.)
+            index event if required.) The table must contain these
+            columns:
+
+            * `other_episode_id`: The ID of the other episode
+                containing the code (relative to the index episode).
+            * `other_spell_id`: The spell containing the other episode.
+            * `group`: The name of the code group.
+            * `type`: The code type, "diagnosis" or "procedure".
+            * `position`: The position of the code (1 for primary, > 1
+                for secondary).
+            * `time_to_other_episode`: The time elapsed between the index
+                episode start and the other episode start.
+
         code_groups: List of code group names containing clinical codes
             that will count towards the sum.
-        any_position: If True, count any code in any diagnosis/procedure
-            position. If False, only count a code if it is the primary
+        primary_only: If False, count any code in any diagnosis/procedure
+            position. If True, only count a code if it is the primary
             diagnosis/procedure.
         exclude_index_spell: Do not include any code in the count if it
             is from an episode in the index spell.
@@ -152,7 +160,7 @@ def count_code_groups(
     """
 
     # Reduce to only the code groups of interest
-    df = other_episodes
+    df = episodes
     df = df[df["group"].isin(code_groups)]
 
     # Duplicated rows correspond to codes in multiple
@@ -162,7 +170,16 @@ def count_code_groups(
     df = df.drop_duplicates(["other_episode_id", "type", "position"])
 
     # Keep only necessary columns
-    df = df[["index_spell_id", "other_spell_id", "position", "time_to_other_episode"]]
+    df = df[
+        [
+            "index_spell_id",
+            "other_spell_id",
+            "code",
+            "docs",
+            "position",
+            "time_to_other_episode",
+        ]
+    ]
 
     # Optionally remove rows corresponding to the index spell
     if exclude_index_spell:
@@ -173,17 +190,42 @@ def count_code_groups(
     # day granularity, and the first and second episodes begin on the
     # same day.
     if first_episode_only:
-        df = df.groupby("other_spell_id").sort_values("time_to_other_episode").head(1)
+        df = df.sort_values("time_to_other_episode").groupby("other_spell_id").head(1)
 
     # Optionally exclude secondary diagnoses/procedures
-    if not any_position:
+    if primary_only:
         df = df[df["position"] == 1]
 
-    # Rows now correspond to codes that can be counted relative to the index spell
-    code_group_count = df.groupby("index_spell_id").size().rename("code_group_count")
+    return df
 
-    return (
-        index_spells[[]]
-        .merge(code_group_count, how="left", left_index=True, right_index=True)
-        .fillna(0.0)["code_group_count"]
+
+def count_code_groups(index_spells: DataFrame, filtered_episodes: DataFrame) -> Series:
+    """Count the number of matching codes relative to index episodes
+
+    This function counts the rows for each index spell ID in the output of
+    filter_by_code_groups, and adds 0 for any index spell ID without
+    any matching rows in filtered_episodes.
+
+    The intent is to count the number of codes (one per row) that matched
+    filter conditions in other episodes with respect to the index spell.
+
+    Args:
+        index_spells: The index spells, which provides the list of
+            spell IDs of interest. The output will be NA for any spell
+            ID that does not have any matching rows in filtered_episodes.
+        filtered_episodes: The output from filter_by_code_groups,
+            which produces a table where each row represents a matching
+            code.
+
+    Returns:
+        How many codes (rows) occurred for each index spell
+    """
+    df = (
+        filtered_episodes.groupby("index_spell_id")
+        .size()
+        .rename("count")
+        .to_frame()
+        .reset_index(names="spell_id")
+        .set_index("spell_id")
     )
+    return index_spells[[]].merge(df, how="left", on="spell_id").fillna(0)["count"]
