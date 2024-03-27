@@ -133,7 +133,7 @@ def get_data_by_patient(
             get_data(engine, query, chunk)
         )
         chunk_count += 1
-    return concat(dataframes)
+    return concat(dataframes).reset_index(drop=True)
 
 def current_commit() -> str:
     """Get current commit.
