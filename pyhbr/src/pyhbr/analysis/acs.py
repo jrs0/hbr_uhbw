@@ -191,6 +191,8 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
     included. Outcomes are allowed to occur in any episode of any spell (including
     the index spell), but must occur in the primary position (to avoid matching
     historical/duplicate coding within a spell).
+    
+    TODO: the ischaemia outcome definition
 
     Args:
         index_spells: A table containing `spell_id` as Pandas index and a
@@ -238,3 +240,49 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
     return DataFrame(
         {"bleeding_outcome": bleeding_outcome, "ischaemia_outcome": ischaemia_outcome}
     )
+    
+def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
+    """Get counts of previous clinical codes in code groups before the index.
+    
+    Predictors derived from clinical code groups use clinical coding data from 365
+    days before the index to 30 days before the index (this excludes episodes where
+    no coding data would be available, because the coding process itself takes
+    approximately one month).
+
+    All groups included anywhere in the `group` column of all_other_codes are
+    included, and each one becomes a new column with "_before" appended.
+
+    Args:
+        index_spells: A table containing `spell_id` as Pandas index and a
+            column `episode_id` for the first episode in the index spell.
+        all_other_codes: A table of other episodes (and their clinical codes)
+            relative to the index spell, output from counting.get_all_other_codes.
+
+    Returns:
+        A table with one column per code group, counting the number of codes
+            in that group that appeared in the year before the index.
+    """
+    code_groups = all_other_codes["group"].unique()
+    primary_only = False
+    exclude_index_spell = False
+    first_episode_only = False
+    max_before = dt.timedelta(days=365)
+    min_before = dt.timedelta(days=30)
+
+    # Get the episodes that occurred in the previous year (for clinical code features)
+    previous_year = counting.get_time_window(all_other_codes, -max_before, -min_before)
+
+    code_features = {}
+    for group in code_groups:
+        group_episodes = counting.filter_by_code_groups(
+            previous_year,
+            [group],
+            primary_only,
+            exclude_index_spell,
+            first_episode_only,
+        )
+        code_features[group + "_before"] = counting.count_code_groups(
+            index_spells, group_episodes
+        )
+    
+    return DataFrame(code_features)

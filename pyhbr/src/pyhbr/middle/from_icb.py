@@ -8,22 +8,7 @@ from datetime import date
 def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
     """Get the episodes table
 
-    Args:
-        raw_sus_data: Data returned by sus_query() query.
-
-    Returns:
-        A dataframe indexed by `episode_id`, with columns
-            `episode_start`, `spell_id` and `patient_id`.
-    """
-    return (
-        raw_sus_data[["spell_id", "patient_id", "episode_start", "age"]]
-        .reset_index(names="episode_id")
-        .set_index("episode_id")
-    )
-
-
-def get_demographics(raw_sus_data: DataFrame) -> DataFrame:
-    """Get patient demographic information
+    Age and gender are also included in each row.
 
     Gender is encoded using the NHS data dictionary values, which
     is mapped to a category column in the table. (Note that initial
@@ -38,15 +23,17 @@ def get_demographics(raw_sus_data: DataFrame) -> DataFrame:
     genders (i.e. it contains information, rather than being a NULL field).
 
     Args:
-        engine: The connection to the database
+        raw_sus_data: Data returned by sus_query() query.
 
     Returns:
-        A table indexed by patient_id, containing gender, birth
-            year, and death_date (if applicable).
-
+        A dataframe indexed by `episode_id`, with columns
+            `episode_start`, `spell_id` and `patient_id`.
     """
-    df = raw_sus_data[["gender", "patient_id"]].copy()
-    df.set_index("patient_id", drop=True, inplace=True)
+    df = (
+        raw_sus_data[["spell_id", "patient_id", "episode_start", "age"]]
+        .reset_index(names="episode_id")
+        .set_index("episode_id")
+    )
 
     # Convert gender to categories
     df["gender"] = df["gender"].replace("9", "0")
@@ -143,9 +130,30 @@ def get_clinical_codes(
     return codes
 
 
-def get_episodes_and_demographics(
-    engine: Engine, start_date: date, end_date: date
-) -> dict[str, DataFrame]:
+def get_raw_sus_data(engine: Engine, start_date: date, end_date: date) -> DataFrame:
+    """Get the raw SUS (secondary uses services hospital episode statistics)
+
+
+    Args:
+        engine: The connection to the database
+        start_date: The start date (inclusive) for returned episodes
+        end_date:  The end date (inclusive) for returned episodes
+
+    Returns:
+        A dataframe with one row per episode, containing clinical code
+            data and patient demographics at that episode.
+    """
+
+    # The fetch is very slow (and varies depending on the internet connection).
+    # Fetching 5 years of data takes approximately 20 minutes (about 2m episodes).
+    print("Starting SUS data fetch...")
+    raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
+    print("SUS data fetch finished.")
+
+    return raw_sus_data
+
+
+def get_episodes_and_codes(raw_sus_data: DataFrame) -> dict[str, DataFrame]:
     """Get episode and clinical code data
 
     This batch of data must be fetched first to find index events,
@@ -154,29 +162,25 @@ def get_episodes_and_demographics(
     them up.
 
     Args:
-        engine: The connection to the database
-        start_date: The start date (inclusive) for returned episodes
-        end_date:  The end date (inclusive) for returned episodes
+        raw_sus_data: The raw HES data returned by get_raw_sus_data()
 
     Returns:
-        A dictionary containing "episode"," codes" and "demographics" tables.
+        A dictionary with "episodes" containing the episodes table
+            (also contains age and gender) and "codes" containing the
+            clinical code data in long format.
     """
-    
-    # The fetch is very slow (and varies depending on the internet connection).
-    # Fetching 5 years of data takes approximately 20 minutes (about 2m episodes).
-    print("Starting SUS data fetch...")
-    raw_sus_data = common.get_data(engine, icb.sus_query, start_date, end_date)
-    print("SUS data fetch finished.")
 
     # Compared to the data fetch, this part is relatively fast, but still very
     # slow (approximately 10% of the total runtime).
     episodes = get_episodes(raw_sus_data)
     codes = get_clinical_codes(raw_sus_data, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml")
-    demographics = get_demographics(raw_sus_data)
 
-    return {"episodes": episodes, "codes": codes, "demographics": demographics}
+    return {"episodes": episodes, "codes": codes}
 
-def get_primary_care_data(engine: Engine, patient_ids: list[str]) -> dict[str, DataFrame]:
+
+def get_primary_care_data(
+    engine: Engine, patient_ids: list[str]
+) -> dict[str, DataFrame]:
     """Fetch primary care information from the database
 
     Args:
@@ -207,5 +211,5 @@ def get_primary_care_data(engine: Engine, patient_ids: list[str]) -> dict[str, D
     return {
         "primary_care_attributes": primary_care_attributes,
         "primary_care_prescriptions": primary_care_prescriptions,
-        "primary_care_measurements": primary_care_measurements   
+        "primary_care_measurements": primary_care_measurements,
     }

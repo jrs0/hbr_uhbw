@@ -16,24 +16,27 @@ importlib.reload(icb)
 importlib.reload(clinical_codes)
 
 # Set a date range for episode fetch
-start_date = dt.date(2020, 1, 1)
+start_date = dt.date(2022, 10, 1)
 end_date = dt.date(2023, 1, 1)
 
-# HES data + patient demographics
+# Get the raw HES data
 engine = common.make_engine(database="abi")
-episodes_and_demographics = from_icb.get_episodes_and_demographics(
-    engine, start_date, end_date
-)
+raw_sus_data = from_icb.get_raw_sus_data(engine, start_date, end_date)
 
 # The full dataset is large, so using a save point
 # to speed up script development
-common.save_item(episodes_and_demographics, "episodes_and_demographics")
+common.save_item(raw_sus_data, "raw_sus_data")
+
+# HES data + patient demographics
+episodes_and_codes = from_icb.get_episodes_and_codes(raw_sus_data)
+
+
 
 # Load from the save point
-episodes_and_demographics = common.load_item("episodes_and_demographics")
+episodes = common.load_item("episodes_and_codes")
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_spells = acs.get_index_spells(episodes_and_demographics)
+index_spells = acs.get_index_spells(episodes)
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
@@ -52,7 +55,7 @@ icb_basic_data["start_date"] = start_date
 icb_basic_data["end_date"] = end_date
 
 # Store the index events that were used to subset
-# the primary care data (based on the patient_ids in 
+# the primary care data (based on the patient_ids in
 # the index spells)
 icb_basic_data["index_spells"] = index_spells
 
@@ -61,4 +64,3 @@ common.save_item(icb_basic_data, "icb_basic_data")
 
 # Load the data
 icb_basic_data = common.load_item("icb_basic_data")
-
