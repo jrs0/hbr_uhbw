@@ -4,6 +4,7 @@
 import importlib
 import datetime as dt
 
+import pandas as pd
 from pyhbr import common, clinical_codes
 from pyhbr.analysis import acs
 from pyhbr.data_source import icb
@@ -15,8 +16,10 @@ importlib.reload(from_icb)
 importlib.reload(icb)
 importlib.reload(clinical_codes)
 
+pd.set_option('future.no_silent_downcasting', True)
+
 # Set a date range for episode fetch
-start_date = dt.date(2022, 10, 1)
+start_date = dt.date(2013, 1, 1)
 end_date = dt.date(2023, 1, 1)
 
 # Get the raw HES data
@@ -30,13 +33,8 @@ common.save_item(raw_sus_data, "raw_sus_data")
 # HES data + patient demographics
 episodes_and_codes = from_icb.get_episodes_and_codes(raw_sus_data)
 
-
-
-# Load from the save point
-episodes = common.load_item("episodes_and_codes")
-
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_spells = acs.get_index_spells(episodes)
+index_spells = acs.get_index_spells(episodes_and_codes)
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
@@ -48,7 +46,7 @@ primary_care_data = from_icb.get_primary_care_data(engine, patient_ids)
 # Combine the data into a single dictionary. This dataset is
 # the standard HES + SWD data available at the ICB (not including
 # the HIC data)
-icb_basic_data = episodes_and_demographics | primary_care_data
+icb_basic_data = episodes_and_codes | primary_care_data
 
 # Store metadata
 icb_basic_data["start_date"] = start_date

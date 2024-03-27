@@ -30,7 +30,7 @@ def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
             `episode_start`, `spell_id` and `patient_id`.
     """
     df = (
-        raw_sus_data[["spell_id", "patient_id", "episode_start", "age"]]
+        raw_sus_data[["spell_id", "patient_id", "episode_start", "age", "gender"]]
         .reset_index(names="episode_id")
         .set_index("episode_id")
     )
@@ -178,6 +178,187 @@ def get_episodes_and_codes(raw_sus_data: DataFrame) -> dict[str, DataFrame]:
     return {"episodes": episodes, "codes": codes}
 
 
+def replace_nan_with_zero(primary_care_attributes: DataFrame) -> DataFrame:
+    """Replace NaN with zero for a selection of rows
+
+    Many column in the primary care attributes data use NA
+    as a marker for 0. It is important to replace these NAs
+    with zero before performing a join of the attributes onto
+    a larger table, which could produce NAs that mean "row
+    was not present in attributes").
+
+    Args:
+        primary_care_attributes: Table where a subset of columns
+            should have NaN replaced with zero.
+            
+    Returns:
+        The modified attributes
+    
+    """
+    na_means_zero = [
+        "abortion",
+        "adhd",
+        "af",
+        "amputations",
+        "anaemia_iron",
+        "anaemia_other",
+        "angio_anaph",
+        "arrhythmia_other",
+        "asthma",
+        "autism",
+        "back_pain",
+        "cancer_bladder",
+        "cancer_bladder_year",
+        "cancer_bowel",
+        "cancer_bowel_year",
+        "cancer_breast",
+        "cancer_breast_year",
+        "cancer_cervical",
+        "cancer_cervical_year",
+        "cancer_giliver",
+        "cancer_giliver_year",
+        "cancer_headneck",
+        "cancer_headneck_year",
+        "cancer_kidney",
+        "cancer_kidney_year",
+        "cancer_leuklymph",
+        "cancer_leuklymph_year",
+        "cancer_lung",
+        "cancer_lung_year",
+        "cancer_melanoma",
+        "cancer_melanoma_year",
+        "cancer_metase",
+        "cancer_metase_year",
+        "cancer_other",
+        "cancer_other_year",
+        "cancer_ovarian",
+        "cancer_ovarian_year",
+        "cancer_prostate",
+        "cancer_prostate_year",
+        "cardio_other",
+        "cataracts",
+        "ckd",
+        "coag",
+        "coeliac",
+        "contraception",
+        "copd",
+        "cystic_fibrosis",
+        "dementia",
+        "dep_alcohol",
+        "dep_benzo",
+        "dep_cannabis",
+        "dep_cocaine",
+        "dep_opioid",
+        "dep_other",
+        "depression",
+        "diabetes_1",
+        "diabetes_2",
+        "diabetes_gest",
+        "diabetes_retina",
+        "disorder_eating",
+        "disorder_pers",
+        "dna_cpr",
+        "eczema",
+        "endocrine_other",
+        "endometriosis",
+        "eol_plan",
+        "epaccs",
+        "epilepsy",
+        "fatigue",
+        "fragility",
+        "gout",
+        "has_carer",
+        "health_check",
+        "hearing_impair",
+        "hep_b",
+        "hep_c",
+        "hf",
+        "hiv",
+        "homeless",
+        "housebound",
+        "ht",
+        "ibd",
+        "ibs",
+        "ihd_mi",
+        "ihd_nonmi",
+        "incont_urinary",
+        "inflam_arthritic",
+        "is_carer",
+        "learning_diff",
+        "learning_dis",
+        "live_birth",
+        "liver_alcohol",
+        "liver_nafl",
+        "liver_other",
+        "lung_restrict",
+        "macular_degen",
+        "measles_mumps",
+        "migraine",
+        "miscarriage",
+        "mmr1",
+        "mmr2",
+        "mnd",
+        "ms",
+        "neuro_pain",
+        "neuro_various",
+        "newborn_check",
+        "nh_rh",
+        "nose",
+        "obesity",
+        "organ_transplant",
+        "osteoarthritis",
+        "osteoporosis",
+        "parkinsons",
+        "pelvic",
+        "phys_disability",
+        "poly_ovary",
+        "pre_diabetes",
+        "pregnancy",
+        "psoriasis",
+        "ptsd",
+        "qof_af",
+        "qof_asthma",
+        "qof_chd",
+        "qof_ckd",
+        "qof_copd",
+        "qof_dementia",
+        "qof_depression",
+        "qof_diabetes",
+        "qof_epilepsy",
+        "qof_hf",
+        "qof_ht",
+        "qof_learndis",
+        "qof_mental",
+        "qof_obesity",
+        "qof_osteoporosis",
+        "qof_pad",
+        "qof_pall",
+        "qof_rheumarth",
+        "qof_stroke",
+        "sad",
+        "screen_aaa",
+        "screen_bowel",
+        "screen_breast",
+        "screen_cervical",
+        "screen_eye",
+        "self_harm",
+        "sickle",
+        "smi",
+        "stomach",
+        "stroke",
+        "tb",
+        "thyroid",
+        "uterine",
+        "vasc_dis",
+        "veteran",
+        "visual_impair",
+    ]
+    
+    df = primary_care_attributes.copy()
+    df[na_means_zero] = df[na_means_zero].fillna(value=0).infer_objects(copy=False)
+    return df
+
+
 def get_primary_care_data(
     engine: Engine, patient_ids: list[str]
 ) -> dict[str, DataFrame]:
@@ -204,9 +385,10 @@ def get_primary_care_data(
     )
 
     # Primary care attributes
-    primary_care_attributes = common.get_data_by_patient(
+    df = common.get_data_by_patient(
         engine, icb.primary_care_attributes_query, patient_ids
     )
+    primary_care_attributes = replace_nan_with_zero(df)
 
     return {
         "primary_care_attributes": primary_care_attributes,

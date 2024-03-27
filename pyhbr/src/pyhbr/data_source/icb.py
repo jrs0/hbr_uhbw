@@ -9,7 +9,7 @@ This file does not include the HIC data transferred to the ICB.
 
 from itertools import product
 from datetime import date
-from sqlalchemy import select, Select, Engine, String
+from sqlalchemy import select, Select, Engine, String, DateTime
 from pyhbr.common import CheckedTable
 
 
@@ -138,12 +138,13 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
 
     return select(
         table.col("nhs_number").cast(String).label("patient_id"),
-        table.col("NHSNumberWasValid").label("row_valid"),
-        table.col("attribute_period"),
+        table.col("attribute_period").cast(DateTime),
         table.col("homeless"),
-        table.col("practice_code"),
-        table.col("age"),
-        table.col("sex"),
+        
+        # No need for these, available in episodes data
+        #table.col("age"),
+        #table.col("sex"),
+        
         table.col("smoking"),
         table.col("bmi"),
         table.col("ethnicity"),
