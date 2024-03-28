@@ -286,3 +286,96 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
         )
     
     return DataFrame(code_features)
+
+
+def get_swd_index_spells(index_spells: DataFrame, primary_care_attributes: DataFrame) -> DataFrame:
+    """Link primary care attributes to index spells by attribute date
+
+    This is a filtering function that reduces the index_spells to just
+    those where there is a corresponding, recent, row in the primary
+    care attributes table. This produces a set of index events where
+    the primary care attributes can be used as predictors.
+
+    The attribute_period column of an attributes row indicates that
+    the attribute was valid at the end of the interval
+    (attribute_period, attribute_period + 1month). It is important
+    that no attribute is used in modelling that could have occurred
+    after the index event, meaning that attribute_period + 1month < spell_start
+    must hold for any attribute used as a predictor. On the other hand,
+    data substantially before the index event should not be used. The
+    valid window is controlled by imposing
+    
+        attribute_period < spell_start - attribute_valid_window
+
+    Args:
+        index_spells: The index spell table, containing a `spell_start`
+            column and `patient_id`
+        primary_care_attributes: The patient attributes table, containing
+            `attribute_period` and `patient_id`
+
+    Returns:
+        A filtered version of index_spells containing only index spells
+            with a valid set of patient attributes. The `attribute_period`
+            column is added to link the attributes (along with `patient_id`).
+    """    
+
+    # Define a window before the index event where SWD attributes will be considered valid.
+    # 41 days is used to ensure that a full month is definitely captured. This
+    # ensures that attribute data that is fairly recent is used as predictors.
+    attribute_valid_window = dt.timedelta(days=60)
+
+    # Add all the patient's attributes onto each index spell
+    df = index_spells.reset_index().merge(
+        primary_care_attributes[["patient_id", "attribute_period"]],
+        how="left",
+        on="patient_id",
+    )
+
+    # Only keep attributes that are from strictly before the index spell
+    # (note attribute_period represents the start of the month that attributes
+    # apply to)
+    attr_before_index = df[
+        (df["attribute_period"] + dt.timedelta(days=31)) < df["spell_start"]
+    ]
+
+    # Keep only the most recent attribute before the index spell
+    most_recent = (
+        attr_before_index.sort_values("attribute_period").groupby("spell_id").tail(1)
+    )
+
+    # Exclude attributes that occurred outside the attribute_value_window before the index
+    swd_index_spells = most_recent[
+        most_recent["attribute_period"]
+        > (most_recent["spell_start"] - attribute_valid_window)
+    ]
+
+    return swd_index_spells.set_index("spell_id")
+
+def get_index_attributes(swd_index_spells: DataFrame, primary_care_attributes: DataFrame) -> DataFrame:
+    """Link the primary care patient data to the index spells
+    
+    !!! warning
+        The validity of this needs checking. The intention is to reduce missingness in
+        the attributes data, but there may be the unintended side-effect of biasing the
+        dataset (depending on the reason for no attributes). Need to find out what is
+        causing the missingness.
+    
+    Filter the primary care attributes table to just those rows applicable
+    to the index spells (determined using get_swd_index_spells), and replace
+    the patient_id/attribute_period columns with the spell_id Pandas index.
+
+    Args:
+        swd_index_spells: Reduced index_spells which all have a recent, valid
+            patient attributes row. Contains the columns `patient_id` and 
+            `attribute_period` for linking, and has Pandas index `spell_id`.
+        primary_care_attributes: The full attributes table.
+
+    Returns:
+        The table of index-spell patient attributes, indexed by `spell_id`.
+    """
+
+    return (
+        swd_index_spells[["patient_id", "attribute_period"]]
+        .reset_index()
+        .merge(primary_care_attributes, how="left", on=["patient_id", "attribute_period"])
+    ).set_index("spell_id").drop(columns=["patient_id", "attribute_period"])

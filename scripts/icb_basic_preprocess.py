@@ -3,6 +3,7 @@
 
 import importlib
 import datetime as dt
+import numpy as np
 from pyhbr import common
 from pyhbr.clinical_codes import counting
 from pyhbr.analysis import describe
@@ -14,61 +15,77 @@ importlib.reload(describe)
 
 data = common.load_item("icb_basic_data")
 
+primary_care_attributes = data["primary_care_attributes"]
+
+# Do this in the data fetch
+primary_care_attributes["smoking"] = primary_care_attributes["smoking"].replace("(U|u)nknown", np.nan, regex=True)
+
+# Reduce the index spells to those which have a valid row of
+# patient attributes
 index_spells = data["index_spells"]
 
-# Fix this upstream (should not contain duplicates) -- just link
-# it to spell_id (i.e. the index), and that will pick out what was
-# recorded in the index spell.
-demographics = data["demographics"].reset_index()
+swd_index_spells = acs.get_swd_index_spells(index_spells, primary_care_attributes)
+
+# Get the patient index-spell attributes
+index_attributes = acs.get_index_attributes(swd_index_spells, primary_care_attributes)
+
+# Remove attribute columns that have too much missingness or where
+# the column contains only one value after excluding NA
+missingness = describe.proportion_missingness(index_attributes)
+zero_variance = describe.zero_variance_columns(index_attributes)
+
+x = missingness[missingness < 0.75]
+y = zero_variance[~zero_variance]
+
+to_keep = missingness[(missingness < 0.75) & ~zero_variance]
+
+
+def contains_enough_variance(
+    column: Series, missingness_threshold: float, common_value_threshold: float
+) -> bool:
+    """Decide if a column has enough variance to include as predictor
+    
+    Args:
+        column: A column (which can have numeric or non-numeric type)
+            to assess whether there is enough variance to use as a
+            predictor in models.
+        missingness_threshold: A column is excluded if there is more
+            missingness (NA or None) than this value.
+        common_value_threshold: A column is excluded if the most common
+            value occupies more than this proportion of the rows (excluding
+            missing values).
+
+    Returns:
+        True if enough variance, False otherwise
+    """
+
+    # Check if the column fails the missingness test
+    if column.isna().sum() / len(column) > missingness_threshold:
+        return False
+
+    # Check if the column meets the common value test
+    frequencies = column.value_counts()
+    if frequencies.iloc[0] > common_value_threshold * frequencies.sum():
+        return False
+    
+    # Else the column has low enough missingness and high enough variance
+    return True
+
+missingness_threshold = 0.5
+common_value_threshold = 0.99
+cols_to_keep = index_attributes.apply(
+    lambda col: contains_enough_variance(
+        col, missingness_threshold, common_value_threshold
+    )
+)
 
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index).
-all_other_codes = counting.get_all_other_codes(index_spells, data)
+all_other_codes = counting.get_all_other_codes(swd_index_spells, data)
 
 # Get the bleeding and ischaemia outcomes
-outcomes = acs.get_outcomes(index_spells, all_other_codes)
-code_features = acs.get_code_features(index_spells, all_other_codes)
-
-# Join the attributes onto the index spells by patient, and then
-# only keep attributes that are before the index event, but within
-# the attribute_valid_window
-#
-# The attribute_period column of an attributes row indicates that
-# the attribute was valid at the end of the interval
-# (attribute_period, attribute_period + 1month). It is important
-# that no attribute is used in modelling that could have occurred
-# after the index event, meaning that attribute_period + 1 < idx_date
-# must hold for any attribute used as a predictor. On the other hand,
-# data substantially before the index event should not be used. The
-# valid window is controlled by imposing
-#
-# (idx_date - attribute_period) < attribute_valid_window
-#
-# Ensure that attribute_valid_window is slightly larger than a multiple
-# of months to ensure that a full month is captured.
-#
-
-# Define a window before the index event where SWD attributes will be considered valid.
-# 41 days is used to ensure that a full month is definitely captured. Consider
-# using 31*n + 10 to allow attributes up to n months before the index event to be used
-# (the most recent attributes will still be preferred).
-attribute_valid_window = dt.timedelta(days=41)
-
-primary_care_attributes = data["primary_care_attributes"]
-
-index_spells.reset_index().merge(
-    primary_care_attributes[["patient_id", "attribute_period"]],
-    how="left",
-    on="patient_id",
-).dtypes
-
-""".groupby("spell_id").apply(
-    lambda g: g[
-        ((g["attribute_period"] + dt.timedelta(days=31)) < g["spell_start"])
-        & ((g["spell_start"] - g["attribute_period"]) < attribute_valid_window)
-    ]
-)
-"""
+outcomes = acs.get_outcomes(swd_index_spells, all_other_codes)
+code_features = acs.get_code_features(swd_index_spells, all_other_codes)
 
 # Combine all tables (features and outcomes) into a single table
 # for saving.

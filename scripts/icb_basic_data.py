@@ -59,6 +59,3 @@ icb_basic_data["index_spells"] = index_spells
 
 # Save point for the primary care data
 common.save_item(icb_basic_data, "icb_basic_data")
-
-# Load the data
-icb_basic_data = common.load_item("icb_basic_data")

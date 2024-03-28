@@ -25,3 +25,33 @@ def get_column_rates(data: DataFrame) -> Series:
     return Series(
         {name + "_rate": proportion_nonzero(col) for name, col in data.items()}
     ).sort_values()
+
+def proportion_missingness(data: DataFrame) -> Series:
+    """Get the proportion of missing values in each column
+    
+    Args:
+        data: A table where missingness should be calculate
+            for each column
+
+    Returns:
+        The proportion of missing values in each column, indexed
+            by the original table column name. The values are sorted
+            in order of increasing missingness
+    """
+    return (data.isna().sum() / len(data)).sort_values().rename("missingness")
+
+def zero_variance_columns(data: DataFrame) -> Series:
+    """Check which columns of the input table have zero variance
+    
+    Zero variance is defined as either having all missing values,
+    or having only one value after excluding missing values.
+    
+    Args:
+        data: The table to check for zero variance
+
+    Returns:
+        A Series containing bool, indexed by the column name
+            in the original data, containing whether the column
+            has zero variance.
+    """
+    return data.apply(lambda col: len(col.value_counts()) < 2).rename("zero_variance")
