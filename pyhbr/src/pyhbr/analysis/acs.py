@@ -400,3 +400,4 @@ def remove_features(index_attributes: DataFrame, max_missingness, const_threshol
     nearly_constant = describe.nearly_constant(index_attributes, const_threshold)
     to_keep = (missingness < max_missingness) & ~nearly_constant
     return index_attributes.loc[:, to_keep]
+

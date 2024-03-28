@@ -8,18 +8,23 @@ from pyhbr import common
 from pyhbr.clinical_codes import counting
 from pyhbr.analysis import describe
 from pyhbr.analysis import acs
+from pyhbr.middle import from_icb
 
 importlib.reload(counting)
 importlib.reload(acs)
 importlib.reload(describe)
+importlib.reload(from_icb)
 
 data = common.load_item("icb_basic_data")
 
 primary_care_attributes = data["primary_care_attributes"]
 
-# Do this in the data fetch
-primary_care_attributes["smoking"] = primary_care_attributes["smoking"].replace(
-    "(U|u)nknown", np.nan, regex=True
+# Preprocess columns
+primary_care_attributes["smoking"] = from_icb.preprocess_smoking(
+    primary_care_attributes["smoking"]
+)
+primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
+    primary_care_attributes["ethnicity"]
 )
 
 # Reduce the index spells to those which have a valid row of
@@ -28,13 +33,15 @@ index_spells = data["index_spells"]
 
 swd_index_spells = acs.get_swd_index_spells(index_spells, primary_care_attributes)
 
-# Get the patient index-spell attributes
-index_attributes = acs.get_index_attributes(swd_index_spells, primary_care_attributes)
+# Get the patient index-spell attributes (before reducing based on missingness/low-variance)
+all_index_attributes = acs.get_index_attributes(
+    swd_index_spells, primary_care_attributes
+)
 
 # Remove attribute columns that have too much missingness or where
 # the column is nearly constant (low variance)
-reduced_index_attributes = acs.remove_features(
-    index_attributes, max_missingness=0.75, const_threshold=0.95
+index_attributes = acs.remove_features(
+    all_index_attributes, max_missingness=0.75, const_threshold=0.95
 )
 
 # Get other episodes relative to the index episode (for counting code

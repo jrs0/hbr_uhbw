@@ -1,4 +1,5 @@
-from pandas import DataFrame, concat
+import numpy as np
+from pandas import DataFrame, Series, concat
 from pyhbr import clinical_codes, common
 from pyhbr.data_source import icb
 from sqlalchemy import Engine
@@ -395,3 +396,183 @@ def get_primary_care_data(
         "primary_care_prescriptions": primary_care_prescriptions,
         "primary_care_measurements": primary_care_measurements,
     }
+
+
+def preprocess_smoking(column: Series) -> Series:
+    """Convert the smoking column from string to category
+    
+    The values in the column are "unknown", "ex", "Unknown",
+    "current", "Smoker", "Ex", and "Never". 
+
+    Based on the distribution of values in the column, it 
+    likely that "Unknown/unknown" mostly means "no". This 
+    makes the percentage of smoking about 15%, which is
+    roughly in line with the average. Without performing this
+    mapping, smokers outnumber non-smokers ("Never") approx.
+    20 to 1.
+
+    Note that the column does also include NA values, which
+    will be left as NA.
+
+    Args:
+        column: The smoking column from the primary
+            care attributes 
+
+    Returns:
+        A category column containing "yes", "no", and "ex".
+    """
+
+    value_map = {
+        "unknown":"no",
+        "Unknown": "no",
+        "current": "yes",
+        "Smoker": "yes",
+        "ex": "ex",
+        "Ex": "ex",
+        "Never": "no"
+    }
+
+    return column.map(value_map).astype("category")
+
+
+def preprocess_ethnicity(column: Series) -> Series:
+    """Map the ethnicity column to standard ethnicities.
+    
+    Ethnicities were obtained from www.ethnicity-facts-figures.service.gov.uk/style-guide/ethnic-groups,
+    from the 2021 census:
+    
+    * asian_or_asian_british
+    * black_black_british_caribbean_or_african
+    * mixed_or_multiple_ethnic_groups
+    * white
+    * other_ethnic_group
+    
+    Args:
+        column: A column of object ("string") containing 
+            ethnicities from the primary care attributes table.
+
+    Returns:
+        A column of type category containing the standard 
+            ethnicities (and NaN).
+    """
+    
+    column = column.str.replace(" - ethnic category 2001 census", "")
+    column = column.str.replace(" - England and Wales ethnic category 2011 census", "")
+    column = column.str.replace(" - 2011 census England and Wales", "")
+    column = column.str.replace(" - Scotland ethnic category 2011 census", "")
+    column = column.str.replace(" - 2001 census", "")
+    column = column.str.lower()
+    column = column.str.replace("(\(|\)|:| )+", "_", regex=True)
+
+    ethnicity_map = {
+        "white_british": "white",
+        "british_or_mixed_british": "white",
+        "white_english_or_welsh_or_scottish_or_northern_irish_or_british": "white",
+        "english": "white",
+        "other_white_background": "white",
+        "white": "white",
+        "ethnic_category_not_stated": np.nan,
+        "pakistani_or_british_pakistani": "asian_or_asian_british",
+        "refusal_by_patient_to_provide_information_about_ethnic_group": np.nan,
+        "ethnic_category": np.nan,
+        "indian_or_british_indian": "asian_or_asian_british",
+        "caribbean": "black_black_british_caribbean_or_african",
+        "other_asian_background": "asian_or_asian_british",
+        "african": "black_black_british_caribbean_or_african",
+        "white_any_other_white_background": "white",
+        "bangladeshi_or_british_bangladeshi": "asian_or_asian_british",
+        "irish": "white",
+        "white_irish": "white",
+        "white_-_ethnic_group": "white",
+        "chinese": "asian_or_asian_british",
+        "polish": "white",
+        "black_british": "black_black_british_caribbean_or_african",
+        "white_and_black_caribbean": "mixed_or_multiple_ethnic_groups",
+        "pakistani": "asian_or_asian_british",
+        "other": "other_ethnic_group",
+        "black_african": "black_black_british_caribbean_or_african",
+        "asian_or_asian_british_indian": "asian_or_asian_british",
+        "black_caribbean": "black_black_british_caribbean_or_african",
+        "indian": "asian_or_asian_british",
+        "asian_or_asian_british_pakistani": "asian_or_asian_british",
+        "other_white_european_or_european_unspecified_or_mixed_european": "white",
+        "somali": "black_black_british_caribbean_or_african",
+        "ethnic_group_not_recorded": np.nan,
+        "asian_or_asian_british_any_other_asian_background": "asian_or_asian_british",
+        "white_and_asian": "mixed_or_multiple_ethnic_groups",
+        "white_and_black_african": "mixed_or_multiple_ethnic_groups",
+        "other_black_background": "black_black_british_caribbean_or_african",
+        "italian": "white",
+        "scottish": "white",
+        "other_white_or_white_unspecified": "white",
+        "other_ethnic_group_any_other_ethnic_group": "other_ethnic_group",
+        "other_mixed_background": "mixed_or_multiple_ethnic_groups",
+        "other_european_nmo_": "white",
+        "welsh": "white",
+        "greek": "white",
+        "patient_ethnicity_unknown": np.nan,
+        "mixed_multiple_ethnic_groups_any_other_mixed_or_multiple_ethnic_background": "mixed_or_multiple_ethnic_groups",
+        "black_or_african_or_caribbean_or_black_british_caribbean": "black_black_british_caribbean_or_african",
+        "filipino": "asian_or_asian_british",
+        "ethnic_group": np.nan,
+        "other_mixed_white": "white",  # Unclear
+        "british_asian": "asian_or_asian_british",
+        "iranian": "other_ethnic_group",
+        "other_asian_ethnic_group": "asian_or_asian_british",
+        "kurdish": "other_ethnic_group",
+        "black_or_african_or_caribbean_or_black_british_african": "black_black_british_caribbean_or_african",
+        "other_asian_nmo_": "asian_or_asian_british",
+        "moroccan": "other_ethnic_group",
+        "other_white_british_ethnic_group": "white",
+        "mixed_multiple_ethnic_groups_white_and_black_caribbean": "mixed_or_multiple_ethnic_groups",
+        "black_and_white": "mixed_or_multiple_ethnic_groups",
+        "asian_or_asian_british_bangladeshi": "asian_or_asian_british",
+        "mixed_multiple_ethnic_groups_white_and_black_african": "mixed_or_multiple_ethnic_groups",
+        "white_polish": "white",
+        "asian_and_chinese": "asian_or_asian_british",
+        "black_or_african_or_caribbean_or_black_british_other_black_or_african_or_caribbean_background": "black_black_british_caribbean_or_african",
+        "black_and_asian": "black_black_british_caribbean_or_african",
+        "white_scottish": "white",
+        "any_other_group": "other_ethnic_group",
+        "other_ethnic_non-mixed_nmo_": "other_ethnic_group",
+        "ethnicity_and_other_related_nationality_data": np.nan,
+        "caucasian_race": "white",
+        "multi-ethnic_islands_mauritian_or_seychellois_or_maldivian_or_st_helena": "other_ethnic_group",
+        "punjabi": "asian_or_asian_british",
+        "albanian": "white",
+        "turkish/turkish_cypriot_nmo_": "other_ethnic_group",
+        "black_-_other_african_country": "black_black_british_caribbean_or_african",
+        "other_black_or_black_unspecified": "black_black_british_caribbean_or_african",
+        "sri_lankan": "asian_or_asian_british",
+        "mixed_asian": "asian_or_asian_british",
+        "other_black_ethnic_group": "black_black_british_caribbean_or_african",
+        "bulgarian": "white",
+        "sikh": "asian_or_asian_british",
+        "other_ethnic_mixed_origin": "other_ethnic_group",
+        "n_african_arab/iranian_nmo_": "other_ethnic_group",
+        "south_and_central_american": "other_ethnic_group",
+        "asian_or_asian_british_chinese": "asian_or_asian_british",
+        "ethnic_groups_census_nos": np.nan,
+        "arab": "other_ethnic_group",
+        "ethnic_group_finding": np.nan,
+        "white_any_other_white_ethnic_group": "white",
+        "greek_cypriot": "white",
+        "latin_american": "other_ethnic_group",
+        "other_asian_or_asian_unspecified": "asian_or_asian_british",
+        "cypriot_part_not_stated_": "other_ethnic_group",
+        "east_african_asian": "other_ethnic_group",
+        "mixed_multiple_ethnic_groups_white_and_asian": "mixed_or_multiple_ethnic_groups",
+        "other_ethnic_group_arab_arab_scottish_or_arab_british": "other_ethnic_group",
+        "other_ethnic_group_arab": "other_ethnic_group",
+        "turkish": "other_ethnic_group",
+        "north_african": "black_black_british_caribbean_or_african",
+        "greek_nmo_": "white",
+        "bangladeshi": "asian_or_asian_british",
+        "chinese_and_white": "mixed_or_multiple_ethnic_groups",
+        "white_gypsy_or_irish_traveller": "white",
+        "vietnamese": "asian_or_asian_british",
+        "romanian": "white",
+        "serbian": "white",
+    }
+
+    return column.map(ethnicity_map).astype("category")
