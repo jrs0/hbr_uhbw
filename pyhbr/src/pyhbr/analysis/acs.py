@@ -1,6 +1,7 @@
 import datetime as dt
 from pandas import DataFrame
 from pyhbr.clinical_codes import counting
+from pyhbr.analysis import describe
 
 
 def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
@@ -379,3 +380,23 @@ def get_index_attributes(swd_index_spells: DataFrame, primary_care_attributes: D
         .reset_index()
         .merge(primary_care_attributes, how="left", on=["patient_id", "attribute_period"])
     ).set_index("spell_id").drop(columns=["patient_id", "attribute_period"])
+    
+    
+def remove_features(index_attributes: DataFrame, max_missingness, const_threshold) -> DataFrame:
+    """Reduce to just the columns meeting minimum missingness and variability criteria.
+
+    Args:
+        index_attributes: The table of primary care attributes for the index spells
+        max_missingness: The maximum allowed missingness in a column before a column
+            is removed as a feature.
+        const_threshold: The maximum allowed constant-value proportion (NA + most
+            common non-NA value) before a column is removed as a feature
+
+    Returns:
+        A table containing the features that remain, which contain sufficient
+            non-missing values and sufficient variance.
+    """
+    missingness = describe.proportion_missingness(index_attributes)
+    nearly_constant = describe.nearly_constant(index_attributes, const_threshold)
+    to_keep = (missingness < max_missingness) & ~nearly_constant
+    return index_attributes.loc[:, to_keep]

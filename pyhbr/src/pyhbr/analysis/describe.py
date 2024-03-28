@@ -40,18 +40,48 @@ def proportion_missingness(data: DataFrame) -> Series:
     """
     return (data.isna().sum() / len(data)).sort_values().rename("missingness")
 
-def zero_variance_columns(data: DataFrame) -> Series:
-    """Check which columns of the input table have zero variance
+def nearly_constant(data: DataFrame, threshold: float) -> Series:
+    """Check which columns of the input table have low variation
     
-    Zero variance is defined as either having all missing values,
-    or having only one value after excluding missing values.
+    A column is considered low variance if the proportion of rows
+    containing NA or the most common non-NA value exceeds threshold.
+    For example, if NA and one other value together comprise 99% of
+    the column, then it is considered to be low variance based on
+    a threshold of 0.9.
     
     Args:
         data: The table to check for zero variance
+        threshold: The proportion of the column that must be NA or
+            the most common value above which the column is considered
+            low variance.
 
     Returns:
         A Series containing bool, indexed by the column name
             in the original data, containing whether the column
-            has zero variance.
+            has low variance.
     """
-    return data.apply(lambda col: len(col.value_counts()) < 2).rename("zero_variance")
+    
+    def low_variance(column: Series) -> bool:
+        
+        if len(column) == 0:
+            # If the column has length zero, consider
+            # it low variance
+            return True
+        
+        if len(column.dropna()) == 0:
+            # If the column is all-NA, it is low variance
+            # independently of the threshold
+            return True
+        
+        # Else, if the proportion of NA and the most common
+        # non-NA value is higher than threshold, the column 
+        # is low variance
+        na_count = column.isna().sum()
+        counts = column.value_counts()
+        most_common_value_count = counts.iloc[0]
+        if (na_count + most_common_value_count) / len(column) > threshold:
+            return True
+        
+        return False
+    
+    return data.apply(low_variance).rename("nearly_constant")
