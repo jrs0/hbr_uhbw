@@ -182,6 +182,8 @@ def hba1c(
 
     return prior_hba1c
 
+prior_hba1c = hba1c(swd_index_spells, primary_care_measurements)
+
 # Combine all tables (features and outcomes) into a single table
 # for saving.
 training_data = (
