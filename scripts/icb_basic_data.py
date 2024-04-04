@@ -16,10 +16,10 @@ importlib.reload(from_icb)
 importlib.reload(icb)
 importlib.reload(clinical_codes)
 
-pd.set_option('future.no_silent_downcasting', True)
+pd.set_option("future.no_silent_downcasting", True)
 
 # Set a date range for episode fetch
-start_date = dt.date(2018, 1, 1)
+start_date = dt.date(2015, 1, 1)
 end_date = dt.date(2023, 1, 1)
 
 # Get the raw HES data
@@ -43,37 +43,77 @@ patient_ids = index_spells["patient_id"].unique()
 engine = common.make_engine(database="modelling_sql_area")
 primary_care_data = from_icb.get_primary_care_data(engine, patient_ids)
 
+# Find latest date seen in all the datasets
+latest_primary_care_attributes = primary_care_data["primary_care_attributes"][
+    "attribute_period"
+].max()
+latest_primary_care_prescriptions = primary_care_data["primary_care_prescriptions"][
+    "date"
+].max()
+latest_primary_care_measurements = primary_care_data["primary_care_measurements"][
+    "date"
+].max()
+latest_sus_data = raw_sus_data["episode_start"].max()
+common_latest = min(
+    [
+        latest_primary_care_attributes,
+        latest_primary_care_prescriptions,
+        latest_primary_care_measurements,
+        latest_sus_data,
+    ]
+)
+
+# Find earliest date seen in all the datasets
+earliest_primary_care_attributes = primary_care_data["primary_care_attributes"][
+    "attribute_period"
+].min()
+earliest_primary_care_prescriptions = primary_care_data["primary_care_prescriptions"][
+    "date"
+].min()
+earliest_primary_care_measurements = primary_care_data["primary_care_measurements"][
+    "date"
+].min()
+earliest_sus_data = raw_sus_data["episode_start"].min()
+common_earliest = max(
+    [
+        earliest_primary_care_attributes,
+        earliest_primary_care_prescriptions,
+        earliest_primary_care_measurements,
+        earliest_sus_data,
+    ]
+)
+
+# Add a margin of one year on either side of the earliest/latest
+# dates to ensure outcomes and features will be valid at the edges
+index_start_date = common_earliest + dt.timedelta(days=365)
+index_end_date = common_latest - dt.timedelta(days=365)
+
+# Reduce the index spells to only those within the valid window
+index_spells = index_spells[
+    (index_spells["spell_start"] < index_end_date)
+    & (index_spells["spell_start"] > index_start_date)
+]
+
 # Combine the data into a single dictionary. This dataset is
 # the standard HES + SWD data available at the ICB (not including
-# the HIC data)
-icb_basic_data = episodes_and_codes | primary_care_data
+# the HIC data). This is a temporary save point to make it simpler
+# to debug the script (avoiding the long-running SQL queries above).
+icb_basic_tmp = episodes_and_codes | primary_care_data
 
 # Store metadata
-icb_basic_data["start_date"] = start_date
-icb_basic_data["end_date"] = end_date
+icb_basic_tmp["start_date"] = start_date
+icb_basic_tmp["end_date"] = end_date
+icb_basic_tmp["index_start_date"] = index_start_date
+icb_basic_tmp["index_end_date"] = index_end_date
+
 
 # Store the index events that were used to subset
 # the primary care data (based on the patient_ids in
 # the index spells)
-icb_basic_data["index_spells"] = index_spells
+icb_basic_tmp["index_spells"] = index_spells
 
 # Save point for the primary care data
-common.save_item(icb_basic_data, "icb_basic_data")
-
-import importlib
-import numpy as np
-from pyhbr import common
-from pyhbr.clinical_codes import counting
-from pyhbr.analysis import describe
-from pyhbr.analysis import acs
-from pyhbr.middle import from_icb
-
-importlib.reload(counting)
-importlib.reload(acs)
-importlib.reload(describe)
-importlib.reload(from_icb)
-
-data = common.load_item("icb_basic_data")
+common.save_item(icb_basic_tmp, "icb_basic_tmp")
 
 primary_care_attributes = data["primary_care_attributes"]
 
@@ -85,15 +125,9 @@ primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
     primary_care_attributes["ethnicity"]
 )
 
-# Reduce the index spells to those which have a valid row of
-# patient attributes
-index_spells = data["index_spells"]
-
-swd_index_spells = acs.get_swd_index_spells(index_spells, primary_care_attributes)
-
 # Get the patient index-spell attributes (before reducing based on missingness/low-variance)
 all_index_attributes = acs.get_index_attributes(
-    swd_index_spells, primary_care_attributes
+    index_spells, primary_care_attributes
 )
 
 # Remove attribute columns that have too much missingness or where
@@ -126,7 +160,9 @@ primary_care_measurements = data["primary_care_measurements"]
 
 # Only blood pressure and HbA1c go back to 2019 in the data -- not
 # including the other measurements in order to keep the sample size up.
-prior_blood_pressure = from_icb.blood_pressure(swd_index_spells, primary_care_measurements)
+prior_blood_pressure = from_icb.blood_pressure(
+    swd_index_spells, primary_care_measurements
+)
 prior_hba1c = from_icb.hba1c(swd_index_spells, primary_care_measurements)
 
 # Combine all tables (features and outcomes) into a single table
@@ -140,14 +176,9 @@ features = (
     .merge(prior_hba1c, how="left", on="spell_id")
 )
 
-rate_summaries = describe.get_column_rates(
-    features.select_dtypes(include="number")
-)
+rate_summaries = describe.get_column_rates(features.select_dtypes(include="number"))
 
 
-data = {
-    "features": features,
-    "outcomes": outcomes   
-}
+data = {"features": features, "outcomes": outcomes}
 
 common.save_item(training_data, "icb_basic_training")
