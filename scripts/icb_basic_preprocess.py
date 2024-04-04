@@ -90,4 +90,4 @@ rate_summaries = describe.get_column_rates(
     training_data.select_dtypes(include="number")
 )
 
-common.save_data(training_data, "icb_basic_training")
+common.save_item(training_data, "icb_basic_training")
