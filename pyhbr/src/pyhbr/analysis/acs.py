@@ -2,6 +2,7 @@ import datetime as dt
 from pandas import DataFrame
 from pyhbr.clinical_codes import counting
 from pyhbr.analysis import describe
+from pyhbr.middle import from_hic  # Need to move the function
 
 
 def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
