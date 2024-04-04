@@ -296,11 +296,6 @@ def get_swd_index_spells(
 ) -> DataFrame:
     """Link primary care attributes to index spells by attribute date
 
-    This is a filtering function that reduces the index_spells to just
-    those where there is a corresponding, recent, row in the primary
-    care attributes table. This produces a set of index events where
-    the primary care attributes can be used as predictors.
-
     The attribute_period column of an attributes row indicates that
     the attribute was valid at the end of the interval
     (attribute_period, attribute_period + 1month). It is important
@@ -308,7 +303,7 @@ def get_swd_index_spells(
     after the index event, meaning that attribute_period + 1month < spell_start
     must hold for any attribute used as a predictor. On the other hand,
     data substantially before the index event should not be used. The
-    valid window is controlled by imposing
+    valid window is controlled by imposing:
 
         attribute_period < spell_start - attribute_valid_window
 
@@ -354,7 +349,9 @@ def get_swd_index_spells(
         > (most_recent["spell_start"] - attribute_valid_window)
     ]
 
-    return swd_index_spells.set_index("spell_id")
+    # return index_spells[[]].merge(
+    #     swd_index_spells.set_index("spell_id"), how="left", on="spell_id"
+    # )
 
 
 def get_index_attributes(

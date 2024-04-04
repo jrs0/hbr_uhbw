@@ -115,9 +115,11 @@ icb_basic_tmp["index_spells"] = index_spells
 # Save point for the primary care data
 common.save_item(icb_basic_tmp, "icb_basic_tmp")
 
-primary_care_attributes = data["primary_care_attributes"]
+# Load the data from file
+icb_basic_tmp = common.load_item("icb_basic_tmp")
 
-# Preprocess columns
+# Preprocess the SWD columns
+primary_care_attributes = icb_basic_tmp["primary_care_attributes"]
 primary_care_attributes["smoking"] = from_icb.preprocess_smoking(
     primary_care_attributes["smoking"]
 )
@@ -126,9 +128,13 @@ primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
 )
 
 # Get the patient index-spell attributes (before reducing based on missingness/low-variance)
-all_index_attributes = acs.get_index_attributes(
+all_index_attributes = acs.get_index_attributes(index_spells, primary_care_attributes)
+
+# Join the latest patient attributes to each index spell
+index_spells_with_attribute_period = acs.get_swd_index_spells(
     index_spells, primary_care_attributes
 )
+
 
 # Remove attribute columns that have too much missingness or where
 # the column is nearly constant (low variance)
