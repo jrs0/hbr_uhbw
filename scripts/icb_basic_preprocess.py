@@ -1,4 +1,8 @@
 """Convert the ICB data to ACS/bleeding/ischaemia datasets
+
+This codes does more preprocessing of the ICB datasets (mainly
+the primary care attributes), and packages them up into a training
+set.
 """
 
 import importlib
@@ -55,10 +59,11 @@ code_features = acs.get_code_features(swd_index_spells, all_other_codes)
 # Combine all tables (features and outcomes) into a single table
 # for saving.
 training_data = (
-    index_spells[["acs_index", "pci_index"]]
+    swd_index_spells[["acs_index", "pci_index"]]
     .merge(outcomes, how="left", on="spell_id")
     .merge(code_features, how="left", on="spell_id")
+    .merge(index_attributes, how="left", on="spell_id")
 )
 
 
-rate_summaries = describe.get_column_rates(training_data)
+rate_summaries = describe.get_column_rates(training_data.select_dtypes(include="number"))
