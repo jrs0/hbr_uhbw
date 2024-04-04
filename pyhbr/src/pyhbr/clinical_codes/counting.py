@@ -74,7 +74,10 @@ def get_all_other_codes(
 
 
 def get_time_window(
-    all_other_codes: DataFrame, window_start: timedelta, window_end: timedelta
+    all_other_codes: DataFrame,
+    window_start: timedelta,
+    window_end: timedelta,
+    time_diff_column: str = "time_to_other_episode",
 ) -> DataFrame:
     """Get the episodes that occurred in a time window with respect to the base episode
 
@@ -101,14 +104,15 @@ def get_time_window(
         window_end: The largest value of time_to_other_episode that will be included in
             the returned table. Can be negative, meaning only episodes before the base
             will be included.
+        time_diff_column: The name of the column containing the time difference,
+            which is positive for an event occurring after the base event.
 
     Returns:
         The episodes within the specified window range.
     """
     df = all_other_codes
     return df[
-        (df["time_to_other_episode"] <= window_end)
-        & (df["time_to_other_episode"] >= window_start)
+        (df[time_diff_column] <= window_end) & (df[time_diff_column] >= window_start)
     ]
 
 
@@ -229,3 +233,40 @@ def count_code_groups(index_spells: DataFrame, filtered_episodes: DataFrame) -> 
         .set_index("spell_id")
     )
     return index_spells[[]].merge(df, how="left", on="spell_id").fillna(0)["count"]
+
+def count_events(index_spells: DataFrame, events: DataFrame, event_name: str) -> DataFrame:
+    """Count the occurrences (rows) of an event given in long format.
+    
+    The input table (events) contains instances of events, one per row,
+    where the event_name contains the name of a string column labelling the
+    events. The table also contains a `spell_id` column, which may be 
+    associated with multiple rows.
+    
+    The function pivots the events so that there is one row per spell,
+    each event has its own column, and the table contains the total number
+    of each event associated with the spell.
+
+    The index_spells table is required because some index spells may have
+    no events. These index spells will have a row of zeros in the output.
+
+    Args:
+        index_spells: Must have Pandas index `spell_id`
+        events: Contains a `spell_id` column and an event_name
+            column.
+
+    Returns:
+        A table of the counts for each event (one event per column), with
+            Pandas index `spell_id`.
+    """
+
+    # Pivot the prescriptions into one column per medicine type,
+    # and prefix the name with "prior_" (e.g. "prior_oac").
+    nonzero_counts = (
+        events.groupby("spell_id")[event_name]
+        .value_counts()
+        .unstack(fill_value=0)
+    )
+    all_counts = (
+        index_spells[[]].merge(nonzero_counts, how="left", on="spell_id").fillna(0)
+    )
+    return all_counts

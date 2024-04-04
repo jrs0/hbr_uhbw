@@ -192,7 +192,7 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
     included. Outcomes are allowed to occur in any episode of any spell (including
     the index spell), but must occur in the primary position (to avoid matching
     historical/duplicate coding within a spell).
-    
+
     TODO: the ischaemia outcome definition
 
     Args:
@@ -241,10 +241,11 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
     return DataFrame(
         {"bleeding_outcome": bleeding_outcome, "ischaemia_outcome": ischaemia_outcome}
     )
-    
+
+
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
     """Get counts of previous clinical codes in code groups before the index.
-    
+
     Predictors derived from clinical code groups use clinical coding data from 365
     days before the index to 30 days before the index (this excludes episodes where
     no coding data would be available, because the coding process itself takes
@@ -285,11 +286,13 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
         code_features[group + "_before"] = counting.count_code_groups(
             index_spells, group_episodes
         )
-    
+
     return DataFrame(code_features)
 
 
-def get_swd_index_spells(index_spells: DataFrame, primary_care_attributes: DataFrame) -> DataFrame:
+def get_swd_index_spells(
+    index_spells: DataFrame, primary_care_attributes: DataFrame
+) -> DataFrame:
     """Link primary care attributes to index spells by attribute date
 
     This is a filtering function that reduces the index_spells to just
@@ -305,7 +308,7 @@ def get_swd_index_spells(index_spells: DataFrame, primary_care_attributes: DataF
     must hold for any attribute used as a predictor. On the other hand,
     data substantially before the index event should not be used. The
     valid window is controlled by imposing
-    
+
         attribute_period < spell_start - attribute_valid_window
 
     Args:
@@ -318,7 +321,7 @@ def get_swd_index_spells(index_spells: DataFrame, primary_care_attributes: DataF
         A filtered version of index_spells containing only index spells
             with a valid set of patient attributes. The `attribute_period`
             column is added to link the attributes (along with `patient_id`).
-    """    
+    """
 
     # Define a window before the index event where SWD attributes will be considered valid.
     # 41 days is used to ensure that a full month is definitely captured. This
@@ -352,22 +355,25 @@ def get_swd_index_spells(index_spells: DataFrame, primary_care_attributes: DataF
 
     return swd_index_spells.set_index("spell_id")
 
-def get_index_attributes(swd_index_spells: DataFrame, primary_care_attributes: DataFrame) -> DataFrame:
+
+def get_index_attributes(
+    swd_index_spells: DataFrame, primary_care_attributes: DataFrame
+) -> DataFrame:
     """Link the primary care patient data to the index spells
-    
+
     !!! warning
         The validity of this needs checking. The intention is to reduce missingness in
         the attributes data, but there may be the unintended side-effect of biasing the
         dataset (depending on the reason for no attributes). Need to find out what is
         causing the missingness.
-    
+
     Filter the primary care attributes table to just those rows applicable
     to the index spells (determined using get_swd_index_spells), and replace
     the patient_id/attribute_period columns with the spell_id Pandas index.
 
     Args:
         swd_index_spells: Reduced index_spells which all have a recent, valid
-            patient attributes row. Contains the columns `patient_id` and 
+            patient attributes row. Contains the columns `patient_id` and
             `attribute_period` for linking, and has Pandas index `spell_id`.
         primary_care_attributes: The full attributes table.
 
@@ -376,13 +382,23 @@ def get_index_attributes(swd_index_spells: DataFrame, primary_care_attributes: D
     """
 
     return (
-        swd_index_spells[["patient_id", "attribute_period"]]
-        .reset_index()
-        .merge(primary_care_attributes, how="left", on=["patient_id", "attribute_period"])
-    ).set_index("spell_id").drop(columns=["patient_id", "attribute_period"])
-    
-    
-def remove_features(index_attributes: DataFrame, max_missingness, const_threshold) -> DataFrame:
+        (
+            swd_index_spells[["patient_id", "attribute_period"]]
+            .reset_index()
+            .merge(
+                primary_care_attributes,
+                how="left",
+                on=["patient_id", "attribute_period"],
+            )
+        )
+        .set_index("spell_id")
+        .drop(columns=["patient_id", "attribute_period"])
+    )
+
+
+def remove_features(
+    index_attributes: DataFrame, max_missingness, const_threshold
+) -> DataFrame:
     """Reduce to just the columns meeting minimum missingness and variability criteria.
 
     Args:
@@ -401,3 +417,51 @@ def remove_features(index_attributes: DataFrame, max_missingness, const_threshol
     to_keep = (missingness < max_missingness) & ~nearly_constant
     return index_attributes.loc[:, to_keep]
 
+
+def prescriptions_before_index(
+    swd_index_spells: DataFrame, primary_care_prescriptions: DataFrame
+) -> DataFrame:
+    """Get the number of primary care prescriptions before each index spell
+
+    Args:
+        index_spells: Must have Pandas index `spell_id`
+        primary_care_prescriptions: Must contain a `name` column
+            that contains a string containing the medicine name
+            somewhere (any case), a `date` column with the
+            prescription date, and a `patient_id` column.
+
+    Returns:
+        A table indexed by `spell_id` that contains one column
+            for each prescription type, prefexed with "prior_"
+    """
+
+    df = primary_care_prescriptions
+
+    # Filter for relevant prescriptions
+    df = from_hic.filter_by_medicine(df)
+
+    # Drop rows where the prescription date is not known
+    df = df[~df["date"].isna()]
+
+    # Join the prescriptions to the index spells
+    df = (
+        swd_index_spells[["spell_start", "patient_id"]]
+        .reset_index()
+        .merge(df, how="left", on="patient_id")
+    )
+    df["time_to_index_spell"] = df["spell_start"] - df["date"]
+
+    # Only keep prescriptions occurring in the year before the index event
+    min_before = dt.timedelta(days=0)
+    max_before = dt.timedelta(days=365)
+    events_before_index = counting.get_time_window(
+        df, -max_before, -min_before, "time_to_index_spell"
+    )
+
+    # Pivot each row (each prescription) to one column per
+    # prescription group.
+    all_counts = counting.count_events(
+        swd_index_spells, events_before_index, "group"
+    ).add_prefix("prior_")
+
+    return all_counts

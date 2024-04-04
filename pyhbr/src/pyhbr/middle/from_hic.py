@@ -2,6 +2,7 @@
 """
 
 import pandas as pd
+from pandas import DataFrame
 from sqlalchemy import Engine
 from pyhbr import clinical_codes
 from pyhbr.common import get_data
@@ -144,6 +145,56 @@ def get_unlinked_lab_results(engine: Engine) -> pd.DataFrame:
     return df[["patient_id", "sample_date", "test_name", "result"]]
 
 
+def filter_by_medicine(df: DataFrame) -> DataFrame:
+    """Filter a dataframe by medicine name
+
+    Args:
+        df: Contains a column `name` containing the medicine
+            name
+
+    Returns:
+        The dataframe, filtered to the set of medicines of interest,
+            with a new column `group` containing just the medicine
+            type (e.g. "oac", "nsaid").
+    """
+
+    prescriptions_of_interest = {
+        "warfarin": "oac",
+        "apixaban": "oac",
+        "dabigatran etexilate": "oac",
+        "edoxaban": "oac",
+        "rivaroxaban": "oac",
+        "ibuprofen": "nsaid",
+        "naproxen": "nsaid",
+        "diclofenac": "nsaid",
+        "diclofenac sodium": "nsaid",
+        "celecoxib": "nsaid",  # Not present in HIC data
+        "mefenamic acid": "nsaid",  # Not present in HIC data
+        "etoricoxib": "nsaid",
+        "indometacin": "nsaid",  # This spelling is used in HIC data
+        "indomethacin": "nsaid",  # Alternative spelling
+        # "aspirin": "nsaid" -- not accounting for high dose
+    }
+
+    # Remove rows with missing medicine name
+    df = df[~df["name"].isna()]
+
+    # This line is really slow (30s for 3.5m rows)
+    df = df[
+        df["name"].str.contains(
+            "|".join(prescriptions_of_interest.keys()), case=False, regex=True
+        )
+    ]
+
+    # Add the type of prescription to the table
+    df["group"] = df["name"]
+    for prescription, group in prescriptions_of_interest.items():
+        df["group"] = df["group"].str.replace(
+            ".*" + prescription + ".*", group, case=False, regex=True
+        )
+
+    return df
+
 def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
     """Get relevant prescriptions from the HIC data (unlinked to episode)
 
@@ -170,29 +221,8 @@ def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
 
     df = get_data(engine, hic.pharmacy_prescribing_query)
 
-    prescriptions_of_interest = {
-        "warfarin": "oac",
-        "apixaban": "oac",
-        "dabigatran etexilate": "oac",
-        "edoxaban": "oac",
-        "rivaroxaban": "oac",
-        "ibuprofen": "nsaid",
-        "naproxen": "nsaid",
-        "diclofenac": "nsaid",
-        "diclofenac sodium": "nsaid",
-        "celecoxib": "nsaid",  # Not present in HIC data
-        "mefenamic acid": "nsaid",  # Not present in HIC data
-        "etoricoxib": "nsaid",
-        "indometacin": "nsaid",  # This spelling is used in HIC data
-        "indomethacin": "nsaid",  # Alternative spelling
-        # "aspirin": "nsaid" -- not accounting for high dose
-    }
-
-    # Only keep prescriptions of interest
-    df = df[df["name"].isin(prescriptions_of_interest.keys())]
-
-    # Add the type of prescription to the table
-    df["group"] = df["name"].map(prescriptions_of_interest)
+    # Create a new `group` column containing the medicine type
+    df = filter_by_medicine(df)
 
     # Replace alternative spellings
     df["name"] = df["name"].str.replace("indomethacin", "indometacin")

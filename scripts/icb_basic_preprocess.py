@@ -13,11 +13,13 @@ from pyhbr.clinical_codes import counting
 from pyhbr.analysis import describe
 from pyhbr.analysis import acs
 from pyhbr.middle import from_icb
+from pyhbr.middle import from_hic  # Need to move the function
 
 importlib.reload(counting)
 importlib.reload(acs)
 importlib.reload(describe)
 importlib.reload(from_icb)
+importlib.reload(from_hic)
 
 data = common.load_item("icb_basic_data")
 
@@ -56,6 +58,16 @@ all_other_codes = counting.get_all_other_codes(swd_index_spells, data)
 outcomes = acs.get_outcomes(swd_index_spells, all_other_codes)
 code_features = acs.get_code_features(swd_index_spells, all_other_codes)
 
+# Process prescriptions
+primary_care_prescriptions = data["primary_care_prescriptions"]
+
+# NOTE: converted date column to datetime upstream, but
+# need to rerun data fetch script.
+primary_care_prescriptions["date"] = pd.to_datetime(primary_care_prescriptions["date"])
+
+prior_prescriptions = prescriptions_before_index(swd_index_spells, primary_care_prescriptions)
+
+
 # Combine all tables (features and outcomes) into a single table
 # for saving.
 training_data = (
@@ -66,4 +78,6 @@ training_data = (
 )
 
 
-rate_summaries = describe.get_column_rates(training_data.select_dtypes(include="number"))
+rate_summaries = describe.get_column_rates(
+    training_data.select_dtypes(include="number")
+)

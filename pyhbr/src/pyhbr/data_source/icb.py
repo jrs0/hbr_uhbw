@@ -1,5 +1,4 @@
 """Data sources available from the BNSSG ICB
-
 This file contains queries that fetch the raw data from the BNSSG
 ICB, which includes hospital episode statistics (HES) and primary
 care data.
@@ -348,7 +347,7 @@ def primary_care_prescriptions_query(
 
     return select(
         table.col("nhs_number").cast(String).label("patient_id"),
-        table.col("prescription_date").label("date"),
+        table.col("prescription_date").cast(DateTime).label("date"),
         table.col("prescription_name").label("name"),
         table.col("prescription_quantity").label("quantity"),
         table.col("prescription_type").label("acute_or_repeat"),

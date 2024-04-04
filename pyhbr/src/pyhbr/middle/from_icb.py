@@ -576,3 +576,5 @@ def preprocess_ethnicity(column: Series) -> Series:
     }
 
     return column.map(ethnicity_map).astype("category")
+
+
