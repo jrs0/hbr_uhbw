@@ -334,21 +334,16 @@ def get_index_attribute_link(
     # Only keep attributes that are from strictly before the index spell
     # (note date represents the start of the month that attributes
     # apply to)
-    attr_before_index = df[
-        (df["date"] + dt.timedelta(days=31)) < df["spell_start"]
-    ]
+    attr_before_index = df[(df["date"] + dt.timedelta(days=31)) < df["spell_start"]]
 
     # Keep only the most recent attribute before the index spell
-    most_recent = (
-        attr_before_index.sort_values("date").groupby("spell_id").tail(1)
-    )
+    most_recent = attr_before_index.sort_values("date").groupby("spell_id").tail(1)
 
     # Exclude attributes that occurred outside the attribute_value_window before the index
     swd_index_spells = most_recent[
-        most_recent["attribute_period"]
-        > (most_recent["spell_start"] - attribute_valid_window)
+        most_recent["date"] > (most_recent["spell_start"] - attribute_valid_window)
     ]
-
+    
     return index_spells.merge(
         swd_index_spells[["spell_id", "date"]].set_index("spell_id"),
         how="left",
@@ -362,9 +357,9 @@ def get_index_attributes(
     """Link the primary care patient data to the index spells
 
     Args:
-        swd_index_spells: Reduced index_spells which all have a recent, valid
+        swd_index_spells: Index_spells linked to a a recent, valid
             patient attributes row. Contains the columns `patient_id` and
-            `attribute_period` for linking, and has Pandas index `spell_id`.
+            `date` for linking, and has Pandas index `spell_id`.
         primary_care_attributes: The full attributes table.
 
     Returns:
@@ -373,16 +368,16 @@ def get_index_attributes(
 
     return (
         (
-            swd_index_spells[["patient_id", "attribute_period"]]
+            swd_index_spells[["patient_id", "date"]]
             .reset_index()
             .merge(
                 primary_care_attributes,
                 how="left",
-                on=["patient_id", "attribute_period"],
+                on=["patient_id", "date"],
             )
         )
         .set_index("spell_id")
-        .drop(columns=["patient_id", "attribute_period"])
+        .drop(columns=["patient_id", "date"])
     )
 
 

@@ -106,7 +106,8 @@ index_spells = index_spells[
 icb_basic_tmp = {
     # Datasets
     "index_spells": index_spells,
-    "episodes_and_codes": episodes_and_codes,
+    "episodes": episodes_and_codes["episodes"],
+    "codes": episodes_and_codes["codes"],
     "primary_care_attributes": primary_care_attributes,
     "primary_care_measurements": primary_care_measurements,
     "primary_care_prescriptions": primary_care_prescriptions,
@@ -139,14 +140,14 @@ primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
     primary_care_attributes["ethnicity"]
 )
 
-# Join the latest patient attributes to each index spell
+# Join the attribute date to the index spells for linking
 index_spells_with_link = acs.get_index_attribute_link(
     index_spells, primary_care_attributes
 )
 
 # Get the patient index-spell attributes (before reducing based on missingness/low-variance)
 all_index_attributes = acs.get_index_attributes(
-    index_spells_with_attribute_period, primary_care_attributes
+    index_spells_with_link, primary_care_attributes
 )
 
 # Remove attribute columns that have too much missingness or where
