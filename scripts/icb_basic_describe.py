@@ -25,12 +25,21 @@ print(prevalence_outcomes)
 missing_attributes = describe.proportion_missingness(features_attributes)
 print("The amount of missing data in the attributes columns is:")
 print(missing_attributes)
-
-
-numeric_attributes = features_attributes.select_dtypes(include="number").iloc[:,0:16].melt()
-sns.catplot(numeric_attributes, y="value", kind="box", col="variable", col_wrap=8, sharey=False)
+sns.barplot(missing_attributes)
+plt.xticks(rotation=90)
+plt.title("Proportion of missing attributes (> 70\% excluded)")
+plt.tight_layout()
 plt.show()
 
+# Plot the distribution of polypharmacy prescription counts
+polypharmacy = (
+    features_attributes.filter(regex="polypharmacy")
+    .rename(columns={"polypharmacy_acute": "Acute", "polypharmacy_repeat": "Repeat"})
+    .melt(var_name="Prescription type", value_name="Count in attribute month")
+)
+sns.histplot(polypharmacy, x="Count in attribute month", hue="Prescription type", stat="percent", multiple="dodge")
+plt.title("Distribution of prescription counts in non-missing rows")
+plt.show()
 
-#.boxplot(meanline=True, showmeans=True)
-#plt.show()
+# .boxplot(meanline=True, showmeans=True)
+# plt.show()
