@@ -182,24 +182,23 @@ def get_episodes_and_codes(raw_sus_data: DataFrame) -> dict[str, DataFrame]:
     return {"episodes": episodes, "codes": codes}
 
 
-def replace_nan_with_zero(primary_care_attributes: DataFrame) -> DataFrame:
-    """Replace NaN with zero for a selection of rows
+def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
+    """Replace NaN with false and convert to bool for a selection of rows
 
-    Many column in the primary care attributes data use NA
-    as a marker for 0. It is important to replace these NAs
-    with zero before performing a join of the attributes onto
-    a larger table, which could produce NAs that mean "row
-    was not present in attributes").
+    Many columns in the primary care attributes encode a flag
+    using 1 for true and NA/NULL for false. These must be replaced
+    with a bool so that NA can distinguish missing data.
 
     Args:
-        primary_care_attributes: Table where a subset of columns
-            should have NaN replaced with zero.
-            
+        primary_care_attributes: Original table containing
+            1/NA flag columns
+
     Returns:
-        The modified attributes
-    
+        The primary care attributes with flag columns encoded
+            as bool.
+
     """
-    na_means_zero = [
+    flag_columns = [
         "abortion",
         "adhd",
         "af",
@@ -357,9 +356,11 @@ def replace_nan_with_zero(primary_care_attributes: DataFrame) -> DataFrame:
         "veteran",
         "visual_impair",
     ]
-    
+
     df = primary_care_attributes.copy()
-    df[na_means_zero] = df[na_means_zero].fillna(value=0).infer_objects(copy=False)
+    df[flag_columns] = (
+        df[flag_columns].fillna(value=0).infer_objects(copy=False).astype(bool)
+    )
     return df
 
 
@@ -380,19 +381,19 @@ def get_primary_care_data(
 
     # Primary care prescriptions
     primary_care_prescriptions = common.get_data_by_patient(
-        engine, icb.primary_care_prescriptions_query, patient_ids
+        engine, icb.primary_care_prescriptions_query, patient_ids[1:800]
     )
 
     # Primary care measurements
     primary_care_measurements = common.get_data_by_patient(
-        engine, icb.primary_care_measurements_query, patient_ids
+        engine, icb.primary_care_measurements_query, patient_ids[1:800]
     )
 
     # Primary care attributes
     df = common.get_data_by_patient(
-        engine, icb.primary_care_attributes_query, patient_ids
+        engine, icb.primary_care_attributes_query, patient_ids[1:800]
     )
-    primary_care_attributes = replace_nan_with_zero(df)
+    primary_care_attributes = process_flag_columns(df)
 
     return {
         "primary_care_attributes": primary_care_attributes,
@@ -403,12 +404,12 @@ def get_primary_care_data(
 
 def preprocess_smoking(column: Series) -> Series:
     """Convert the smoking column from string to category
-    
-    The values in the column are "unknown", "ex", "Unknown",
-    "current", "Smoker", "Ex", and "Never". 
 
-    Based on the distribution of values in the column, it 
-    likely that "Unknown/unknown" mostly means "no". This 
+    The values in the column are "unknown", "ex", "Unknown",
+    "current", "Smoker", "Ex", and "Never".
+
+    Based on the distribution of values in the column, it
+    likely that "Unknown/unknown" mostly means "no". This
     makes the percentage of smoking about 15%, which is
     roughly in line with the average. Without performing this
     mapping, smokers outnumber non-smokers ("Never") approx.
@@ -419,20 +420,20 @@ def preprocess_smoking(column: Series) -> Series:
 
     Args:
         column: The smoking column from the primary
-            care attributes 
+            care attributes
 
     Returns:
         A category column containing "yes", "no", and "ex".
     """
 
     value_map = {
-        "unknown":"no",
+        "unknown": "no",
         "Unknown": "no",
         "current": "yes",
         "Smoker": "yes",
         "ex": "ex",
         "Ex": "ex",
-        "Never": "no"
+        "Never": "no",
     }
 
     return column.map(value_map).astype("category")
@@ -440,25 +441,25 @@ def preprocess_smoking(column: Series) -> Series:
 
 def preprocess_ethnicity(column: Series) -> Series:
     """Map the ethnicity column to standard ethnicities.
-    
+
     Ethnicities were obtained from www.ethnicity-facts-figures.service.gov.uk/style-guide/ethnic-groups,
     from the 2021 census:
-    
+
     * asian_or_asian_british
     * black_black_british_caribbean_or_african
     * mixed_or_multiple_ethnic_groups
     * white
     * other_ethnic_group
-    
+
     Args:
-        column: A column of object ("string") containing 
+        column: A column of object ("string") containing
             ethnicities from the primary care attributes table.
 
     Returns:
-        A column of type category containing the standard 
+        A column of type category containing the standard
             ethnicities (and NaN).
     """
-    
+
     column = column.str.replace(" - ethnic category 2001 census", "")
     column = column.str.replace(" - England and Wales ethnic category 2011 census", "")
     column = column.str.replace(" - 2011 census England and Wales", "")
@@ -636,6 +637,7 @@ def blood_pressure(
 
     return prior_bp
 
+
 def hba1c(
     swd_index_spells: DataFrame, primary_care_measurements: DataFrame
 ) -> DataFrame:
@@ -662,9 +664,7 @@ def hba1c(
     # Drop rows where the prescription date is not known
     df = df[~df["date"].isna()]
 
-    hba1c = df[df.name.str.contains("hba1c")][
-        ["patient_id", "date", "result"]
-    ].copy()
+    hba1c = df[df.name.str.contains("hba1c")][["patient_id", "date", "result"]].copy()
     hba1c["hba1c"] = pd.to_numeric(hba1c["result"], errors="coerce")
 
     # Join the prescriptions to the index spells
@@ -682,7 +682,9 @@ def hba1c(
         df, -max_before, -min_before, "time_to_index_spell"
     )
 
-    most_recent_hba1c = hba1c_before_index.sort_values("date").groupby("spell_id").tail(1)
+    most_recent_hba1c = (
+        hba1c_before_index.sort_values("date").groupby("spell_id").tail(1)
+    )
     prior_hba1c = swd_index_spells.merge(
         most_recent_hba1c, how="left", on="spell_id"
     ).set_index("spell_id")[["hba1c"]]
