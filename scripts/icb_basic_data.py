@@ -18,9 +18,9 @@ importlib.reload(icb)
 importlib.reload(clinical_codes)
 importlib.reload(counting)
 
-# Set a date range for episode fetch. The primary 
+# Set a date range for episode fetch. The primary
 # care data start in Oct 2019. Use an end date
-# in the future to ensure all data is fetched. 
+# in the future to ensure all data is fetched.
 # Index spell data is limited based on the min/max
 # dates seen in all the datasets below.
 start_date = dt.date(2019, 1, 1)
@@ -53,14 +53,16 @@ patient_ids = index_spells["patient_id"].unique()
 engine = common.make_engine(database="modelling_sql_area")
 
 # Primary care prescriptions
-primary_care_prescriptions = common.get_data_by_patient(
+dfs = common.get_data_by_patient(
     engine, icb.primary_care_prescriptions_query, patient_ids
 )
+primary_care_prescriptions = pd.concat(dfs).reset_index(drop=True)
 
 # Primary care measurements
-primary_care_measurements = common.get_data_by_patient(
+dfs = common.get_data_by_patient(
     engine, icb.primary_care_measurements_query, patient_ids
 )
+primary_care_measurements = pd.concat(dfs).reset_index(drop=True)
 
 # Primary care attributes
 dfs = common.get_data_by_patient(engine, icb.primary_care_attributes_query, patient_ids)
@@ -91,33 +93,33 @@ common_start = max(
 
 # Add a margin of one year on either side of the earliest/latest
 # dates to ensure outcomes and features will be valid at the edges
-index_start_date = common_start + dt.timedelta(days=365)
-index_end_date = common_end - dt.timedelta(days=365)
+index_start = common_start + dt.timedelta(days=365)
+index_end = common_end - dt.timedelta(days=365)
 
 # Reduce the index spells to only those within the valid window
 index_spells = index_spells[
-    (index_spells["spell_start"] < index_end_date)
-    & (index_spells["spell_start"] > index_start_date)
+    (index_spells["spell_start"] < index_end)
+    & (index_spells["spell_start"] > index_start)
 ]
 
-# Combine the data into a single dictionary. This dataset is
-# the standard HES + SWD data available at the ICB (not including
-# the HIC data). This is a temporary save point to make it simpler
-# to debug the script (avoiding the long-running SQL queries above).
-icb_basic_tmp = episodes_and_codes | primary_care_data
+# Combine the datasets for saving
+icb_base_tmp = {
+    # Datasets
+    "index_spells": index_spells,
+    "episodes_and_codes": episodes_and_codes,
+    "primary_care_attributes": primary_care_attributes,
+    "primary_care_measurements": primary_care_measurements,
+    "primary_care_prescriptions": primary_care_prescriptions,
+    # Metadata
+    "start_date": start_date,
+    "end_date": end_date,
+    "common_start": common_start,
+    "common_end": common_end,
+    "index_start": index_start,
+    "index_end_date": index_end,
+}
 
-# Store metadata
-icb_basic_tmp["start_date"] = start_date
-icb_basic_tmp["end_date"] = end_date
-icb_basic_tmp["index_start_date"] = index_start_date
-icb_basic_tmp["index_end_date"] = index_end_date
-
-# Store the index events that were used to subset
-# the primary care data (based on the patient_ids in
-# the index spells)
-icb_basic_tmp["index_spells"] = index_spells
-
-# Save point for the primary care data
+# Save point for the intermediate data
 common.save_item(icb_basic_tmp, "icb_basic_tmp")
 
 # Load the data from file

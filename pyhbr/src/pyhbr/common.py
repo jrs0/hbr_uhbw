@@ -107,7 +107,7 @@ def get_data(
 
 def get_data_by_patient(
     engine: Engine, query: Callable[[Engine, ...], Select], patient_ids: list[str]
-) -> DataFrame:
+) -> list[DataFrame]:
     """Fetch data using a query restricted by patient ID
     
     The patient_id list is chunked into 2000 long batches to fit
@@ -121,7 +121,7 @@ def get_data_by_patient(
         patient_ids: A list of patient IDs to restrict the query.
 
     Returns:
-        The result of the query filtered to the patient_ids
+        A list of dataframes, one corresponding to each chunk.
     """
     dataframes = []
     patient_id_chunks = chunks(patient_ids, 2000)
@@ -134,7 +134,6 @@ def get_data_by_patient(
         )
         chunk_count += 1
     return dataframes
-    return concat(dataframes).reset_index(drop=True)
 
 def current_commit() -> str:
     """Get current commit.
