@@ -198,6 +198,12 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
             as bool.
 
     """
+    
+    # Columns interpreted as flags have been taken from
+    # the SWD guide, where the data format column says
+    # 1/Null. SWD documentation has been taken as a proxy
+    # for the primary care attributes table (which does
+    # not have column documentation).
     flag_columns = [
         "abortion",
         "adhd",
@@ -211,6 +217,7 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
         "autism",
         "back_pain",
         "cancer_bladder",
+        # Not sure what *_year means as a flag
         "cancer_bladder_year",
         "cancer_bowel",
         "cancer_bowel_year",
@@ -239,7 +246,7 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
         "cancer_prostate",
         "cancer_prostate_year",
         "cardio_other",
-        "cataracts",
+        "cataracts",        
         "ckd",
         "coag",
         "coeliac",
@@ -379,21 +386,7 @@ def get_primary_care_data(
             and "primary_care_measurements".
     """
 
-    # Primary care prescriptions
-    primary_care_prescriptions = common.get_data_by_patient(
-        engine, icb.primary_care_prescriptions_query, patient_ids[1:800]
-    )
 
-    # Primary care measurements
-    primary_care_measurements = common.get_data_by_patient(
-        engine, icb.primary_care_measurements_query, patient_ids[1:800]
-    )
-
-    # Primary care attributes
-    df = common.get_data_by_patient(
-        engine, icb.primary_care_attributes_query, patient_ids[1:800]
-    )
-    primary_care_attributes = process_flag_columns(df)
 
     return {
         "primary_care_attributes": primary_care_attributes,

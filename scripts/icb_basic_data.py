@@ -31,6 +31,7 @@ raw_sus_data = from_icb.get_raw_sus_data(engine, start_date, end_date)
 # The full dataset is large, so using a save point
 # to speed up script development
 common.save_item(raw_sus_data, "raw_sus_data")
+raw_sus_data = common.load_item("raw_sus_data")
 
 # HES data + patient demographics
 episodes_and_codes = from_icb.get_episodes_and_codes(raw_sus_data)
@@ -43,7 +44,23 @@ patient_ids = index_spells["patient_id"].unique()
 
 # Fetch all the primary care data, narrowed by patient
 engine = common.make_engine(database="modelling_sql_area")
-primary_care_data = from_icb.get_primary_care_data(engine, patient_ids)
+
+# Primary care prescriptions
+primary_care_prescriptions = common.get_data_by_patient(
+    engine, icb.primary_care_prescriptions_query, patient_ids
+)
+
+# Primary care measurements
+primary_care_measurements = common.get_data_by_patient(
+    engine, icb.primary_care_measurements_query, patient_ids
+)
+
+# Primary care attributes
+df = common.get_data_by_patient(
+    engine, icb.primary_care_attributes_query, patient_ids
+)
+primary_care_attributes = from_icb.process_flag_columns(df)
+
 
 # Find latest date seen in all the datasets
 latest_primary_care_attributes = primary_care_data["primary_care_attributes"][
