@@ -137,7 +137,7 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
 
     return select(
         table.col("nhs_number").cast(String).label("patient_id"),
-        table.col("attribute_period").cast(DateTime),
+        table.col("attribute_period").cast(DateTime).label("date"),
         table.col("homeless"),
         
         # No need for these, available in episodes data

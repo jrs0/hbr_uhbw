@@ -63,7 +63,7 @@ primary_care_attributes = from_icb.process_flag_columns(df)
 
 
 # Find latest date seen in all the datasets
-latest_primary_care_attributes = primary_care_data["primary_care_attributes"][
+latest_primary_care_attributes = primary_care_attributes[
     "attribute_period"
 ].max()
 latest_primary_care_prescriptions = primary_care_data["primary_care_prescriptions"][

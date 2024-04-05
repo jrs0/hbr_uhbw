@@ -370,31 +370,6 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
     )
     return df
 
-
-def get_primary_care_data(
-    engine: Engine, patient_ids: list[str]
-) -> dict[str, DataFrame]:
-    """Fetch primary care information from the database
-
-    Args:
-        engine: The database connection
-        patient_ids: A list of patient IDs to restrict the query.
-
-    Returns:
-        A map from table name to table containing
-            "primary_care_attributes", "primary_care_prescriptions",
-            and "primary_care_measurements".
-    """
-
-
-
-    return {
-        "primary_care_attributes": primary_care_attributes,
-        "primary_care_prescriptions": primary_care_prescriptions,
-        "primary_care_measurements": primary_care_measurements,
-    }
-
-
 def preprocess_smoking(column: Series) -> Series:
     """Convert the smoking column from string to category
 
