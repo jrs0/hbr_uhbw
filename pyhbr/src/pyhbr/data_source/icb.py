@@ -100,6 +100,10 @@ def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
     columns += clinical_code_columns
 
     # Valid rows must have one of the following commissioner codes
+    #
+    # These commissioner codes are used to restrict the system-wide dataset
+    # to just in-area patients (those registered with BNSSG GP practices).
+    # When linking to primary care data 
     valid_list = ["5M8", "11T", "5QJ", "11H", "5A3", "12A", "15C", "14F", "Q65"]
 
     return select(*columns).where(

@@ -18,15 +18,22 @@ importlib.reload(icb)
 importlib.reload(clinical_codes)
 importlib.reload(counting)
 
-pd.set_option("future.no_silent_downcasting", True)
-
-# Set a date range for episode fetch
-start_date = dt.date(2015, 1, 1)
-end_date = dt.date(2023, 1, 1)
+# Set a date range for episode fetch. The primary 
+# care data start in Oct 2019. Use an end date
+# in the future to ensure all data is fetched. 
+# Index spell data is limited based on the min/max
+# dates seen in all the datasets below.
+start_date = dt.date(2019, 1, 1)
+end_date = dt.date(2025, 1, 1)
 
 # Get the raw HES data
 engine = common.make_engine(database="abi")
 raw_sus_data = from_icb.get_raw_sus_data(engine, start_date, end_date)
+
+# Note that the SUS data is limited to in-area patients only, so that
+# the patients are present in the primary care attributes table (see
+# the notes on valid commissioner code in icb.py). This restriction
+# can be lifted if the primary care data is not used in the analysis.
 
 # The full dataset is large, so using a save point
 # to speed up script development
@@ -56,56 +63,36 @@ primary_care_measurements = common.get_data_by_patient(
 )
 
 # Primary care attributes
-df = common.get_data_by_patient(
-    engine, icb.primary_care_attributes_query, patient_ids
-)
-primary_care_attributes = from_icb.process_flag_columns(df)
+dfs = common.get_data_by_patient(engine, icb.primary_care_attributes_query, patient_ids)
+with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
+primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
 
-
-# Find latest date seen in all the datasets
-latest_primary_care_attributes = primary_care_attributes[
-    "attribute_period"
-].max()
-latest_primary_care_prescriptions = primary_care_data["primary_care_prescriptions"][
-    "date"
-].max()
-latest_primary_care_measurements = primary_care_data["primary_care_measurements"][
-    "date"
-].max()
-latest_sus_data = raw_sus_data["episode_start"].max()
-common_latest = min(
+# Find the most recent date that was seen in all the datasets. Note
+# that the date in the primary care attributes covers the month
+# beginning from that date.
+common_end = min(
     [
-        latest_primary_care_attributes,
-        latest_primary_care_prescriptions,
-        latest_primary_care_measurements,
-        latest_sus_data,
+        primary_care_attributes["date"].max() + dt.timedelta(days=31),
+        primary_care_prescriptions["date"].max(),
+        primary_care_measurements["date"].max(),
+        raw_sus_data["episode_start"].max(),
     ]
 )
 
-# Find earliest date seen in all the datasets
-earliest_primary_care_attributes = primary_care_data["primary_care_attributes"][
-    "attribute_period"
-].min()
-earliest_primary_care_prescriptions = primary_care_data["primary_care_prescriptions"][
-    "date"
-].min()
-earliest_primary_care_measurements = primary_care_data["primary_care_measurements"][
-    "date"
-].min()
-earliest_sus_data = raw_sus_data["episode_start"].min()
-common_earliest = max(
+# Find earliest date seen in all the datasets.
+common_start = max(
     [
-        earliest_primary_care_attributes,
-        earliest_primary_care_prescriptions,
-        earliest_primary_care_measurements,
-        earliest_sus_data,
+        primary_care_attributes["date"].min(),
+        primary_care_prescriptions["date"].min(),
+        primary_care_measurements["date"].min(),
+        raw_sus_data["episode_start"].min(),
     ]
 )
 
 # Add a margin of one year on either side of the earliest/latest
 # dates to ensure outcomes and features will be valid at the edges
-index_start_date = common_earliest + dt.timedelta(days=365)
-index_end_date = common_latest - dt.timedelta(days=365)
+index_start_date = common_start + dt.timedelta(days=365)
+index_end_date = common_end - dt.timedelta(days=365)
 
 # Reduce the index spells to only those within the valid window
 index_spells = index_spells[
@@ -181,11 +168,11 @@ features_prescriptions = acs.prescriptions_before_index(
 
 # Only blood pressure and HbA1c go back to 2019 in the data -- not
 # including the other measurements in order to keep the sample size up.
-prior_blood_pressure = from_icb.blood_pressure(
-    index_spells, primary_care_measurements
-)
+prior_blood_pressure = from_icb.blood_pressure(index_spells, primary_care_measurements)
 prior_hba1c = from_icb.hba1c(index_spells, primary_care_measurements)
-features_measurements = prior_blood_pressure.merge(prior_hba1c, how="left", on="spell_id")
+features_measurements = prior_blood_pressure.merge(
+    prior_hba1c, how="left", on="spell_id"
+)
 
 # Get basic index features (drop instead of keep in case new
 # features are added)

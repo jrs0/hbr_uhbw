@@ -8,7 +8,7 @@ icb_basic_data = common.load_item("icb_basic_data")
 
 # Get datasets for convenience
 outcomes = icb_basic_data["outcomes"]
-features_attributes = icb - basic_data["features_attributes"]
+features_attributes = icb_basic_data["features_attributes"]
 
 # Check outcomes
 missing_outcomes = describe.proportion_missingness(outcomes)
@@ -17,6 +17,9 @@ print(missing_outcomes)
 prevalence_outcomes = describe.get_column_rates(outcomes)
 print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
+
+# Check raw attributes
+
 
 # Check attributes
 missing_attributes = describe.proportion_missingness(features_attributes)
