@@ -366,7 +366,7 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
 
     df = primary_care_attributes.copy()
     df[flag_columns] = (
-        df[flag_columns].astype(bool).fillna(False)
+        df[flag_columns].astype("float").fillna(0).astype(bool)
     )
     return df
 
