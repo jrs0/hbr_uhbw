@@ -41,5 +41,16 @@ sns.histplot(polypharmacy, x="Count in attribute month", hue="Prescription type"
 plt.title("Distribution of prescription counts in non-missing rows")
 plt.show()
 
+# Plot the egfr (if present). Seem to be a lot of zeros (note zero does
+# not mean NA). The large distribution at about 100 means eGFR > 90, which 
+# can be recorded as 90 in the data, and represents the tail of the distribution.
+egfr = features_attributes["egfr"].rename("eGFR (mL/min)")
+sns.displot(egfr, stat="percent")
+plt.title("Distribution of eGFR in non-missing rows")
+plt.tight_layout()
+plt.show()
+
+numeric_attributes = features_attributes.select_dtypes(include="number")
+
 # .boxplot(meanline=True, showmeans=True)
 # plt.show()

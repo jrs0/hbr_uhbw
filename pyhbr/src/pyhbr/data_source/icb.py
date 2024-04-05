@@ -309,7 +309,11 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
         table.col("qof_pall"),
         table.col("qof_rheumarth"),
         table.col("qof_stroke"),
-        table.col("qrisk2_3"),
+        
+        # Excluding a cardiovascular risk score as not wanting to use
+        # a feature that may require hidden variables to calculate.
+        #table.col("qrisk2_3"),
+        
         table.col("religion"),
         table.col("ricketts"),
         table.col("sad"),
