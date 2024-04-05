@@ -103,7 +103,7 @@ index_spells = index_spells[
 ]
 
 # Combine the datasets for saving
-icb_base_tmp = {
+icb_basic_tmp = {
     # Datasets
     "index_spells": index_spells,
     "episodes_and_codes": episodes_and_codes,
