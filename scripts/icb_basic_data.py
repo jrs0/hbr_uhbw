@@ -140,7 +140,7 @@ primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
 )
 
 # Join the latest patient attributes to each index spell
-index_spells_with_attribute_period = acs.get_index_attribute_periods(
+index_spells_with_link = acs.get_index_attribute_link(
     index_spells, primary_care_attributes
 )
 

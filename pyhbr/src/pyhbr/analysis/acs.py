@@ -291,31 +291,31 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
     return DataFrame(code_features)
 
 
-def get_index_attribute_periods(
+def get_index_attribute_link(
     index_spells: DataFrame, primary_care_attributes: DataFrame
 ) -> DataFrame:
     """Link primary care attributes to index spells by attribute date
 
-    The attribute_period column of an attributes row indicates that
+    The date column of an attributes row indicates that
     the attribute was valid at the end of the interval
-    (attribute_period, attribute_period + 1month). It is important
+    (date, date + 1month). It is important
     that no attribute is used in modelling that could have occurred
-    after the index event, meaning that attribute_period + 1month < spell_start
+    after the index event, meaning that date + 1month < spell_start
     must hold for any attribute used as a predictor. On the other hand,
     data substantially before the index event should not be used. The
     valid window is controlled by imposing:
 
-        attribute_period < spell_start - attribute_valid_window
+        date < spell_start - attribute_valid_window
 
     Args:
         index_spells: The index spell table, containing a `spell_start`
             column and `patient_id`
         primary_care_attributes: The patient attributes table, containing
-            `attribute_period` and `patient_id`
+            `date` and `patient_id`
 
     Returns:
         A filtered version of index_spells containing only index spells
-            with a valid set of patient attributes. The `attribute_period`
+            with a valid set of patient attributes. The `date`
             column is added to link the attributes (along with `patient_id`).
     """
 
@@ -326,21 +326,21 @@ def get_index_attribute_periods(
 
     # Add all the patient's attributes onto each index spell
     df = index_spells.reset_index().merge(
-        primary_care_attributes[["patient_id", "attribute_period"]],
+        primary_care_attributes[["patient_id", "date"]],
         how="left",
         on="patient_id",
     )
 
     # Only keep attributes that are from strictly before the index spell
-    # (note attribute_period represents the start of the month that attributes
+    # (note date represents the start of the month that attributes
     # apply to)
     attr_before_index = df[
-        (df["attribute_period"] + dt.timedelta(days=31)) < df["spell_start"]
+        (df["date"] + dt.timedelta(days=31)) < df["spell_start"]
     ]
 
     # Keep only the most recent attribute before the index spell
     most_recent = (
-        attr_before_index.sort_values("attribute_period").groupby("spell_id").tail(1)
+        attr_before_index.sort_values("date").groupby("spell_id").tail(1)
     )
 
     # Exclude attributes that occurred outside the attribute_value_window before the index
@@ -350,7 +350,7 @@ def get_index_attribute_periods(
     ]
 
     return index_spells.merge(
-        swd_index_spells[["spell_id", "attribute_period"]].set_index("spell_id"),
+        swd_index_spells[["spell_id", "date"]].set_index("spell_id"),
         how="left",
         on="spell_id",
     )
