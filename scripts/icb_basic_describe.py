@@ -50,7 +50,13 @@ plt.title("Distribution of eGFR in non-missing rows")
 plt.tight_layout()
 plt.show()
 
+# Plot some of these individually
 numeric_attributes = features_attributes.select_dtypes(include="number")
 
-# .boxplot(meanline=True, showmeans=True)
-# plt.show()
+# Each is True/False/NaN (note, represented as object because bool
+# cannot store NaN)
+flag_attributes = features_attributes.select_dtypes(exclude="number")
+long = flag_attributes.melt()
+sns.barplot(long, x = "variable", y = "value")
+plt.show()
+

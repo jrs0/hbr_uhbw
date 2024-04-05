@@ -187,7 +187,10 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
 
     Many columns in the primary care attributes encode a flag
     using 1 for true and NA/NULL for false. These must be replaced
-    with a bool so that NA can distinguish missing data.
+    with a boolean type so that NA can distinguish missing data. 
+    Instead of using a `bool`, use Int8 so that NaNs can be stored.
+    (This is important later on for index spells with missing attributes,
+    which need to store NaN in these flag columns.)
 
     Args:
         primary_care_attributes: Original table containing
@@ -195,7 +198,7 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
 
     Returns:
         The primary care attributes with flag columns encoded
-            as bool.
+            as Int8.
 
     """
     
@@ -366,7 +369,7 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
 
     df = primary_care_attributes.copy()
     df[flag_columns] = (
-        df[flag_columns].astype("float").fillna(0).astype(bool)
+        df[flag_columns].astype("float").fillna(0).astype("Int8")
     )
     return df
 
