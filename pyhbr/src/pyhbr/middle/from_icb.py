@@ -366,7 +366,7 @@ def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
 
     df = primary_care_attributes.copy()
     df[flag_columns] = (
-        df[flag_columns].fillna(value=0).infer_objects(copy=False).astype(bool)
+        df[flag_columns].astype(bool).fillna(False)
     )
     return df
 
