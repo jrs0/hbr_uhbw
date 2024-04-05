@@ -291,7 +291,7 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
     return DataFrame(code_features)
 
 
-def get_swd_index_spells(
+def get_index_attribute_periods(
     index_spells: DataFrame, primary_care_attributes: DataFrame
 ) -> DataFrame:
     """Link primary care attributes to index spells by attribute date
@@ -349,25 +349,17 @@ def get_swd_index_spells(
         > (most_recent["spell_start"] - attribute_valid_window)
     ]
 
-    # return index_spells[[]].merge(
-    #     swd_index_spells.set_index("spell_id"), how="left", on="spell_id"
-    # )
+    return index_spells.merge(
+        swd_index_spells[["spell_id", "attribute_period"]].set_index("spell_id"),
+        how="left",
+        on="spell_id",
+    )
 
 
 def get_index_attributes(
     swd_index_spells: DataFrame, primary_care_attributes: DataFrame
 ) -> DataFrame:
     """Link the primary care patient data to the index spells
-
-    !!! warning
-        The validity of this needs checking. The intention is to reduce missingness in
-        the attributes data, but there may be the unintended side-effect of biasing the
-        dataset (depending on the reason for no attributes). Need to find out what is
-        causing the missingness.
-
-    Filter the primary care attributes table to just those rows applicable
-    to the index spells (determined using get_swd_index_spells), and replace
-    the patient_id/attribute_period columns with the spell_id Pandas index.
 
     Args:
         swd_index_spells: Reduced index_spells which all have a recent, valid
