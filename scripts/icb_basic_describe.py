@@ -18,8 +18,7 @@ prevalence_outcomes = describe.get_column_rates(outcomes)
 print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
 
-# Check raw attributes
-
+# Check raw attributes (e.g. no attributes at all vs. no attributes before index)
 
 # Check attributes
 missing_attributes = describe.proportion_missingness(features_attributes)
@@ -55,8 +54,14 @@ numeric_attributes = features_attributes.select_dtypes(include="number")
 
 # Each is True/False/NaN (note, represented as object because bool
 # cannot store NaN)
-flag_attributes = features_attributes.select_dtypes(exclude="number")
+flag_attributes = features_attributes.select_dtypes(include="Int8")
 long = flag_attributes.melt()
-sns.barplot(long, x = "variable", y = "value")
+long["Present"] = long["value"].map({
+    0: "False",
+    1: "True",
+}).fillna("Missing")
+sns.displot(long, x = "variable", hue="Present", multiple="stack")
+plt.xticks(rotation=90)
+plt.title("Proportion of missing attributes (> 70\% excluded)")
+plt.tight_layout()
 plt.show()
-
