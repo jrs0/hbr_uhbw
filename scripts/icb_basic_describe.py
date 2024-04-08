@@ -7,10 +7,13 @@ import seaborn as sns
 
 icb_basic_data = common.load_item("icb_basic_data")
 
-# Get datasets for convenience
+# For convenience
 outcomes = icb_basic_data["outcomes"]
-features_attributes = icb_basic_data["features_attributes"]
-features_codes = icb_basic_data["features_codes"]
+features_index = icb_basic_data["features_index"]  # bool-only
+features_codes = icb_basic_data["features_codes"]  # float-only
+features_prescriptions = icb_basic_data["features_prescriptions"]  # float-only
+features_measurements = icb_basic_data["features_measurements"]  # float-only
+features_attributes = icb_basic_data["features_attributes"]  # float, category, Int8
 
 # Check outcomes
 missing_outcomes = describe.proportion_missingness(outcomes)
@@ -19,6 +22,34 @@ print(missing_outcomes)
 prevalence_outcomes = describe.get_column_rates(outcomes)
 print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
+
+# Check prescriptions
+missing_prescriptions = describe.proportion_missingness(features_prescriptions)
+print("The amount of missing data in the prescriptions columns is:")
+print(missing_prescriptions)
+prevalence_prescriptions = describe.get_column_rates(features_prescriptions > 0)
+print("The rate of occurrence of each prescriptions is:")
+print(prevalence_prescriptions)
+
+# Check measurements
+missing_measurements = describe.proportion_missingness(features_measurements)
+print("The amount of missing data in the measurements columns is:")
+print(missing_measurements)
+prevalence_prescriptions = describe.get_column_rates(features_prescriptions > 0)
+print("The rate of occurrence of each prescriptions is:")
+print(prevalence_prescriptions)
+
+# Plot measurement distribution
+measurement_names = {
+    "bp_systolic": "Blood pressure (sys.), mmHg",
+    "bp_diastolic": "Blood pressure (dia.), mmHg",
+    "hba1c": "HbA1c, mmol/mol",    
+}
+long = features_measurements.rename(columns=measurement_names).melt(var_name="Measurement", value_name="Result")
+sns.displot(long, x = "Result", hue="Measurement")
+plt.title("Non-missing primary-care measurements (up to 2 months before index)")
+plt.tight_layout()
+plt.show()
 
 # Check raw attributes (e.g. no attributes at all vs. no attributes before index)
 
@@ -32,13 +63,16 @@ plt.title("Proportion of missing attributes (> 70\% excluded)")
 plt.tight_layout()
 plt.show()
 
+# Check prescriptions
+
+
 # Plot the distribution of polypharmacy prescription counts
 polypharmacy = (
     features_attributes.filter(regex="polypharmacy")
     .rename(columns={"polypharmacy_acute": "Acute", "polypharmacy_repeat": "Repeat"})
     .melt(var_name="Prescription type", value_name="Count in attribute month")
 )
-sns.histplot(
+sns.displot(
     polypharmacy,
     x="Count in attribute month",
     hue="Prescription type",
@@ -58,7 +92,31 @@ plt.tight_layout()
 plt.show()
 
 # Plot some of these individually
-numeric_attributes = features_attributes.select_dtypes(include="number")
+numeric_names = {
+    "egfr": "eGFR",
+    "polypharmacy_repeat": "Pharm. (Rep.)",
+    "polypharmacy_acute": "Pharm. (Acute)",
+    "bmi": "BMI",
+    "alcohol_units": "Alcohol",
+    "efi_category": "EFI"
+}
+numeric_attributes = features_attributes.select_dtypes(include="float").rename(columns=numeric_names)
+missing_numeric = describe.proportion_missingness(numeric_attributes).rename("Percent Missingness")
+sns.barplot(100*missing_numeric)
+plt.xticks(rotation=90)
+plt.xlabel("Feature name")
+plt.title("Proportion of missingness in numerical attributes")
+plt.tight_layout()
+plt.show()
+
+# Plot numeric attributes
+long = numeric_attributes.melt(var_name = "Numeric Feature", value_name="Numeric Value")
+sns.displot(long, x = "Numeric Value", hue="Numeric Feature")
+plt.title("Other numerical non-missing primary care attributes")
+plt.tight_layout()
+plt.xlim(0,100)
+plt.show()
+
 
 # Each is True/False/NaN (note, represented as Int8 because bool
 # cannot store NaN)
@@ -117,10 +175,12 @@ long_counts = (
     .reset_index()
 )
 long_counts["Category"] = "None"
-long_counts["Category"] = long_counts["variable"].case_when([
-    (long_counts["variable"] == "Bleeding (ADAPTT)", "Outcome group"),
-    (long_counts["variable"] == "AMI/Stroke", "Outcome group"),    
-])
+long_counts["Category"] = long_counts["variable"].case_when(
+    [
+        (long_counts["variable"] == "Bleeding (ADAPTT)", "Outcome group"),
+        (long_counts["variable"] == "AMI/Stroke", "Outcome group"),
+    ]
+)
 sns.barplot(long, x="variable", y="value", hue="Category")
 plt.xticks(rotation=90)
 plt.tight_layout()
