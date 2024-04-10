@@ -1,8 +1,9 @@
 import importlib
 
+import scipy
 from numpy.random import RandomState
 from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
+
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
@@ -56,123 +57,24 @@ preprocessors = [
     model.make_float_preprocessor(X_train),
 ]
 
-
-def make_columns_transformer(
-    preprocessors: list[Preprocessor | None],
-) -> ColumnTransformer:
-
-    # Remove None values from the list (occurs when no columns
-    # of that type are present in the training data)
-    not_none = [pre for pre in preprocessors if pre is not None]
-
-    # Make the list of tuples in the format for ColumnTransformer
-    tuples = [(pre.name, pre.pipe, pre.columns) for pre in not_none]
-
-    return ColumnTransformer(tuples, remainder="drop")
-
-
 # Combine the preprocessors together into a column transformer
 # which performs the preprocessing on the groups of columns in
 # parallel.
-preprocess = make_columns_transformer(preprocessors)
+preprocess = model.make_columns_transformer(preprocessors)
 
 # Select the outcome for modelling
 outcome_name = "bleeding_outcome"
 
 # Create a model to be trained on the preprocessed training set
-model = RandomForestClassifier(
+mod = RandomForestClassifier(
     n_estimators=100, max_depth=10, random_state=random_state
 )
 
-pipe = Pipeline([("preprocess", preprocess), ("model", model)])
+pipe = Pipeline([("preprocess", preprocess), ("model", mod)])
 
 fit = pipe.fit(X_train, y_train.loc[:, outcome_name])
 
-def get_num_feature_columns(fit: Pipeline) -> int:
-    """Get the total number of feature columns
-    Args:
-        fit: The fitted pipeline, containing a "preprocess"
-            step.
-
-    Returns:
-        The total number of columns in the features, after
-            preprocessing.
-    """
-    
-    # Get the map from column transformers to the slices
-    # that they occupy in the training data
-    preprocess = fit["preprocess"]
-    column_slices = preprocess.output_indices_
-
-    total = 0
-    for s in column_slices.values():
-        total += s.stop - s.start
-        
-    return total
-
-def get_preprocessed_column_map(
-    fit: Pipeline, preprocessors: list[Preprocessor]
-) -> dict[str, str]:
-
-    # Get the fitted ColumnTransformer from the fitted pipeline
-    preprocess = fit["preprocess"]
-
-    # Map from preprocess name to the relevant step that changes
-    # column names. This must be kept consistent with the
-    # make_*_preprocessor functions
-    relevant_step = {
-        "category": "one_hot_encoder",
-        "float": "low_variance",
-        "flag": "one_hot_encode",
-    }
-
-    # Get the map showing which column transformers (preprocessors)
-    # are responsible which which slices of columns in the output
-    # training dataframe
-    column_slices = preprocess.output_indices_
-
-    # Make an empty list of the right length to store all the columns
-    column_names = get_num_feature_columns(fit) * [None]
-
-    for pre in preprocessors:
-        name = pre.name
-        step_name = relevant_step[name]
-
-        # Get the step which transforms column names
-        step = preprocess.named_transformers_[pre.name][step_name]
-
-        # A special case is required for the low_variance columns
-        # which need original list of columns passing in
-        if name == "float":
-            columns = step.get_feature_names_out(pre.columns)
-        else:
-            columns = step.get_feature_names_out()
-
-        # Get the properties of the slice where this set of
-        # columns sits
-        start = column_slices[name].start
-        stop = column_slices[name].stop
-        length = stop - start
-
-        # Check the length of the slice matches the output
-        # columns length
-        if len(columns) != length:
-            raise RuntimeError(
-                "Length of output columns slice did not match the length of the column names list"
-            )
-            
-        # Insert the list of colum names by slice
-        column_names[column_slices[name]] = columns
-
-    return column_names
-
-get_preprocessed_column_map(fit, preprocessors)
-
-preprocess = fit["preprocess"]
-preprocess.output_indices_
-
-get_preprocessed_column_map(fit, preprocessors)
-
+F_train = model.get_features(fit, X_train)
 
 probs = fit.predict_proba(X_test)
 
