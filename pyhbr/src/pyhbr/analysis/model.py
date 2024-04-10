@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 from dataclasses import dataclass
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -198,15 +199,17 @@ def get_num_feature_columns(fit: Pipeline) -> int:
     return total
 
 
-def get_preprocessed_column_map(
-    fit: Pipeline, preprocessors: list[Preprocessor | None]
-) -> dict[str, str]:
-    """_summary_
+def get_feature_names(
+    fit: Pipeline
+) -> DataFrame:
+    """Get a table of feature names
+    
+    The feature names are the names of the columns in the output
+    from the preprocessing step in the fitted pipeline
 
     Args:
         fit: A fitted sklearn pipeline, containing a "preprocess"
             step.
-        preprocessors:
 
     Raises:
         RuntimeError: _description_
@@ -238,21 +241,21 @@ def get_preprocessed_column_map(
     # Make an empty list for the preprocessor groups
     prep_names = get_num_feature_columns(fit) * [None]
 
-    # Remove None values from the list (occurs when no columns
-    # of that type are present in the training data)
-    not_none = [pre for pre in preprocessors if pre is not None]
-
-    for pre in not_none:
-        name = pre.name
+    for name, pipe, columns in preprocess.transformers_:
+        
+        # Ignore the remainder step
+        if name == "remainder":
+            continue
+        
         step_name = relevant_step[name]
 
         # Get the step which transforms column names
-        step = preprocess.named_transformers_[pre.name][step_name]
+        step = pipe[step_name]
 
         # A special case is required for the low_variance columns
         # which need original list of columns passing in
         if name == "float":
-            columns = step.get_feature_names_out(pre.columns)
+            columns = step.get_feature_names_out(columns)
         else:
             columns = step.get_feature_names_out()
 
@@ -304,19 +307,19 @@ def get_features(fit: Pipeline, X: DataFrame) -> DataFrame:
 
     # Get the preprocessing step and new feature column names
     preprocess = fit["preprocess"]
-    prep_columns = get_preprocessed_column_map(fit, preprocessors)
+    prep_columns = get_feature_names(fit)
     X_numpy = preprocess.transform(X)
 
     # Convert the numpy array or sparse array to a dataframe
-    if scipy.sparse.issparse(X_train_numpy):
+    if scipy.sparse.issparse(X_numpy):
         return DataFrame.sparse.from_spmatrix(
             X_numpy,
             columns=prep_columns["column"],
-            index=X_train.index,
+            index=X.index,
         )
     else:
         return DataFrame(
             X_numpy,
             columns=prep_columns["column"],
-            index=X_train.index,
+            index=X.index,
         )

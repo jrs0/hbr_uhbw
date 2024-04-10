@@ -14,6 +14,7 @@ from pyhbr.analysis import model
 importlib.reload(model)
 
 
+
 # Load outcome and training data
 icb_basic_data = common.load_item("icb_basic_data")
 
@@ -74,6 +75,8 @@ pipe = Pipeline([("preprocess", preprocess), ("model", mod)])
 
 fit = pipe.fit(X_train, y_train.loc[:, outcome_name])
 
+# View the features that go directly into the model. This dataframe
+# has the column that the model sees (after the preprocessing steps).
 F_train = model.get_features(fit, X_train)
 
 probs = fit.predict_proba(X_test)
