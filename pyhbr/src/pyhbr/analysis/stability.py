@@ -74,14 +74,20 @@ from matplotlib.axes import Axes
 @dataclass
 class Resamples:
     """Store a training set along with M resamples of it
+    
+    Args:
+        X0: The matrix of predictors
+        Y0: The matrix of outcomes (one column per outcome)
+        Xm: A list of resamples of the predictors
+        Ym: A list of resamples of the outcomes
     """
     X0: DataFrame
-    y0: Series
+    Y0: DataFrame
     Xm: list[DataFrame]
-    ym: list[Series]
+    Ym: list[DataFrame]
 
 
-def make_bootstrapped_resamples(X0: DataFrame, y0: Series, M: int, random_state: RandomState) -> Resamples:
+def make_bootstrapped_resamples(X0: DataFrame, y0: DataFrame, M: int, random_state: RandomState) -> Resamples:
     """Make M resamples of the training data
     
     Makes M bootstrapped resamples of a training set (X0,y0).
@@ -89,7 +95,8 @@ def make_bootstrapped_resamples(X0: DataFrame, y0: Series, M: int, random_state:
 
     Args:
         X0: The features in the training set to be resampled
-        y0: The outcome in the training set to be resampled
+        y0: The outcome in the training set to be resampled. Can have multiple
+            columns (corresponding to different outcomes).
         M: How many resamples to take
         random_state: Source of randomness for resampling
 
@@ -99,9 +106,8 @@ def make_bootstrapped_resamples(X0: DataFrame, y0: Series, M: int, random_state:
     Returns:
         An object containing the original training set and the resamples.
     """
-    
-    num_samples = X0.shape[0]
-    if num_samples != len(y0):
+
+    if len(X0) != len(y0):
         raise ValueError("Number of rows in X0_train and y0_train must match")
     if M < 200:
         warnings.warn("M should be at least 200; see Riley and Collins, 2022")
@@ -134,7 +140,7 @@ class FittedModel:
 def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: RandomState) -> FittedModel:
     """Fit a model to a training set and resamples of the training set.
     
-    Use the unfitted model pipeline returned by model_factory to:
+    Use the unfitted model pipeline to:
     
     * Fit a model to the training set (X0, y0)
     * Fit a model to M resamples (Xm, ym) of the training set
@@ -176,7 +182,7 @@ def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: 
     Mm = []
     for m in range(M):
         pipe = clone(model)
-        ym = resamples.ym[m]
+        ym = resamples.Ym[m]
         Xm = resamples.Xm[m]
         Mm.append(pipe.fit(Xm, ym))
 

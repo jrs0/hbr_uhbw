@@ -10,9 +10,14 @@ from sklearn.metrics import roc_auc_score
 from pyhbr import common
 
 from pyhbr.analysis import model
+from pyhbr.analysis import stability
+from pyhbr.analysis import roc
+from pyhbr.analysis import calibration
+
+import matplotlib.pyplot as plt
 
 importlib.reload(model)
-
+importlib.reload(calibration)
 
 
 # Load outcome and training data
@@ -67,13 +72,51 @@ preprocess = model.make_columns_transformer(preprocessors)
 outcome_name = "bleeding_outcome"
 
 # Create a model to be trained on the preprocessed training set
-mod = RandomForestClassifier(
-    n_estimators=100, max_depth=10, random_state=random_state
-)
+mod = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=random_state)
 
 pipe = Pipeline([("preprocess", preprocess), ("model", mod)])
 
-fit = pipe.fit(X_train, y_train.loc[:, outcome_name])
+# Fit the bleeding and ischaemia models on the training set
+# and bootstrap resamples of the training set (to assess stability)
+fitted_bleeding_model = stability.fit_model(
+    pipe, X_train, y_train.loc[:, "bleeding_outcome"], 50, random_state
+)
+fitted_ischaemia_model = stability.fit_model(
+    pipe, X_train, y_train.loc[:, "ischaemia_outcome"], 50, random_state
+)
+
+# Get the predicted probabilities associated with all the resamples of
+# the bleeding and ischaemia models
+bleeding_probs = stability.predict_probabilities(fitted_bleeding_model, X_test)
+ischaemia_probs = stability.predict_probabilities(fitted_ischaemia_model, X_test)
+
+# Plot the stability of predicted probabilities
+fig, ax = plt.subplots(1,2)
+stability.plot_instability(ax[0], bleeding_probs, y_test.loc[:,"bleeding_outcome"], "Stability of Predicted Risks of Bleeding")
+stability.plot_instability(ax[1], ischaemia_probs, y_test.loc[:,"ischaemia_outcome"], "Stability of Predicted Risks of Ischaemia")
+plt.show()
+
+# Calculate the ROC curves for the models
+bleeding_roc_curves = roc.get_roc_curves(bleeding_probs, y_test.loc[:, "bleeding_outcome"])
+ischaemia_roc_curves = roc.get_roc_curves(ischaemia_probs, y_test.loc[:, "ischaemia_outcome"])
+bleeding_auc = roc.get_auc(bleeding_probs, y_test.loc[:, "bleeding_outcome"])
+ischaemia_auc = roc.get_auc(ischaemia_probs, y_test.loc[:, "ischaemia_outcome"])
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots(1,2)
+roc.plot_roc_curves(ax[0], bleeding_roc_curves, bleeding_auc, "Bleeding ROC Curves")
+roc.plot_roc_curves(ax[1], ischaemia_roc_curves, ischaemia_auc, "Ischaemia ROC Curves")
+plt.show()
+
+# Get the calibration of the models
+bleeding_calibration_curves = calibration.get_calibration(bleeding_probs, y_test.loc[:, "bleeding_outcome"], 15)
+ischaemia_calibration_curves = calibration.get_calibration(ischaemia_probs, y_test.loc[:, "ischaemia_outcome"], 15)
+
+# Plot the calibration curves
+fig, ax = plt.subplots(1,1)
+calibration.plot_calibration_curves(ax, bleeding_calibration_curves, "red", "testtt")
+calibration.plot_calibration_curves(ax, ischaemia_calibration_curves, "blue", "test")
+plt.show()
 
 # View the features that go directly into the model. This dataframe
 # has the column that the model sees (after the preprocessing steps).

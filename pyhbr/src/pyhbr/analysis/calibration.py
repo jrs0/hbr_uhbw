@@ -133,8 +133,8 @@ def plot_calibration_curves(
             linewidth=0.3,
             alpha=0.4,
         )
-    # ax.axline([0, 0], [1, 1], color="k", linestyle="--")
-    # ax.legend(["Model-under-test", "Bootstrapped models"])
+    ax.axline([0, 0], [1, 1], color="k", linestyle="--")
+    ax.legend(["Model-under-test", "Bootstrapped models"])
     ax.set_title(title)
     ax.set_xlabel("Predicted probability of bleeding from model")
     ax.set_ylabel("Observed bleeding rate corresponding to risk prediction")
