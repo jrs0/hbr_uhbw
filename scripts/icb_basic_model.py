@@ -112,6 +112,57 @@ plt.show()
 bleeding_calibration_curves = calibration.get_calibration(bleeding_probs, y_test.loc[:, "bleeding_outcome"], 15)
 ischaemia_calibration_curves = calibration.get_calibration(ischaemia_probs, y_test.loc[:, "ischaemia_outcome"], 15)
 
+def get_variable_width_calibration(probs: DataFrame, y_test: Series, n_bins: int) -> list[DataFrame]:
+    """Get variable-bin-width calibration curves
+    
+    Model predictions are arranged in ascending order, and then risk ranges
+    are selected so that an equal number of predictions falls in each group.
+    This means bin widths will be more granular at points where many patients
+    are predicted the same risk. The risk bins are shown on the x-axis of 
+    calibration plots.
+    
+    In each bin, the proportion of patient with an event are calculated. This
+    value, which is a function of each bin, is plotted on the y-axis of the
+    calibration plot, and is a measure of the prevalence of the outcome in 
+    each bin. In a well calibrated model, this prevalence should match the 
+    mean risk prediction in the bin (the bin center).
+    
+    Note that a well-calibrated model is not a sufficient condition for 
+    correctness of risk predictions. One way that the prevalence of the
+    bin can match the bin risk is for all true risks to roughly match
+    the bin risk P. However, other ways are possible, for example, a
+    proportion P of patients in the bin could have 100% risk, and the 
+    other have zero risk. 
+    
+
+    Args:
+        probs: Each column is the predictions from one of the resampled
+            models. The first column corresponds to the model-under-test.
+        y_test: Contains the observed outcomes. 
+        n_bins: The number of (variable-width) bins to include.
+
+    Returns:
+        A list of dataframes, one for each calibration curve. The
+            "bin_center" column contains the central bin width;
+            the "bin_width" columns contains the width of the bin
+            (highest risk - lowest risk); the "bin_prevalence"
+            column contains the mean number of events in that bin;
+            and the "bin_ci" contains the confidence interval for
+            that estimated mean.
+    """
+    
+probs = bleeding_probs
+    
+col = probs.iloc[:,0].sort_values()
+sns.displot(col)
+plt.show()
+
+n_bins = 5
+samples_per_bin = int(np.ceil(len(col) / n_bins))
+bins = []
+for start in range(0, len(col), samples_per_bin):
+    bins.append(col[start:start+samples_per_bin])
+
 # Plot the calibration curves
 fig, ax = plt.subplots(1,1)
 calibration.plot_calibration_curves(ax, bleeding_calibration_curves, "red", "testtt")
