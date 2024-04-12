@@ -169,3 +169,79 @@ def plot_prediction_distribution(ax, probs, n_bins):
     # ax.set_title("Distribution of predicted probabilities")
     ax.set_xlabel("Mean predicted probability")
     ax.set_ylabel("Count")
+
+
+def get_prevalence(y_test: Series): 
+    """Estimate the prevalence in a set of outcomes
+    
+    To calculate model calibration, patients are grouped
+    together into similar-risk groups. The prevalence of
+    the outcome in each group is then compared to the 
+    predicted risk.
+    
+    The true risk of the outcome within each group is not
+    known, but it is known what outcome occurred.
+    
+    One possible assumption is that the patients in each
+    group all have the same risk, p. In this case, the
+    outcomes from the group follow a Bernoulli 
+    distribution. The population parameter p (where the
+    popopulation is all patients receiving risk predictions
+    in this group) can be estimated simply using
+    $\hat{p} = N_\\text{outcome}/N_\\text{group_size}$.
+    Using a simple approach to calculate the confidence
+    interval on this estimate, assuming a large enough
+    sample size for normally distributed estimate of the
+    mean, gives a CI of:
+    
+    $$
+    \hat{p} \pm 1.96\sqrt{\\frac{\hat{p}(1-\hat{p})}{N_\\text{group_size}}}
+    $$
+    
+    (See [this answer](https://stats.stackexchange.com/a/156807)
+    for details.)
+    
+    However, the assumption of uniform risk within the 
+    models groups-of-equal-risk-prediction may not be valid,
+    because it assumes that the model is predicting 
+    reasonably accurate risks, and the model is the item
+    under test.
+    
+    One argument is that, if the estimated prevalence matches
+    the risk of the group closely, then this may give evidence
+    that the models predicted risks are accurate -- the alternative
+    would be that the real risks follow a different distribution, whose
+    mean happens (coincidentally) to coincide with the predicted
+    risk. Such a conclusion may be possible if the confidence 
+    interval for the estimated prevalence is narrow, and agrees
+    with the predicted risk closely.
+    
+    Without further assumptions, there is nothing further that
+    can be said about the distribution of patient risks within
+    each group. As a result, good calibration is a necessary,
+    but not sufficient, condition for accurate risk 
+    predictions in the model .
+
+    Args:
+        y_test: The (binary) outcomes in a single risk group.
+            The values are True/False (boolean)
+    
+    Returns:
+        A map containing the key "prevalence", for the estimated
+            mean of the Bernoulli distribution, and "lower"
+            and "upper" for the estimated confidence interval,
+            assuming all patients in the risk group are drawn
+            from a single Bernoulii distribution.
+            
+            Note that the assumption of a Bernoulli distribution
+            is not necessarily accurate.
+    """
+    n_group_size = len(y_test)
+    p_hat = np.mean(y_test)
+    half_width = 1.96 * np.sqrt((p_hat * (1 - p_hat)) / n_group_size)
+    return {
+        "prevalence": p_hat,
+        "lower": p_hat - half_width,
+        "upper": p_hat + half_width,
+    }
+    

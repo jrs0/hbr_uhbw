@@ -13,11 +13,13 @@ from pyhbr.analysis import model
 from pyhbr.analysis import stability
 from pyhbr.analysis import roc
 from pyhbr.analysis import calibration
+from pyhbr import common
 
 import matplotlib.pyplot as plt
 
 importlib.reload(model)
 importlib.reload(calibration)
+importlib.reload(common)
 
 
 # Load outcome and training data
@@ -79,10 +81,10 @@ pipe = Pipeline([("preprocess", preprocess), ("model", mod)])
 # Fit the bleeding and ischaemia models on the training set
 # and bootstrap resamples of the training set (to assess stability)
 fitted_bleeding_model = stability.fit_model(
-    pipe, X_train, y_train.loc[:, "bleeding_outcome"], 50, random_state
+    pipe, X_train, y_train.loc[:, "bleeding_outcome"], 10, random_state
 )
 fitted_ischaemia_model = stability.fit_model(
-    pipe, X_train, y_train.loc[:, "ischaemia_outcome"], 50, random_state
+    pipe, X_train, y_train.loc[:, "ischaemia_outcome"], 10, random_state
 )
 
 # Get the predicted probabilities associated with all the resamples of
@@ -91,82 +93,220 @@ bleeding_probs = stability.predict_probabilities(fitted_bleeding_model, X_test)
 ischaemia_probs = stability.predict_probabilities(fitted_ischaemia_model, X_test)
 
 # Plot the stability of predicted probabilities
-fig, ax = plt.subplots(1,2)
-stability.plot_instability(ax[0], bleeding_probs, y_test.loc[:,"bleeding_outcome"], "Stability of Predicted Risks of Bleeding")
-stability.plot_instability(ax[1], ischaemia_probs, y_test.loc[:,"ischaemia_outcome"], "Stability of Predicted Risks of Ischaemia")
+fig, ax = plt.subplots(1, 2)
+stability.plot_instability(
+    ax[0],
+    bleeding_probs,
+    y_test.loc[:, "bleeding_outcome"],
+    "Stability of Predicted Risks of Bleeding",
+)
+stability.plot_instability(
+    ax[1],
+    ischaemia_probs,
+    y_test.loc[:, "ischaemia_outcome"],
+    "Stability of Predicted Risks of Ischaemia",
+)
 plt.show()
 
 # Calculate the ROC curves for the models
-bleeding_roc_curves = roc.get_roc_curves(bleeding_probs, y_test.loc[:, "bleeding_outcome"])
-ischaemia_roc_curves = roc.get_roc_curves(ischaemia_probs, y_test.loc[:, "ischaemia_outcome"])
+bleeding_roc_curves = roc.get_roc_curves(
+    bleeding_probs, y_test.loc[:, "bleeding_outcome"]
+)
+ischaemia_roc_curves = roc.get_roc_curves(
+    ischaemia_probs, y_test.loc[:, "ischaemia_outcome"]
+)
 bleeding_auc = roc.get_auc(bleeding_probs, y_test.loc[:, "bleeding_outcome"])
 ischaemia_auc = roc.get_auc(ischaemia_probs, y_test.loc[:, "ischaemia_outcome"])
 
 # Plot the ROC curves for the models
-fig, ax = plt.subplots(1,2)
+fig, ax = plt.subplots(1, 2)
 roc.plot_roc_curves(ax[0], bleeding_roc_curves, bleeding_auc, "Bleeding ROC Curves")
 roc.plot_roc_curves(ax[1], ischaemia_roc_curves, ischaemia_auc, "Ischaemia ROC Curves")
 plt.show()
 
 # Get the calibration of the models
-bleeding_calibration_curves = calibration.get_calibration(bleeding_probs, y_test.loc[:, "bleeding_outcome"], 15)
-ischaemia_calibration_curves = calibration.get_calibration(ischaemia_probs, y_test.loc[:, "ischaemia_outcome"], 15)
+bleeding_calibration_curves = calibration.get_calibration(
+    bleeding_probs, y_test.loc[:, "bleeding_outcome"], 15
+)
+ischaemia_calibration_curves = calibration.get_calibration(
+    ischaemia_probs, y_test.loc[:, "ischaemia_outcome"], 15
+)
 
-def get_variable_width_calibration(probs: DataFrame, y_test: Series, n_bins: int) -> list[DataFrame]:
+
+def get_variable_width_calibration(
+    probs: DataFrame, y_test: Series, n_bins: int
+) -> list[DataFrame]:
     """Get variable-bin-width calibration curves
-    
+
     Model predictions are arranged in ascending order, and then risk ranges
     are selected so that an equal number of predictions falls in each group.
     This means bin widths will be more granular at points where many patients
-    are predicted the same risk. The risk bins are shown on the x-axis of 
+    are predicted the same risk. The risk bins are shown on the x-axis of
     calibration plots.
-    
+
     In each bin, the proportion of patient with an event are calculated. This
     value, which is a function of each bin, is plotted on the y-axis of the
-    calibration plot, and is a measure of the prevalence of the outcome in 
-    each bin. In a well calibrated model, this prevalence should match the 
+    calibration plot, and is a measure of the prevalence of the outcome in
+    each bin. In a well calibrated model, this prevalence should match the
     mean risk prediction in the bin (the bin center).
-    
-    Note that a well-calibrated model is not a sufficient condition for 
+
+    Note that a well-calibrated model is not a sufficient condition for
     correctness of risk predictions. One way that the prevalence of the
     bin can match the bin risk is for all true risks to roughly match
     the bin risk P. However, other ways are possible, for example, a
-    proportion P of patients in the bin could have 100% risk, and the 
-    other have zero risk. 
-    
+    proportion P of patients in the bin could have 100% risk, and the
+    other have zero risk.
+
 
     Args:
         probs: Each column is the predictions from one of the resampled
             models. The first column corresponds to the model-under-test.
-        y_test: Contains the observed outcomes. 
+        y: Contains the observed outcomes.
         n_bins: The number of (variable-width) bins to include.
 
     Returns:
         A list of dataframes, one for each calibration curve. The
             "bin_center" column contains the central bin width;
-            the "bin_width" columns contains the width of the bin
-            (highest risk - lowest risk); the "bin_prevalence"
-            column contains the mean number of events in that bin;
-            and the "bin_ci" contains the confidence interval for
-            that estimated mean.
+            the "bin_half_width" column contains the half-width
+            of each equal-risk group. The "est_prev" column contains
+            the mean number of events in that bin;
+            and the "est_prev_err" contains the half-width of the 95%
+            confidence interval (symmetrical above and below bin_prev).
     """
-    
-probs = bleeding_probs
-    
-col = probs.iloc[:,0].sort_values()
-sns.displot(col)
-plt.show()
 
-n_bins = 5
-samples_per_bin = int(np.ceil(len(col) / n_bins))
-bins = []
-for start in range(0, len(col), samples_per_bin):
-    bins.append(col[start:start+samples_per_bin])
+    # Make the list that will contain the output calibration information
+    calibration_dfs = []
+
+    n_cols = probs.shape[1]
+    for n in range(n_cols):
+
+        # Get the probabilities predicted by one of the resampled
+        # models (stored as a column in probs)
+        col = probs.iloc[:, n].sort_values()
+
+        # Bin the predictions into variable-width risk
+        # ranges with equal numbers in each bin
+        n_bins = 5
+        samples_per_bin = int(np.ceil(len(col) / n_bins))
+        bins = []
+        for start in range(0, len(col), samples_per_bin):
+            end = start + samples_per_bin
+            bins.append(col[start:end])
+
+        # Get the bin centres and bin widths
+        bin_center = []
+        bin_half_width = []
+        for b in bins:
+            upper = b.max()
+            lower = b.min()
+            bin_center.append((upper + lower) / 2)
+            bin_half_width.append((upper - lower) / 2)
+
+        # Get the event prevalence in the bin
+        # Get the confidence intervals for each bin
+        est_prev = []
+        est_prev_err = []
+        for b in bins:
+
+            # Get the outcomes corresponding to the current
+            # bin (group of equal predicted risk)
+            equal_risk_group = y_test.loc[b.index]
+
+            prevalence_ci = calibration.get_prevalence(equal_risk_group)
+            est_prev_err.append((prevalence_ci["upper"] - prevalence_ci["lower"]) / 2)
+            est_prev.append(prevalence_ci["prevalence"])
+
+        # Add the data to the calibration list
+        df = DataFrame(
+            {
+                "bin_center": bin_center,
+                "bin_half_width": bin_half_width,
+                "est_prev": est_prev,
+                "est_prev_err": est_prev_err,
+            }
+        )
+        calibration_dfs.append(df)
+
+    return calibration_dfs
+
 
 # Plot the calibration curves
-fig, ax = plt.subplots(1,1)
+fig, ax = plt.subplots(1, 1)
 calibration.plot_calibration_curves(ax, bleeding_calibration_curves, "red", "testtt")
 calibration.plot_calibration_curves(ax, ischaemia_calibration_curves, "blue", "test")
+plt.show()
+
+calibrations = get_variable_width_calibration(
+    probs, y_test.loc[:, "bleeding_outcome"], 5
+)
+
+# Plot an example calibration curve
+c = calibrations[0]
+
+from matplotlib.patches import Rectangle
+from matplotlib.collections import PatchCollection
+import matplotlib.ticker as mtick
+
+# Function to plot error boxes
+def make_error_boxes(ax, x, y, xerr, yerr, colour="r", alpha=0.3):
+    """Plot error boxes and error bars around points
+
+    Args:
+        ax: The axis on which to plot the error boxes.
+        x: The x-centers of the boxes to plot.
+        y: The y-centers of the boxes to plot.
+        xerr: The half width of the box in the x direction.
+        yerr: The half width of the box in the y direction.
+        colour:  The colour of the box.
+        alpha: The transparency of the box.
+    """
+
+    ax.errorbar(
+        x=x,
+        y=y,
+        xerr=xerr,
+        yerr=yerr,
+        fmt="None",
+    )
+
+    # Create list for all the error patches
+    errorboxes = []
+
+    # Loop over data points; create box from errors at each point
+    for xc, yc, xe, ye in zip(x, y, xerr, yerr):
+        rect = Rectangle((xc - xe, yc - ye), 2 * xe, 2 * ye)
+        errorboxes.append(rect)
+
+    # Create patch collection with specified colour/alpha
+    pc = PatchCollection(errorboxes, facecolor=colour, alpha=alpha)
+
+    # Add collection to axes
+    ax.add_collection(pc)
+
+
+# Create figure and axes
+fig, ax = plt.subplots(1)
+make_error_boxes(
+    ax, c["bin_center"], c["est_prev"], c["bin_half_width"], c["est_prev_err"]
+)
+#ax.set_xscale("log")
+#ax.set_yscale("log")
+ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+ax.set_ylabel("Estimated risk in risk group")
+ax.set_xlabel("Model-predicted risks")
+plt.title("Calibration of equal-sized equal-predicted-risk groups")
+
+# Get the minimum and maximum for the x range
+min_x = (c["bin_center"]).min()
+max_x = (c["bin_center"]).max()
+
+# Generate a dense straight line (smooth curve on log scale)
+coords = np.geomspace(min_x, max_x, num=50)
+
+ax.plot(coords, coords, c="k")
+
+plt.tight_layout()
 plt.show()
 
 # View the features that go directly into the model. This dataframe

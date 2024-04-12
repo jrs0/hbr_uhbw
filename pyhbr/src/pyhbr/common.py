@@ -7,6 +7,9 @@ import os
 from typing import Callable, Any
 from time import time
 import pickle
+from pandas import Series
+import numpy as np
+import scipy
 
 from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
 from sqlalchemy.exc import NoSuchTableError
@@ -418,3 +421,28 @@ def chunks(patient_ids: list[str], n: int) -> list[list[str]]:
         A list containing chunks (list) of patient IDs
     """
     return [patient_ids[i:i+n] for i in range(0, len(patient_ids), n)]
+
+
+def mean_confidence_interval(data: Series, confidence: float = 0.95) -> dict[str, float]:
+    """Compute the confidence interval around the mean
+
+    Args:
+        data: A series of numerical values to compute the confidence interval.
+        confidence: The confidence interval to compute.
+
+    Returns:
+        A map containing the keys "mean", "lower", and "upper". The latter
+            keys contain the confidence interval limits.
+    """
+    a = 1.0 * np.array(data)
+    n = len(a)
+    mean = np.mean(a)
+    standard_error = scipy.stats.sem(a)
+    
+    # Check this
+    half_width = standard_error * scipy.stats.t.ppf((1 + confidence) / 2.0, n-1)
+    return {
+        "mean": mean,
+        "lower": mean - half_width,
+        "upper": mean + half_width
+    }
