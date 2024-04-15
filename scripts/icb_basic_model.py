@@ -109,7 +109,6 @@ stability.plot_reclass_instability(
 plt.tight_layout()
 plt.show()
 
-
 # Calculate the ROC curves for the models
 bleeding_roc_curves = roc.get_roc_curves(
     bleeding_probs, y_test.loc[:, "bleeding_outcome"]
@@ -208,11 +207,16 @@ def get_variable_width_calibration(
         # Get the confidence intervals for each bin
         est_prev = []
         est_prev_err = []
+        actual_samples_per_bin = []
+        num_events = []
         for b in bins:
 
             # Get the outcomes corresponding to the current
             # bin (group of equal predicted risk)
             equal_risk_group = y_test.loc[b.index]
+
+            actual_samples_per_bin.append(len(b))
+            num_events.append(equal_risk_group.sum())
 
             prevalence_ci = calibration.get_prevalence(equal_risk_group)
             est_prev_err.append((prevalence_ci["upper"] - prevalence_ci["lower"]) / 2)
@@ -225,6 +229,8 @@ def get_variable_width_calibration(
                 "bin_half_width": bin_half_width,
                 "est_prev": est_prev,
                 "est_prev_err": est_prev_err,
+                "samples_per_bin": actual_samples_per_bin,
+                "num_events": num_events,
             }
         )
         calibration_dfs.append(df)
@@ -234,6 +240,7 @@ def get_variable_width_calibration(
 
 # Plot the calibration curves
 fig, ax = plt.subplots(1, 1)
+
 calibration.plot_calibration_curves(ax, bleeding_calibration_curves, "red", "testtt")
 calibration.plot_calibration_curves(ax, ischaemia_calibration_curves, "blue", "test")
 plt.show()
@@ -245,66 +252,78 @@ calibrations = get_variable_width_calibration(
 # Plot an example calibration curve
 c = calibrations[0]
 
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Rectangle, Patch
 from matplotlib.collections import PatchCollection
 import matplotlib.ticker as mtick
+from matplotlib import cm
 
 
 # Function to plot error boxes
-def make_error_boxes(ax, x, y, xerr, yerr, colour="r", alpha=0.3):
+def make_error_boxes(ax: Axes, calibration: DataFrame):
     """Plot error boxes and error bars around points
 
     Args:
         ax: The axis on which to plot the error boxes.
-        x: The x-centers of the boxes to plot.
-        y: The y-centers of the boxes to plot.
-        xerr: The half width of the box in the x direction.
-        yerr: The half width of the box in the y direction.
-        colour:  The colour of the box.
-        alpha: The transparency of the box.
+        calibration: Dataframe containing one row per
+            bin, showing how the predicted risk compares
+            to the estimated prevalence.
     """
 
+    alpha = 0.3
+
+    c = calibration
+    for n in range(len(c)):
+        num_events = c.loc[n, "num_events"]
+        samples_in_bin = c.loc[n, "samples_per_bin"]
+        
+        est_prev = 100 * c.loc[n, "est_prev"]
+        est_prev_err = 100 * c.loc[n, "est_prev_err"]
+        risk = 100 * c.loc[n, "bin_center"]
+        bin_half_width = 100 * c.loc[n, "bin_half_width"]
+
+        margin = 1.0
+        x = risk - margin * bin_half_width
+        y = est_prev - margin * est_prev_err
+        width = 2 * margin * bin_half_width
+        height = 2 * margin * est_prev_err
+
+        rect = Rectangle(
+            (x, y), width, height,
+            label=f"Risk {risk:.2f}%, {num_events}/{samples_in_bin} events",
+            alpha=alpha,
+            facecolor=cm.jet(n/len(c))
+        )
+        ax.add_patch(rect)
+
     ax.errorbar(
-        x=x,
-        y=y,
-        xerr=xerr,
-        yerr=yerr,
+        x=100 * c["bin_center"],
+        y=100 * c["est_prev"],
+        xerr=100 * c["bin_half_width"],
+        yerr=100 * c["est_prev_err"],
         fmt="None",
     )
-
-    # Create list for all the error patches
-    errorboxes = []
-
-    # Loop over data points; create box from errors at each point
-    for xc, yc, xe, ye in zip(x, y, xerr, yerr):
-        rect = Rectangle((xc - xe, yc - ye), 2 * xe, 2 * ye)
-        errorboxes.append(rect)
-
-    # Create patch collection with specified colour/alpha
-    pc = PatchCollection(errorboxes, facecolor=colour, alpha=alpha)
-
-    # Add collection to axes
-    ax.add_collection(pc)
+    
+    ax.legend()
 
 
 c = calibrations[3]
 
 # Create figure and axes
 fig, ax = plt.subplots(1)
-make_error_boxes(
-    ax, 100*c["bin_center"], 100*c["est_prev"], 100*c["bin_half_width"], 100*c["est_prev_err"]
-)
+
+make_error_boxes(ax, c)
+
 ax.set_xscale("log")
 ax.set_yscale("log")
 ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 ax.yaxis.set_major_formatter(mtick.PercentFormatter())
-ax.set_ylabel("Estimated risk in risk group")
+ax.set_ylabel("Estimated prevalence")
 ax.set_xlabel("Model-predicted risks")
-plt.title("Calibration of equal-sized equal-predicted-risk groups")
+plt.title("Calibration of equal-sized similarly-predicted-risk groups")
 
 # Get the minimum and maximum for the x range
-min_x = 100*(c["bin_center"]).min()
-max_x = 100*(c["bin_center"]).max()
+min_x = 100 * (c["bin_center"]).min()
+max_x = 100 * (c["bin_center"]).max()
 
 # Generate a dense straight line (smooth curve on log scale)
 coords = np.geomspace(min_x, max_x, num=50)
