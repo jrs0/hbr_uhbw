@@ -70,6 +70,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.utils import resample
 
 from matplotlib.axes import Axes
+import matplotlib.ticker as mtick
 
 @dataclass
 class Resamples:
@@ -267,7 +268,8 @@ def get_average_instability(probs):
     return np.mean(smape_over_bootstraps)
 
 def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probability stability"):
-    """
+    """Plot the instability of risk predictions
+    
     This function plots a scatter graph of one point
     per value in the test set (row of probs), where the
     x-axis is the value of the model under test (the
@@ -281,7 +283,15 @@ def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probabil
     close to the M0 line, indicating that the bootstrapped
     models Mn broadly agree with the predictions made by M0.
 
-    Testing: not yet tested
+    Args:
+        ax: The axes on which to plot the risks
+        probs: The matrix of probabilities from the model-under-test
+            (first column) and the bootstrapped models (subsequent
+            models).
+        y_test: The true outcome corresponding to each row of the
+            probs matrix. This is used to colour the points based on
+            whether the outcome occurred on not.
+        title: The title to place on the axes.
     """
 
     num_rows = probs.shape[0]
@@ -291,8 +301,8 @@ def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probabil
     c = []
     for i in range(num_rows):
         for j in range(1, num_cols):
-            x.append(probs.iloc[i, 0])  # Model-under-test
-            y.append(probs.iloc[i, j])  # Other bootstrapped models
+            x.append(100*probs.iloc[i, 0])  # Model-under-test
+            y.append(100*probs.iloc[i, j])  # Other bootstrapped models
             c.append(y_test.iloc[i]),  # What was the actual outcome
 
     colour_map = {0: "g", 1: "r"}
@@ -307,6 +317,10 @@ def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probabil
     # You can restrict the axes here if you want
     #ax.set_xlim(0, 0.1)
     #ax.set_ylim(0,0.1)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 
     ax.legend(
         [   
@@ -316,6 +330,6 @@ def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probabil
         markerscale=15
     )
     ax.set_title(title)
-    ax.set_xlabel("Prediction from model-under-test")
-    ax.set_ylabel("Bootstrap model predictions")
+    ax.set_xlabel("First prediction from model-under-test")
+    ax.set_ylabel("Second predictions (from bootstrap models)")
     
