@@ -16,6 +16,7 @@ import numpy as np
 from sklearn.calibration import calibration_curve
 from pandas import DataFrame, Series
 from matplotlib.axes import Axes
+import matplotlib.ticker as mtick
 
 
 def get_calibration(probs: DataFrame, y_test: Series, n_bins: int) -> list[DataFrame]:
@@ -110,34 +111,49 @@ def get_average_calibration_error(probs, y_test, n_bins):
 def plot_calibration_curves(
     ax: Axes,
     curves: list[DataFrame],
-    colour: str,
-    name: str,
     title="Calibration-stability curves",
 ):
     """Plot calibration curves for the model under test and resampled models
 
     Args:
         ax: The axes on which to plot the calibration curves
-        curves: A list of DataFrames containing `predicted` and `observed`
-            columns. The first DataFrame corresponds to the model under test
+        curves: A list of DataFrames containing the calibration curve data
         title: Title to add to the plot.
     """
     mut_curve = curves[0]  # model-under-test
-    ax.plot(mut_curve["predicted"], mut_curve["observed"], label=name, c=colour)
+    ax.plot(
+        100 * mut_curve["bin_center"],
+        100 * mut_curve["est_prev"],
+        label="Model-under-test",
+        c="r",
+    )
     for curve in curves[1:]:
         ax.plot(
-            curve["predicted"],
-            curve["observed"],
+            100*curve["bin_center"],
+            100*curve["est_prev"],
             label="Resample",
-            c=colour,
+            c="b",
             linewidth=0.3,
             alpha=0.4,
         )
-    ax.axline([0, 0], [1, 1], color="k", linestyle="--")
+
+    # Get the minimum and maximum for the x range
+    min_x = 100 * (curves[0]["bin_center"]).min()
+    max_x = 100 * (curves[0]["bin_center"]).max()
+
+    # Generate a dense straight line (smooth curve on log scale)
+    coords = np.geomspace(min_x, max_x, num=50)
+    ax.plot(coords, coords, c="k")
+
     ax.legend(["Model-under-test", "Bootstrapped models"])
+
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.set_ylabel("Estimated prevalence")
+    ax.set_xlabel("Model-predicted risks")
     ax.set_title(title)
-    ax.set_xlabel("Predicted probability of bleeding from model")
-    ax.set_ylabel("Observed bleeding rate corresponding to risk prediction")
 
 
 def plot_prediction_distribution(ax, probs, n_bins):
@@ -171,20 +187,20 @@ def plot_prediction_distribution(ax, probs, n_bins):
     ax.set_ylabel("Count")
 
 
-def get_prevalence(y_test: Series): 
+def get_prevalence(y_test: Series):
     """Estimate the prevalence in a set of outcomes
-    
+
     To calculate model calibration, patients are grouped
     together into similar-risk groups. The prevalence of
-    the outcome in each group is then compared to the 
+    the outcome in each group is then compared to the
     predicted risk.
-    
+
     The true risk of the outcome within each group is not
     known, but it is known what outcome occurred.
-    
+
     One possible assumption is that the patients in each
     group all have the same risk, p. In this case, the
-    outcomes from the group follow a Bernoulli 
+    outcomes from the group follow a Bernoulli
     distribution. The population parameter p (where the
     popopulation is all patients receiving risk predictions
     in this group) can be estimated simply using
@@ -193,46 +209,46 @@ def get_prevalence(y_test: Series):
     interval on this estimate, assuming a large enough
     sample size for normally distributed estimate of the
     mean, gives a CI of:
-    
+
     $$
     \hat{p} \pm 1.96\sqrt{\\frac{\hat{p}(1-\hat{p})}{N_\\text{group_size}}}
     $$
-    
+
     (See [this answer](https://stats.stackexchange.com/a/156807)
     for details.)
-    
-    However, the assumption of uniform risk within the 
+
+    However, the assumption of uniform risk within the
     models groups-of-equal-risk-prediction may not be valid,
-    because it assumes that the model is predicting 
+    because it assumes that the model is predicting
     reasonably accurate risks, and the model is the item
     under test.
-    
+
     One argument is that, if the estimated prevalence matches
     the risk of the group closely, then this may give evidence
     that the models predicted risks are accurate -- the alternative
     would be that the real risks follow a different distribution, whose
     mean happens (coincidentally) to coincide with the predicted
-    risk. Such a conclusion may be possible if the confidence 
+    risk. Such a conclusion may be possible if the confidence
     interval for the estimated prevalence is narrow, and agrees
     with the predicted risk closely.
-    
+
     Without further assumptions, there is nothing further that
     can be said about the distribution of patient risks within
     each group. As a result, good calibration is a necessary,
-    but not sufficient, condition for accurate risk 
+    but not sufficient, condition for accurate risk
     predictions in the model .
 
     Args:
         y_test: The (binary) outcomes in a single risk group.
             The values are True/False (boolean)
-    
+
     Returns:
         A map containing the key "prevalence", for the estimated
             mean of the Bernoulli distribution, and "lower"
             and "upper" for the estimated confidence interval,
             assuming all patients in the risk group are drawn
             from a single Bernoulii distribution.
-            
+
             Note that the assumption of a Bernoulli distribution
             is not necessarily accurate.
     """
@@ -244,4 +260,3 @@ def get_prevalence(y_test: Series):
         "lower": p_hat - half_width,
         "upper": p_hat + half_width,
     }
-    

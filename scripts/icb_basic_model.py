@@ -238,13 +238,6 @@ def get_variable_width_calibration(
     return calibration_dfs
 
 
-# Plot the calibration curves
-fig, ax = plt.subplots(1, 1)
-
-calibration.plot_calibration_curves(ax, bleeding_calibration_curves, "red", "testtt")
-calibration.plot_calibration_curves(ax, ischaemia_calibration_curves, "blue", "test")
-plt.show()
-
 calibrations = get_variable_width_calibration(
     bleeding_probs, y_test.loc[:, "bleeding_outcome"], 5
 )
@@ -305,33 +298,42 @@ def make_error_boxes(ax: Axes, calibration: DataFrame):
     
     ax.legend()
 
+def draw_calibration_confidence(ax: Axes, calibration: DataFrame):
+    """Draw a single model's calibration curve with confidence intervals
+
+    Args:
+        ax: The axes on which to draw the plot
+        calibration: The model's calibration data
+    """
+    c = calibration
+
+    make_error_boxes(ax, c)
+
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.set_ylabel("Estimated prevalence")
+    ax.set_xlabel("Model-predicted risks")
+    plt.title("Calibration of equal-sized similarly-predicted-risk groups")
+
+    # Get the minimum and maximum for the x range
+    min_x = 100 * (c["bin_center"]).min()
+    max_x = 100 * (c["bin_center"]).max()
+
+    # Generate a dense straight line (smooth curve on log scale)
+    coords = np.geomspace(min_x, max_x, num=50)
+
+    ax.plot(coords, coords, c="k")
+
+    #ax.set_aspect("equal")
 
 c = calibrations[3]
 
 # Create figure and axes
-fig, ax = plt.subplots(1)
-
-make_error_boxes(ax, c)
-
-ax.set_xscale("log")
-ax.set_yscale("log")
-ax.xaxis.set_major_formatter(mtick.PercentFormatter())
-ax.yaxis.set_major_formatter(mtick.PercentFormatter())
-ax.set_ylabel("Estimated prevalence")
-ax.set_xlabel("Model-predicted risks")
-plt.title("Calibration of equal-sized similarly-predicted-risk groups")
-
-# Get the minimum and maximum for the x range
-min_x = 100 * (c["bin_center"]).min()
-max_x = 100 * (c["bin_center"]).max()
-
-# Generate a dense straight line (smooth curve on log scale)
-coords = np.geomspace(min_x, max_x, num=50)
-
-ax.plot(coords, coords, c="k")
-
-ax.set_aspect("equal")
-
+fig, ax = plt.subplots(1, 2)
+calibration.plot_calibration_curves(ax[0], calibrations)
+draw_calibration_confidence(ax[1], calibrations[0]) 
 plt.tight_layout()
 plt.show()
 
