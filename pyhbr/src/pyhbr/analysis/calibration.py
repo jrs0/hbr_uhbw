@@ -17,10 +17,119 @@ from sklearn.calibration import calibration_curve
 from pandas import DataFrame, Series
 from matplotlib.axes import Axes
 import matplotlib.ticker as mtick
+from matplotlib.patches import Rectangle
+from matplotlib import cm
 
+def get_variable_width_calibration(
+    probs: DataFrame, y_test: Series, n_bins: int
+) -> list[DataFrame]:
+    """Get variable-bin-width calibration curves
+
+    Model predictions are arranged in ascending order, and then risk ranges
+    are selected so that an equal number of predictions falls in each group.
+    This means bin widths will be more granular at points where many patients
+    are predicted the same risk. The risk bins are shown on the x-axis of
+    calibration plots.
+
+    In each bin, the proportion of patient with an event are calculated. This
+    value, which is a function of each bin, is plotted on the y-axis of the
+    calibration plot, and is a measure of the prevalence of the outcome in
+    each bin. In a well calibrated model, this prevalence should match the
+    mean risk prediction in the bin (the bin center).
+
+    Note that a well-calibrated model is not a sufficient condition for
+    correctness of risk predictions. One way that the prevalence of the
+    bin can match the bin risk is for all true risks to roughly match
+    the bin risk P. However, other ways are possible, for example, a
+    proportion P of patients in the bin could have 100% risk, and the
+    other have zero risk.
+
+
+    Args:
+        probs: Each column is the predictions from one of the resampled
+            models. The first column corresponds to the model-under-test.
+        y: Contains the observed outcomes.
+        n_bins: The number of (variable-width) bins to include.
+
+    Returns:
+        A list of dataframes, one for each calibration curve. The
+            "bin_center" column contains the central bin width;
+            the "bin_half_width" column contains the half-width
+            of each equal-risk group. The "est_prev" column contains
+            the mean number of events in that bin;
+            and the "est_prev_err" contains the half-width of the 95%
+            confidence interval (symmetrical above and below bin_prev).
+    """
+
+    # Make the list that will contain the output calibration information
+    calibration_dfs = []
+
+    n_cols = probs.shape[1]
+    for n in range(n_cols):
+
+        # Get the probabilities predicted by one of the resampled
+        # models (stored as a column in probs)
+        col = probs.iloc[:, n].sort_values()
+
+        # Bin the predictions into variable-width risk
+        # ranges with equal numbers in each bin
+        n_bins = 5
+        samples_per_bin = int(np.ceil(len(col) / n_bins))
+        bins = []
+        for start in range(0, len(col), samples_per_bin):
+            end = start + samples_per_bin
+            bins.append(col[start:end])
+
+        # Get the bin centres and bin widths
+        bin_center = []
+        bin_half_width = []
+        for b in bins:
+            upper = b.max()
+            lower = b.min()
+            bin_center.append((upper + lower) / 2)
+            bin_half_width.append((upper - lower) / 2)
+
+        # Get the event prevalence in the bin
+        # Get the confidence intervals for each bin
+        est_prev = []
+        est_prev_err = []
+        actual_samples_per_bin = []
+        num_events = []
+        for b in bins:
+
+            # Get the outcomes corresponding to the current
+            # bin (group of equal predicted risk)
+            equal_risk_group = y_test.loc[b.index]
+
+            actual_samples_per_bin.append(len(b))
+            num_events.append(equal_risk_group.sum())
+
+            prevalence_ci = get_prevalence(equal_risk_group)
+            est_prev_err.append((prevalence_ci["upper"] - prevalence_ci["lower"]) / 2)
+            est_prev.append(prevalence_ci["prevalence"])
+
+        # Add the data to the calibration list
+        df = DataFrame(
+            {
+                "bin_center": bin_center,
+                "bin_half_width": bin_half_width,
+                "est_prev": est_prev,
+                "est_prev_err": est_prev_err,
+                "samples_per_bin": actual_samples_per_bin,
+                "num_events": num_events,
+            }
+        )
+        calibration_dfs.append(df)
+
+    return calibration_dfs
 
 def get_calibration(probs: DataFrame, y_test: Series, n_bins: int) -> list[DataFrame]:
     """Calculate the calibration of the fitted models
+
+    !!! warning
+    
+        This function is deprecated. Use the variable bin width calibration
+        function instead.
 
     Get the calibration curves for all models (whose probability
     predictions for the positive class are columns of probs) based
@@ -111,7 +220,7 @@ def get_average_calibration_error(probs, y_test, n_bins):
 def plot_calibration_curves(
     ax: Axes,
     curves: list[DataFrame],
-    title="Calibration-stability curves",
+    title="Stability of Calibration",
 ):
     """Plot calibration curves for the model under test and resampled models
 
@@ -260,3 +369,79 @@ def get_prevalence(y_test: Series):
         "lower": p_hat - half_width,
         "upper": p_hat + half_width,
     }
+
+def make_error_boxes(ax: Axes, calibration: DataFrame):
+    """Plot error boxes and error bars around points
+
+    Args:
+        ax: The axis on which to plot the error boxes.
+        calibration: Dataframe containing one row per
+            bin, showing how the predicted risk compares
+            to the estimated prevalence.
+    """
+
+    alpha = 0.3
+
+    c = calibration
+    for n in range(len(c)):
+        num_events = c.loc[n, "num_events"]
+        samples_in_bin = c.loc[n, "samples_per_bin"]
+        
+        est_prev = 100 * c.loc[n, "est_prev"]
+        est_prev_err = 100 * c.loc[n, "est_prev_err"]
+        risk = 100 * c.loc[n, "bin_center"]
+        bin_half_width = 100 * c.loc[n, "bin_half_width"]
+
+        margin = 1.0
+        x = risk - margin * bin_half_width
+        y = est_prev - margin * est_prev_err
+        width = 2 * margin * bin_half_width
+        height = 2 * margin * est_prev_err
+
+        rect = Rectangle(
+            (x, y), width, height,
+            label=f"Risk {risk:.2f}%, {num_events}/{samples_in_bin} events",
+            alpha=alpha,
+            facecolor=cm.jet(n/len(c))
+        )
+        ax.add_patch(rect)
+
+    ax.errorbar(
+        x=100 * c["bin_center"],
+        y=100 * c["est_prev"],
+        xerr=100 * c["bin_half_width"],
+        yerr=100 * c["est_prev_err"],
+        fmt="None",
+    )
+    
+    ax.legend()
+
+def draw_calibration_confidence(ax: Axes, calibration: DataFrame):
+    """Draw a single model's calibration curve with confidence intervals
+
+    Args:
+        ax: The axes on which to draw the plot
+        calibration: The model's calibration data
+    """
+    c = calibration
+
+    make_error_boxes(ax, c)
+
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+    ax.set_ylabel("Estimated prevalence")
+    ax.set_xlabel("Model-predicted risks")
+    ax.set_title("Calibration confidence for model-under-test")
+
+    # Get the minimum and maximum for the x range
+    min_x = 100 * (c["bin_center"]).min()
+    max_x = 100 * (c["bin_center"]).max()
+
+    # Generate a dense straight line (smooth curve on log scale)
+    coords = np.geomspace(min_x, max_x, num=50)
+
+    ax.plot(coords, coords, c="k")
+
+    #ax.set_aspect("equal")
