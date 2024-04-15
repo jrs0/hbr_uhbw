@@ -292,10 +292,10 @@ c = calibrations[3]
 # Create figure and axes
 fig, ax = plt.subplots(1)
 make_error_boxes(
-    ax, c["bin_center"], c["est_prev"], c["bin_half_width"], c["est_prev_err"]
+    ax, 100*c["bin_center"], 100*c["est_prev"], 100*c["bin_half_width"], 100*c["est_prev_err"]
 )
-# ax.set_xscale("log")
-# ax.set_yscale("log")
+ax.set_xscale("log")
+ax.set_yscale("log")
 ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 ax.set_ylabel("Estimated risk in risk group")
@@ -303,20 +303,17 @@ ax.set_xlabel("Model-predicted risks")
 plt.title("Calibration of equal-sized equal-predicted-risk groups")
 
 # Get the minimum and maximum for the x range
-min_x = (c["bin_center"]).min()
-max_x = (c["bin_center"]).max()
+min_x = 100*(c["bin_center"]).min()
+max_x = 100*(c["bin_center"]).max()
 
 # Generate a dense straight line (smooth curve on log scale)
 coords = np.geomspace(min_x, max_x, num=50)
-
-ax.set_xlim([0, 0.04])
-ax.set_ylim([0, 0.04])
 
 ax.plot(coords, coords, c="k")
 
 ax.set_aspect("equal")
 
-# plt.tight_layout()~
+plt.tight_layout()
 plt.show()
 
 
