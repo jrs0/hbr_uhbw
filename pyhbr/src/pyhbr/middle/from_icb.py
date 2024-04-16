@@ -661,3 +661,53 @@ def hba1c(
     ).set_index("spell_id")[["hba1c"]]
 
     return prior_hba1c
+
+def get_mortality(engine: Engine, start_date: date, end_date: date) -> dict[str, DataFrame]:
+    """Get mortality dates and cause of death
+
+    Args:
+        engine: The connection to the database
+        start_date: First date of death that will be included
+        end_date: Last date of death that will be included
+
+    Returns:
+        A dictionary containing "date_of_death", with date of
+            death indexed by patient_id, and "cause_of_death",
+            which has columns "patient_id", "position", "code",
+            "group".
+    """
+
+    # Fetch the mortality data limited by the date range
+    raw_mortality_data = common.get_data(engine, icb.mortality_query, start_date, end_date)
+
+    # Some patient IDs have multiple inconsistent death records. Exclude any patients
+    # with more than one entry
+    df = raw_mortality_data.groupby("patient_id").filter(lambda g: len(g) == 1)
+
+    mortality = df.set_index("patient_id")[["date_of_death"]]
+
+    # Convert the cause of death to a long format, normalise the codes,
+    # and keep only the code and position for each patient.
+    df = df.filter(regex="(id|cause)").melt(id_vars="patient_id")
+    df["position"] = df["variable"].str.split("_", expand=True).iloc[:, -1].astype(int)
+    df = df[~df["value"].isna()]
+    df["code"] = df["value"].apply(clinical_codes.normalise_code)
+    cause_of_death = df[["patient_id", "position", "code"]]
+
+    # Read the code tree containing code groups
+    diagnoses_file = "icd10_arc_hbr.yaml"
+    diagnosis_codes = clinical_codes.load_from_package(diagnoses_file)
+
+    # Join the code groups to the codes (does not filter -- leaves
+    # NA group for a code not in any group).
+    codes_with_groups = clinical_codes.codes_in_any_group(diagnosis_codes)
+    cause_of_death = cause_of_death.merge(
+        codes_with_groups[["code", "group"]], on="code", how="left"
+    )
+
+    return {
+        "date_of_death": mortality,
+        "cause_of_death": cause_of_death.sort_values(
+            ["patient_id", "position"]
+        ).reset_index(drop=True),
+    }

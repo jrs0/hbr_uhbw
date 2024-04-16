@@ -10,6 +10,7 @@ from serde.yaml import from_yaml
 import pandas as pd
 from pandas import Series, DataFrame
 
+
 # Note: this class is missing the @serde decorator
 # deliberately. It seems like there is an issue with
 # the class being recursively defined and the use of
@@ -201,7 +202,7 @@ def codes_in_any_group(codes: ClinicalCodeTree) -> pd.DataFrame:
 
     Returns a table with the normalised code (lowercase/no whitespace/no
     dots) in column `code`, and the group containing the code in the
-    column `group`. 
+    column `group`.
 
     All codes which are in any group will be included.
 
@@ -222,7 +223,7 @@ def codes_in_any_group(codes: ClinicalCodeTree) -> pd.DataFrame:
         df = pd.DataFrame({"code": normalised_codes, "docs": docs, "group": g})
         dfs.append(df)
 
-    return pd.concat(dfs).reset_index()
+    return pd.concat(dfs).reset_index(drop=True)
 
 
 def filter_to_groups(
@@ -262,18 +263,22 @@ def filter_to_groups(
 
     return codes_table
 
-def get_group(codes: Series, codes: ClinicalCodeTree) -> DataFrame:
-    """Normalise a code column 
+
+def get_code_groups(codes: Series, code_tree: ClinicalCodeTree) -> DataFrame:
+    """Normalise a code column and assign codes to groups
 
     Args:
         codes: A column of (potentially non-normalised) clinical
-            codes. 
-        codes: The clinical codes object (previously loaded from a file)
+            codes.
+        code_tree: The clinical codes object (previously loaded from a file)
             containing code groups to use.
 
     Returns:
         A table where the first column ("code") is the normalised code
             obtained from the code column. The second column ("group")
             contains the group containing the code if the code is in
-            
+
     """
+    codes_with_groups = codes_in_any_group(code_tree)
+    normalised_codes = codes.apply(normalise_code).rename("code")
+    return normalised_codes.to_frame().merge(codes_with_groups, on="code", how="left")
