@@ -137,7 +137,6 @@ def get_clinical_codes(
 def get_raw_sus_data(engine: Engine, start_date: date, end_date: date) -> DataFrame:
     """Get the raw SUS (secondary uses services hospital episode statistics)
 
-
     Args:
         engine: The connection to the database
         start_date: The start date (inclusive) for returned episodes

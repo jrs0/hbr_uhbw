@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from serde import serde
 from serde.yaml import from_yaml
 import pandas as pd
+from pandas import Series, DataFrame
 
 # Note: this class is missing the @serde decorator
 # deliberately. It seems like there is an issue with
@@ -251,7 +252,7 @@ def filter_to_groups(
 
     Returns:
         A table containing the episode ID, the clinical code (normalised),
-        the group containing the code, and the code position.
+            the group containing the code, and the code position.
 
     """
     codes_with_groups = codes_in_any_group(codes)
@@ -260,3 +261,19 @@ def filter_to_groups(
     codes_table = codes_table[["episode_id", "code", "docs", "group", "position"]]
 
     return codes_table
+
+def get_group(codes: Series, codes: ClinicalCodeTree) -> DataFrame:
+    """Normalise a code column 
+
+    Args:
+        codes: A column of (potentially non-normalised) clinical
+            codes. 
+        codes: The clinical codes object (previously loaded from a file)
+            containing code groups to use.
+
+    Returns:
+        A table where the first column ("code") is the normalised code
+            obtained from the code column. The second column ("group")
+            contains the group containing the code if the code is in
+            
+    """

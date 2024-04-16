@@ -49,6 +49,31 @@ index_spells = acs.get_index_spells(episodes_and_codes)
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
 
+# Fetch the mortality data limited by the date range
+raw_mortality_data = common.get_data(engine, icb.mortality_query, start_date, end_date)
+
+# Some patient IDs have multiple inconsistent death records. Exclude any patients
+# with more than one entry
+df = raw_mortality_data.groupby("patient_id").filter(lambda g: len(g) == 1)
+
+mortality = df[["date_of_death"]]
+
+df = df.filter(regex="(id|cause)").melt(id_vars="patient_id")
+df["position"] = df["variable"].str.split("_", expand=True).iloc[:, -1].astype(int)
+df = df[~df["value"].isna()]
+
+# Only keep the primary cause of death, and convert the codes to normalised form
+df = raw_mortality_data[["patient_id", "date_of_death"]].copy()
+df["cause_of_death"] = raw_mortality_data["cause_of_death_1"].apply(
+    lambda code: clinical_codes.normalise_code(code) if not pd.isna(code) else None
+)
+
+diagnoses_file = "icd10_arc_hbr.yaml"
+diagnosis_codes = clinical_codes.load_from_package(diagnoses_file)
+
+# Add the code group to any row where the primary cause of death is in a group
+df["group"] = df["cause_of_death"]
+
 # Fetch all the primary care data, narrowed by patient
 engine = common.make_engine(database="modelling_sql_area")
 

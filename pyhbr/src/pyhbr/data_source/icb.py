@@ -126,7 +126,7 @@ def mortality_query(engine: Engine, start_date: date, end_date: date) -> Select:
         SQL query to retrieve episodes table
     """
     
-    table = CheckedTable("abi.civil_registration.mortality", engine)
+    table = CheckedTable("mortality", engine, schema="civil_registration")
 
     # Secondary cause of death columns
     cause_of_death_columns = [
@@ -135,15 +135,15 @@ def mortality_query(engine: Engine, start_date: date, end_date: date) -> Select:
     ]
 
     return select(
-        table.col("derived_pseudo_nhs").cast(String).label("patient_id"),
+        table.col("Derived_Pseudo_NHS").cast(String).label("patient_id"),
         table.col("REG_DATE_OF_DEATH").cast(DateTime).label("date_of_death"),
         table.col("S_UNDERLYING_COD_ICD10").label("cause_of_death_1"),
         *cause_of_death_columns,
     ).where(
         table.col("REG_DATE_OF_DEATH") >= start_date,
-        table.col("DEG_DATE_OF_DEATH") <= end_date,
-        table.col("AIMTC_Pseudo_NHS").is_not(None),
-        table.col("derived_pseudo_nhs") != 9000219621,  # Invalid-patient marker    
+        table.col("REG_DATE_OF_DEATH") <= end_date,
+        table.col("Derived_Pseudo_NHS").is_not(None),
+        table.col("Derived_Pseudo_NHS") != 9000219621,  # Invalid-patient marker    
     )
 
 def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Select:
