@@ -133,6 +133,8 @@ icb_basic_tmp = common.load_item("icb_basic_tmp")
 
 # Extract some datasets for convenience
 index_spells = icb_basic_tmp["index_spells"]
+date_of_death = icb_basic_tmp["date_of_death"]
+cause_of_death = icb_basic_tmp["cause_of_death"]
 primary_care_attributes = icb_basic_tmp["primary_care_attributes"]
 primary_care_prescriptions = icb_basic_tmp["primary_care_prescriptions"]
 primary_care_measurements = icb_basic_tmp["primary_care_measurements"]
@@ -166,7 +168,14 @@ features_attributes = acs.remove_features(
 all_other_codes = counting.get_all_other_codes(index_spells, icb_basic_tmp)
 
 # Get the bleeding and ischaemia outcomes
-outcomes = acs.get_outcomes(index_spells, all_other_codes)
+outcomes = acs.get_outcomes(
+    index_spells, all_other_codes, date_of_death, cause_of_death
+)
+
+# Add the bleeding/ischaemia mortality outcomes.
+outcomes["bleeding"] += death_outcomes["death_bleeding"]
+outcomes["ischaemia"] += death_outcomes["death_ischaemia"]
+
 features_codes = acs.get_code_features(index_spells, all_other_codes)
 
 # Get counts of relevant prescriptions in the year before the index

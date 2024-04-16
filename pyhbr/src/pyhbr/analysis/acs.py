@@ -184,7 +184,12 @@ def index_episodes(data: dict[str, DataFrame]) -> DataFrame:
     )
 
 
-def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
+def get_outcomes(
+    index_spells: DataFrame,
+    all_other_codes: DataFrame,
+    date_of_death: DataFrame,
+    cause_of_death: DataFrame,
+) -> DataFrame:
     """Get bleeding and ischaemia outcomes
 
     The bleeding outcome is defined by the ADAPTT trial bleeding code group,
@@ -201,6 +206,11 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
             column `episode_id` for the first episode in the index spell.
         all_other_codes: A table of other episodes (and their clinical codes)
             relative to the index spell, output from counting.get_all_other_codes.
+        date_of_death: A table with Pandas index `patient_id` and one column
+            containing the date of death (if the patient died). 
+        cause_of_death: A table with columns `patient_id`, `position`, `code`,
+            and `group`, containing information about the cause of death
+            for patients who died.
 
     Returns:
         A table with two columns `bleeding` and `ischaemia`, which
@@ -208,13 +218,47 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
             the index.
     """
 
-    bleeding_groups = ["bleeding_adaptt"]
+    bleeding_groups = ["bleeding_al_ani"]
     ischaemia_groups = ["hussain_ami_stroke"]
     primary_only = True
     exclude_index_spell = False
     first_episode_only = False
     min_after = dt.timedelta(days=3)
     max_after = dt.timedelta(days=365)
+
+    # Add mortality information to the index spell data
+    mortality_after_index = (
+        index_spells.reset_index()
+        .merge(date_of_death, on="patient_id", how="left")
+        .merge(cause_of_death, on="patient_id", how="left")
+    )
+    mortality_after_index["survival_time"] = (
+        mortality_after_index["date_of_death"] - mortality_after_index["spell_start"]
+    )
+
+    # Restrict to cases when the patient died in the follow up period
+    window = mortality_after_index[
+        (mortality_after_index["survival_time"] > min_after)
+        & (mortality_after_index["survival_time"] < max_after)
+    ].copy()
+    window["death_all_cause"] = True
+    window["death_bleeding"] = (window["position"] == 1) & (
+        window["group"].isin(bleeding_groups)
+    )
+    window["death_ischaemia"] = (window["position"] == 1) & (
+        window["group"].isin(ischaemia_groups)
+    )
+
+    # Join the mortality outcomes for each spell back onto
+    # the index
+    death_outcomes = (
+        window.filter(regex="spell_id|death_")
+        .groupby("spell_id")
+        .any()
+        .astype(int)
+        .merge(index_spells[[]], on="spell_id", how="right")
+        .fillna(False)
+    )
 
     # Get the episodes (and all their codes) in the follow-up window
     following_year = counting.get_time_window(all_other_codes, min_after, max_after)
@@ -239,7 +283,14 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
     )
     ischaemia_outcome = counting.count_code_groups(index_spells, ischaemia_episodes)
 
-    return DataFrame({"bleeding": bleeding_outcome, "ischaemia": ischaemia_outcome})
+    outcomes = DataFrame({"bleeding": bleeding_outcome, "ischaemia": ischaemia_outcome})
+
+    # Add the bleeding/ischaemia mortality outcomes.
+    outcomes["bleeding"] += death_outcomes["death_bleeding"]
+    outcomes["ischaemia"] += death_outcomes["death_ischaemia"]
+    
+    # Join the mortality outcomes
+    return outcomes.merge(death_outcomes, on="spell_id", how="left")
 
 
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
