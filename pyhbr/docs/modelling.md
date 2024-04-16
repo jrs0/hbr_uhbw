@@ -125,6 +125,12 @@ The primary disadvantage is the use of an all-hospital-bleeding definition. Howe
 
 No PPV is available for this code group. A basic chart review should be performed on the patients identified by this bleeding group to increase confidence that they match relevant bleeding events.
 
+Fatal bleeding (BARC 5) is included in the bleeding outcome. Mortality information is available from the Civil Registration of Deaths, which includes a primary cause of death and multiple secondary causes of death. A death is included in the bleeding outcome when the primary cause of death (an ICD-10 code) is an ADAPTT bleeding code as described above.
+
+
+
+### Ischaemia Outcome
+
 ## Predictors
 
 Predictors are defined based on data that is available in the index presentation, if that data would be available to the clinician.

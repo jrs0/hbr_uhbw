@@ -106,7 +106,15 @@ def get_data(
         The pandas dataframe containing the SQL data
     """
     stmt = query(engine, *args)
-    return read_sql(stmt, engine)
+    df = read_sql(stmt, engine)
+    
+    # Convert the column names to regular strings instead
+    # of sqlalchemy.sql.elements.quoted_name. This avoids
+    # an error down the line in sklearn, which cannot
+    # process sqlalchemy column title tuples.
+    df.columns = [str(col) for col in df.columns]
+    
+    return df
 
 def get_data_by_patient(
     engine: Engine, query: Callable[[Engine, ...], Select], patient_ids: list[str]

@@ -157,6 +157,7 @@ def get_raw_sus_data(engine: Engine, start_date: date, end_date: date) -> DataFr
     return raw_sus_data
 
 
+
 def get_episodes_and_codes(raw_sus_data: DataFrame) -> dict[str, DataFrame]:
     """Get episode and clinical code data
 

@@ -114,6 +114,37 @@ def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
         table.col("AIMTC_OrganisationCode_Codeofcommissioner").in_(valid_list),
     )
 
+def mortality_query(engine: Engine, start_date: date, end_date: date) -> Select:
+    """Get the mortality query, including cause of death
+
+    Args:
+        engine: The connection to the database
+        start_date: First date of death that will be included
+        end_date: Last date of death that will be included
+
+    Returns:
+        SQL query to retrieve episodes table
+    """
+    
+    table = CheckedTable("abi.civil_registration.mortality", engine)
+
+    # Secondary cause of death columns
+    cause_of_death_columns = [
+        table.col(f"S_COD_CODE_{n}").label(f"cause_of_death_{n+1}")
+        for n in range(1, 16)
+    ]
+
+    return select(
+        table.col("derived_pseudo_nhs").cast(String).label("patient_id"),
+        table.col("REG_DATE_OF_DEATH").cast(DateTime).label("date_of_death"),
+        table.col("S_UNDERLYING_COD_ICD10").label("cause_of_death_1"),
+        *cause_of_death_columns,
+    ).where(
+        table.col("REG_DATE_OF_DEATH") >= start_date,
+        table.col("DEG_DATE_OF_DEATH") <= end_date,
+        table.col("AIMTC_Pseudo_NHS").is_not(None),
+        table.col("derived_pseudo_nhs") != 9000219621,  # Invalid-patient marker    
+    )
 
 def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Select:
     """Get primary care patient information
