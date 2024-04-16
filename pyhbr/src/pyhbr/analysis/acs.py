@@ -218,7 +218,7 @@ def get_outcomes(
             the index.
     """
 
-    bleeding_groups = ["bleeding_al_ani"]
+    bleeding_groups = ["bleeding_adaptt"]
     ischaemia_groups = ["hussain_ami_stroke"]
     primary_only = True
     exclude_index_spell = False
