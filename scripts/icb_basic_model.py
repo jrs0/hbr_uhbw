@@ -22,7 +22,6 @@ importlib.reload(calibration)
 importlib.reload(common)
 importlib.reload(stability)
 
-
 # Load outcome and training data
 icb_basic_data = common.load_item("icb_basic_data")
 
@@ -106,7 +105,7 @@ high_risk_thresholds = {
 }
 
 # Plot the stability of predicted probabilities
-outcome_name = "ischaemia"
+outcome_name = "bleeding"
 fig, ax = plt.subplots(1, 2)
 stability.plot_instability(
     ax[0],
@@ -156,7 +155,7 @@ calibrations = {
 }
 
 # Plot the calibrations
-outcome_name = "ischaemia"
+outcome_name = "bleeding"
 fig, ax = plt.subplots(1, 2)
 calibration.plot_calibration_curves(ax[0], calibrations[outcome_name])
 calibration.draw_calibration_confidence(ax[1], calibrations[outcome_name][0])

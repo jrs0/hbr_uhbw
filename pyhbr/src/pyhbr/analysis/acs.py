@@ -203,7 +203,7 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
             relative to the index spell, output from counting.get_all_other_codes.
 
     Returns:
-        A table with two columns `bleeding_outcome` and `ischaemia_outcome`, which
+        A table with two columns `bleeding` and `ischaemia`, which
             count the number of subsequent events in the other episodes after
             the index.
     """
@@ -239,9 +239,7 @@ def get_outcomes(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFra
     )
     ischaemia_outcome = counting.count_code_groups(index_spells, ischaemia_episodes)
 
-    return DataFrame(
-        {"bleeding_outcome": bleeding_outcome, "ischaemia_outcome": ischaemia_outcome}
-    )
+    return DataFrame({"bleeding": bleeding_outcome, "ischaemia": ischaemia_outcome})
 
 
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
@@ -343,7 +341,7 @@ def get_index_attribute_link(
     swd_index_spells = most_recent[
         most_recent["date"] > (most_recent["spell_start"] - attribute_valid_window)
     ]
-    
+
     return index_spells.merge(
         swd_index_spells[["spell_id", "date"]].set_index("spell_id"),
         how="left",
