@@ -168,13 +168,7 @@ features_attributes = acs.remove_features(
 all_other_codes = counting.get_all_other_codes(index_spells, icb_basic_tmp)
 
 # Get the bleeding and ischaemia outcomes
-outcomes = acs.get_outcomes(
-    index_spells, all_other_codes, date_of_death, cause_of_death
-)
-
-# Add the bleeding/ischaemia mortality outcomes.
-outcomes["bleeding"] += death_outcomes["death_bleeding"]
-outcomes["ischaemia"] += death_outcomes["death_ischaemia"]
+outcomes = acs.get_outcomes(index_spells, all_other_codes, date_of_death, cause_of_death)
 
 features_codes = acs.get_code_features(index_spells, all_other_codes)
 

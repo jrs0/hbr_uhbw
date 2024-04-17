@@ -74,43 +74,42 @@ def get_all_other_codes(
 
 
 def get_time_window(
-    all_other_codes: DataFrame,
+    time_diff_table: DataFrame,
     window_start: timedelta,
     window_end: timedelta,
     time_diff_column: str = "time_to_other_episode",
 ) -> DataFrame:
-    """Get the episodes that occurred in a time window with respect to the base episode
+    """Get events that occurred in a time window with respect to a base event
 
-    Use the time_to_other_episode column to filter the all_other_codes
-    table to just those that occurred between window_start and window_end
-    with respect to the the base episode.
+    Use the time_diff_column column to filter the time_diff_table to just those
+    that occurred between window_start and window_end with respect to the base. 
+    For example, rows can represent an index episode paired with other episodes,
+    with the time_diff_column representing the time to the other episode.
 
-    The arguments window_start and window_end are time differences between the other
-    episode and the base episode. Use positive values for a window after the base,
-    and use negative values for a window before the base.
+    The arguments window_start and window_end control the minimum and maximum 
+    values for the time difference. Use positive values for a window after the 
+    base event, and use negative values for a window before the base event.
 
-    Episodes on the boundary of the window are included.
+    Events on the boundary of the window are included.
 
-    Note that the base episode itself will be included as a row if window_start
-    is negative and window_end is positive (i.e. the window includes episodes before
-    and after the base).
+    Note that the base event itself will be included as a row if window_start
+    is negative and window_end is positive.
 
     Args:
-        all_other_codes: Table containing at least `time_to_other_episode`
-        window_start: The smallest value of time_to_other_episode that will be included
-            in the returned table. Can be negative, meaning episode before the base
-            will be included.
-
-        window_end: The largest value of time_to_other_episode that will be included in
-            the returned table. Can be negative, meaning only episodes before the base
+        time_diff_table: Table containing at least the `time_diff_column`
+        window_start: The smallest value of `time_diff_column` that will be included
+            in the returned table. Can be negative, meaning events before the base
+            event will be included.
+        window_end: The largest value of `time_diff_column` that will be included in
+            the returned table. Can be negative, meaning events after the base
             will be included.
         time_diff_column: The name of the column containing the time difference,
             which is positive for an event occurring after the base event.
 
     Returns:
-        The episodes within the specified window range.
+        The rows within the specific time window
     """
-    df = all_other_codes
+    df = time_diff_table
     return df[
         (df[time_diff_column] <= window_end) & (df[time_diff_column] >= window_start)
     ]
