@@ -83,9 +83,11 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
     )
 
     # Join some useful information about the episode
-    return (
+    index_spells = (
         index_spells.merge(
-            data["episodes"][["patient_id", "episode_start", "spell_id", "age", "gender"]],
+            data["episodes"][
+                ["patient_id", "episode_start", "spell_id", "age", "gender"]
+            ],
             how="left",
             on="episode_id",
         )
@@ -93,6 +95,12 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
         .reset_index("episode_id")
         .set_index("spell_id")
     )
+    
+    # Convert the age column to a float. This should probably
+    # be done upstream
+    index_spells["age"] = index_spells["age"].astype(float)
+    
+    return index_spells
 
 
 def index_episodes(data: dict[str, DataFrame]) -> DataFrame:
@@ -216,7 +224,7 @@ def get_mortality_outcomes(
         & (window["position"] <= max_position)
         & (window["group"].isin(bleeding_groups))
     )
-    
+
     window["death_ischaemia"] = (
         (window["survival_time"] > min_after)
         & (window["survival_time"] < max_after)
@@ -226,19 +234,14 @@ def get_mortality_outcomes(
 
     # Join the mortality outcomes for each spell back onto
     # the index
-    return (
-        window.filter(regex="spell_id|death_")
-        .groupby("spell_id")
-        .any()
-        .astype(int)
-    )
+    return window.filter(regex="spell_id|death_").groupby("spell_id").any().astype(int)
 
 
 def get_outcomes(
     index_spells: DataFrame,
     all_other_codes: DataFrame,
     date_of_death: DataFrame,
-    cause_of_death: DataFrame
+    cause_of_death: DataFrame,
 ) -> DataFrame:
     """Get bleeding and ischaemia outcomes
 
@@ -256,7 +259,7 @@ def get_outcomes(
             column `episode_id` for the first episode in the index spell.
         all_other_codes: A table of other episodes (and their clinical codes)
             relative to the index spell, output from counting.get_all_other_codes.
-        date_of_death: Contains a column date_of_death, with Pandas index 
+        date_of_death: Contains a column date_of_death, with Pandas index
             `patient_id`
         cause_of_death: Contains columns `patient_id`, `code` (ICD-10) for
             cause of death, `position` of the code, and `group`.
@@ -309,7 +312,9 @@ def get_outcomes(
 
     outcomes = DataFrame({"bleeding": bleeding_outcome, "ischaemia": ischaemia_outcome})
 
-    death_outcomes = get_mortality_outcomes(mortality_after_index, bleeding_groups, ischaemia_groups)
+    death_outcomes = get_mortality_outcomes(
+        mortality_after_index, bleeding_groups, ischaemia_groups
+    )
 
     # Add the bleeding/ischaemia mortality outcomes.
     outcomes["bleeding"] += death_outcomes["death_bleeding"]
