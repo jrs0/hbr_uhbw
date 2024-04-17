@@ -92,21 +92,9 @@ high_risk_thresholds = {
     "ischaemia": 0.2,  # Could pick the median risk, or take from literature
 }
 
-# Plot the stability of predicted probabilities
-outcome_name = "ischaemia"
+# Plot the stability
 fig, ax = plt.subplots(1, 2)
-stability.plot_instability(
-    ax[0],
-    probs[outcome_name],
-    y_test.loc[:, outcome_name],
-    "Stability of repeat risk prediction",
-)
-stability.plot_reclass_instability(
-    ax[1],
-    probs[outcome_name],
-    y_test.loc[:, outcome_name],
-    high_risk_thresholds[outcome_name],
-)
+stability.plot_stability_analysis(ax, "bleeding", probs, y_test, high_risk_thresholds)
 plt.tight_layout()
 plt.show()
 
@@ -120,7 +108,6 @@ roc_aucs = {
     "bleeding": roc.get_auc(probs["bleeding"], y_test.loc[:, "bleeding"]),
     "ischaemia": roc.get_auc(probs["ischaemia"], y_test.loc[:, "ischaemia"]),
 }
-
 
 # Plot the ROC curves for the models
 fig, ax = plt.subplots(1, 2)
@@ -143,7 +130,7 @@ calibrations = {
 }
 
 # Plot the calibrations
-outcome_name = "ischaemia"
+outcome_name = "bleeding"
 fig, ax = plt.subplots(1, 2)
 calibration.plot_calibration_curves(ax[0], calibrations[outcome_name])
 calibration.draw_calibration_confidence(ax[1], calibrations[outcome_name][0])

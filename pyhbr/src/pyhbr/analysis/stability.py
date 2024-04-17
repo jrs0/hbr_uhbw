@@ -73,25 +73,29 @@ from sklearn.utils import resample
 from matplotlib.axes import Axes
 import matplotlib.ticker as mtick
 
+
 @dataclass
 class Resamples:
     """Store a training set along with M resamples of it
-    
+
     Args:
         X0: The matrix of predictors
         Y0: The matrix of outcomes (one column per outcome)
         Xm: A list of resamples of the predictors
         Ym: A list of resamples of the outcomes
     """
+
     X0: DataFrame
     Y0: DataFrame
     Xm: list[DataFrame]
     Ym: list[DataFrame]
 
 
-def make_bootstrapped_resamples(X0: DataFrame, y0: DataFrame, M: int, random_state: RandomState) -> Resamples:
+def make_bootstrapped_resamples(
+    X0: DataFrame, y0: DataFrame, M: int, random_state: RandomState
+) -> Resamples:
     """Make M resamples of the training data
-    
+
     Makes M bootstrapped resamples of a training set (X0,y0).
     M should be at least 200 (as per recommendation).
 
@@ -123,36 +127,39 @@ def make_bootstrapped_resamples(X0: DataFrame, y0: DataFrame, M: int, random_sta
 
     return Resamples(X0, y0, Xm, ym)
 
+
 @dataclass
 class FittedModel:
-    """Stores a model fitted to a training set and resamples of the training set.
-    """
+    """Stores a model fitted to a training set and resamples of the training set."""
+
     M0: Pipeline
     Mm: list[Pipeline]
-    
+
     def flatten(self) -> list[Pipeline]:
         """Get a flat list of all the models
 
         Returns:
             The list of fitted models, with M0 at the front
         """
-        return [self.M0] + self.Mm    
-    
+        return [self.M0] + self.Mm
 
-def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: RandomState) -> FittedModel:
+
+def fit_model(
+    model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: RandomState
+) -> FittedModel:
     """Fit a model to a training set and resamples of the training set.
-    
+
     Use the unfitted model pipeline to:
-    
+
     * Fit a model to the training set (X0, y0)
     * Fit a model to M resamples (Xm, ym) of the training set
-    
+
     The model is an unfitted scikit-learn Pipeline. Note that if RandomState is used
     when specifying the model, then the models used to fit the resamples here will
     be _statstical clones_ (i.e. they might not necessarily produce the same result
-    on the same data). clone() is called on model before fitting, so each fit gets a 
+    on the same data). clone() is called on model before fitting, so each fit gets a
     new clean object.
-    
+
     Args:
         model: An unfitted scikit-learn pipeline, which is used as the basis for
             all the fits. Each fit calls clone() on this object before fitting, to
@@ -166,7 +173,7 @@ def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: 
     Returns:
         An object containing the model fitted on (X0,y0) and all (Xm,ym)
     """
-    
+
     # Develop a single model from the training set (X0_train, y0_train),
     # using any method (e.g. including cross validation and hyperparameter
     # tuning) using training set data. This is referred to as D in
@@ -178,7 +185,7 @@ def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: 
     # Resample the training set to obtain the new datasets (Xm, ym)
     print(f"Creating {M} bootstrap resamples of training set")
     resamples = make_bootstrapped_resamples(X0, y0, M, random_state)
-    
+
     # Develop all the bootstrap models to compare with the model-under-test M0
     print("Fitting bootstrapped models")
     Mm = []
@@ -190,9 +197,10 @@ def fit_model(model: Pipeline, X0: DataFrame, y0: Series, M: int, random_state: 
 
     return FittedModel(M0, Mm)
 
+
 def predict_probabilities(fitted_model: FittedModel, X_test: DataFrame) -> DataFrame:
     """Predict outcome probabilities using the fitted models on the test set
-    
+
     Aggregating function which finds the predicted probability
     from the model-under-test M0 and all the bootstrapped models
     Mn on each sample of the training set features X_test. The
@@ -203,13 +211,13 @@ def predict_probabilities(fitted_model: FittedModel, X_test: DataFrame) -> DataF
 
     Note: the numbers in the matrix are the probabilities of 1 in the
     test set y_test.
-    
+
     Args:
         fitted_model: The model fitted on the training set and resamples
-    
+
     Returns:
         An table of probabilities of the positive outcome in the class,
-            where each column comes from a different model. Column zero 
+            where each column comes from a different model. Column zero
             corresponds to the training set, and the other columns are
             from the resamples. The index for the DataFrame is the same
             as X_test
@@ -226,6 +234,7 @@ def predict_probabilities(fitted_model: FittedModel, X_test: DataFrame) -> DataF
     df.index = X_test.index
     return df
 
+
 def smape(A, F):
     terms = []
     for a, f in zip(A, F):
@@ -233,44 +242,48 @@ def smape(A, F):
             terms.append(0)
         else:
             terms.append(2 * np.abs(f - a) / (np.abs(a) + np.abs(f)))
-    return (100/len(A)) * np.sum(terms)
+    return (100 / len(A)) * np.sum(terms)
+
 
 def get_average_instability(probs):
     """
     Instability is the extend to which the bootstrapped models
-    give a different prediction from the model under test. The 
+    give a different prediction from the model under test. The
     average instability is an average of the SMAPE between
     the prediction of the model-under-test and the predictions of
     each of the other bootstrap models (i.e. pairing the model-under-test)
-    with a single bootstrapped model gives one SMAPE value, and 
+    with a single bootstrapped model gives one SMAPE value, and
     these are averaged over all the bootstrap models).
-    
+
     SMAPE is preferable to mean relative error, because the latter
     diverges when the prediction from the model-under-test is very small.
     It may however be better still to use the log of the accuracy ratio;
     see https://en.wikipedia.org/wiki/Symmetric_mean_absolute_percentage_error,
-    since the probabilities are all positive (or maybe there is a better 
+    since the probabilities are all positive (or maybe there is a better
     thing for comparing probabilities specifically)
-    
+
     Testing: not yet tested
     """
     num_rows = probs.shape[0]
     num_cols = probs.shape[1]
-    
+
     smape_over_bootstraps = []
-    
+
     # Loop over each boostrap model
     for j in range(1, num_cols):
-        
+
         # Calculate SMAPE between bootstrap model j and
         # the model-under-test
-        smape_over_bootstraps.append(smape(probs[:,0], probs[:,j]))
+        smape_over_bootstraps.append(smape(probs[:, 0], probs[:, j]))
 
     return np.mean(smape_over_bootstraps)
 
-def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probability stability"):
+
+def plot_instability(
+    ax: Axes, probs: DataFrame, y_test: Series, title="Probability stability"
+):
     """Plot the instability of risk predictions
-    
+
     This function plots a scatter graph of one point
     per value in the test set (row of probs), where the
     x-axis is the value of the model under test (the
@@ -300,47 +313,80 @@ def plot_instability(ax: Axes, probs: DataFrame, y_test: Series, title="Probabil
     x = []
     y = []
     c = []
+    # Keep track of an example point to plot
+    example_risk = 1
+    example_second_risk = 1
     for i in range(num_rows):
         for j in range(1, num_cols):
-            x.append(100*probs.iloc[i, 0])  # Model-under-test
-            y.append(100*probs.iloc[i, j])  # Other bootstrapped models
+
+            # Get the pair of risks
+            risk = 100 * probs.iloc[i, 0]
+            second_risk = 100 * probs.iloc[i, j]
+
+            # Keep track of the worst discrepancy
+            # in the upper left quadrant
+            if (
+                (1.0 < risk < 10.0)
+                and (second_risk > risk)
+                and (second_risk / risk) > (example_second_risk / example_risk)
+            ):
+                example_risk = risk
+                example_second_risk = second_risk
+
+            x.append(risk)  # Model-under-test
+            y.append(second_risk)  # Other bootstrapped models
             c.append(y_test.iloc[i]),  # What was the actual outcome
 
-    colour_map = {0: "g", 1: "r"}
+    colour_map = {0: "b", 1: "r"}
+
+    text = f"Model risk {example_risk:.1f}%, bootstrap risk {example_second_risk:.1f}%"
+    ax.annotate(
+        text,
+        xy=(example_risk, example_second_risk),
+        xycoords="data",
+        xytext=(example_risk, 95),
+        fontsize=9,
+        verticalalignment="top",
+        horizontalalignment="center",
+        textcoords="data",
+        arrowprops={"arrowstyle": "->"},
+        backgroundcolor="w",
+    )
 
     for outcome_to_plot, colour in colour_map.items():
-       x_to_plot = [x for x, outcome in zip(x, c) if outcome == outcome_to_plot]
-       y_to_plot = [y for y, outcome in zip(y, c) if outcome == outcome_to_plot]
-       ax.scatter(x_to_plot, y_to_plot, c=colour, s=1, marker=".")
+        x_to_plot = [x for x, outcome in zip(x, c) if outcome == outcome_to_plot]
+        y_to_plot = [y for y, outcome in zip(y, c) if outcome == outcome_to_plot]
+        ax.scatter(x_to_plot, y_to_plot, c=colour, s=1, marker=".")
 
     ax.axline([0, 0], [1, 1])
 
     # You can restrict the axes here if you want
-    #ax.set_xlim(0, 0.1)
-    #ax.set_ylim(0,0.1)
+    # ax.set_xlim(0, 0.1)
+    # ax.set_ylim(0,0.1)
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.xaxis.set_major_formatter(mtick.PercentFormatter())
     ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 
     ax.legend(
-        [   
-            "Did not occur (background)",
-            "Event occurred (foreground)",
+        [
+            "Did not occur",
+            "Event occurred",
         ],
-        markerscale=15
+        markerscale=10,
+        loc="lower right",
     )
     ax.set_title(title)
-    ax.set_xlabel("First prediction from model-under-test")
-    ax.set_ylabel("Second predictions (from bootstrap models)")
-    
-    
+    ax.set_xlabel("Risk estimate from model")
+    ax.set_ylabel("Risk estimates from equivalent models")
+
+
 def plot_reclass_instability(
     ax: Axes,
     probs: DataFrame,
     y_test: Series,
     threshold: float,
-    title: str = "Stability of risk classification",
+    title: str = "Stability of Risk Class",
 ):
     """Plot the probability of reclassification by predicted risk
 
@@ -391,12 +437,21 @@ def plot_reclass_instability(
     x = 100 * df["original_risk"]
     y = 100 * df["unstable_prob"]
     c = df["outcome"]
-    colour_map = {False: "g", True: "r"}
+    colour_map = {False: "b", True: "r"}
 
+    # TODO: Plot is all black now, this can go
     for outcome_to_plot, colour in colour_map.items():
         x_to_plot = [x for x, outcome in zip(x, c) if outcome == outcome_to_plot]
         y_to_plot = [y for y, outcome in zip(y, c) if outcome == outcome_to_plot]
-        ax.scatter(x_to_plot, y_to_plot, c=colour, s=1, marker=".")
+        ax.scatter(x_to_plot, y_to_plot, c="k", s=1, marker=".")
+
+    # ax.legend(
+    #     [
+    #         "Did not occur",
+    #         "Event occurred",
+    #     ],
+    #     markerscale=15
+    # )
 
     # Plot the risk category threshold and label it
     ax.axline(
@@ -406,7 +461,7 @@ def plot_reclass_instability(
     )
 
     # Plot the 50% line for more-likely-than-not reclassification
-    ax.axline([0, 50], [100, 50])
+    ax.axline([0, 50], [100, 50], c="r")
 
     # Get the lower axis limits
     min_risk = 100 * df["original_risk"].min()
@@ -431,23 +486,37 @@ def plot_reclass_instability(
         backgroundcolor="w",
     )
 
+    text_str = f"Prob. of reclassification = 50%"
+    ax.text(
+        min_risk * 1.1,
+        50,
+        text_str,
+        fontsize=9,
+        # rotation="vertical",
+        color="r",
+        # horizontalalignment="center",
+        verticalalignment="center",
+        backgroundcolor="w",
+    )
+
     # Calculate the number of patients who fall in each stability group.
     # Unstable means
     num_high_risk = (df["original_risk"] >= threshold).sum()
     num_low_risk = (df["original_risk"] < threshold).sum()
 
-    num_unstable_given_low_risk = (
-        (df["original_risk"] < threshold) & (df["unstable_prob"] >= 0.5)
-    ).sum()
-    num_unstable_given_high_risk = (
-        (df["original_risk"] >= threshold) & (df["unstable_prob"] >= 0.5)
-    ).sum()
-
     num_stable = (df["unstable_prob"] < 0.5).sum()
     num_unstable = (df["unstable_prob"] >= 0.5).sum()
 
     high_risk_and_unstable = (
-        (df["original_risk"] >= threshold) & (df["unstable_prob"] > 0.5)
+        (df["original_risk"] >= threshold) & (df["unstable_prob"] >= 0.5)
+    ).sum()
+
+    high_risk_and_stable = (
+        (df["original_risk"] >= threshold) & (df["unstable_prob"] < 0.5)
+    ).sum()
+
+    low_risk_and_unstable = (
+        (df["original_risk"] < threshold) & (df["unstable_prob"] >= 0.5)
     ).sum()
 
     low_risk_and_stable = (
@@ -456,30 +525,54 @@ def plot_reclass_instability(
 
     # Count the number of events in each risk group
     num_events_in_low_risk_group = df[df["original_risk"] < threshold]["outcome"].sum()
-    num_events_in_high_risk_group = df[df["original_risk"] >= threshold]["outcome"].sum()
+    num_events_in_high_risk_group = df[df["original_risk"] >= threshold][
+        "outcome"
+    ].sum()
 
     ax.set_xlim(0.9 * min_risk, 110)
     ax.set_ylim(0.9 * min_unstable_prob, 110)
 
-    text_str = f"{num_low_risk} predicted\nlow risk. {num_unstable_given_low_risk} have\n>50% chance\nreclass. as high\nrisk. {num_events_in_low_risk_group} events\noccurred."
+    text_str = f"N = {low_risk_and_unstable}"
     ax.text(
-        0.05,
-        0.95,
+        min_risk * 1.1,
+        90,
         text_str,
-        transform=ax.transAxes,
         fontsize=9,
         verticalalignment="top",
+        backgroundcolor="w",
     )
 
-    text_str = f"{num_high_risk} predicted\nhigh risk. {num_unstable_given_high_risk} have\n>50% chance\nreclass. as low\nrisk. {num_events_in_high_risk_group} events\noccurred."
+    text_str = f"N = {high_risk_and_unstable}"
     ax.text(
-        0.95,
-        0.95,
+        90,
+        90,
         text_str,
-        transform=ax.transAxes,
         fontsize=9,
         verticalalignment="top",
-        horizontalalignment="right"
+        horizontalalignment="right",
+        backgroundcolor="w",
+    )
+
+    text_str = f"N = {low_risk_and_stable}"
+    ax.text(
+        min_risk * 1.1,
+        40,
+        text_str,
+        fontsize=9,
+        verticalalignment="top",
+        horizontalalignment="left",
+        backgroundcolor="w",
+    )
+
+    text_str = f"N = {high_risk_and_stable}"
+    ax.text(
+        90,
+        40,
+        text_str,
+        fontsize=9,
+        verticalalignment="top",
+        horizontalalignment="right",
+        backgroundcolor="w",
     )
 
     # Set axis properties
@@ -489,5 +582,39 @@ def plot_reclass_instability(
     ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 
     ax.set_title(title)
-    ax.set_xlabel("Risk prediction from model")
+    ax.set_xlabel("Risk estimate from model")
     ax.set_ylabel("Probability of risk reclassification by equivalent model")
+
+
+def plot_stability_analysis(
+    ax: Axes,
+    outcome_name: str,
+    probs: DataFrame,
+    y_test: DataFrame,
+    high_risk_thresholds: dict[str, float],
+):
+    """Plot the two stability plots
+
+    Args:
+        ax: The axes on which to plot the graphs (must have two
+        outcome_name: One of "bleeding" or "ischaemia"
+        probs: The model predictions. The first column is
+            the model-under-test, and the other columns are
+            the bootstrap model predictions.
+        y_test: The outcomes table, with columns for "bleeding"
+            and "ischaemia".
+        high_risk_thresholds: Map containing the vertical risk
+            prediction threshold for "bleeding" and "ischaemia".
+    """
+    plot_instability(
+        ax[0],
+        probs[outcome_name],
+        y_test.loc[:, outcome_name],
+        "Stability of Repeat Risk Prediction",
+    )
+    plot_reclass_instability(
+        ax[1],
+        probs[outcome_name],
+        y_test.loc[:, outcome_name],
+        high_risk_thresholds[outcome_name],
+    )
