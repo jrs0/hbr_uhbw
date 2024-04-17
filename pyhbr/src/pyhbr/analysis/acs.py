@@ -85,7 +85,7 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
     # Join some useful information about the episode
     return (
         index_spells.merge(
-            data["episodes"][["patient_id", "episode_start", "spell_id"]],
+            data["episodes"][["patient_id", "episode_start", "spell_id", "age", "gender"]],
             how="left",
             on="episode_id",
         )
