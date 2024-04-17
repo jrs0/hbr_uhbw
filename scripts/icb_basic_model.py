@@ -35,9 +35,9 @@ features_attributes = icb_basic_data["features_attributes"]  # float, category, 
 
 # It would be better for everything to agree on the bleeding/ischaemia
 # key. Fix this upstream
-outcomes.columns = outcomes.columns.map(
-    {"bleeding_outcome": "bleeding", "ischaemia_outcome": "ischaemia"}
-)
+# outcomes.columns = outcomes.columns.map(
+#     {"bleeding_outcome": "bleeding", "ischaemia_outcome": "ischaemia"}
+# )
 
 # Combine all the features
 features = (
@@ -51,7 +51,7 @@ features = (
 # sqlalchemy.sql.elements.quoted_name, which is nearly impossible
 # to discover (because dtype is object and it prints as a string)
 # Fix this upstream.
-features.columns = [str(col) for col in features.columns]
+#features.columns = [str(col) for col in features.columns]
 
 # Convert to a binary outcome (rather than a count)
 binary_outcome = outcomes > 0
