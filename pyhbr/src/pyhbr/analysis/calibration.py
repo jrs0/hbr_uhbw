@@ -261,7 +261,7 @@ def plot_calibration_curves(
     ax.xaxis.set_major_formatter(mtick.PercentFormatter())
     ax.yaxis.set_major_formatter(mtick.PercentFormatter())
     ax.set_ylabel("Estimated prevalence")
-    ax.set_xlabel("Model-predicted risks")
+    ax.set_xlabel("Model-estimated risks")
     ax.set_title(title)
 
 
@@ -432,8 +432,8 @@ def draw_calibration_confidence(ax: Axes, calibration: DataFrame):
     ax.xaxis.set_major_formatter(mtick.PercentFormatter())
     ax.yaxis.set_major_formatter(mtick.PercentFormatter())
     ax.set_ylabel("Estimated prevalence")
-    ax.set_xlabel("Model-predicted risks")
-    ax.set_title("Calibration confidence for model-under-test")
+    ax.set_xlabel("Model-estimated risks")
+    ax.set_title("Calibration confidence for model")
 
     # Get the minimum and maximum for the x range
     min_x = 100 * (c["bin_center"]).min()

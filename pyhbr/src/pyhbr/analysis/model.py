@@ -1,12 +1,20 @@
-import numpy as np
-import scipy
 from dataclasses import dataclass
+
+import numpy as np
+from numpy.random import RandomState
+import scipy
+from pandas import DataFrame
+
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from pandas import DataFrame
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn import tree
+
+from matplotlib.axes import Axes
 
 
 @dataclass
@@ -87,10 +95,10 @@ def make_flag_preprocessor(X_train: DataFrame) -> Preprocessor | None:
     Columns in the training features that are flags (bool + NaN) are
     represented using Int8 (because bool does not allow NaN). These
     columns are also one-hot encoded.
-    
+
     The ColumnTransformer transformer created from this preprocessor
     will be called "flag".
-    
+
     Args:
         X_train: The training features
 
@@ -101,14 +109,14 @@ def make_flag_preprocessor(X_train: DataFrame) -> Preprocessor | None:
     """
 
     # Flag columns (encoded using Int8, which supports NaN), should be one-hot
-    # encoded (considered separately from category in case I want to do something
+    # encoded (considered separately from category in case we want to do something
     # different with these).
     columns = X_train.columns[(X_train.dtypes == "Int8")]
-    
+
     # Return None if there are no discrete columns.
     if len(columns) == 0:
         return None
-    
+
     pipe = Pipeline(
         [
             (
@@ -127,14 +135,14 @@ def make_float_preprocessor(X_train: DataFrame) -> Preprocessor | None:
     Columns in the training features that are numerical are encoded
     using float (to distinguish them from Int8, which is used for
     flags).
-    
+
     Missing values in these columns are imputed using the mean, then
-    low variance columns are removed. The remaining columns are 
+    low variance columns are removed. The remaining columns are
     centered and scaled.
-    
+
     The ColumnTransformer transformer created from this preprocessor
     will be called "float".
-    
+
     Args:
         X_train: The training features
 
@@ -144,15 +152,14 @@ def make_float_preprocessor(X_train: DataFrame) -> Preprocessor | None:
             Int8 columns.
     """
 
-
     # Numerical columns -- impute missing values, remove low variance
     # columns, and then centre and scale the rest.
     columns = X_train.columns[(X_train.dtypes == "float")]
-    
+
     # Return None if there are no discrete columns.
     if len(columns) == 0:
-        return None    
-    
+        return None
+
     pipe = Pipeline(
         [
             ("impute", SimpleImputer(missing_values=np.nan, strategy="mean")),
@@ -162,6 +169,7 @@ def make_float_preprocessor(X_train: DataFrame) -> Preprocessor | None:
     )
 
     return Preprocessor("float", pipe, columns)
+
 
 def make_columns_transformer(
     preprocessors: list[Preprocessor | None],
@@ -175,6 +183,7 @@ def make_columns_transformer(
     tuples = [(pre.name, pre.pipe, pre.columns) for pre in not_none]
 
     return ColumnTransformer(tuples, remainder="drop")
+
 
 def get_num_feature_columns(fit: Pipeline) -> int:
     """Get the total number of feature columns
@@ -199,11 +208,9 @@ def get_num_feature_columns(fit: Pipeline) -> int:
     return total
 
 
-def get_feature_names(
-    fit: Pipeline
-) -> DataFrame:
+def get_feature_names(fit: Pipeline) -> DataFrame:
     """Get a table of feature names
-    
+
     The feature names are the names of the columns in the output
     from the preprocessing step in the fitted pipeline
 
@@ -242,11 +249,11 @@ def get_feature_names(
     prep_names = get_num_feature_columns(fit) * [None]
 
     for name, pipe, columns in preprocess.transformers_:
-        
+
         # Ignore the remainder step
         if name == "remainder":
             continue
-        
+
         step_name = relevant_step[name]
 
         # Get the step which transforms column names
@@ -323,3 +330,44 @@ def get_features(fit: Pipeline, X: DataFrame) -> DataFrame:
             columns=prep_columns["column"],
             index=X.index,
         )
+
+
+def make_random_forest(random_state: RandomState, X_train: DataFrame) -> Pipeline:
+    """Make the random forest model
+
+    Args:
+        random_state: Source of randomness for creating the model
+        X_train: The training dataset containing all features for modelling
+
+    Returns:
+        The preprocessing and fitting pipeline
+    """
+
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+    mod = RandomForestClassifier(
+        n_estimators=100, max_depth=10, random_state=random_state
+    )
+    return Pipeline([("preprocess", preprocess), ("model", mod)])
+
+
+def plot_random_forest(ax: Axes, fit_results: Pipeline, outcome: str, tree_num: int):
+
+    # Get the primary model for the outcome
+    fitted_pipe = fit_results["fitted_models"][outcome].M0
+
+    first_tree = fitted_pipe["model"].estimators_[tree_num]
+    names = get_feature_names(fitted_pipe)["column"]
+
+    tree.plot_tree(
+        first_tree,
+        feature_names=names,
+        class_names=[outcome, "no_" + outcome],
+        filled=True,
+        ax=ax,
+        fontsize=5
+    )
