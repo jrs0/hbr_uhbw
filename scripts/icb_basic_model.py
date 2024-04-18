@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from xgboost import XGBClassifier
 
 from pyhbr.analysis import model
 from pyhbr.analysis import fit
@@ -66,16 +65,8 @@ num_bins = 5
 
 # Make the preprocessing/fitting pipeline
 #pipe = model.make_random_forest(random_state, X_train)
-pipe = model.make_logistic_regression(random_state, X_train)
-
-preprocessors = [
-    model.make_category_preprocessor(X_train),
-    model.make_flag_preprocessor(X_train),
-    model.make_float_preprocessor(X_train),
-]
-preprocess = model.make_columns_transformer(preprocessors)
-mod = XGBClassifier(tree_method="hist")
-pipe = Pipeline([("preprocess", preprocess), ("model", mod)])
+#pipe = model.make_logistic_regression(random_state, X_train)
+pipe = model.make_xgboost(random_state, X_train)
 
 
 # Fit the model, and also fit bootstrapped models (using resamples

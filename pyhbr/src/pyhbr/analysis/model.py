@@ -14,6 +14,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn import tree
 
+from xgboost import XGBClassifier
+
 from matplotlib.axes import Axes
 
 
@@ -388,4 +390,16 @@ def make_logistic_regression(random_state: RandomState, X_train: DataFrame):
     ]
     preprocess = make_columns_transformer(preprocessors)
     mod = LogisticRegression(random_state=random_state, max_iter=1000)
+    return Pipeline([("preprocess", preprocess), ("model", mod)])
+
+
+def make_xgboost(random_state: RandomState, X_train: DataFrame) -> Pipeline:
+
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+    mod = XGBClassifier(tree_method="hist")
     return Pipeline([("preprocess", preprocess), ("model", mod)])
