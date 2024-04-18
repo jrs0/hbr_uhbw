@@ -360,9 +360,8 @@ def plot_instability(
 
     ax.axline([0, 0], [1, 1])
 
-    # You can restrict the axes here if you want
-    # ax.set_xlim(0, 0.1)
-    # ax.set_ylim(0,0.1)
+    ax.set_xlim(0.01, 100)
+    ax.set_ylim(0.01,100)
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.xaxis.set_major_formatter(mtick.PercentFormatter())
@@ -488,7 +487,7 @@ def plot_reclass_instability(
 
     text_str = f"Prob. of reclassification = 50%"
     ax.text(
-        min_risk * 1.1,
+        0.011,
         50,
         text_str,
         fontsize=9,
@@ -529,12 +528,12 @@ def plot_reclass_instability(
         "outcome"
     ].sum()
 
-    ax.set_xlim(0.9 * min_risk, 110)
+    ax.set_xlim(0.009, 110)
     ax.set_ylim(0.9 * min_unstable_prob, 110)
 
-    text_str = f"N = {low_risk_and_unstable}"
+    text_str = f"Unstable\nN = {low_risk_and_unstable}"
     ax.text(
-        min_risk * 1.1,
+        0.011,
         90,
         text_str,
         fontsize=9,
@@ -542,7 +541,7 @@ def plot_reclass_instability(
         backgroundcolor="w",
     )
 
-    text_str = f"N = {high_risk_and_unstable}"
+    text_str = f"Unstable\nN = {high_risk_and_unstable}"
     ax.text(
         90,
         90,
@@ -553,9 +552,9 @@ def plot_reclass_instability(
         backgroundcolor="w",
     )
 
-    text_str = f"N = {low_risk_and_stable}"
+    text_str = f"Stable\nN = {low_risk_and_stable}"
     ax.text(
-        min_risk * 1.1,
+        0.011,
         40,
         text_str,
         fontsize=9,
@@ -564,7 +563,7 @@ def plot_reclass_instability(
         backgroundcolor="w",
     )
 
-    text_str = f"N = {high_risk_and_stable}"
+    text_str = f"Stable\nN = {high_risk_and_stable}"
     ax.text(
         90,
         40,

@@ -379,3 +379,13 @@ def plot_random_forest(ax: Axes, fit_results: Pipeline, outcome: str, tree_num: 
         ax=ax,
         fontsize=5
     )
+
+def make_logistic_regression(random_state: RandomState, X_train: DataFrame):
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+    mod = LogisticRegression(random_state=random_state, max_iter=1000)
+    return Pipeline([("preprocess", preprocess), ("model", mod)])

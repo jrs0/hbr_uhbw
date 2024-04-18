@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+from xgboost import XGBClassifier
 
 from pyhbr.analysis import model
 from pyhbr.analysis import fit
@@ -63,9 +64,9 @@ num_bootstraps = 50
 # estimating the prevalence.
 num_bins = 5
 
-# Create a model to be trained on the preprocessed training set
-# mod = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=random_state)
-mod = LogisticRegression(random_state=random_state)
+# Make the preprocessing/fitting pipeline
+#pipe = model.make_random_forest(random_state, X_train)
+pipe = model.make_logistic_regression(random_state, X_train)
 
 preprocessors = [
     model.make_category_preprocessor(X_train),
@@ -73,12 +74,9 @@ preprocessors = [
     model.make_float_preprocessor(X_train),
 ]
 preprocess = model.make_columns_transformer(preprocessors)
-mod = LogisticRegression(random_state=random_state, reg)
-
+mod = XGBClassifier(tree_method="hist")
 pipe = Pipeline([("preprocess", preprocess), ("model", mod)])
 
-# Make the preprocessing/fitting pipeline
-pipe = model.make_random_forest(random_state, X_train)
 
 # Fit the model, and also fit bootstrapped models (using resamples
 # of the training set) to assess stability.
@@ -86,16 +84,13 @@ fit_results = fit.fit_model(
     pipe, X_train, y_train, X_test, y_test, num_bootstraps, num_bins, random_state
 )
 
+# Process the dataset
+model.get_features(fit_results["fitted_models"]["bleeding"].M0, X_train).mean().sort_values()
+
 # Plot a tree from the forest
 fig, ax = plt.subplots(1)
 model.plot_random_forest(ax, fit_results, "bleeding", 3)
 plt.show()
-
-# These levels will define high risk for bleeding and ischaemia
-high_risk_thresholds = {
-    "bleeding": 0.04,  # 4% from ARC HBR
-    "ischaemia": 0.2,  # Could pick the median risk, or take from literature
-}
 
 # Plot the ROC curves for the models
 fig, ax = plt.subplots(1, 2)
@@ -104,10 +99,17 @@ for n, outcome in enumerate(["bleeding", "ischaemia"]):
     roc_curves = fit_results["roc_curves"][outcome]
     roc_aucs = fit_results["roc_aucs"][outcome]
     roc.plot_roc_curves(ax[n], roc_curves, roc_aucs, title)
+plt.tight_layout()
 plt.show()
 
+# These levels will define high risk for bleeding and ischaemia
+high_risk_thresholds = {
+    "bleeding": 0.04,  # 4% from ARC HBR
+    "ischaemia": 0.2,  # Could pick the median risk, or take from literature
+}
+
 # Plot the stability
-outcome = "ischaemia"
+outcome = "bleeding"
 fig, ax = plt.subplots(1, 2)
 probs = fit_results["probs"]
 stability.plot_stability_analysis(ax, outcome, probs, y_test, high_risk_thresholds)
