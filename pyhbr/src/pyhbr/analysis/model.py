@@ -43,7 +43,7 @@ class Preprocessor:
     columns: list[str]
 
 
-def make_category_preprocessor(X_train: DataFrame) -> Preprocessor | None:
+def make_category_preprocessor(X_train: DataFrame, drop=None) -> Preprocessor | None:
     """Create a preprocessor for string/category columns
 
     Columns in the training features that are discrete, represented
@@ -56,6 +56,10 @@ def make_category_preprocessor(X_train: DataFrame) -> Preprocessor | None:
 
     Args:
         X_train: The training features
+        drop: The drop argument to be passed to OneHotEncoder. Default
+            None means no features will be dropped. Using "first" drops
+            the first item in the category, which is useful to avoid
+            collinearity in linear models.
 
     Returns:
         A preprocessor for processing the discrete columns. None is
@@ -80,7 +84,7 @@ def make_category_preprocessor(X_train: DataFrame) -> Preprocessor | None:
             (
                 "one_hot_encoder",
                 OneHotEncoder(
-                    handle_unknown="infrequent_if_exist", min_frequency=0.002
+                    handle_unknown="infrequent_if_exist", min_frequency=0.002, drop=drop
                 ),
             ),
         ]
@@ -89,7 +93,7 @@ def make_category_preprocessor(X_train: DataFrame) -> Preprocessor | None:
     return Preprocessor("category", pipe, columns)
 
 
-def make_flag_preprocessor(X_train: DataFrame) -> Preprocessor | None:
+def make_flag_preprocessor(X_train: DataFrame, drop=None) -> Preprocessor | None:
     """Create a preprocessor for flag columns
 
     Columns in the training features that are flags (bool + NaN) are
@@ -100,7 +104,11 @@ def make_flag_preprocessor(X_train: DataFrame) -> Preprocessor | None:
     will be called "flag".
 
     Args:
-        X_train: The training features
+        X_train: The training features.
+        drop: The drop argument to be passed to OneHotEncoder. Default
+            None means no features will be dropped. Using "first" drops
+            the first item in the category, which is useful to avoid
+            collinearity in linear models.
 
     Returns:
         A preprocessor for processing the flag columns. None is
@@ -121,7 +129,7 @@ def make_flag_preprocessor(X_train: DataFrame) -> Preprocessor | None:
         [
             (
                 "one_hot_encode",
-                OneHotEncoder(handle_unknown="infrequent_if_exist"),
+                OneHotEncoder(handle_unknown="infrequent_if_exist", drop=drop),
             ),
         ]
     )

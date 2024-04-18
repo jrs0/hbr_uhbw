@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from pyhbr import common
 
 from pyhbr.analysis import model
 from pyhbr.analysis import fit
@@ -68,6 +67,16 @@ num_bins = 5
 # mod = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=random_state)
 mod = LogisticRegression(random_state=random_state)
 
+preprocessors = [
+    model.make_category_preprocessor(X_train),
+    model.make_flag_preprocessor(X_train),
+    model.make_float_preprocessor(X_train),
+]
+preprocess = model.make_columns_transformer(preprocessors)
+mod = LogisticRegression(random_state=random_state, reg)
+
+pipe = Pipeline([("preprocess", preprocess), ("model", mod)])
+
 # Make the preprocessing/fitting pipeline
 pipe = model.make_random_forest(random_state, X_train)
 
@@ -98,7 +107,7 @@ for n, outcome in enumerate(["bleeding", "ischaemia"]):
 plt.show()
 
 # Plot the stability
-outcome = "bleeding"
+outcome = "ischaemia"
 fig, ax = plt.subplots(1, 2)
 probs = fit_results["probs"]
 stability.plot_stability_analysis(ax, outcome, probs, y_test, high_risk_thresholds)
@@ -106,7 +115,7 @@ plt.tight_layout()
 plt.show()
 
 # Plot the calibrations
-outcome = "bleeding"
+outcome = "ischaemia"
 fig, ax = plt.subplots(1, 2)
 calibrations = fit_results["calibrations"]
 calibration.plot_calibration_curves(ax[0], calibrations[outcome])
