@@ -49,7 +49,7 @@ random_state = RandomState(0)
 
 # Create the train/test split
 X_train, X_test, y_train, y_test = train_test_split(
-    features, binary_outcome, test_size=0.25, random_state=random_state
+    features, binary_outcome, test_size=0.5, random_state=random_state
 )
 
 # Make all the preprocessors for each group of columns
@@ -80,33 +80,30 @@ fitted_models = {
     ),
 }
 
-# Get the predicted probabilities associated with all the resamples of
-# the bleeding and ischaemia models
-probs = {
-    "bleeding": stability.predict_probabilities(fitted_models["bleeding"], X_test),
-    "ischaemia": stability.predict_probabilities(fitted_models["ischaemia"], X_test),
-}
+# Calculate the results of the model
+probs = {}
+calibrations = {}
+roc_curves = {}
+roc_aucs = {}
+for outcome in ["bleeding", "ischaemia"]:
+
+    # Get the predicted probabilities associated with all the resamples of
+    # the bleeding and ischaemia models
+    probs[outcome] = stability.predict_probabilities(fitted_models[outcome], X_test)
+
+    # Get the calibration of the models
+    num_bins = 5
+    calibrations[outcome] = calibration.get_variable_width_calibration(
+        probs[outcome], y_test.loc[:, outcome], num_bins
+    )
+
+    # Calculate the ROC curves for the models
+    roc_curves[outcome] = roc.get_roc_curves(probs[outcome], y_test.loc[:, outcome])
+    roc_aucs[outcome] = roc.get_auc(probs[outcome], y_test.loc[:, outcome])
 
 high_risk_thresholds = {
     "bleeding": 0.04,  # 4% from ARC HBR
     "ischaemia": 0.2,  # Could pick the median risk, or take from literature
-}
-
-# Plot the stability
-fig, ax = plt.subplots(1, 2)
-stability.plot_stability_analysis(ax, "bleeding", probs, y_test, high_risk_thresholds)
-plt.tight_layout()
-plt.show()
-
-# Calculate the ROC curves for the models
-roc_curves = {
-    "bleeding": roc.get_roc_curves(probs["bleeding"], y_test.loc[:, "bleeding"]),
-    "ischaemia": roc.get_roc_curves(probs["ischaemia"], y_test.loc[:, "ischaemia"]),
-}
-
-roc_aucs = {
-    "bleeding": roc.get_auc(probs["bleeding"], y_test.loc[:, "bleeding"]),
-    "ischaemia": roc.get_auc(probs["ischaemia"], y_test.loc[:, "ischaemia"]),
 }
 
 # Plot the ROC curves for the models
@@ -119,15 +116,11 @@ roc.plot_roc_curves(
 )
 plt.show()
 
-# Get the calibration of the models
-calibrations = {
-    "bleeding": calibration.get_variable_width_calibration(
-        probs["bleeding"], y_test.loc[:, "bleeding"], 5
-    ),
-    "ischaemia": calibration.get_variable_width_calibration(
-        probs["ischaemia"], y_test.loc[:, "ischaemia"], 5
-    ),
-}
+# Plot the stability
+fig, ax = plt.subplots(1, 2)
+stability.plot_stability_analysis(ax, "bleeding", probs, y_test, high_risk_thresholds)
+plt.tight_layout()
+plt.show()
 
 # Plot the calibrations
 outcome_name = "bleeding"
