@@ -64,54 +64,35 @@ num_bootstraps = 50
 num_bins = 5
 
 # Make the preprocessing/fitting pipeline
-pipe = model.make_random_forest(random_state, X_train)
-#pipe = model.make_logistic_regression(random_state, X_train)
-#pipe = model.make_xgboost(random_state, X_train)
+pipes = {
+    "random_forest": model.make_random_forest(random_state, X_train),
+    "logistic_regression": model.make_logistic_regression(random_state, X_train),
+    "xgboost": model.make_xgboost(random_state, X_train),
+}
 
 # Fit the model, and also fit bootstrapped models (using resamples
 # of the training set) to assess stability.
-fit_results = fit.fit_model(
-    pipe, X_train, y_train, X_test, y_test, num_bootstraps, num_bins, random_state
-)
+fit_results = {
+    model_name: fit.fit_model(
+        pipe, X_train, y_train, X_test, y_test, num_bootstraps, num_bins, random_state
+    )
+    for model_name, pipe in pipes.items()
+}
 
 # Process the dataset
-model.get_features(fit_results["fitted_models"]["bleeding"].M0, X_train).mean().sort_values()
+model.get_features(
+    fit_results["fitted_models"]["bleeding"].M0, X_train
+).mean().sort_values()
 
 # Plot a tree from the forest
 fig, ax = plt.subplots(1)
 model.plot_random_forest(ax, fit_results, "bleeding", 3)
 plt.show()
 
-# Plot the ROC curves for the models
-fig, ax = plt.subplots(1, 2)
-for n, outcome in enumerate(["bleeding", "ischaemia"]):
-    title = f"{outcome.title()} ROC Curves"
-    roc_curves = fit_results["roc_curves"][outcome]
-    roc_aucs = fit_results["roc_aucs"][outcome]
-    roc.plot_roc_curves(ax[n], roc_curves, roc_aucs, title)
-plt.tight_layout()
-plt.show()
-
-# These levels will define high risk for bleeding and ischaemia
-high_risk_thresholds = {
-    "bleeding": 0.04,  # 4% from ARC HBR
-    "ischaemia": 0.2,  # Could pick the median risk, or take from literature
+# Save the fitted models
+icb_basic_models = {
+    "fit_results": fit_results,
+    "icb_basic_data": icb_basic_data    
 }
+common.save_item(icb_basic_models, "icb_basic_models")
 
-# Plot the stability
-outcome = "bleeding"
-fig, ax = plt.subplots(1, 2)
-probs = fit_results["probs"]
-#plot_instability_boxes(ax[0], fit_results["probs"]["bleeding"])
-stability.plot_stability_analysis(ax, outcome, probs, y_test, high_risk_thresholds)
-plt.tight_layout()
-plt.show()
-
-# Plot the calibrations
-outcome = "bleeding"
-fig, ax = plt.subplots(1, 2)
-calibrations = fit_results["calibrations"]
-calibration.plot_calibration_curves(ax[0], calibrations[outcome])
-calibration.draw_calibration_confidence(ax[1], calibrations[outcome][0])
-plt.tight_layout()
-plt.show()

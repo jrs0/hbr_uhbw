@@ -620,7 +620,7 @@ def plot_instability_boxes(ax: Axes, probs: DataFrame, n_bins: int = 5):
 
     ax_hist = ax.twinx()
     ax_hist.hist(100*probs["prob_M0"], color='lightgreen', alpha=0.5, bins=800)
-    ax_hist.set_ylabel("Count for histogram of model risk estimates")
+    ax_hist.set_ylabel("(Green Histogram) Total Count of Risk Estimates")
 
     ax.boxplot(other_predictions, positions=bin_center, widths=bin_width, whis=(0,100))
     ax.set_yscale("log")
@@ -628,8 +628,8 @@ def plot_instability_boxes(ax: Axes, probs: DataFrame, n_bins: int = 5):
     ax.set_ylim([0.01, 100])
     ax.xaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
     ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
-    ax.set_ylabel("Absolute difference in estimate from bootstrap")
-    ax.set_xlabel("Model-estimated risks")
+    ax.set_ylabel("(Box Plots) Absolute Difference from Bootstraps Estimates")
+    ax.set_xlabel("Model-Estimated Risks")
     ax.set_title("Risk Estimate Stability by Risk Level")
 
 
