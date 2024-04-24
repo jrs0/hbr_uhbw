@@ -1,7 +1,20 @@
 import matplotlib.pyplot as plt
 from pyhbr import common
+from pyhbr.analysis import roc
+from pyhbr.analysis import stability
 
-icb_basic_models = common.load_item()
+# Load the data
+icb_basic_models = common.load_item("icb_basic_models")
+
+# These levels will define high risk for bleeding and ischaemia
+high_risk_thresholds = {
+    "bleeding": 0.04,  # 4% from ARC HBR
+    "ischaemia": 0.2,  # Could pick the median risk, or take from literature
+}
+
+# Get a model
+model = "random_forest"
+fit_results = icb_basic_models["fit_results"][model]
 
 # Plot the ROC curves for the models
 fig, ax = plt.subplots(1, 2)
@@ -12,12 +25,6 @@ for n, outcome in enumerate(["bleeding", "ischaemia"]):
     roc.plot_roc_curves(ax[n], roc_curves, roc_aucs, title)
 plt.tight_layout()
 plt.show()
-
-# These levels will define high risk for bleeding and ischaemia
-high_risk_thresholds = {
-    "bleeding": 0.04,  # 4% from ARC HBR
-    "ischaemia": 0.2,  # Could pick the median risk, or take from literature
-}
 
 # Plot the stability
 outcome = "bleeding"

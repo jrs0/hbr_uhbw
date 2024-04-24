@@ -1,17 +1,11 @@
 import importlib
 
-import scipy
 from numpy.random import RandomState
 from sklearn.model_selection import train_test_split
-
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score
 
 from pyhbr.analysis import model
 from pyhbr.analysis import fit
 from pyhbr.analysis import stability
-from pyhbr.analysis import roc
 from pyhbr.analysis import calibration
 from pyhbr import common
 
