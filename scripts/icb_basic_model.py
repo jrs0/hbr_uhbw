@@ -64,10 +64,9 @@ num_bootstraps = 50
 num_bins = 5
 
 # Make the preprocessing/fitting pipeline
-#pipe = model.make_random_forest(random_state, X_train)
+pipe = model.make_random_forest(random_state, X_train)
 #pipe = model.make_logistic_regression(random_state, X_train)
-pipe = model.make_xgboost(random_state, X_train)
-
+#pipe = model.make_xgboost(random_state, X_train)
 
 # Fit the model, and also fit bootstrapped models (using resamples
 # of the training set) to assess stability.
@@ -103,12 +102,61 @@ high_risk_thresholds = {
 outcome = "bleeding"
 fig, ax = plt.subplots(1, 2)
 probs = fit_results["probs"]
-stability.plot_stability_analysis(ax, outcome, probs, y_test, high_risk_thresholds)
+
+
+n_bins = 5
+probs = fit_results["probs"]["bleeding"]
+ordered = probs.sort_values("prob_M0")
+rows_per_bin = int(np.ceil(len(ordered) / n_bins))
+
+# Get the mean and range of each bin 
+bin_center = []
+bin_width = []
+for start in range(0, len(ordered), rows_per_bin):
+    end = start + rows_per_bin
+    bin_probs = ordered.iloc[start:end, 0]
+    upper = bin_probs.max()
+    lower = bin_probs.min()
+    bin_center.append(100*(lower + upper) / 2)
+    bin_width.append(90*(upper - lower))
+
+# Get the other model's risk predictions
+bins = []
+for start in range(0, len(ordered), rows_per_bin):
+    end = start + rows_per_bin
+    bootstrap_probs = ordered.iloc[start:end, :]
+    
+    # Make a table containing the initial risk (from the
+    # model under test) and a column for all other risks
+    prob_compare = bootstrap_probs.melt(id_vars="prob_M0", value_name="bootstrap_risk", var_name="initial_risk")
+    
+    
+    # Round the resulting risk error to 2 decimal places (i.e. to 0.01%). This truncates very small values
+    # to zero, which means the resulting log y scale is not artificially extended downwards.
+    absolute_error = (prob_compare["bootstrap_risk"] - prob_compare["prob_M0"]).abs().round(decimals=2)
+    
+    bins.append(100*absolute_error)
+
+other_predictions = pd.concat(bins, axis=1)
+
+fig, ax = plt.subplots(1)
+ax.boxplot(other_predictions, positions=bin_center, widths=bin_width, whis=(0,100))
+ax.set_yscale("log")
+ax.set_xscale("log")
+ax.set_ylim([0.01, 100])
+ax.xaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
+ax.yaxis.set_major_formatter(mtick.PercentFormatter(decimals=1))
+ax.set_ylabel("Absolute difference in estimate from bootstrap")
+ax.set_xlabel("Model-estimated risks")
+plt.tight_layout()
+plt.show()
+
+#stability.plot_stability_analysis(ax, outcome, probs, y_test, high_risk_thresholds)
 plt.tight_layout()
 plt.show()
 
 # Plot the calibrations
-outcome = "ischaemia"
+outcome = "bleeding"
 fig, ax = plt.subplots(1, 2)
 calibrations = fit_results["calibrations"]
 calibration.plot_calibration_curves(ax[0], calibrations[outcome])

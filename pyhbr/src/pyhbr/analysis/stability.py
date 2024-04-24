@@ -247,7 +247,7 @@ def smape(A, F):
 
 def get_average_instability(probs):
     """
-    Instability is the extend to which the bootstrapped models
+    Instability is the extent to which the bootstrapped models
     give a different prediction from the model under test. The
     average instability is an average of the SMAPE between
     the prediction of the model-under-test and the predictions of
