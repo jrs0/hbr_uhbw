@@ -1,17 +1,17 @@
-from typing import Any
-
 import matplotlib.pyplot as plt
 
 from pyhbr import common
 from pyhbr.analysis import roc
 from pyhbr.analysis import stability
 from pyhbr.analysis import calibration
+from pyhbr.analysis import describe
 
 import importlib
 
 importlib.reload(stability)
 importlib.reload(common)
 importlib.reload(roc)
+importlib.reload(describe)
 
 # Load the data
 icb_basic_models = common.load_item("icb_basic_models")
@@ -37,92 +37,19 @@ for n, outcome in enumerate(["bleeding", "ischaemia"]):
 plt.tight_layout()
 plt.show()
 
-# Get the spread of the percentage-point errors and convert
-# to a string
 
+# Map the model names to strings for the report
 model_names = {
     "random_forest": "RF",
     "logistic_regression": "LR",
     "xgboost": "XGB",
 }
 
+# Map the outcome names to strings for the report
 outcome_names = {"bleeding": "B", "ischaemia": "I"}
 
-
-def get_summary_table(models: dict[str, Any], high_risk_thresholds: dict[str, float]):
-    """Get a table of model metric comparison across different models
-
-    Args:
-        models: Model saved data
-    """
-    names = []
-    instabilities = []
-    aucs = []
-    inaccuracies = []
-    low_risk_reclass = []
-    high_risk_reclass = []
-
-    for model, fit_results in models["fit_results"].items():
-        for outcome in ["bleeding", "ischaemia"]:
-            names.append(f"{model_names[model]} ({outcome_names[outcome]})")
-
-            probs = fit_results["probs"]
-
-            # Get the summary instabilities
-            instability = stability.average_absolute_instability(probs[outcome])
-            instabilities.append(common.median_to_string(instability))
-
-            # Get the summary calibration accuracies
-            calibrations = fit_results["calibrations"][outcome]
-
-            # Join together all the calibration data for the primary model
-            # and all the bootstrap models, to compare the bin center positions
-            # with the estimated prevalence for all bins.
-            all_calibrations = pd.concat(calibrations)
-
-            absolute_errors = (
-                100
-                * (all_calibrations["bin_center"] - all_calibrations["est_prev"]).abs()
-            )
-            mean_accuracy = absolute_errors.mean()
-            inaccuracies.append(f"{mean_accuracy:.2f}%")
-
-            threshold = high_risk_thresholds[outcome]
-            y_test = models["y_test"][outcome]
-            df = stability.get_reclass_probabilities(
-                probs[outcome], y_test, threshold
-            )
-            high_risk = (df["original_risk"] >= threshold).sum()
-            high_risk_and_unstable = (
-                (df["original_risk"] >= threshold) & (df["unstable_prob"] >= 0.5)
-            ).sum()
-            high_risk_reclass.append(f"{100 * high_risk_and_unstable / high_risk:.2f}%")
-            low_risk = (df["original_risk"] < threshold).sum()
-            low_risk_and_unstable = (
-                (df["original_risk"] < threshold) & (df["unstable_prob"] >= 0.5)
-            ).sum()
-            low_risk_reclass.append(f"{100 * low_risk_and_unstable / low_risk:.2f}%")
-
-            # Get the summary ROC AUCs
-            auc_data = fit_results["roc_aucs"][outcome]
-            auc_spread = Series(
-                auc_data.resample_auc + [auc_data.model_under_test_auc]
-            ).quantile([0.25, 0.5, 0.75])
-            aucs.append(common.median_to_string(auc_spread, unit=""))
-
-    return DataFrame(
-        {
-            "Model": names,
-            "Median Instability": instabilities,
-            "P(H->L) > 50%": high_risk_reclass,
-            "P(L->H) > 50%": low_risk_reclass,
-            "Estimated Mean Inaccuracy": inaccuracies,
-            "ROC AUCs": aucs,
-        }
-    )
-
-
-summary = get_summary_table(icb_basic_models, high_risk_thresholds)
+# Get the table of model summary metrics
+summary = describe.get_summary_table(icb_basic_models, high_risk_thresholds, model_names, outcome_names)
 
 # Plot the stability
 outcome = "ischaemia"
