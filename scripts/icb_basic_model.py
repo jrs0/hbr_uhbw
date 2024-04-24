@@ -140,6 +140,7 @@ for start in range(0, len(ordered), rows_per_bin):
 other_predictions = pd.concat(bins, axis=1)
 
 fig, ax = plt.subplots(1)
+ax.hist(100*probs["prob_M0"], color='lightgreen', ec='black', bins=20)
 ax.boxplot(other_predictions, positions=bin_center, widths=bin_width, whis=(0,100))
 ax.set_yscale("log")
 ax.set_xscale("log")
