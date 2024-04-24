@@ -9,8 +9,6 @@ from pyhbr.analysis import stability
 from pyhbr.analysis import calibration
 from pyhbr import common
 
-import matplotlib.pyplot as plt
-
 importlib.reload(model)
 importlib.reload(calibration)
 importlib.reload(common)
@@ -39,17 +37,19 @@ features = (
 # Convert to a binary outcome (rather than a count)
 binary_outcome = outcomes > 0
 
-# Create a random seed
-random_state = RandomState(0)
+# Create a random state from a seed
+seed = 0
+random_state = RandomState(seed)
 
 # Create the train/test split
+test_proportion = 0.25
 X_train, X_test, y_train, y_test = train_test_split(
-    features, binary_outcome, test_size=0.5, random_state=random_state
+    features, binary_outcome, test_size=test_proportion, random_state=random_state
 )
 
 # Using a larger number of bootstrap resamples will make
 # the stability analysis better, but will take longer to fit.
-num_bootstraps = 50
+num_bootstraps = 10
 
 # Choose the number of bins for the calibration calculation.
 # Using more bins will resolve the risk estimates more
@@ -85,7 +85,15 @@ plt.show()
 
 # Save the fitted models
 icb_basic_models = {
+    "seed": seed,
+    "test_proportion": test_proportion,
+    "num_bins": num_bins,
+    "num_bootstraps": num_bootstraps,
     "fit_results": fit_results,
+    "X_train": X_train,
+    "X_test": X_test,
+    "y_train": y_train,
+    "y_test": y_test,
     "icb_basic_data": icb_basic_data    
 }
 common.save_item(icb_basic_models, "icb_basic_models")
