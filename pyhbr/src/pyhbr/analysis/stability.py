@@ -73,6 +73,7 @@ from sklearn.utils import resample
 from matplotlib.axes import Axes
 import matplotlib.ticker as mtick
 
+from pyhbr import common
 
 @dataclass
 class Resamples:
@@ -361,7 +362,7 @@ def plot_instability(
     ax.axline([0, 0], [1, 1])
 
     ax.set_xlim(0.01, 100)
-    ax.set_ylim(0.01,100)
+    ax.set_ylim(0.01, 100)
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.xaxis.set_major_formatter(mtick.PercentFormatter())
@@ -380,17 +381,10 @@ def plot_instability(
     ax.set_ylabel("Risk estimates from equivalent models")
 
 
-def plot_reclass_instability(
-    ax: Axes,
-    probs: DataFrame,
-    y_test: Series,
-    threshold: float,
-    title: str = "Stability of Risk Class",
-):
-    """Plot the probability of reclassification by predicted risk
+def get_reclass_probabilities(probs: DataFrame, y_test: Series, threshold: float) -> DataFrame:
+    """Get the probability of risk reclassification for each patient
 
     Args:
-        ax: The axes on which to draw the plot
         probs: The matrix of probabilities from the model-under-test
             (first column) and the bootstrapped models (subsequent
             models).
@@ -398,7 +392,10 @@ def plot_reclass_instability(
             probs matrix. This is used to colour the points based on
             whether the outcome occurred on not.
         threshold: The risk level at which a patient is considered high risk
-        title: The plot title.
+        
+    Returns:
+        A table containing columns "original_risk", "unstable_prob", and
+            "outcome".
     """
 
     # For the predictions of each model, categorise patients as
@@ -427,14 +424,37 @@ def plot_reclass_instability(
 
     # Merge the original risk with the unstable count
     original_risk = probs.iloc[:, 0].rename("original_risk")
-    df = (
+    return (
         original_risk.to_frame()
         .merge(unstable_prob, on="spell_id", how="left")
         .merge(y_test.rename("outcome"), on="spell_id", how="left")
     )
 
-    x = 100 * df["original_risk"]
-    y = 100 * df["unstable_prob"]
+def plot_reclass_instability(
+    ax: Axes,
+    probs: DataFrame,
+    y_test: Series,
+    threshold: float,
+    title: str = "Stability of Risk Class",
+):
+    """Plot the probability of reclassification by predicted risk
+
+    Args:
+        ax: The axes on which to draw the plot
+        probs: The matrix of probabilities from the model-under-test
+            (first column) and the bootstrapped models (subsequent
+            models).
+        y_test: The true outcome corresponding to each row of the
+            probs matrix. This is used to colour the points based on
+            whether the outcome occurred on not.
+        threshold: The risk level at which a patient is considered high risk
+        title: The plot title.
+    """
+
+    df = get_reclass_probabilities(probs, y_test, threshold)
+
+    x = df["original_risk"]
+    y = df["unstable_prob"]
     c = df["outcome"]
     colour_map = {False: "b", True: "r"}
 
@@ -584,12 +604,75 @@ def plot_reclass_instability(
     ax.set_xlabel("Risk estimate from model")
     ax.set_ylabel("Probability of risk reclassification by equivalent model")
 
+
+def absolute_instability(probs: DataFrame) -> Series:
+    """Get a list of the absolute percentage-point differences
+    
+    Compare the primary model to the bootstrap models by flattening
+    all the bootstrap model estimates and calculating the absolute
+    difference between the primary model estimate and the bootstraps.
+    Results are expressed in percentage points.
+
+    Args:
+        probs: First column is primary model risk estimates, other
+            columns are bootstrap model estimates.
+
+    Returns:
+        A Series of absolute percentage-point discrepancies between
+            the primary model predictions and the bootstrap 
+            estimates.
+    """
+    
+    # Make a table containing the initial risk (from the
+    # model under test) and a column for all other risks
+    prob_compare = 100 * probs.melt(
+        id_vars="prob_M0", value_name="bootstrap_risk", var_name="initial_risk"
+    )
+
+    # Round the resulting risk error to 2 decimal places (i.e. to 0.01%). This truncates very small values
+    # to zero, which means the resulting log y scale is not artificially extended downwards.
+    return (
+        (prob_compare["bootstrap_risk"] - prob_compare["prob_M0"])
+        .abs()
+        .round(decimals=2)
+    )
+
+def average_absolute_instability(probs: DataFrame) -> dict[str, float]:
+    """Get the average absolute error between primary model and bootstrap estimates.
+
+    This function computes the average of the absolute difference between the risks
+    estimated by the primary model, and the risks estimated by the bootstrap models.
+    For example, if the primary model estimates 1%, and a bootstrap model provides
+    2% and 3%, the result is 1.5% error.
+
+    Expressed differently, the function calculates the average percentage-point
+    difference between the model under test and bootstrap models.
+
+    Using the absolute error instead of the relative error is more useful in
+    practice, because it does not inflate errors between very small risks. Since
+    most risks are on the order < 20%, with a risk threshold like 5%, it is
+    easier to interpret an absolute risk difference.
+
+    Further granularity in the variability of risk estimates as a function of
+    risk is obtained by looking at the instability box plot.
+
+    Args:
+        probs: The table of risks estimated by the models. The first column is
+            the model under test, and the other columns are bootstrap models.
+
+    Returns:
+        A mean and confidence interval for the estimate. The units are percent.
+    """
+    
+    absolute_errors = absolute_instability(probs)
+    return absolute_errors.quantile([0.25, 0.5, 0.75])
+
 def plot_instability_boxes(ax: Axes, probs: DataFrame, n_bins: int = 5):
     n_bins = 5
     ordered = probs.sort_values("prob_M0")
     rows_per_bin = int(np.ceil(len(ordered) / n_bins))
 
-    # Get the mean and range of each bin 
+    # Get the mean and range of each bin
     bin_center = []
     bin_width = []
     for start in range(0, len(ordered), rows_per_bin):
@@ -597,32 +680,38 @@ def plot_instability_boxes(ax: Axes, probs: DataFrame, n_bins: int = 5):
         bin_probs = ordered.iloc[start:end, 0]
         upper = bin_probs.max()
         lower = bin_probs.min()
-        bin_center.append(100*(lower + upper) / 2)
-        bin_width.append(100*(upper - lower))
+        bin_center.append(100 * (lower + upper) / 2)
+        bin_width.append(100 * (upper - lower))
 
     # Get the other model's risk predictions
     bins = []
     for start in range(0, len(ordered), rows_per_bin):
         end = start + rows_per_bin
         bootstrap_probs = ordered.iloc[start:end, :]
-        
+
         # Make a table containing the initial risk (from the
         # model under test) and a column for all other risks
-        prob_compare = 100*bootstrap_probs.melt(id_vars="prob_M0", value_name="bootstrap_risk", var_name="initial_risk")
-        
+        prob_compare = 100 * bootstrap_probs.melt(
+            id_vars="prob_M0", value_name="bootstrap_risk", var_name="initial_risk"
+        )
+
         # Round the resulting risk error to 2 decimal places (i.e. to 0.01%). This truncates very small values
         # to zero, which means the resulting log y scale is not artificially extended downwards.
-        absolute_error = (prob_compare["bootstrap_risk"] - prob_compare["prob_M0"]).abs().round(decimals=2)
-        
+        absolute_error = (
+            (prob_compare["bootstrap_risk"] - prob_compare["prob_M0"])
+            .abs()
+            .round(decimals=2)
+        )
+
         bins.append(absolute_error)
 
     other_predictions = pd.concat(bins, axis=1)
 
     ax_hist = ax.twinx()
-    ax_hist.hist(100*probs["prob_M0"], color='lightgreen', alpha=0.5, bins=800)
+    ax_hist.hist(100 * probs["prob_M0"], color="lightgreen", alpha=0.5, bins=800)
     ax_hist.set_ylabel("(Green Histogram) Total Count of Risk Estimates")
 
-    ax.boxplot(other_predictions, positions=bin_center, widths=bin_width, whis=(0,100))
+    ax.boxplot(other_predictions, positions=bin_center, widths=bin_width, whis=(0, 100))
     ax.set_yscale("log")
     ax.set_xscale("log")
     ax.set_ylim([0.01, 100])
@@ -631,7 +720,6 @@ def plot_instability_boxes(ax: Axes, probs: DataFrame, n_bins: int = 5):
     ax.set_ylabel("(Box Plots) Absolute Difference from Bootstraps Estimates")
     ax.set_xlabel("Model-Estimated Risks")
     ax.set_title("Risk Estimate Stability by Risk Level")
-
 
 
 def plot_stability_analysis(

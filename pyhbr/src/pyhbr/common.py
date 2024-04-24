@@ -3,6 +3,9 @@
 A collection of routines used by the data source or analysis functions.
 """
 
+
+from dataclasses import dataclass
+
 import os
 from typing import Callable, Any
 from time import time
@@ -15,7 +18,6 @@ from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
 from sqlalchemy.exc import NoSuchTableError
 from pandas import DataFrame, read_sql, to_datetime, read_pickle, concat
 from git import Repo, InvalidGitRepositoryError
-
 
 def make_engine(
     con_string: str = "mssql+pyodbc://dsn", database: str = "hic_cv_test"
@@ -451,6 +453,23 @@ def mean_confidence_interval(data: Series, confidence: float = 0.95) -> dict[str
     half_width = standard_error * scipy.stats.t.ppf((1 + confidence) / 2.0, n-1)
     return {
         "mean": mean,
+        "confidence": confidence,
         "lower": mean - half_width,
         "upper": mean + half_width
     }
+    
+def median_to_string(instability: DataFrame, unit="%") -> str:
+    """Convert the median-quartile DataFrame to a String
+
+    Args:
+        instability: Table containing three rows, indexed by
+            0.5 (median), 0.25 (lower quartile) and 0.75
+            (upper quartile).
+        unit: What units to add to the values in the string.
+
+    Returns:
+        A string containing the median, and the lower and upper
+            quartiles.
+    """
+    return f"{instability.loc[0.5]:.2f}{unit} [LQ {instability.loc[0.25]:.2f}{unit}, UQ {instability.loc[0.75]:.2f}{unit}]"
+

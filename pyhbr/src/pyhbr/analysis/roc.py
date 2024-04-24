@@ -52,6 +52,9 @@ class AucData:
         """
         return np.mean(self.resample_auc)
 
+    def roc_auc_spread(self) -> DataFrame:
+        return Series(self.resample_auc + [self.model_under_test_auc]).quantile([0.25, 0.5, 0.75])
+
 def get_auc(probs: DataFrame, y_test: Series) -> AucData:
     """Get the area under the ROC curves for the fitted models
     
