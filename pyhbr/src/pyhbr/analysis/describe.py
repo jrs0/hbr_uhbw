@@ -132,12 +132,21 @@ def get_summary_table(
             # with the estimated prevalence for all bins.
             all_calibrations = pd.concat(calibrations)
 
-            absolute_errors = (
-                100
-                * (all_calibrations["bin_center"] - all_calibrations["est_prev"]).abs()
-            )
-            mean_accuracy = absolute_errors.mean()
-            inaccuracies.append(f"{mean_accuracy:.2f}%")
+            # Average relative error where prevalence is non-zero
+            error = 0
+            count = 0
+            for n in range(len(all_calibrations)):
+                if all_calibrations["est_prev"].iloc[n] > 0:
+                    error += all_calibrations["bin_center"].iloc[n] / all_calibrations["est_prev"].iloc[n]
+                    count += 1
+            mean_accuracy = error / count
+
+            # absolute_errors = (
+            #     100
+            #     * (all_calibrations["bin_center"] - all_calibrations["est_prev"]).abs()
+            # )
+            # mean_accuracy = absolute_errors.mean()
+            inaccuracies.append(f"{mean_accuracy:.2f}")
 
             threshold = high_risk_thresholds[outcome]
             y_test = models["y_test"][outcome]
@@ -163,10 +172,10 @@ def get_summary_table(
     return DataFrame(
         {
             "Model": names,
-            "Median Instability": instabilities,
+            "Spread of Instability": instabilities,
             "P(H->L) > 50%": high_risk_reclass,
             "P(L->H) > 50%": low_risk_reclass,
-            "Estimated Absolute Error": inaccuracies,
+            #"Estimated Absolute Error": inaccuracies,
             "ROC AUCs": aucs,
         }
     )

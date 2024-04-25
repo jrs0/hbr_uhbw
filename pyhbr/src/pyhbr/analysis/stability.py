@@ -453,8 +453,8 @@ def plot_reclass_instability(
 
     df = get_reclass_probabilities(probs, y_test, threshold)
 
-    x = df["original_risk"]
-    y = df["unstable_prob"]
+    x = 100*df["original_risk"]
+    y = 100*df["unstable_prob"]
     c = df["outcome"]
     colour_map = {False: "b", True: "r"}
 
