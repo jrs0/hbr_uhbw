@@ -52,7 +52,7 @@ outcome_names = {"bleeding": "B", "ischaemia": "I"}
 summary = describe.get_summary_table(icb_basic_models, high_risk_thresholds, model_names, outcome_names)
 
 # Plot the stability
-outcome = "ischaemia"
+outcome = "bleeding"
 fig, ax = plt.subplots(1, 2)
 probs = fit_results["probs"]
 stability.plot_stability_analysis(ax, outcome, probs, y_test, high_risk_thresholds)

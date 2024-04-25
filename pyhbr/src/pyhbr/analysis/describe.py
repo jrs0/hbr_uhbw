@@ -157,7 +157,7 @@ def get_summary_table(
             auc_data = fit_results["roc_aucs"][outcome]
             auc_spread = Series(
                 auc_data.resample_auc + [auc_data.model_under_test_auc]
-            ).quantile([0.25, 0.5, 0.75])
+            ).quantile([0.025, 0.5, 0.975])
             aucs.append(common.median_to_string(auc_spread, unit=""))
 
     return DataFrame(
@@ -166,7 +166,7 @@ def get_summary_table(
             "Median Instability": instabilities,
             "P(H->L) > 50%": high_risk_reclass,
             "P(L->H) > 50%": low_risk_reclass,
-            "Estimated Mean Inaccuracy": inaccuracies,
+            "Estimated Absolute Error": inaccuracies,
             "ROC AUCs": aucs,
         }
     )

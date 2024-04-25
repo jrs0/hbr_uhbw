@@ -665,7 +665,7 @@ def average_absolute_instability(probs: DataFrame) -> dict[str, float]:
     """
     
     absolute_errors = absolute_instability(probs)
-    return absolute_errors.quantile([0.25, 0.5, 0.75])
+    return absolute_errors.quantile([0.025, 0.5, 0.975])
 
 def plot_instability_boxes(ax: Axes, probs: DataFrame, n_bins: int = 5):
     n_bins = 5
@@ -711,7 +711,7 @@ def plot_instability_boxes(ax: Axes, probs: DataFrame, n_bins: int = 5):
     ax_hist.hist(100 * probs["prob_M0"], color="lightgreen", alpha=0.5, bins=800)
     ax_hist.set_ylabel("(Green Histogram) Total Count of Risk Estimates")
 
-    ax.boxplot(other_predictions, positions=bin_center, widths=bin_width, whis=(0, 100))
+    ax.boxplot(other_predictions, positions=bin_center, widths=bin_width, whis=(2.5, 97.5))
     ax.set_yscale("log")
     ax.set_xscale("log")
     ax.set_ylim([0.01, 100])

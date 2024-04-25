@@ -471,5 +471,5 @@ def median_to_string(instability: DataFrame, unit="%") -> str:
         A string containing the median, and the lower and upper
             quartiles.
     """
-    return f"{instability.loc[0.5]:.2f}{unit} [LQ {instability.loc[0.25]:.2f}{unit}, UQ {instability.loc[0.75]:.2f}{unit}]"
+    return f"{instability.loc[0.5]:.2f}{unit} [LQ {instability.loc[0.025]:.2f}{unit}, UQ {instability.loc[0.975]:.2f}{unit}]"
 
