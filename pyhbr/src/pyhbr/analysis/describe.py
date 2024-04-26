@@ -1,4 +1,6 @@
 from typing import Any
+from dataclasses import dataclass
+
 from pandas import Series, DataFrame
 import pandas as pd
 import numpy as np
@@ -96,19 +98,34 @@ def nearly_constant(data: DataFrame, threshold: float) -> Series:
 
     return data.apply(low_variance).rename("nearly_constant")
 
+@dataclass
+class Names:
+    model_names: dict[str, str]
+    outcome_names: dict[str, str]
+    
+    def model_name(self, model: str, outcome: str) -> str:
+        """Get the short name for a model
+
+        Args:
+            model: The model key
+            outcome: The outcome key
+
+        Returns:
+            A short name for the model, for use in reports.
+        """
+        return f"{self.model_names[model]}-{self.outcome_names[outcome]}"
 
 def get_summary_table(
     models: dict[str, Any],
     high_risk_thresholds: dict[str, float],
-    model_names: dict[str, str],
-    outcome_names: dict[str, str]
+    names: Names
 ):
     """Get a table of model metric comparison across different models
 
     Args:
         models: Model saved data
     """
-    names = []
+    model_names = []
     instabilities = []
     aucs = []
     risk_accuracy = []
@@ -117,7 +134,7 @@ def get_summary_table(
 
     for model, fit_results in models["fit_results"].items():
         for outcome in ["bleeding", "ischaemia"]:
-            names.append(f"{model_names[model]} ({outcome_names[outcome]})")
+            model_names.append(names.model_name(model, outcome))
 
             probs = fit_results["probs"]
 
@@ -182,7 +199,7 @@ def get_summary_table(
 
     return DataFrame(
         {
-            "Model": names,
+            "Model": model_names,
             "Spread of Instability": instabilities,
             "P(H->L) > 50%": high_risk_reclass,
             "P(L->H) > 50%": low_risk_reclass,
