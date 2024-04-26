@@ -157,7 +157,7 @@ def get_summary_table(
             # assuming all the distributions are normal.
             ci_upper = accuracy_mean + 1.96*np.sqrt(accuracy_variance)
             ci_lower = accuracy_mean - 1.96*np.sqrt(accuracy_variance)
-            risk_accuracy.append(f"{100*accuracy_mean:.2f}%, 95% CI [{100*ci_lower}%, {100*ci_upper}%]")
+            risk_accuracy.append(f"{100*accuracy_mean:.2f}%, 95% CI [{100*ci_lower:.2f}%, {100*ci_upper:.2f}%]")
 
             threshold = high_risk_thresholds[outcome]
             y_test = models["y_test"][outcome]
@@ -186,7 +186,7 @@ def get_summary_table(
             "Spread of Instability": instabilities,
             "P(H->L) > 50%": high_risk_reclass,
             "P(L->H) > 50%": low_risk_reclass,
-            "Estimated Risk Accuracy": risk_accuracy,
-            "ROC AUCs": aucs,
+            "Estimated Risk Uncertainty": risk_accuracy,
+            "ROC AUC": aucs,
         }
     )
