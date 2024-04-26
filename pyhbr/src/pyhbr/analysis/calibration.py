@@ -93,6 +93,7 @@ def get_variable_width_calibration(
         # Get the confidence intervals for each bin
         est_prev = []
         est_prev_err = []
+        est_prev_variance = []
         actual_samples_per_bin = []
         num_events = []
         for b in bins:
@@ -107,6 +108,7 @@ def get_variable_width_calibration(
             prevalence_ci = get_prevalence(equal_risk_group)
             est_prev_err.append((prevalence_ci["upper"] - prevalence_ci["lower"]) / 2)
             est_prev.append(prevalence_ci["prevalence"])
+            est_prev_variance.append(prevalence_ci["variance"])
 
         # Add the data to the calibration list
         df = DataFrame(
@@ -115,6 +117,7 @@ def get_variable_width_calibration(
                 "bin_half_width": bin_half_width,
                 "est_prev": est_prev,
                 "est_prev_err": est_prev_err,
+                "est_prev_variance": est_prev_variance,
                 "samples_per_bin": actual_samples_per_bin,
                 "num_events": num_events,
             }
@@ -356,18 +359,23 @@ def get_prevalence(y_test: Series):
             mean of the Bernoulli distribution, and "lower"
             and "upper" for the estimated confidence interval,
             assuming all patients in the risk group are drawn
-            from a single Bernoulii distribution.
+            from a single Bernoulii distribution. The "variance"
+            is the estimate of the sample variance of the estimated
+            prevalence, and can be used to form an average of
+            the accuracy uncertainties in each bin.
 
             Note that the assumption of a Bernoulli distribution
             is not necessarily accurate.
     """
     n_group_size = len(y_test)
     p_hat = np.mean(y_test)
-    half_width = 1.96 * np.sqrt((p_hat * (1 - p_hat)) / n_group_size)
+    variance = (p_hat * (1 - p_hat)) / n_group_size # square of standard error of Bernoulli
+    half_width = 1.96 * np.sqrt(variance) # Estimate of 95% confidence interval
     return {
         "prevalence": p_hat,
         "lower": p_hat - half_width,
         "upper": p_hat + half_width,
+        "variance": variance
     }
 
 def make_error_boxes(ax: Axes, calibration: DataFrame):

@@ -1,6 +1,7 @@
 from typing import Any
 from pandas import Series, DataFrame
 import pandas as pd
+import numpy as np
 
 from pyhbr.analysis import roc
 from pyhbr.analysis import stability
@@ -110,7 +111,7 @@ def get_summary_table(
     names = []
     instabilities = []
     aucs = []
-    inaccuracies = []
+    risk_accuracy = []
     low_risk_reclass = []
     high_risk_reclass = []
 
@@ -133,20 +134,30 @@ def get_summary_table(
             all_calibrations = pd.concat(calibrations)
 
             # Average relative error where prevalence is non-zero
-            error = 0
+            accuracy_mean = 0
+            accuracy_variance = 0
             count = 0
             for n in range(len(all_calibrations)):
                 if all_calibrations["est_prev"].iloc[n] > 0:
-                    error += all_calibrations["bin_center"].iloc[n] / all_calibrations["est_prev"].iloc[n]
+                    
+                    # This assumes that all risk predictions in the bin are at the bin center, with no
+                    # distribution (i.e. the result is normal with a distribution based on the sample
+                    # mean of the prevalence. For more accuracy, consider using the empirical distribution
+                    # of the risk predictions in the bin as the basis for this calculation.
+                    accuracy_mean += np.abs(all_calibrations["bin_center"].iloc[n] - all_calibrations["est_prev"].iloc[n])
+                    
+                    # When adding normal distributions together, the variances sum.
+                    accuracy_variance += all_calibrations["est_prev_variance"].iloc[n]
+                    
                     count += 1
-            mean_accuracy = error / count
-
-            # absolute_errors = (
-            #     100
-            #     * (all_calibrations["bin_center"] - all_calibrations["est_prev"]).abs()
-            # )
-            # mean_accuracy = absolute_errors.mean()
-            inaccuracies.append(f"{mean_accuracy:.2f}")
+            accuracy_mean /= count
+            accuracy_variance /= count
+            
+            # Calculate a 95% confidence interval for the resulting mean of the accuracies,
+            # assuming all the distributions are normal.
+            ci_upper = accuracy_mean + 1.96*np.sqrt(accuracy_variance)
+            ci_lower = accuracy_mean - 1.96*np.sqrt(accuracy_variance)
+            risk_accuracy.append(f"{100*accuracy_mean:.2f}%, 95% CI [{100*ci_lower}%, {100*ci_upper}%]")
 
             threshold = high_risk_thresholds[outcome]
             y_test = models["y_test"][outcome]
@@ -175,7 +186,7 @@ def get_summary_table(
             "Spread of Instability": instabilities,
             "P(H->L) > 50%": high_risk_reclass,
             "P(L->H) > 50%": low_risk_reclass,
-            #"Estimated Absolute Error": inaccuracies,
+            "Estimated Risk Accuracy": risk_accuracy,
             "ROC AUCs": aucs,
         }
     )
