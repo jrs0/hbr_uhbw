@@ -23,6 +23,34 @@ prevalence_outcomes = describe.get_column_rates(outcomes)
 print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
 
+# Create a table of dataset and outcomes information
+binary_outcomes = binary_outcomes > 0
+start_date = icb_basic_data["icb_basic_tmp"]["index_start"]
+end_date = icb_basic_data["icb_basic_tmp"]["index_end_date"]
+num_acs = len(binary_outcomes)
+fatal_bleeding = binary_outcomes.sum().loc["death_bleeding"]
+total_bleeding = binary_outcomes.sum().loc["bleeding"]
+non_fatal_bleeding = total_bleeding - fatal_bleeding
+fatal_ischaemia = binary_outcomes.sum().loc["death_ischaemia"]
+total_ischaemia = binary_outcomes.sum().loc["ischaemia"]
+non_fatal_ischaemia = total_ischaemia - fatal_ischaemia
+all_cause_death = binary_outcomes.sum().loc["death_all_cause"]
+
+# Folder in which to save plots and other data
+res_folder = "../hbr_papers/resources/"
+
+outcomes_map = {
+    "Any Bleeding": f"{int(total_bleeding)} ({100*total_bleeding/num_acs:.2f}%)",
+    "Fatal Bleeding": f"{int(fatal_bleeding)} ({100*fatal_bleeding/num_acs:.2f}%)",
+    "Non-Fatal Bleeding": f"{int(non_fatal_bleeding)} ({100*non_fatal_bleeding/num_acs:.2f}%)",
+    "Any Ischaemia": f"{int(total_ischaemia)} ({100*total_ischaemia/num_acs:.2f}%)",
+    "Fatal Ischaemia": f"{int(fatal_ischaemia)} ({100*fatal_ischaemia/num_acs:.2f}%)",
+    "Non-Fatal Ischaemia": f"{int(non_fatal_ischaemia)} ({100*non_fatal_ischaemia/num_acs:.2f}%)"
+}
+outcomes_table = pd.DataFrame({"Event": outcomes_map.keys(), "Patient Count": outcomes_map.values()})
+with open(res_folder + "outcomes.tex", 'w') as f:
+     f.write(outcomes_table.to_latex())
+
 # Check prescriptions
 missing_prescriptions = describe.proportion_missingness(features_prescriptions)
 print("The amount of missing data in the prescriptions columns is:")

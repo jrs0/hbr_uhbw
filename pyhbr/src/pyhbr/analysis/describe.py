@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pandas import Series, DataFrame
 import pandas as pd
 import numpy as np
+import scipy
 
 from pyhbr.analysis import roc
 from pyhbr.analysis import stability
@@ -207,3 +208,43 @@ def get_summary_table(
             "ROC AUC": aucs,
         }
     )
+
+def pvalue_chi2_high_risk_vs_outcome(
+    probs: DataFrame, y_test: Series, high_risk_threshold: float
+) -> float:
+    """Perform a Chi-2 hypothesis test on the contingency between estimated high risk and outcome
+    
+    Get the p-value from the hypothesis test that there is no association
+    between the estimated high-risk category, and the outcome. The p-value
+    is interpreted as the probability of getting obtaining the outcomes 
+    corresponding to the model's estimated high-risk category under the
+    assumption that there is no association between the two.
+
+    Args:
+        probs: The model-estimated probabilities (first column is used)
+        y_test: Whether the outcome occurred
+        high_risk_threshold: The cut-off risk (probability) defining an
+            estimate to be high risk.
+
+    Returns:
+        The p-value for the hypothesis test.
+    """
+
+    # Get the cases (True) where the model estimated a risk
+    # that puts the patient in the high risk category
+    estimated_high_risk = (probs.iloc[:, 0] > high_risk_threshold).rename(
+        "estimated_high_risk"
+    )
+
+    # Get the instances (True) in the test set where the outcome
+    # occurred
+    outcome_occurred = y_test.rename("outcome_occurred")
+
+    # Create a contingency table of the estimated high risk
+    # vs. whether the outcome occurred.
+    table = pd.crosstab(estimated_high_risk, outcome_occurred)
+
+    # Hypothesis test whether the estimated high risk category
+    # is related to the outcome (null hypothesis is that there
+    # is no relation).
+    return scipy.stats.chi2_contingency(table.to_numpy()).pvalue
