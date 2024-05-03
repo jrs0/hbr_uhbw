@@ -287,12 +287,12 @@ p_a_i_b = q * (1-p) * p_b_i_b + (1-q) * p_b_i_b + q * (1-p) * p * p_b_ni_b
 #     risk, but not modifying DAPT medication, so that the ischaemia risk is
 #     not increased. Due to the less aggressive intervention, the probability
 #     of removing the bleeding event is less compared to X.
-# NI/NB, I/NB: Do not intervene.
+# */NB: Do not intervene (depends only on bleeding prediction)
 #
 # To make the interventions more general, use the following notation:
 #
-# X: P(remove bleeding) = b_x, P(add ischaemia) = i_x
-# Y: P(remove bleeding) = b_y, P(add ischaemia) = i_y
+# X: P(remove bleeding) = x_b, P(add ischaemia) = x_i
+# Y: P(remove bleeding) = y_b, P(add ischaemia) = y_i
 #
 # Note that both X and Y can only reduce bleeding and increase ischaemia
 # in this model. Note also that X and Y are mutually exclusive.
@@ -311,7 +311,7 @@ y_i = 0.0 # Y: No modification of DAPT
 # the outcome does not change.
 
 # Previous NI/NB, correct no intervene
-a_0 = q_b * p_b_ni_nb 
+a_0 = q_b * p_b_ni_nb
 # Previous NI/NB, incorrect X, bleeding already none, no increase in ischaemia
 a_1 = q_i * (1-q_b) * (1-x_i) * p_b_ni_nb 
 # Previous NI/NB, incorrect Y, bleeding already none, no increase in ischaemia
@@ -326,9 +326,9 @@ p_a_ni_nb = a_0 + a_1 + a_2 + a_3 + a_4
 # Previous NI/B, incorrect no intervene
 a_0 = (1-q_b) * p_b_ni_b
 # Previous NI/B, incorrect Y, no reduction in bleeding/increase in ischaemia
-a_1 = q_i * (1-q_b) * (1-y_i) * (1-y_b) * p_b_ni_b
+a_1 = (1-q_i) * q_b * (1-y_i) * (1-y_b) * p_b_ni_b
 # Previous NI/B, correct X, no reduction in bleeding/increase in ischaemia
-a_2 = q_i * q_b * (1-x_i) * (1-y_b) * p_b_ni_b
+a_2 = q_i * q_b * (1-x_i) * (1-x_b) * p_b_ni_b
 # Add up all the terms
 p_a_ni_b = a_0 + a_1 + a_2
 
@@ -350,19 +350,17 @@ a_6 = q_i * q_b * x_i * x_b * p_b_ni_b
 p_a_i_nb = a_0 + a_1 + a_2 + a_3 + a_4 + a_5 + a_6
 
 # Previous I/B, incorrect no intervene
-a_0 = (1-q_i) * (1-q_b) * p_b_i_b
+a_0 = (1-q_b) * p_b_i_b
 # Previous I/B, correct Y, ischaemia already present, no reduction in bleeding
 a_1 = q_i * q_b * (1-y_b) * p_b_i_b
 # Previous I/B, incorrect X, ischaemia already present, no reduction in bleeding
 a_2 = (1-q_i) * q_b * (1-x_b) * p_b_i_b
-# Previous NI/B, incorrect no intervene
-a_3 = (1-q_b) * p_b_ni_b
 # Previous NI/B, incorrect Y, ischaemia added, no reduction in bleeding
-a_4 = (1-q_i) * q_b * (1-y_i) * (1-y_b) * p_b_ni_b
+a_3 = (1-q_i) * q_b * y_i * (1-y_b) * p_b_ni_b
 # Previous NI/B, correct X, ischaemia added, no reduction in bleeding
-a_5 = q_i * q_b * (1-x_i) * (1-x_b) * p_b_ni_b
+a_4 = q_i * q_b * x_i * (1-x_b) * p_b_ni_b
 # Add up all the terms 
-p_a_i_b = a_0 + a_1 + a_2 + a_3 + a_4 + a_5
+p_a_i_b = a_0 + a_1 + a_2 + a_3 + a_4
 
 
 # Print outcome rates
