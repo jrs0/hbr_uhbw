@@ -297,12 +297,19 @@ p_a_i_b = q * (1-p) * p_b_i_b + (1-q) * p_b_i_b + q * (1-p) * p * p_b_ni_b
 # Note that both X and Y can only reduce bleeding and increase ischaemia
 # in this model. Note also that X and Y are mutually exclusive.
 #
-q_b = 0.8
-q_i = 0.8
-x_b = 0.3 # X: Modification of DAPT reduces bleeding
-x_i = 0.3 # X: Modification of DAPT increases ischaemia
-y_b = 0.1 # Y: Less aggressive bleeding reduction
-y_i = 0.0 # Y: No modification of DAPT 
+# Notethat splitting the interventions into X and Y in this model
+# may be misleading, because those in the ideal Y group have a deterministic
+# ischaemia event anyway, so there is no improvement due to the reduced
+# intensity of Y. If the model included a model of patient risk which is
+# modified by the interventions X and Y, then the reduced intensity of 
+# Y would be beneficial (this also matches reality better).
+#
+q_b = 0.95
+q_i = 0.95
+x_b = 0.5 # X: Modification of DAPT reduces bleeding
+x_i = 0.5 # X: Modification of DAPT increases ischaemia
+y_b = 0.5 # Y: Less aggressive bleeding reduction
+y_i = 0.5 # Y: No modification of DAPT 
 
 # Probabilities of each outcome are worked out below. Note that
 # X and Y can only reduce bleeding and increase ischaemia, which
@@ -362,7 +369,6 @@ a_4 = q_i * q_b * x_i * (1-x_b) * p_b_ni_b
 # Add up all the terms 
 p_a_i_b = a_0 + a_1 + a_2 + a_3 + a_4
 
-
 # Print outcome rates
 p_a_ni_nb
 p_a_i_nb
@@ -370,14 +376,16 @@ p_a_ni_b
 p_a_i_b
 p_a_ni_nb + p_a_i_nb + p_a_ni_b + p_a_i_b
 
-bleeding_rate_before = p_b_i_b + p_b_ni_b
-bleeding_rate_after = p_a_i_b + p_a_ni_b
-ischaemia_rate_before = p_b_i_b + p_b_i_nb
-ischaemia_rate_after = p_a_i_b + p_a_i_nb
+n = 5000
 
-# Get the total bleeding probability
-print(f"Bleeding rate: {bleeding_rate_after}")
-print(f"Ischaemia rate: {ischaemia_rate_after}")
-print(f"Bleeding decrease: {bleeding_rate_before - bleeding_rate_after}")
-print(f"Ischaemia increase: {ischaemia_rate_after - ischaemia_rate_before}")
+bleeding_before = n * (p_b_i_b + p_b_ni_b)
+bleeding_after = n * (p_a_i_b + p_a_ni_b)
+ischaemia_before = n * (p_b_i_b + p_b_i_nb)
+ischaemia_after = n * (p_a_i_b + p_a_i_nb)
 
+bleeding_increase = bleeding_after - bleeding_before
+ischaemia_increase = ischaemia_after - ischaemia_before
+trade_off = - bleeding_increase - ischaemia_increase
+print(f"Bleeding: {bleeding_before} -> {bleeding_after} ({bleeding_increase})")
+print(f"Ischaemia: {ischaemia_before} -> {ischaemia_after} ({ischaemia_increase})")
+print(f"Trade-off (bleeding decrease - ischaemia increase, positive good): {trade_off}")
