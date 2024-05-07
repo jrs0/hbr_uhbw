@@ -56,7 +56,7 @@ st.write(
     "Using the baseline prevalence, the accuracy of the model, and the efficacy of the intervention, the expected change in outcome proportions can be calculated, and compared to the baseline prevalences."
 )
 st.write(
-    "The usefullness of the tool depends on the absolute number of bleeding events removed and ischaemia events introduced, the use of the tool is either "
+    "The usefulness of the tool depends on the absolute number of bleeding events removed and ischaemia events introduced."
 )
 
 baseline_container = st.container(border=True)
