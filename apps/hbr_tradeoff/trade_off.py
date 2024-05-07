@@ -99,7 +99,7 @@ p_b_i_b = baseline_container.number_input(
     "Proportion with bleeding and ischaemia (%)",
     min_value=0.0,
     max_value=100.0,
-    value=100 * p_b_i_b,
+    value=1.0,
 )
 
 total_prob = p_b_ni_nb + p_b_ni_b + p_b_i_nb + p_b_i_b
