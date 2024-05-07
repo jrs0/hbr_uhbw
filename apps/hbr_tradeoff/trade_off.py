@@ -95,14 +95,16 @@ p_b_ni_b = (
     )
     / 100.0
 )
-p_b_i_b = 1.0 - p_b_ni_nb - p_b_i_nb - p_b_ni_b
-baseline_container.number_input(
+p_b_i_b = baseline_container.number_input(
     "Proportion with bleeding and ischaemia (%)",
     min_value=0.0,
     max_value=100.0,
     value=100 * p_b_i_b,
 )
 
+total_prob = p_b_ni_nb + p_b_ni_b + p_b_i_nb + p_b_i_b
+if np.abs(total_prob - 1.0) > 1e-5:
+    st.error(f"Total proportions must add up to 100%; these add up to {100*total_prob:.2f}%")
 
 def get_ppv(fpr: float, fnr: float, prev: float) -> float:
     """Calculate the positive predictive value.
