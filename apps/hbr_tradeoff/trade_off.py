@@ -844,22 +844,16 @@ output_container.write(
 )
 
 output_container.write(
-    f"**By using the tool on {n} patients, the expected changes in numbers of outcomes are as follows:**"
+    f"**Expected changes in outcomes of a pool of {n} patients, compared to baseline**"
 )
 
 bleeding_increase = int(bleeding_after - bleeding_before)
-output_container.write(
-    f"**Bleeding: {bleeding_before} -> {bleeding_after} ({bleeding_increase:+d})**"
-)
-
 ischaemia_increase = ischaemia_after - ischaemia_before
-output_container.write(
-    f"**Ischaemia: {ischaemia_before} -> {ischaemia_after} ({ischaemia_increase:+d})**"
-)
+previous_adverse_outcomes = bleeding_before + ischaemia_before
+total_adverse_outcomes = bleeding_after + ischaemia_after
+outcome_difference = total_adverse_outcomes - previous_adverse_outcomes
 
-output_container.write(
-    "A benefit to using the tool is achieved if absolute numbers of bleeding events removed are not outweighed by ischaemia outcomes introduced. A positive number here means more bleeding was removed than ischaemia was added:"
-)
-
-trade_off = -bleeding_increase - ischaemia_increase
-output_container.write(f"**Bleeding removed - ischaemia added: {trade_off:d}**")
+col1, col2, col3 = output_container.columns(3)
+col1.metric("Bleeding", bleeding_after, bleeding_increase, delta_color="inverse")
+col2.metric("Ischaemia", ischaemia_after, ischaemia_increase, delta_color="inverse")
+col3.metric("Total Adverse Outcomes", total_adverse_outcomes, outcome_difference, delta_color="inverse")
