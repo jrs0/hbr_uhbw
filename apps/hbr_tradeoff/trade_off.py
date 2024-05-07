@@ -47,10 +47,10 @@ st.write(
     "In this model, patients are assumed to have predetermined outcomes, which occur deterministically in proportions which match the observed prevalence of bleeding and ischaemia outcomes (**Input 1**)."
 )
 st.write(
-    "In the model, a tool attempts to predict who will have adverse events. An intervention is applied to the patients determined to be at high bleeding risk."
+    "In the model, a tool attempts to predict who will have adverse events, with a certain degree of success (**Input 2**). An intervention is applied to the patients determined to be at high bleeding risk."
 )
 st.write(
-    "The intervention is assumed to remove a bleeding event with a particular probability, and add an ischaemia event with a particular probability."
+    "The intervention is assumed to remove a bleeding event with a particular probability, and add an ischaemia event with a particular probability (**Input 3**)."
 )
 st.write(
     "Using the baseline prevalence, the accuracy of the model, and the efficacy of the intervention, the expected change in outcome proportions can be calculated, and compared to the baseline prevalences."
@@ -619,7 +619,7 @@ st.write(
 )
 
 intervention_container = st.container(border=True)
-intervention_container.header("Input 2: Intervention Effectiveness", divider=True)
+intervention_container.header("Input 3: Intervention Effectiveness", divider=True)
 intervention_container.write("Set the probabilities for each intervention to reduce bleeding, and increase ischaemia.")
 intervention_container.write("In this model, an intervention can only reduce the chance of bleeding, and can only increase the chance of ischaemia.")
 x_and_y_separate = intervention_container.toggle(
