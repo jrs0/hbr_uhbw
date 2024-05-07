@@ -95,16 +95,22 @@ p_b_ni_b = (
     )
     / 100.0
 )
-p_b_i_b = baseline_container.number_input(
-    "Proportion with bleeding and ischaemia (%)",
-    min_value=0.0,
-    max_value=100.0,
-    value=1.0,
+p_b_i_b = (
+    baseline_container.number_input(
+        "Proportion with bleeding and ischaemia (%)",
+        min_value=0.0,
+        max_value=100.0,
+        value=1.0,
+    )
+    / 100
 )
 
 total_prob = p_b_ni_nb + p_b_ni_b + p_b_i_nb + p_b_i_b
 if np.abs(total_prob - 1.0) > 1e-5:
-    st.error(f"Total proportions must add up to 100%; these add up to {100*total_prob:.2f}%")
+    st.error(
+        f"Total proportions must add up to 100%; these add up to {100*total_prob:.2f}%"
+    )
+
 
 def get_ppv(fpr: float, fnr: float, prev: float) -> float:
     """Calculate the positive predictive value.
@@ -466,7 +472,7 @@ else:
             key="input_q_b_fnr",
             min_value=0.0,
             max_value=100.0,
-            value=100*(1 - st.session_state["q_b_tpr"]),
+            value=100 * (1 - st.session_state["q_b_tpr"]),
             step=0.1,
             help="A low false-negative rate is the same as a high true-positive rate, which increases the chance of identifting high-bleedin-risk patients who require intervention.",
         )
@@ -478,7 +484,7 @@ else:
             key="input_q_b_fpr",
             min_value=0.0,
             max_value=100.0,
-            value=100*(1 - st.session_state["q_b_tnr"]),
+            value=100 * (1 - st.session_state["q_b_tnr"]),
             step=0.1,
             help="A low false-positive rate prevents low-bleeding-risk patients being exposed to an intervention unnecessarily.",
         )
@@ -523,7 +529,7 @@ else:
             key="input_q_i_fnr",
             min_value=0.0,
             max_value=100.0,
-            value=100*(1 - st.session_state["q_i_tpr"]),
+            value=100 * (1 - st.session_state["q_i_tpr"]),
             step=0.1,
             help="A low false-negative rate is the same as a high true-positive rate, which increases the chance of identifting high-ischaemia-risk patients who require intervention.",
         )
@@ -535,7 +541,7 @@ else:
             key="input_q_i_fpr",
             min_value=0.0,
             max_value=100.0,
-            value=100*(1 - st.session_state["q_i_tnr"]),
+            value=100 * (1 - st.session_state["q_i_tnr"]),
             step=0.1,
             help="A low false-positive rate prevents low-ischaemia-risk patients being exposed to an intervention unnecessarily.",
         )
@@ -548,25 +554,36 @@ q_b_tnr = st.session_state["q_b_tnr"]
 q_i_tpr = st.session_state["q_i_tpr"]
 q_i_tnr = st.session_state["q_i_tnr"]
 
-roc_expander = st.expander("**What ROC Curve would achieve this accuracy?**", expanded=False)
+roc_expander = st.expander(
+    "**What ROC Curve would achieve this accuracy?**", expanded=False
+)
 
 roc_container = roc_expander.container(border=True)
 roc_container.header("Required ROC Curves", divider=True)
-roc_container.write("The ROC curve is a plot of true-positive rate on the y-axis against false-positive rate on the x-axis, for various thresholds that might be used to decide that a patient is high risk.")
-roc_container.write("The accuracy specification above determines a single coordinate on this plot, which the ROC curve must pass though if the model is to have the required accuracy. Better models will require the ROC curve to pass through a point near the top-left corner.")
-roc_container.write("The area under the ROC curve (AUC) is only relevant insofar as a ROC curve passing through a point near the top-left corner will likely have a high AUC.")
-roc_container.write("Below, two hypothetical ROC curves are plotted (one for the bleeding model and one for the ischaemia model), which pass through the required points.")
+roc_container.write(
+    "The ROC curve is a plot of true-positive rate on the y-axis against false-positive rate on the x-axis, for various thresholds that might be used to decide that a patient is high risk."
+)
+roc_container.write(
+    "The accuracy specification above determines a single coordinate on this plot, which the ROC curve must pass though if the model is to have the required accuracy. Better models will require the ROC curve to pass through a point near the top-left corner."
+)
+roc_container.write(
+    "The area under the ROC curve (AUC) is only relevant insofar as a ROC curve passing through a point near the top-left corner will likely have a high AUC."
+)
+roc_container.write(
+    "Below, two hypothetical ROC curves are plotted (one for the bleeding model and one for the ischaemia model), which pass through the required points."
+)
 
 fig, ax = plt.subplots()
 
+
 def simple_auc(tpr: float, tnr: float) -> float:
     """Simple estimate of required AUC
-    
+
     Assuming a ROC curve that passes through one point defined by
     the give true-positive and true-negative rates, calculate the
     area under the piecewise-linear ROC curve.
 
-    A ROC curve is a plot of the true-positive rate on the y-axis 
+    A ROC curve is a plot of the true-positive rate on the y-axis
     against the false-positive rate (1 - true-negative rate) on
     the x-axis.
 
@@ -578,28 +595,23 @@ def simple_auc(tpr: float, tnr: float) -> float:
         The required estimated AUC
     """
     # Calculate each area component
-    middle_rect = tnr * tpr # note x-axis is inverted
+    middle_rect = tnr * tpr  # note x-axis is inverted
     left_triangle = 0.5 * (1 - tnr) * tpr
     right_triangle = 0.5 * tnr * (1 - tpr)
     return middle_rect + left_triangle + right_triangle
+
 
 # Plot baseline
 ax.plot([0.0, 100], [0.0, 100], "--")
 
 # Bleeding model ROC
-data={
-    "x": [0.0, 100*(1-q_b_tnr),100.0],
-    "y": [0.0, 100*q_b_tpr, 100.0]
-}
+data = {"x": [0.0, 100 * (1 - q_b_tnr), 100.0], "y": [0.0, 100 * q_b_tpr, 100.0]}
 auc = simple_auc(q_b_tpr, q_b_tnr)
 ax.plot(data["x"], data["y"], color="r", label=f"Bleeding model (AUC > {auc:.2f})")
 ax.fill_between(data["x"], data["y"], [0.0] * 3, color="r", alpha=0.05)
 
 # Ischaemia model ROC
-data={
-    "x": [0.0, 100*(1-q_i_tnr),100.0],
-    "y": [0.0, 100*q_i_tpr, 100.0]
-}
+data = {"x": [0.0, 100 * (1 - q_i_tnr), 100.0], "y": [0.0, 100 * q_i_tpr, 100.0]}
 auc = simple_auc(q_i_tpr, q_i_tnr)
 ax.plot(data["x"], data["y"], color="b", label=f"Ischaemia model (AUC > {auc:.2f})")
 ax.fill_between(data["x"], data["y"], [0.0] * 3, color="b", alpha=0.05)
@@ -610,8 +622,10 @@ ax.set_title("Bleeding Model")
 ax.legend(loc="lower right")
 
 roc_container.pyplot(fig)
-roc_container.write("The ROC AUC is calculated for the minimum convex shapes that pass through the required point. A more realistic ROC curve that passes through the point would likely have a slightly higher area, due to the extra curvature in the straight segments.")
-                    
+roc_container.write(
+    "The ROC AUC is calculated for the minimum convex shapes that pass through the required point. A more realistic ROC curve that passes through the point would likely have a slightly higher area, due to the extra curvature in the straight segments."
+)
+
 
 st.write(
     "When the tool predicts a bleed, one of two interventions are made. If no ischaemia is predicted, an aggressive intervention $X$ is made (e.g. a change in DAPT therapy), which has $X_b\%$ chance to remove a bleeding event, and $X_i\%$ chance to add an ischaemia event."
@@ -622,8 +636,12 @@ st.write(
 
 intervention_container = st.container(border=True)
 intervention_container.header("Input 3: Intervention Effectiveness", divider=True)
-intervention_container.write("Set the probabilities for each intervention to reduce bleeding, and increase ischaemia.")
-intervention_container.write("In this model, an intervention can only reduce the chance of bleeding, and can only increase the chance of ischaemia.")
+intervention_container.write(
+    "Set the probabilities for each intervention to reduce bleeding, and increase ischaemia."
+)
+intervention_container.write(
+    "In this model, an intervention can only reduce the chance of bleeding, and can only increase the chance of ischaemia."
+)
 x_and_y_separate = intervention_container.toggle(
     "Y is different from X",
     value=False,
@@ -647,7 +665,7 @@ if not x_and_y_separate:
             key="input_xy_b",
             min_value=0.0,
             max_value=100.0,
-            value=100*st.session_state["x_b"],
+            value=100 * st.session_state["x_b"],
             step=0.1,
         )
         / 100.0
@@ -659,7 +677,7 @@ if not x_and_y_separate:
             key="input_xy_i",
             min_value=0.0,
             max_value=100.0,
-            value=100*st.session_state["x_i"],
+            value=100 * st.session_state["x_i"],
             step=0.1,
         )
         / 100.0
@@ -675,7 +693,7 @@ else:
             key="input_x_b",
             min_value=0.0,
             max_value=100.0,
-            value=100*st.session_state["x_b"],
+            value=100 * st.session_state["x_b"],
             step=0.1,
         )
         / 100.0
@@ -683,10 +701,10 @@ else:
     st.session_state["x_i"] = (
         intervention_columns[0].number_input(
             "Probability that an ischaemia event is removed (%)",
-             key="input_x_i",
+            key="input_x_i",
             min_value=0.0,
             max_value=100.0,
-            value=100*st.session_state["x_i"],
+            value=100 * st.session_state["x_i"],
             step=0.1,
         )
         / 100.0
@@ -694,10 +712,10 @@ else:
     st.session_state["y_b"] = (
         intervention_columns[1].number_input(
             "Probability that a bleeding event is removed (%)",
-             key="input_y_b",
+            key="input_y_b",
             min_value=0.0,
             max_value=100.0,
-            value=100*st.session_state["y_b"],
+            value=100 * st.session_state["y_b"],
             step=0.1,
         )
         / 100.0
@@ -705,10 +723,10 @@ else:
     st.session_state["y_i"] = (
         intervention_columns[1].number_input(
             "Probability that an ischaemia event is removed (%)",
-             key="input_y_i",
+            key="input_y_i",
             min_value=0.0,
             max_value=100.0,
-            value=100*st.session_state["y_i"],
+            value=100 * st.session_state["y_i"],
             step=0.1,
         )
         / 100.0
@@ -720,8 +738,12 @@ x_i = st.session_state["x_i"]
 y_b = st.session_state["y_b"]
 y_i = st.session_state["y_i"]
 
-st.write("Based on the inputs above, there is a probability that a patient's outcomes will be correctly predicted, and a probability that an intervention to reduce bleeding will be successful (i.e. reduce bleeding and not increase ischaemia).")
-st.write("There will also be patients who would not have had any adverse event, but which are flagged as high bleeding risk and have an intervention which introduces ischaemia.")
+st.write(
+    "Based on the inputs above, there is a probability that a patient's outcomes will be correctly predicted, and a probability that an intervention to reduce bleeding will be successful (i.e. reduce bleeding and not increase ischaemia)."
+)
+st.write(
+    "There will also be patients who would not have had any adverse event, but which are flagged as high bleeding risk and have an intervention which introduces ischaemia."
+)
 st.write("The balance between these two competing effects is calculated below.")
 
 # Probabilities of each outcome are worked out below. Note that
@@ -731,7 +753,7 @@ st.write("The balance between these two competing effects is calculated below.")
 # the outcome does not change.
 
 # True-positive rates (TPR) and true-negative rates (TNR) are used to calculate
-# the probability of having an outcome predicted correctly. These 
+# the probability of having an outcome predicted correctly. These
 # are the correct numbers to use, because the TPR (TNR) is the probability
 # of the test being correct given that a patient is positive (negative) --
 # see the wiki page for sensitivity and specificity (alternative names for
