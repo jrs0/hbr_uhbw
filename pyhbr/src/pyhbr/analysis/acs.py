@@ -271,11 +271,11 @@ def get_outcomes(
     """
 
     bleeding_groups = ["bleeding_adaptt"]
-    ischaemia_groups = ["hussain_ami_stroke"]
+    ischaemia_groups = ["ami_stroke_ohm"]
     primary_only = True
     exclude_index_spell = False
     first_episode_only = False
-    min_after = dt.timedelta(days=3)
+    min_after = dt.timedelta(hours=48)
     max_after = dt.timedelta(days=365)
 
     mortality_after_index = (

@@ -125,17 +125,54 @@ The primary disadvantage is the use of an all-hospital-bleeding definition. Howe
 
 No PPV is available for this code group. A basic chart review should be performed on the patients identified by this bleeding group to increase confidence that they match relevant bleeding events.
 
+A spell is considered to be a bleeding outcome if any episode of the spell contains a bleeding code in the primary position.
+
 Fatal bleeding (BARC 5) is included in the bleeding outcome. Mortality information is available from the Civil Registration of Deaths, which includes a primary cause of death and multiple secondary causes of death. A death is included in the bleeding outcome when the primary cause of death (an ICD-10 code) is an ADAPTT bleeding code as described above.
 
-
-
 ### Ischaemia Outcome
+
+Various definitions of ischaemia outcomes are commonly used when deriving outcomes from administrative databases[@bosco2021major]. We require a definition of major adverse cardiovascular event (MACE) that uses ICD-10 codes, and includes only ischaemia outcomes (for example, excludes haemorrhagic stroke), due to the requirement for comparing bleeding and ischaemia models for the purposes of assessing a bleeding/ischaemia trade-off. The definition should also include cardiovascular mortality, to match the BARC-5 fatal bleeding included in the bleeding outcome definition.
+
+The best matching definition in Bosco et al. (2021)[@bosco2021major] (Table 1) is Ohm et al. (2018)[@ohm2018socioeconomic], because:
+
+* It is simple (three-point), and includes only ischaemia outcomes (AMI, ischaemic stroke, and CV death)
+* All codes used were fully defined;
+* Codes used ICD-10 (instead of ICD-9).
+
+The code groups are defined as follows:
+
+??? note "AMI, ischaemic stroke, and CV death components of MACE used for ischaemia outcomes"
+
+    | Category | ICD-10 | Description |
+    |----------|--------|-------------|
+    | AMI | I21.* | Acute myocardial infarction |  
+    ||I22.*  | Subsequent myocardial infarction |
+    |Ischaemic stroke|I63.* | Cerebral infarction |
+    |CV death |I46.1 | Sudden cardiac death, so described |
+    ||I46.9| Cardiac arrest, unspecified |
+
+Disadvantages of this code group includes the lack of definition in whether the primary/secondary positions are used, and lack of validation. Similarly to the bleeding groups, basic validation may be performed by a chart analysis.
+
+
 
 ## Predictors
 
 Predictors are defined based on data that is available in the index presentation, if that data would be available to the clinician.
 
 Clinical codes are used to define predictors, but an exclusion period of one month is applied to avoid using ICD-10 and OPCS-4 codes that would not have been coded yet before the index (clinical coding happens monthly, and clinical codes are not available until this processing has occurred). 
+
+## Limitations of Administrative Data
+
+While use of ICD-10 and OPCS-4 coded patient data is useful because of its size and availability, there are caveats regarding its use for models intended directly for patient care.
+
+Coding is performed manually, at large scale, and errors have financial implications. There is evidence that internal inconsistencies in the data exist[@hardy2022data], that may impact tools designed for direct patient care. This modification of the intended purpose of the dataset should be considered if the data is to be used in clinical decision support tools.
+
+There is a wide degree of choice involved in selecting code groups to define index events and outcomes[@bosco2022major], both of which directly determine what question a given model is addressing (rather than how accurate it is). It is not possible to assess how well the coding maps to clinical reality using any model metric; the only available method is chart review, which is not possible to perform directly using only HES data.
+
+In addition to variability in choice of code groups, variability also exists regarding which episode (or epsiodes) of a spell is used to define an event, and which primary/secondary positions should be utilised. There is no systematic consensus on how these choices should be made when creating model for patient-care purposes.
+
+Finally, it is hard to assess coding accuracy by comparing the prevalence of events with trial or study data, because trials and studies often introduce some bias in prevalence due to the recruitment criteria used which is not present in counts of events in the entire patient population.
+
 
 ## Models
 
