@@ -9,10 +9,6 @@
       
       
       
-        <link rel="prev" href="../design/">
-      
-      
-        <link rel="next" href="../modelling/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -20,7 +16,7 @@
     
     
       
-        <title>ARC HBR Calculation - PyHBR Docs</title>
+        <title>Data Sources - PyHBR Docs</title>
       
     
     
@@ -64,7 +60,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#arc-hbr-calculation" class="md-skip">
+        <a href="#data-sources" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ARC HBR Calculation
+              Data Sources
             
           </span>
         </div>
@@ -230,30 +226,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    ARC HBR Calculation
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../arc_hbr/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -262,83 +238,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#steps-to-calculate-the-arc-hbr-score" class="md-nav__link">
-    <span class="md-ellipsis">
-      Steps to Calculate the ARC HBR Score
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Steps to Calculate the ARC HBR Score">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preprocessing-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Preprocessing Steps
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Preprocessing Steps">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#link-laboratory-results-and-prescriptions-to-episodes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Link Laboratory Results and Prescriptions to Episodes
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#identify-index-events" class="md-nav__link">
-    <span class="md-ellipsis">
-      Identify Index Events
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#calculating-the-score" class="md-nav__link">
-    <span class="md-ellipsis">
-      Calculating the Score
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -430,59 +329,20 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#steps-to-calculate-the-arc-hbr-score" class="md-nav__link">
+  <a href="#uhbw-data-sources" class="md-nav__link">
     <span class="md-ellipsis">
-      Steps to Calculate the ARC HBR Score
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Steps to Calculate the ARC HBR Score">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preprocessing-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Preprocessing Steps
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Preprocessing Steps">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#link-laboratory-results-and-prescriptions-to-episodes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Link Laboratory Results and Prescriptions to Episodes
+      UHBW Data Sources
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#identify-index-events" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#bnssg-icb-data-sources" class="md-nav__link">
     <span class="md-ellipsis">
-      Identify Index Events
+      BNSSG ICB Data Sources
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#calculating-the-score" class="md-nav__link">
-    <span class="md-ellipsis">
-      Calculating the Score
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -501,60 +361,11 @@
                   
 
 
-<h1 id="arc-hbr-calculation">ARC HBR Calculation</h1>
-<p>The ARC HBR score is a concensus-based risk score to identify patients at high bleeding risk. It is formed from a weighted sum of 13 criteria, involving patient characteristics, patient history, laboratory test results, prescriptions information, and planned healthcare activity. This page describes how the ARC HBR score is calculated and assessed in PyHBR.</p>
-<h2 id="steps-to-calculate-the-arc-hbr-score">Steps to Calculate the ARC HBR Score</h2>
-<p>Using source data that includes diagnosis/procedure codes, laboratory tests, and prescriptions information, the ARC HBR score can be calculated as follows:</p>
-<h3 id="preprocessing-steps">Preprocessing Steps</h3>
-<p>Before identifying patients/index events, or calculating the score, some preprocessing is required. This is the section that is likely to require modification if a new data source is used.</p>
-<ol>
-<li>For diagnosis and procedure codes, add the group they belong to, and drop codes not in any group. Retain the code, the group, and the code position in long format in a table. The following groups are required:<ul>
-<li><code>acs</code>: Diagnosis codes corresponding to acute coronary syndromes (includes myocardial infarction/unstable angina). Used to identify index events.</li>
-<li><code>pci</code>: Percutaneous coronary intervention codes (e.g. stent implantation). Used to identify index events.</li>
-<li><code>ckd</code>: Chronic kidney disease: includes N18.5, N18.4, N18.3, N18.2, N18.1. Used as a fall-back in case eGFR is missing.</li>
-<li><code>anaemia</code>: Used as a fall-back in case Hb measurement is missing.</li>
-<li><code>bleeding</code>: Used to identify prior bleeding.</li>
-<li><code>cbd</code>: Chronic bleeding diatheses.</li>
-<li><code>cph</code>: Cirrhosis with portal hypertension.</li>
-<li><code>cancer_diag</code>: Used to identify cancer diagnoses.</li>
-<li><code>cancer_proc</code>: Used to identify cancer therapy.</li>
-<li><code>bavm</code>: Brain arteriovenous malformation diagnoses.</li>
-<li><code>istroke</code>: Ischaemic stroke.</li>
-<li><code>ich</code>: Intracranial haemorrhage.</li>
-<li><code>csurgery</code>: Cardiac surgery. Used to exclude cardiac surgery for one criterion.</li>
-<li><code>surgery</code>: All surgery. Used as a proxy for "major surgery" criteria</li>
-</ul>
-</li>
-<li>
-<p>For laboratory results, narrow to the subset of results shown below. Convert all tests to the standard unit used in the ARC definition, and drop the unit from the table. Keep the date/time at which the laboratory sample was collected, and the patient ID (in this data, associated episode is not linked, and must be inferred from the date).</p>
-<ul>
-<li><code>egfr</code>: Used to assess kidney function (unit: mL/min)</li>
-<li><code>hb</code>: Haemoglobin, used to assess anaemia (unit: g/dL)</li>
-<li><code>platelets</code>: Platelet count, used to assess thrombocytopenia (unit: <code>x10^9/L</code>)</li>
-</ul>
-</li>
-<li>
-<p>For prescriptions, narrow to the set of medicines shown below. Keep the medicine name, flag for present-on-admission, patient ID, and prescription order date (used to infer link to episode, as above).</p>
-<ul>
-<li><code>oac</code>: any of warfarin, apixaban, edoxaban, dabigatran, rivaroxaban</li>
-<li><code>nsaid</code>: any of ibuprofen, naproxen, diclofenac, celecoxib, mefenamic acid, etoricoxib, indomethacin (high-does aspirin excluded for now).</li>
-</ul>
-</li>
-<li>
-<p>For demographics, retain age and gender. This calculation may be postoned until after index events are calculated (for example, if the demographics table contains year of birth instead of age).</p>
-</li>
-</ol>
-<p>NOTE: The <code>episodes</code>, <code>prescriptions</code>, and <code>lab_results</code> tables have <code>episode_id</code> as Pandas index. The <code>demographics</code> table uses <code>patient_id</code> as index. The <code>episodes</code> table contains <code>patient_id</code> as a column for linking to <code>demographics</code>.</p>
-<h4 id="link-laboratory-results-and-prescriptions-to-episodes">Link Laboratory Results and Prescriptions to Episodes</h4>
-<p>In the HIC data, laboratory results and prescriptions do not contain an episode_id; instead, they contain a date/time (either a sample date for laboratory tests or an order date for prescriptions).</p>
-<p>To link each test/prescription to an episode, use the episode start and end times. If the sample date/order date falls within the episode start and end time, then it should be associated with that episode.</p>
-<p>A complication with this process is that episodes sometimes overlap (i.e. the start time of the next is before the end time of the previous one). This will be solved by associating a test/prescription with the earliest episode containing the time.</p>
-<h3 id="identify-index-events">Identify Index Events</h3>
-<p>Inclusion criteria for calculation of the ARC HBR score is having a hospital visit (spell) where the first episode of the spell contains an ACS diagnosis in the primary position, or a PCI procedure in any position.</p>
-<p>The table is indexed by the episode ID, and contains flag columns <code>acs_index</code> for <code>pci_index</code> for which inclusion condition is satisfied.</p>
-<p>NOTE: The <code>index_event</code> table is indexed by <code>episode_id</code>, and also contains the <code>patient_id</code> as a column.</p>
-<h3 id="calculating-the-score">Calculating the Score</h3>
-<p>The score is calculated differently for each different class of critera:</p>
+<h1 id="data-sources">Data Sources</h1>
+<p>This page documents the raw data sources that have been used as the basis for this analysis. </p>
+<h2 id="uhbw-data-sources">UHBW Data Sources</h2>
+<h2 id="bnssg-icb-data-sources">BNSSG ICB Data Sources</h2>
+<p>Access to regional patient hospital episode statistics and primary care data was available from the Bristol, North Somerset and South Gloucestershire Integrated Care Board (BNSSG ICB). </p>
 
 
 

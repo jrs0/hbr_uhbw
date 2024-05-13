@@ -12,7 +12,7 @@
         <link rel="prev" href="../arc_hbr/">
       
       
-        <link rel="next" href="../reference/">
+        <link rel="next" href="../verification/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -299,6 +299,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Sources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#index-events" class="md-nav__link">
     <span class="md-ellipsis">
       Index Events
@@ -321,6 +330,15 @@
   <a href="#bleeding-outcome" class="md-nav__link">
     <span class="md-ellipsis">
       Bleeding Outcome
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ischaemia-outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ischaemia Outcome
     </span>
   </a>
   
@@ -358,10 +376,48 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#minimum-performance-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Minimum Performance Criteria
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations-of-administrative-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations of Administrative Data
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bleeding/Ischaemia Risk Estimate Verification
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -413,6 +469,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Sources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#index-events" class="md-nav__link">
     <span class="md-ellipsis">
       Index Events
@@ -435,6 +500,15 @@
   <a href="#bleeding-outcome" class="md-nav__link">
     <span class="md-ellipsis">
       Bleeding Outcome
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ischaemia-outcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ischaemia Outcome
     </span>
   </a>
   
@@ -472,6 +546,24 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#minimum-performance-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      Minimum Performance Criteria
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations-of-administrative-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations of Administrative Data
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -488,20 +580,96 @@
 
 
 <h1 id="bleedingischaemia-risk-modelling">Bleeding/Ischaemia Risk Modelling</h1>
-<p>Bleeding and ischaemia risk prediction models contained in PyHBR are trained to predict a bleeding and ischaemia outcome defined by clinical codes (ICD-10 and OPCS-4), and are trained on a number of different datasets. The methodology used to develop and test the models is explained below.</p>
+<p>Bleeding and ischaemia risk prediction models using PyHBR are trained to predict a bleeding and ischaemia outcome defined by clinical codes (ICD-10 and OPCS-4), and are trained on a number of different datasets. The methods used to develop and test the models is explained below.</p>
+<h2 id="data-sources">Data Sources</h2>
+<p>Index events and outcomes are determined from diagnosis (ICD-10) and procedure (OPCS-4) codes in Hospital Episode Statistics (HES) data.</p>
+<p>In HES, hospital visits are structured into groups of episodes called spells, where each episode corresponds to a continuous period of care (usually) led by one consultant. Each consultant episode contains a list of diagnoses and procedures. Of these, one diagnosis and one procedure is marked as primary.</p>
+<p>The clinical coding guidelines<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> define the use of the primary diagnosis field in DGCS.1:</p>
+<div class="admonition quote">
+<p class="admonition-title">Definition of Primary Diagnosis (extract from DGCS.1)</p>
+<ol>
+<li>The first diagnosis field(s) of the coded clinical record (the primary diagnosis) will contain
+the main condition treated or investigated during the relevant episode of healthcare.</li>
+<li>Where a definitive diagnosis has not been made by the responsible clinician the main
+symptom, abnormal findings, or problem should be recorded in the first diagnosis field of the
+coded clinical record.</li>
+</ol>
+</div>
+<p>The primary diagnosis is not necessary the main clinical diagnosis; instead, it is the main diagnosis being treated in the current episode<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>. Secondary diagnoses are other diagnoses relevant to the current episode, but which are not the primary diagnosis.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Secondary diagnoses may contain historical diagnoses if they are relevant to the current episode.</p>
+</div>
+<p>Similarly, the primary procedure is defined as the main procedure that occurred in the episode<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>:</p>
+<div class="admonition quote">
+<p class="admonition-title">Definition of Primary Procedure (extract from PRule 2)</p>
+<p>When classifying diagnostic information, the International Classification of Diseases and
+Health Related Problems (ICD) recommend criteria for the selection of the MAIN condition
+for single-cause analysis. OPCS-4 follows this precedent in that the intervention selected
+for single procedure analysis from records of episodes of hospital care should be the MAIN
+intervention or procedure carried out during the relevant episode which may not always be
+the first procedure performed during the consultant episode.</p>
+</div>
+<p>Secondary procedures are other interventions that occurred in the consultant episode.</p>
 <h2 id="index-events">Index Events</h2>
-<p>The target cohort for risk prediction is patients who present in hospital with an acute coronary syndrome (ACS), or receive a percutaneous coronary intervention (PCI), such as a stent implant, and are to be placed on a blood thinning medication such as dual antiplatelet therapy. </p>
-<p>These patients are identified using diagnosis (ICD-10) and procedure (OPCS-4) code data, which is generated by clinical coders who transcribe written patient notes. Hospital visits are structured into groups of episodes called spells, where each episode contains a list of diagnoses and procedures. Of these, one diagnosis and one procedure is marked as primary.</p>
+<p>The target cohort for risk prediction is patients who present in hospital with an acute coronary syndrome (ACS), or receive a percutaneous coronary intervention (PCI), such as a stent implant; these groups are likely to be placed on a blood thinning medication such as dual antiplatelet therapy. </p>
 <p>To capture acute presentation for ACS, patients are included if the ACS diagnosis is listed as the primary diagnosis in any episode of the spell. This is to rule out episodes where a historical ACS is coded. A PCI is allowed in any primary or secondary position, on the assumption that inclusion of the procedure means that the procedure was performed.</p>
+<p>A UK Biobank report identifies a validated group of codes for identification of MI (both STEMI and NSTEMI) based on HES data, with PPV greater than 70% for each group<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup>. However, the codes contain I25.2 (old myocardial infarction), which would capture patients in index events who do not necessarily have ACS at that time. This issue was addressed in a study validating ACS code groups in a French administrative database <sup id="fnref:5"><a class="footnote-ref" href="#fn:5">5</a></sup>. Of the different code groups they present, the I20.0, I21.<em> and I24.</em> was identified as a good compromise between validated ACS and PPV (84%).</p>
+<p>ALL OPCS-4 PCI codes are included, based on the list provided in Pathak et al. (2023).</p>
+<p>The code groups used to define the index event are shown below:</p>
+<details class="note">
+<summary>List of ACS and PCI codes used to define index events</summary>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>ICD-10</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ACS</td>
+<td>I20.0</td>
+<td>Unstable angina</td>
+</tr>
+<tr>
+<td></td>
+<td>I21.*</td>
+<td>Acute myocardial infarction</td>
+</tr>
+<tr>
+<td></td>
+<td>I24.*</td>
+<td>Other acute ischaemic heart diseases</td>
+</tr>
+<tr>
+<td>PCI</td>
+<td>K49.*</td>
+<td>Transluminal balloon angioplasty of coronary artery</td>
+</tr>
+<tr>
+<td></td>
+<td>K50.*</td>
+<td>Other therapeutic transluminal operations on coronary artery</td>
+</tr>
+<tr>
+<td></td>
+<td>K75.*</td>
+<td>Percutaneous transluminal balloon angioplasty and insertion of stent into coronary artery</td>
+</tr>
+</tbody>
+</table>
+</details>
 <h2 id="outcome-definition">Outcome Definition</h2>
 <p>Bleeding and ischaemia outcomes are defined by looking for ICD-10 codes in the spells that occur after the index presentation, up to one year.</p>
 <h3 id="bleeding-outcome">Bleeding Outcome</h3>
-<p>The bleeding outcome definition should map to a clinically relevant definition of bleeding for patients on anticoagulant therapy. One such definition is bleeding academic research consortium (BARC) 3 or 5 bleeding<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, which is the basis of the high bleeding risk definition by the Academic Research Consortium (ARC)<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>.</p>
-<p>According to BARC criteria, many ICD-10-coded bleeding events may qualify for BARC-2, because being written explicitly in the patient notes (a criterion for coding) could imply that an "overt" bleed is present, or that the bleed is "more than would be expected for the clinical circumstance". </p>
+<p>The bleeding outcome definition should map to a clinically relevant definition of bleeding for patients on anticoagulant therapy. One such definition is bleeding academic research consortium (BARC) 3 or 5 bleeding<sup id="fnref:6"><a class="footnote-ref" href="#fn:6">6</a></sup>, which is the basis of the high bleeding risk definition by the Academic Research Consortium (ARC)<sup id="fnref:7"><a class="footnote-ref" href="#fn:7">7</a></sup>.</p>
+<p>Many ICD-10-coded bleeding events may qualify for BARC-2, because being written explicitly in the patient notes (a criterion for coding) could imply that an "overt" bleed is present, or that the bleed is "more than would be expected for the clinical circumstance". </p>
 <p>Determining that a bleed qualifies for BARC-3 requires a haemoglobin drop due to the bleed of greater than 3 g/dL. This cannot be determined from an analysis of ICD-10 codes alone. </p>
-<p>Several attempts to capture "severe" bleeding from administrative codes exist in the literature. For example, one study identifies a group of ICD-10 codes with a particularly high positive predictive value (PPV; chance that a ICD-10-coded bleed is in fact a clinically relevant bleed), of 88%<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>. The list of ICD-10 codes is shown below:</p>
+<p>Several attempts to capture "severe" bleeding from administrative codes exist in the literature. For example, one study identifies a group of ICD-10 codes with a particularly high positive predictive value (PPV; chance that a ICD-10-coded bleed is in fact a clinically relevant bleed), of 88%<sup id="fnref:8"><a class="footnote-ref" href="#fn:8">8</a></sup>. The list of ICD-10 codes is shown below:</p>
 <details class="note">
-<summary>List of major bleeding codes<sup id="fnref2:3"><a class="footnote-ref" href="#fn:3">3</a></sup></summary>
+<summary>List of major bleeding codes<sup id="fnref2:8"><a class="footnote-ref" href="#fn:8">8</a></sup></summary>
 <table>
 <thead>
 <tr>
@@ -664,13 +832,13 @@
 </tbody>
 </table>
 </details>
-<p>The primary rationale for adopting such a code group is that</p>
+<p>The primary rationale for adopting such a code group would be that:</p>
 <ul>
-<li>It originates from a study where the PPV of the code group was measured (offsetting the risk that coded bleeding definitions do not correspond to real bleeds)</li>
+<li>It originates from a study where the PPV of the code group was measured (offsetting the risk that coded bleeding definitions do not correspond to real bleeds);</li>
 <li>The study qualifies the group as "major" bleeds (so that it might be taken as a reasonable proxy for BARC 3 or 5 bleeding).</li>
 </ul>
 <p>Disadvantages, however, include differences in coding between the UK and Canada (the location of the study), particularly the difference between ICD-10 (UK) and ICD-10CM (Canada). In addition, the presence of unqualified diverticulosis within the bleeding group is not directly a bleeding condition, and may significantly reduce the PPV in older patients.</p>
-<p>As a result, we define a bleeding outcome based on the BARC 2-5 criteria<sup id="fnref:4"><a class="footnote-ref" href="#fn:4">4</a></sup>.</p>
+<p>As a result, we define a bleeding outcome based on the BARC 2-5 criteria<sup id="fnref:9"><a class="footnote-ref" href="#fn:9">9</a></sup>.</p>
 <details class="note">
 <summary>Bleeding codes corresponding to BARC 2-5</summary>
 <table>
@@ -856,28 +1024,126 @@
 </table>
 </details>
 <p>The group is generated based on UK ICD-10 data, which is likely to reduce coding discrepancies, and does not contain the generic diverticulosis category. </p>
-<p>Further, the lack of attempt to distinguish "major" bleeding (i.e. more bleeding codes are included) inherently makes the group more likely to be robust. Coded events are likely to correspond to a bleed written on the chart, with the only mechanism to reduce to positive predictive being coding errors.</p>
-<p>The primary disadvantage is the use of an all-hospital-bleeding definition. However, this is justified as a simple starting point for modelling, that can be refined later by the inclusion of factors to distinguish major bleeds.</p>
 <p>No PPV is available for this code group. A basic chart review should be performed on the patients identified by this bleeding group to increase confidence that they match relevant bleeding events.</p>
+<p>A spell is considered to be a bleeding outcome if any episode of the spell contains a bleeding code in the primary position.</p>
+<p>Fatal bleeding (BARC 5) is included in the bleeding outcome. Mortality information is available from the Civil Registration of Deaths, which includes a primary cause of death and multiple secondary causes of death. A death is included in the bleeding outcome when the primary cause of death (an ICD-10 code) is an ADAPTT bleeding code as described above.</p>
+<h3 id="ischaemia-outcome">Ischaemia Outcome</h3>
+<p>Various definitions of ischaemia outcomes are commonly used when deriving outcomes from administrative databases<sup id="fnref:10"><a class="footnote-ref" href="#fn:10">10</a></sup>. We require a definition of major adverse cardiovascular event (MACE) that uses ICD-10 codes, and includes only ischaemia outcomes (for example, excludes haemorrhagic stroke), due to the requirement for comparing bleeding and ischaemia models for the purposes of assessing a bleeding/ischaemia trade-off. The definition should also include cardiovascular mortality, to match the BARC-5 fatal bleeding included in the bleeding outcome definition.</p>
+<p>The best matching definition in Bosco et al. (2021)<sup id="fnref2:10"><a class="footnote-ref" href="#fn:10">10</a></sup> (Table 1) is Ohm et al. (2018)<sup id="fnref:11"><a class="footnote-ref" href="#fn:11">11</a></sup>, because:</p>
+<ul>
+<li>It is simple (three-point), and includes only ischaemia outcomes (AMI, ischaemic stroke, and CV death)</li>
+<li>All codes used were fully defined;</li>
+<li>Codes used ICD-10 (instead of ICD-9).</li>
+</ul>
+<p>The code groups are defined as follows:</p>
+<details class="note">
+<summary>AMI, ischaemic stroke, and CV death components of MACE used for ischaemia outcomes</summary>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>ICD-10</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AMI</td>
+<td>I21.*</td>
+<td>Acute myocardial infarction</td>
+</tr>
+<tr>
+<td></td>
+<td>I22.*</td>
+<td>Subsequent myocardial infarction</td>
+</tr>
+<tr>
+<td>Ischaemic stroke</td>
+<td>I63.*</td>
+<td>Cerebral infarction</td>
+</tr>
+<tr>
+<td>CV death</td>
+<td>I46.1</td>
+<td>Sudden cardiac death, so described</td>
+</tr>
+<tr>
+<td></td>
+<td>I46.9</td>
+<td>Cardiac arrest, unspecified</td>
+</tr>
+</tbody>
+</table>
+</details>
+<p>Disadvantages of this code group includes the lack of definition in whether the primary/secondary positions are used, and lack of validation. Similarly to the bleeding groups, basic validation may be performed by a chart analysis.</p>
 <h2 id="predictors">Predictors</h2>
-<p>Predictors are defined based on data that is available in the index presentation, if that data would be available to the clinician.</p>
 <p>Clinical codes are used to define predictors, but an exclusion period of one month is applied to avoid using ICD-10 and OPCS-4 codes that would not have been coded yet before the index (clinical coding happens monthly, and clinical codes are not available until this processing has occurred). </p>
+<p>Depending on which data sources are used, other predictors may be available. For example, predictors in some models including primary care attribute flags, and physiological measurements such as HbA1c and blood pressure.</p>
 <h2 id="models">Models</h2>
+<p>Classification models are trained on the bleeding and ischaemia outcomes within one year, which are binary (either an adverse event occurred or it did not). </p>
+<p>Both adverse outcomes have a low prevalence (0 - 20%). If individual patient risk is broadly localised at low values around the prevalence, it is not possible for any classification model to predict who will have adverse outcomes. Evidence for more determinstic outcomes, where a low number of patients have nearly 100% chance of adverse events and others have nearly 0% risk, would be provided by models that are able to predict adverse outcomes very well (i.e. with very high true negative/positive rates, and a very high ROC AUC).</p>
+<p>Since very high ROC AUCs are not observed, the former interpretation of risk distribution is more likely. In this case, the adverse outcome is considered a proxy for high risk or low risk (instead of outcome occurred or outcome did not occur), and the result may be used in two possible ways:</p>
+<ul>
+<li>The classification outcome itself may be utilised directly as an estimate of whether the patient is high or low risk.</li>
+<li>The continuous parameter underlying the classification model decision may be used as an estimate of continuous patient risk (i.e. between 0% and 100%).</li>
+</ul>
+<p>To test the accuracy of the model under the first interpretation, it is necessary to establish that patients estimated at high risk typically have more adverse events. In the second interpretation, estimates must be made of patients' true continuous risk, which requires an aggregate over patients in the testing set. This is discussed in the next section.</p>
 <h2 id="model-testing">Model Testing</h2>
+<p>Models are assessed according to two criteria:</p>
+<ul>
+<li><strong>Accuracy</strong>: Whether the model produces the correct risk classifications or estimates;</li>
+<li><strong>Stability</strong>: Whether the model produces consistent risk classifications or estimates.</li>
+</ul>
+<p>Both these metrics are assessed by applying the models to data in the testing set, which is not used in the model fitting process. Accuracy is assessed through calibration plots, by grouping patients into similar-risk groups and comparing the prevalence in each group to the estimated risk.</p>
+<p>Stability is assessed by training multiple models on bootstrap resamples of the training set, and comparing the model outputs for each patient.</p>
+<h2 id="minimum-performance-criteria">Minimum Performance Criteria</h2>
+<p>A minimum performance criteria for the models can be established by estimating the number of patients either positively or negatively affected by a change in intervention based on model risk estimates for bleeding and ischaemia.</p>
+<p>The simplest model to perform these calculations is hosted <a href="https://hbrtradeoff.streamlit.app">here</a>. It assumes determinstic outcomes, meaning that all patients are assumed to be either 0% or 100% risk before an intervention is applied. More complex versions of the calculation could assume a more realistic distribution of patient risk, and/or allow for differences in the effect of the intervention depending on the real patient risk.</p>
+<p>The model can be used to understand possible benefit or harm caused by taking action based on the estimates from bleeding/ischaemia models, based on the background prevalence of the outcomes, the performance of the model, and the modifications in risk caused by the intervention.</p>
+<h2 id="limitations-of-administrative-data">Limitations of Administrative Data</h2>
+<p>While use of ICD-10 and OPCS-4 coded patient data is useful because of its size and availability, there are caveats regarding its use for models intended directly for patient care.</p>
+<p>Coding is performed manually for financial purposes. There is evidence that internal inconsistencies in the data exist<sup id="fnref:12"><a class="footnote-ref" href="#fn:12">12</a></sup>, that may impact tools designed for direct patient care. This modification of the intended purpose of the dataset should be considered if the data is to be used in clinical decision support tools.</p>
+<p>There is a wide degree of choice involved in selecting code groups to define index events and outcomes[@bosco2022major], both of which directly determine what question a given model is addressing (rather than how accurate it is). It is not possible to assess how well the coding maps to clinical reality using any model metric; the only available method is chart review, which is not possible to perform directly using only HES data.</p>
+<p>In addition to variability in choice of code groups, variability also exists regarding which episode (or epsiodes) of a spell is used to define an event, and which primary/secondary positions should be utilised. There is no systematic consensus on how these choices should be made when creating model for patient-care purposes.</p>
+<p>Finally, it is hard to assess coding accuracy by comparing the prevalence of events with trial or study data, because trials and studies often introduce some bias due to the recruitment criteria causing a discrepancy compared to counts of events in the entire patient population.</p>
 <div class="footnote">
 <hr />
 <ol>
 <li id="fn:1">
-<p>Mehran R, Rao SV, Bhatt DL, Gibson CM, Caixeta A, Eikelboom J, et al. Standardized bleeding definitions for cardiovascular clinical trials: A consensus report from the bleeding academic research consortium. Circulation [Internet]. 2011;123(23):2736–47. Available from: <a href="https://www.ahajournals.org/doi/10.1161/circulationaha.110.009449">https://www.ahajournals.org/doi/10.1161/circulationaha.110.009449</a>&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+<p>National Clinical Coding Standards ICD-10 5th Edition. NHS England; 2023.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:2">
-<p>Urban P, Mehran R, Colleran R, Angiolillo DJ, Byrne RA, Capodanno D, et al. Defining high bleeding risk in patients undergoing percutaneous coronary intervention: A consensus document from the academic research consortium for high bleeding risk. Circulation [Internet]. 2019;140(3):240–61. Available from: <a href="https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.119.040167">https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.119.040167</a>&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+<p><span class="nocase">Short Guide to Clinical Coding for Clinicians&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 <li id="fn:3">
-<p>Al-Ani F, Shariff S, Siqueira L, Seyam A, Lazo-Langner A. Identifying venous thromboembolism and major bleeding in emergency room discharges using administrative data. Thrombosis research [Internet]. 2015;136(6):1195–8. Available from: <a href="https://www.thrombosisresearch.com/article/S0049-3848(15)30167-5/abstract">https://www.thrombosisresearch.com/article/S0049-3848(15)30167-5/abstract</a>&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+<p>National Clinical Coding Standards OPCS-4. NHS England; 2024.&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 <li id="fn:4">
-<p>Pufulete M, Harris J, Sterne JA, Johnson TW, Lasserson D, Mumford A, et al. Comprehensive ascertainment of bleeding in patients prescribed different combinations of dual antiplatelet therapy (DAPT) and triple therapy (TT) in the UK: Study protocol for three population-based cohort studies emulating “target trials”(the ADAPTT study). BMJ open [Internet]. 2019;9(6):e029388. Available from: <a href="https://bmjopen.bmj.com/content/9/6/e029388">https://bmjopen.bmj.com/content/9/6/e029388</a>&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+<p>Biobank U. Definitions of acute myocardial infarction and main myocardial infarction pathological types: UK biobank phase 1 outcomes adjudication. 2017.&#160;<a class="footnote-backref" href="#fnref:4" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:5">
+<p>Bezin J, Girodet PO, Rambelomanana S, Touya M, Ferreira P, Gilleron V, et al. Choice of ICD-10 codes for the identification of acute coronary syndrome in the french hospitalization database. Fundamental   &amp; clinical pharmacology. 2015;29(6):586–91.&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+</li>
+<li id="fn:6">
+<p>Mehran R, Rao SV, Bhatt DL, Gibson CM, Caixeta A, Eikelboom J, et al. Standardized bleeding definitions for cardiovascular clinical trials: A consensus report from the bleeding academic research consortium. Circulation [Internet]. 2011;123(23):2736–47. Available from: <a href="https://www.ahajournals.org/doi/10.1161/circulationaha.110.009449">https://www.ahajournals.org/doi/10.1161/circulationaha.110.009449</a>&#160;<a class="footnote-backref" href="#fnref:6" title="Jump back to footnote 6 in the text">&#8617;</a></p>
+</li>
+<li id="fn:7">
+<p>Urban P, Mehran R, Colleran R, Angiolillo DJ, Byrne RA, Capodanno D, et al. Defining high bleeding risk in patients undergoing percutaneous coronary intervention: A consensus document from the academic research consortium for high bleeding risk. Circulation [Internet]. 2019;140(3):240–61. Available from: <a href="https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.119.040167">https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.119.040167</a>&#160;<a class="footnote-backref" href="#fnref:7" title="Jump back to footnote 7 in the text">&#8617;</a></p>
+</li>
+<li id="fn:8">
+<p>Al-Ani F, Shariff S, Siqueira L, Seyam A, Lazo-Langner A. Identifying venous thromboembolism and major bleeding in emergency room discharges using administrative data. Thrombosis research [Internet]. 2015;136(6):1195–8. Available from: <a href="https://www.thrombosisresearch.com/article/S0049-3848(15)30167-5/abstract">https://www.thrombosisresearch.com/article/S0049-3848(15)30167-5/abstract</a>&#160;<a class="footnote-backref" href="#fnref:8" title="Jump back to footnote 8 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:8" title="Jump back to footnote 8 in the text">&#8617;</a></p>
+</li>
+<li id="fn:9">
+<p>Pufulete M, Harris J, Sterne JA, Johnson TW, Lasserson D, Mumford A, et al. Comprehensive ascertainment of bleeding in patients prescribed different combinations of dual antiplatelet therapy (DAPT) and triple therapy (TT) in the UK: Study protocol for three population-based cohort studies emulating “target trials”(the ADAPTT study). BMJ open [Internet]. 2019;9(6):e029388. Available from: <a href="https://bmjopen.bmj.com/content/9/6/e029388">https://bmjopen.bmj.com/content/9/6/e029388</a>&#160;<a class="footnote-backref" href="#fnref:9" title="Jump back to footnote 9 in the text">&#8617;</a></p>
+</li>
+<li id="fn:10">
+<p>Bosco E, Hsueh L, McConeghy KW, Gravenstein S, Saade E. Major adverse cardiovascular event definitions used in observational analysis of administrative databases: A systematic review. BMC Medical Research Methodology. 2021;21(1):1–18.&#160;<a class="footnote-backref" href="#fnref:10" title="Jump back to footnote 10 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:10" title="Jump back to footnote 10 in the text">&#8617;</a></p>
+</li>
+<li id="fn:11">
+<p>Ohm J, Skoglund PH, Discacciati A, Sundström J, Hambraeus K, Jernberg T, et al. Socioeconomic status predicts second cardiovascular event in 29,226 survivors of a first myocardial infarction. European Journal of Preventive Cardiology. 2018;25(9):985–93.&#160;<a class="footnote-backref" href="#fnref:11" title="Jump back to footnote 11 in the text">&#8617;</a></p>
+</li>
+<li id="fn:12">
+<p>Hardy F, Heyl J, Tucker K, Hopper A, March textasciitilde a MJ, Briggs TW, et al. Data consistency in the english hospital episodes statistics database. BMJ Health   &amp; Care Informatics. 2022;29(1).&#160;<a class="footnote-backref" href="#fnref:12" title="Jump back to footnote 12 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>
@@ -931,6 +1197,12 @@
     
     
       <script src="../assets/javascripts/bundle.caa56a14.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
     
   </body>
