@@ -65,7 +65,7 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
 
     # A PCI match is allowed anywhere in the procedures list, but must still
     # be present in the first episode of the index spell.
-    pci_match = first_episodes_with_codes["group"] == "pci"
+    pci_match = first_episodes_with_codes["group"] == "all_pci_pathak"
 
     # Get all the episodes matching the ACS or PCI condition (multiple rows
     # per episode)
@@ -79,7 +79,7 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
         matching_episodes["group"].eq("acs_bezin").groupby("episode_id").any()
     )
     index_spells["pci_index"] = (
-        matching_episodes["group"].eq("pci").groupby("episode_id").any()
+        matching_episodes["group"].eq("all_pci_pathak").groupby("episode_id").any()
     )
 
     # Join some useful information about the episode
@@ -183,7 +183,7 @@ def index_episodes(data: dict[str, DataFrame]) -> DataFrame:
         matching_episodes["group"].eq("acs_bezin").groupby("episode_id").any()
     )
     index_episodes["pci_index"] = (
-        matching_episodes["group"].eq("pci").groupby("episode_id").any()
+        matching_episodes["group"].eq("all_pci_pathak").groupby("episode_id").any()
     )
 
     # Join some useful information about the episode

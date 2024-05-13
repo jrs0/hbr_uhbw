@@ -3042,6 +3042,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - A00
     - B99
@@ -5925,6 +5927,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - C00
     - D48
@@ -6591,6 +6595,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - D50
     - D89
@@ -7999,6 +8005,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - E00
     - E90
@@ -8052,6 +8060,8 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - ami_stroke_ohm
+      - cv_death_ohm
       index:
       - I00
       - I02
@@ -8170,6 +8180,8 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - ami_stroke_ohm
+      - cv_death_ohm
       index:
       - I05
       - I09
@@ -8248,6 +8260,8 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - ami_stroke_ohm
+      - cv_death_ohm
       index:
       - I10
       - I15
@@ -8279,6 +8293,7 @@ categories:
         - mi_schnier
         - bleeding_adaptt
         - hussain_ami_stroke
+        - ami_stroke_ohm
         index: I20
         name: I20
       - categories:
@@ -8390,6 +8405,7 @@ categories:
         - acs_bezin
         - ihd_bezin
         - hussain_ami_stroke
+        - ami_stroke_ohm
         index: I23
         name: I23
       - categories:
@@ -8417,6 +8433,7 @@ categories:
         - mi_nstemi_schnier
         - bleeding_adaptt
         - hussain_ami_stroke
+        - ami_stroke_ohm
         index: I24
         name: I24
       - categories:
@@ -8472,6 +8489,7 @@ categories:
         - bleeding_adaptt
         - acs_bezin
         - hussain_ami_stroke
+        - ami_stroke_ohm
         index: I25
         name: I25
       docs: Ischaemic heart diseases
@@ -8482,6 +8500,7 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - cv_death_ohm
       index:
       - I20
       - I25
@@ -8547,6 +8566,8 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - ami_stroke_ohm
+      - cv_death_ohm
       index:
       - I26
       - I28
@@ -8566,6 +8587,8 @@ categories:
           index: I309
           name: I30.9
         docs: Acute pericarditis
+        exclude:
+        - cv_death_ohm
         index: I30
         name: I30
       - categories:
@@ -8588,6 +8611,8 @@ categories:
           index: I319
           name: I31.9
         docs: Other diseases of pericardium
+        exclude:
+        - cv_death_ohm
         index: I31
         name: I31
       - categories:
@@ -8601,6 +8626,8 @@ categories:
           index: I328
           name: I32.8
         docs: Pericarditis in diseases classified elsewhere
+        exclude:
+        - cv_death_ohm
         index: I32
         name: I32
       - categories:
@@ -8611,6 +8638,8 @@ categories:
           index: I339
           name: I33.9
         docs: Acute and subacute endocarditis
+        exclude:
+        - cv_death_ohm
         index: I33
         name: I33
       - categories:
@@ -8630,6 +8659,8 @@ categories:
           index: I349
           name: I34.9
         docs: Nonrheumatic mitral valve disorders
+        exclude:
+        - cv_death_ohm
         index: I34
         name: I34
       - categories:
@@ -8649,6 +8680,8 @@ categories:
           index: I359
           name: I35.9
         docs: Nonrheumatic aortic valve disorders
+        exclude:
+        - cv_death_ohm
         index: I35
         name: I35
       - categories:
@@ -8668,6 +8701,8 @@ categories:
           index: I369
           name: I36.9
         docs: Nonrheumatic tricuspid valve disorders
+        exclude:
+        - cv_death_ohm
         index: I36
         name: I36
       - categories:
@@ -8687,9 +8722,13 @@ categories:
           index: I379
           name: I37.9
         docs: Pulmonary valve disorders
+        exclude:
+        - cv_death_ohm
         index: I37
         name: I37
       - docs: Endocarditis, valve unspecified
+        exclude:
+        - cv_death_ohm
         index: I38
         name: I38
       - categories:
@@ -8712,6 +8751,8 @@ categories:
           index: I398
           name: I39.8
         docs: Endocarditis and heart valve disorders in diseases classified elsewhere
+        exclude:
+        - cv_death_ohm
         index: I39
         name: I39
       - categories:
@@ -8728,6 +8769,8 @@ categories:
           index: I409
           name: I40.9
         docs: Acute myocarditis
+        exclude:
+        - cv_death_ohm
         index: I40
         name: I40
       - categories:
@@ -8744,6 +8787,8 @@ categories:
           index: I418
           name: I41.8
         docs: Myocarditis in diseases classified elsewhere
+        exclude:
+        - cv_death_ohm
         index: I41
         name: I41
       - categories:
@@ -8778,6 +8823,8 @@ categories:
           index: I429
           name: I42.9
         docs: Cardiomyopathy
+        exclude:
+        - cv_death_ohm
         index: I42
         name: I42
       - categories:
@@ -8794,6 +8841,8 @@ categories:
           index: I438
           name: I43.8
         docs: Cardiomyopathy in diseases classified elsewhere
+        exclude:
+        - cv_death_ohm
         index: I43
         name: I43
       - categories:
@@ -8822,6 +8871,8 @@ categories:
           index: I447
           name: I44.7
         docs: Atrioventricular and left bundle-branch block
+        exclude:
+        - cv_death_ohm
         index: I44
         name: I44
       - categories:
@@ -8853,10 +8904,14 @@ categories:
           index: I459
           name: I45.9
         docs: Other conduction disorders
+        exclude:
+        - cv_death_ohm
         index: I45
         name: I45
       - categories:
         - docs: Cardiac arrest with successful resuscitation
+          exclude:
+          - cv_death_ohm
           index: I460
           name: I46.0
         - docs: Sudden cardiac death, so described
@@ -8882,6 +8937,8 @@ categories:
           index: I479
           name: I47.9
         docs: Paroxysmal tachycardia
+        exclude:
+        - cv_death_ohm
         index: I47
         name: I47
       - categories:
@@ -8904,6 +8961,8 @@ categories:
           index: I489
           name: I48.9
         docs: Atrial fibrillation and flutter
+        exclude:
+        - cv_death_ohm
         index: I48
         name: I48
       - categories:
@@ -8932,6 +8991,8 @@ categories:
           index: I499
           name: I49.9
         docs: Other cardiac arrhythmias
+        exclude:
+        - cv_death_ohm
         index: I49
         name: I49
       - categories:
@@ -8945,6 +9006,8 @@ categories:
           index: I509
           name: I50.9
         docs: Heart failure
+        exclude:
+        - cv_death_ohm
         index: I50
         name: I50
       - categories:
@@ -8979,6 +9042,8 @@ categories:
           index: I519
           name: I51.9
         docs: Complications and ill-defined descriptions of heart disease
+        exclude:
+        - cv_death_ohm
         index: I51
         name: I51
       - categories:
@@ -8992,6 +9057,8 @@ categories:
           index: I528
           name: I52.8
         docs: Other heart disorders in diseases classified elsewhere
+        exclude:
+        - cv_death_ohm
         index: I52
         name: I52
       docs: Other forms of heart disease
@@ -9009,6 +9076,7 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - ami_stroke_ohm
       index:
       - I30
       - I52
@@ -9053,6 +9121,7 @@ categories:
         exclude:
         - bleeding_cadth
         - ischaemic_stroke
+        - ami_stroke_ohm
         index: I60
         name: I60
       - categories:
@@ -9099,6 +9168,7 @@ categories:
         exclude:
         - bleeding_cadth
         - ischaemic_stroke
+        - ami_stroke_ohm
         index: I61
         name: I61
       - categories:
@@ -9120,6 +9190,7 @@ categories:
         docs: Other nontraumatic intracranial haemorrhage
         exclude:
         - ischaemic_stroke
+        - ami_stroke_ohm
         index: I62
         name: I62
       - categories:
@@ -9169,6 +9240,7 @@ categories:
         - ich
         - ischaemic_stroke
         - bleeding_barc
+        - ami_stroke_ohm
         index: I64
         name: I64
       - categories:
@@ -9199,6 +9271,7 @@ categories:
         - ich
         - ischaemic_stroke
         - bleeding_barc
+        - ami_stroke_ohm
         index: I65
         name: I65
       - categories:
@@ -9232,6 +9305,7 @@ categories:
         - ich
         - ischaemic_stroke
         - bleeding_barc
+        - ami_stroke_ohm
         index: I66
         name: I66
       - categories:
@@ -9274,6 +9348,7 @@ categories:
         - ich
         - ischaemic_stroke
         - bleeding_barc
+        - ami_stroke_ohm
         index: I67
         name: I67
       - categories:
@@ -9298,6 +9373,7 @@ categories:
         - ich
         - ischaemic_stroke
         - bleeding_barc
+        - ami_stroke_ohm
         index: I68
         name: I68
       - categories:
@@ -9333,6 +9409,7 @@ categories:
         - ich
         - ischaemic_stroke
         - bleeding_barc
+        - ami_stroke_ohm
         index: I69
         name: I69
       docs: Cerebrovascular diseases
@@ -9343,6 +9420,7 @@ categories:
       - acs_bezin
       - ihd_bezin
       - portal_hypertension
+      - cv_death_ohm
       index:
       - I60
       - I69
@@ -9551,6 +9629,8 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - ami_stroke_ohm
+      - cv_death_ohm
       index:
       - I70
       - I79
@@ -9767,6 +9847,8 @@ categories:
       - hussain_ami_stroke
       - ich
       - ischaemic_stroke
+      - ami_stroke_ohm
+      - cv_death_ohm
       index:
       - I80
       - I89
@@ -9847,6 +9929,8 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - ami_stroke_ohm
+      - cv_death_ohm
       index:
       - I95
       - I99
@@ -11414,6 +11498,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - F00
     - F99
@@ -12732,6 +12818,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - G00
     - G99
@@ -13830,6 +13918,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - H00
     - H59
@@ -14308,6 +14398,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - H60
     - H95
@@ -15277,6 +15369,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - J00
     - J99
@@ -17382,6 +17476,8 @@ categories:
     - bavm
     - ich
     - ischaemic_stroke
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - K00
     - K93
@@ -18715,6 +18811,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - L00
     - L99
@@ -20803,6 +20901,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - M00
     - M99
@@ -22574,6 +22674,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - N00
     - N99
@@ -27370,6 +27472,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - S00
     - T98
@@ -29015,6 +29119,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - O00
     - O99
@@ -30317,6 +30423,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - P00
     - P96
@@ -32656,6 +32764,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - Q00
     - Q99
@@ -34117,6 +34227,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - R00
     - R99
@@ -39090,6 +39202,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - V01
     - Y98
@@ -41377,6 +41491,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - Z00
     - Z99
@@ -41560,6 +41676,8 @@ categories:
     - ich
     - ischaemic_stroke
     - bleeding_barc
+    - ami_stroke_ohm
+    - cv_death_ohm
     index:
     - U00
     - U85
@@ -41574,6 +41692,7 @@ groups:
 - bleeding_cadth
 - bleeding_adaptt
 - bleeding_barc
+- ami_stroke_ohm
 - mi_stemi_schnier
 - mi_nstemi_schnier
 - mi_schnier
@@ -41590,3 +41709,4 @@ groups:
 - bavm
 - ich
 - ischaemic_stroke
+- cv_death_ohm
