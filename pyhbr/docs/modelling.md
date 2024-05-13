@@ -10,6 +10,23 @@ These patients are identified using diagnosis (ICD-10) and procedure (OPCS-4) co
 
 To capture acute presentation for ACS, patients are included if the ACS diagnosis is listed as the primary diagnosis in any episode of the spell. This is to rule out episodes where a historical ACS is coded. A PCI is allowed in any primary or secondary position, on the assumption that inclusion of the procedure means that the procedure was performed.
 
+A UK Biobank report identifies a validated group of codes for identification of MI (both STEMI and NSTEMI) based on HES data, with PPV greater than 70% for each group[@biobankdefinitions]. However, the codes contain I25.2 (old myocardial infarction), which would capture patients in index events who do not necessarily have ACS at that time. This issue was addressed in a study validating ACS code groups in a French administrative database [@bezin2015choice]. Of the different code groups they present, the I20.0, I21.* and I24.* was identified as a good compromise between validated ACS and PPV (84%).
+
+ALL OPCS-4 PCI codes are included, based on the list provided in Pathak et al. (2023).
+
+The code groups used to define the index event are shown below:
+
+??? note "List of ACS and PCI codes used to define index events"
+
+    | Category | ICD-10 | Description |
+    |----------|--------|-------------|
+    | ACS | I20.0 | Unstable angina|  
+    ||I21.*  | Acute myocardial infarction |
+    ||I24.* | Other acute ischaemic heart diseases |
+    |PCI|K49.* |Transluminal balloon angioplasty of coronary artery |
+    ||K50.*|Other therapeutic transluminal operations on coronary artery |
+    ||K75.*|Percutaneous transluminal balloon angioplasty and insertion of stent into coronary artery|
+
 ## Outcome Definition
 
 Bleeding and ischaemia outcomes are defined by looking for ICD-10 codes in the spells that occur after the index presentation, up to one year.
@@ -153,11 +170,7 @@ The code groups are defined as follows:
 
 Disadvantages of this code group includes the lack of definition in whether the primary/secondary positions are used, and lack of validation. Similarly to the bleeding groups, basic validation may be performed by a chart analysis.
 
-
-
 ## Predictors
-
-Predictors are defined based on data that is available in the index presentation, if that data would be available to the clinician.
 
 Clinical codes are used to define predictors, but an exclusion period of one month is applied to avoid using ICD-10 and OPCS-4 codes that would not have been coded yet before the index (clinical coding happens monthly, and clinical codes are not available until this processing has occurred). 
 
@@ -165,14 +178,13 @@ Clinical codes are used to define predictors, but an exclusion period of one mon
 
 While use of ICD-10 and OPCS-4 coded patient data is useful because of its size and availability, there are caveats regarding its use for models intended directly for patient care.
 
-Coding is performed manually, at large scale, and errors have financial implications. There is evidence that internal inconsistencies in the data exist[@hardy2022data], that may impact tools designed for direct patient care. This modification of the intended purpose of the dataset should be considered if the data is to be used in clinical decision support tools.
+Coding is performed manually for financial purposes. There is evidence that internal inconsistencies in the data exist[@hardy2022data], that may impact tools designed for direct patient care. This modification of the intended purpose of the dataset should be considered if the data is to be used in clinical decision support tools.
 
 There is a wide degree of choice involved in selecting code groups to define index events and outcomes[@bosco2022major], both of which directly determine what question a given model is addressing (rather than how accurate it is). It is not possible to assess how well the coding maps to clinical reality using any model metric; the only available method is chart review, which is not possible to perform directly using only HES data.
 
 In addition to variability in choice of code groups, variability also exists regarding which episode (or epsiodes) of a spell is used to define an event, and which primary/secondary positions should be utilised. There is no systematic consensus on how these choices should be made when creating model for patient-care purposes.
 
-Finally, it is hard to assess coding accuracy by comparing the prevalence of events with trial or study data, because trials and studies often introduce some bias in prevalence due to the recruitment criteria used which is not present in counts of events in the entire patient population.
-
+Finally, it is hard to assess coding accuracy by comparing the prevalence of events with trial or study data, because trials and studies often introduce some bias due to the recruitment criteria causing a discrepancy compared to counts of events in the entire patient population.
 
 ## Models
 

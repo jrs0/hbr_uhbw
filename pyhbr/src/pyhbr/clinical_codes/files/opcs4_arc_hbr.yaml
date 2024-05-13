@@ -1805,6 +1805,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - A01
     - A84
@@ -2633,6 +2634,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - B01
     - B45
@@ -4577,6 +4579,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - C01
     - C91
@@ -5111,6 +5114,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - D01
     - D28
@@ -6797,6 +6801,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - E01
     - E98
@@ -8033,6 +8038,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - F01
     - F67
@@ -9863,6 +9869,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - G01
     - G82
@@ -11438,6 +11445,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - H01
     - H73
@@ -13073,6 +13081,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - J01
     - J77
@@ -13094,6 +13103,7 @@ categories:
       docs: Transplantation of heart and lung
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K011
       - K019
@@ -13126,6 +13136,7 @@ categories:
       docs: Other transplantation of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K021
       - K029
@@ -13158,6 +13169,7 @@ categories:
       docs: Repair of tetralogy of Fallot
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K041
       - K049
@@ -13178,6 +13190,7 @@ categories:
       docs: Atrial inversion operations for transposition of great arteries
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K051
       - K059
@@ -13204,6 +13217,7 @@ categories:
       docs: Other repair of transposition of great arteries
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K061
       - K069
@@ -13227,6 +13241,7 @@ categories:
       docs: Correction of total anomalous pulmonary venous connection
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K071
       - K079
@@ -13253,6 +13268,7 @@ categories:
       docs: Repair of double outlet ventricle
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K081
       - K089
@@ -13285,6 +13301,7 @@ categories:
       docs: Repair of defect of atrioventricular septum
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K091
       - K099
@@ -13314,6 +13331,7 @@ categories:
       docs: Repair of defect of interatrial septum
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K101
       - K109
@@ -13349,6 +13367,7 @@ categories:
       docs: Repair of defect of interventricular septum
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K111
       - K119
@@ -13378,6 +13397,7 @@ categories:
       docs: Repair of defect of unspecified septum of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K121
       - K129
@@ -13407,6 +13427,7 @@ categories:
       docs: Transluminal repair of defect of septum
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K131
       - K139
@@ -13436,6 +13457,7 @@ categories:
       docs: Other open operations on septum of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K141
       - K149
@@ -13456,6 +13478,7 @@ categories:
       docs: Closed operations on septum of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K151
       - K159
@@ -13488,6 +13511,7 @@ categories:
       docs: Other therapeutic transluminal operations on septum of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K161
       - K169
@@ -13523,6 +13547,7 @@ categories:
       docs: Repair of univentricular heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K171
       - K179
@@ -13558,6 +13583,7 @@ categories:
       docs: Creation of valved cardiac conduit
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K181
       - K189
@@ -13590,6 +13616,7 @@ categories:
       docs: Creation of other cardiac conduit
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K191
       - K199
@@ -13616,6 +13643,7 @@ categories:
       docs: Refashioning of atrium
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K201
       - K209
@@ -13639,6 +13667,7 @@ categories:
       docs: Other operations on wall of atrium
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K221
       - K229
@@ -13671,6 +13700,7 @@ categories:
       docs: Other operations of wall of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K231
       - K239
@@ -13706,6 +13736,7 @@ categories:
       docs: Other operations on ventricles of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K241
       - K249
@@ -13735,6 +13766,7 @@ categories:
       docs: Plastic repair of mitral valve
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K251
       - K259
@@ -13764,6 +13796,7 @@ categories:
       docs: Plastic repair of aortic valve
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K261
       - K269
@@ -13796,6 +13829,7 @@ categories:
       docs: Plastic repair of tricuspid valve
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K271
       - K279
@@ -13825,6 +13859,7 @@ categories:
       docs: Plastic repair of pulmonary valve
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K281
       - K289
@@ -13860,6 +13895,7 @@ categories:
       docs: Plastic repair of unspecified valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K291
       - K299
@@ -13889,6 +13925,7 @@ categories:
       docs: Revision of plastic repair of valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K301
       - K309
@@ -13918,6 +13955,7 @@ categories:
       docs: Open incision of valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K311
       - K319
@@ -13944,6 +13982,7 @@ categories:
       docs: Closed incision of valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K321
       - K329
@@ -13976,6 +14015,7 @@ categories:
       docs: Operations on aortic root
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K331
       - K339
@@ -14008,6 +14048,7 @@ categories:
       docs: Other open operations on valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K341
       - K349
@@ -14043,6 +14084,7 @@ categories:
       docs: Therapeutic transluminal operations on valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K351
       - K359
@@ -14063,6 +14105,7 @@ categories:
       docs: Excision of valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K361
       - K369
@@ -14095,6 +14138,7 @@ categories:
       docs: Removal of obstruction from structure adjacent to valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K371
       - K379
@@ -14127,6 +14171,7 @@ categories:
       docs: Other operations on structure adjacent to valve of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K381
       - K389
@@ -14153,6 +14198,7 @@ categories:
       docs: Saphenous vein graft replacement of coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K401
       - K409
@@ -14179,6 +14225,7 @@ categories:
       docs: Other autograft replacement of coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K411
       - K419
@@ -14205,6 +14252,7 @@ categories:
       docs: Allograft replacement of coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K421
       - K429
@@ -14231,6 +14279,7 @@ categories:
       docs: Prosthetic replacement of coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K431
       - K439
@@ -14251,6 +14300,7 @@ categories:
       docs: Other replacement of coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K441
       - K449
@@ -14283,6 +14333,7 @@ categories:
       docs: Connection of thoracic artery to coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K451
       - K459
@@ -14312,6 +14363,7 @@ categories:
       docs: Other bypass of coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K461
       - K469
@@ -14341,6 +14393,7 @@ categories:
       docs: Repair of coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K471
       - K479
@@ -14367,6 +14420,7 @@ categories:
       docs: Other open operations on coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K481
       - K489
@@ -14435,6 +14489,7 @@ categories:
       docs: Diagnostic transluminal operations on coronary artery
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K511
       - K519
@@ -14467,6 +14522,7 @@ categories:
       docs: Open operations on conducting system of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K521
       - K529
@@ -14487,6 +14543,7 @@ categories:
       docs: Other incision of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K531
       - K539
@@ -14507,6 +14564,7 @@ categories:
       docs: Open heart assist operations
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K541
       - K549
@@ -14539,6 +14597,7 @@ categories:
       docs: Other open operations on heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K551
       - K559
@@ -14565,6 +14624,7 @@ categories:
       docs: Transluminal heart assist operations
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K561
       - K569
@@ -14600,6 +14660,7 @@ categories:
       docs: Other therapeutic transluminal operations on heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K571
       - K579
@@ -14632,6 +14693,7 @@ categories:
       docs: Diagnostic transluminal operations on heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K581
       - K589
@@ -14667,6 +14729,7 @@ categories:
       docs: Cardioverter defibrillator introduced through the vein
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K591
       - K599
@@ -14702,6 +14765,7 @@ categories:
       docs: Cardiac pacemaker system introduced through vein
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K601
       - K609
@@ -14737,6 +14801,7 @@ categories:
       docs: Other cardiac pacemaker system
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K611
       - K619
@@ -14769,6 +14834,7 @@ categories:
       docs: Therapeutic transluminal operations on heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K621
       - K629
@@ -14801,6 +14867,7 @@ categories:
       docs: Contrast radiology of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K631
       - K639
@@ -14818,6 +14885,7 @@ categories:
       docs: Percutaneous operations on heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K641
       - K649
@@ -14844,6 +14912,7 @@ categories:
       docs: Catheterisation of heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K651
       - K659
@@ -14861,6 +14930,7 @@ categories:
       docs: Other operations on heart
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K661
       - K669
@@ -14878,6 +14948,7 @@ categories:
       docs: Excision of pericardium
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K671
       - K679
@@ -14898,6 +14969,7 @@ categories:
       docs: Drainage of pericardium
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K681
       - K689
@@ -14918,6 +14990,7 @@ categories:
       docs: Incision of pericardium
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K691
       - K699
@@ -14944,6 +15017,7 @@ categories:
       docs: Other operations on pericardium
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K711
       - K719
@@ -14970,6 +15044,7 @@ categories:
       docs: Other cardioverter defibrillator
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K721
       - K729
@@ -14993,6 +15068,7 @@ categories:
       docs: Other cardiac pacemaker system introduced through vein
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K731
       - K739
@@ -15016,6 +15092,7 @@ categories:
       docs: Cardiac pacemaker system
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K741
       - K749
@@ -15057,6 +15134,7 @@ categories:
       docs: Transluminal operations on cardiac conduit
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K761
       - K769
@@ -15074,6 +15152,7 @@ categories:
       docs: Transluminal drainage of pericardium
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K771
       - K779
@@ -15091,6 +15170,7 @@ categories:
       docs: Transluminal operations on internal mammary artery side branch
       exclude:
       - pci
+      - all_pci_pathak
       index:
       - K781
       - K789
@@ -17384,6 +17464,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - L01
     - L99
@@ -19271,6 +19352,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - M01
     - M86
@@ -19898,6 +19980,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - N01
     - N35
@@ -20576,6 +20659,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - P01
     - P32
@@ -21758,6 +21842,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - Q01
     - Q58
@@ -22455,6 +22540,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - R01
     - R43
@@ -24030,6 +24116,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - S01
     - S70
@@ -26061,6 +26148,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - T01
     - T98
@@ -27135,6 +27223,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - U01
     - U54
@@ -28812,6 +28901,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - V01
     - V70
@@ -31473,6 +31563,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - W01
     - W99
@@ -33608,6 +33699,7 @@ categories:
     docs: Miscellaneous Operations
     exclude:
     - pci
+    - all_pci_pathak
     index:
     - X01
     - X98
@@ -35849,6 +35941,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - Y01
     - Y99
@@ -38741,6 +38834,7 @@ categories:
     exclude:
     - pci
     - packed_red_cells_transfusion
+    - all_pci_pathak
     index:
     - Z01
     - Z99
@@ -38752,4 +38846,5 @@ categories:
   name: OPCS-4
 groups:
 - pci
+- all_pci_pathak
 - packed_red_cells_transfusion
