@@ -38,7 +38,8 @@ import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
 
-st.title("Deterministic Outcomes Trade-Off Model")
+st.title("Deterministic Model")
+st.write("*Baseline patients are assumed to have determinsitic outcomes, which have a chance of being modified by the intervention.*")
 
 st.write(
     "This page contains a simple theoretical model to estimate the effect of using a bleeding/ischaemia risk estimation tool selectively intervene in PCI patients to reduce their bleeding risk."
