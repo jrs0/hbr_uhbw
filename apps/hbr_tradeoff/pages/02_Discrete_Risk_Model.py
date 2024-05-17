@@ -3,20 +3,20 @@ import scipy
 import pandas as pd
 import streamlit as st
 
-st.title("Discrete Nondeterministic Model")
+st.title("Discrete Risk Model")
 st.write(
-    "*Baseline patients are dichotomised into high and low risk, but baseline outcomes are probabilistic. Interventions modify this probability.*"
+    "*Baseline patients are dichotomised into high and low risk groups, but all patients in the same group share the same risk (the risks do not follow a continuous distribution).*"
 )
 
 st.write(
-    "This simulation uses the simplest possible non-deterministic model of patient outcomes, where baseline patients have a bleeding and ischaemia risk depending on which of four possible risk categories they belong to. The four risk categories are:"
+    "This simulation uses the simplest possible non-deterministic model of patient outcomes, where all patients have one of two possible bleeding risks, and one of two possible ischaemia risks:"
 )
 st.write(
-    "- **LIR/LBR**: Low ischaemia risk and low bleeding risk;\n- **HIR/LBR**: High ischaemia risk and low bleeding risk;\n- **LIR/HBR**: Low ischaemia risk and high bleeding risk;\n- **HIR/HBR**: High ischaemia risk and high bleeding risk."
+    "- **LIR vs. HIR**: All patients at HIR share the same risk of ischaemic outcomes, which is higher than the fixed, equal (among all patients) risk of ischaemia in the LIR group.\n- **LBR vs. HBR**: All patients in the HBR shared a common bleeding risk, which is higher than the fixed, equal risk to all LBR patients."
 )
 
 st.info(
-    "In this model, baseline patients have a bleeding risk and an ischaemia risk which depends only on which of of the four groups they are in.",
+    "In the model, being high risk for bleeding is independent of being high risk for ischaemia, and all outcome risks are also independent.",
     icon="ℹ️",
 )
 
