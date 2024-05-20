@@ -51,6 +51,15 @@ You can generate the documentation for viewing live using:
 mkdocs serve
 ```
 
+### Linux System Dependencies
+
+If you are using Linux, ensure the following packages are installed:
+
+```bash
+# For PyQt6
+sudo apt-get install libxcb-cursor0
+```
+
 ### Further Development Notes
 
 Ordinarily, running `pip install -e .` will automatically fetch dependencies from PyPi. However, if you are unable to access PyPI due to networking limitations (on computer `A`), but are able to move a (~ 250 MiB) file from a computer (`B`) which does have access to PyPI, then you can perform the steps below to install the dependencies and this package on `A`.
