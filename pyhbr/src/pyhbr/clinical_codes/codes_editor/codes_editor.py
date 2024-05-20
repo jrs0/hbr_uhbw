@@ -8,7 +8,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("PyHBR Clinical Code Group Editor")
+        self.setWindowTitle("Clinical Code Group Editor")
         button = QPushButton("Press Me!")
 
         # Set the central widget of the Window.

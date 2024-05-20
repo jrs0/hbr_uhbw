@@ -172,6 +172,20 @@ class ClinicalCodeTree:
 
         return get_codes_in_group(group, self.categories)
 
+def load_from_file(path: str) -> ClinicalCodeTree:
+    """Load a clinical codes file relative to the working directory
+
+    Args:
+        path: The path to the codes file relative to the current
+            working directory.
+
+    Returns:
+        The contents of the file
+    """
+    with open(path, "r") as file:
+        contents = file.read()
+        return from_yaml(ClinicalCodeTree, contents)
+    
 
 def load_from_package(name: str) -> ClinicalCodeTree:
     """Load a clinical codes file from the pyhbr package.
