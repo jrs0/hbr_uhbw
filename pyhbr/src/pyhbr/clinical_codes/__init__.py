@@ -6,10 +6,11 @@ from importlib.resources import files as res_files
 
 from dataclasses import dataclass
 from serde import serde
-from serde.yaml import from_yaml
+from serde.yaml import from_yaml, to_yaml
 import pandas as pd
 from pandas import Series, DataFrame
 
+from pathlib import Path
 
 # Note: this class is missing the @serde decorator
 # deliberately. It seems like there is an issue with
@@ -185,8 +186,12 @@ def load_from_file(path: str) -> ClinicalCodeTree:
     with open(path, "r") as file:
         contents = file.read()
         return from_yaml(ClinicalCodeTree, contents)
-    
 
+def save_to_file(code_tree: ClinicalCodeTree, path: str):
+    contents = to_yaml(code_tree)
+    with open(path, "w") as file:
+        file.write(contents)
+    
 def load_from_package(name: str) -> ClinicalCodeTree:
     """Load a clinical codes file from the pyhbr package.
 
