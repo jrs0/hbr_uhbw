@@ -58,7 +58,9 @@ index_spells = acs.get_index_spells(episodes, codes, "acs_bezin", "all_pci_patha
 patient_ids = index_spells["patient_id"].unique()
 
 # Get date of death and cause of death from registry data
-date_of_death, cause_of_death = from_icb.get_mortality(engine, start_date, end_date, code_groups)
+date_of_death, cause_of_death = from_icb.get_mortality(
+    engine, start_date, end_date, code_groups
+)
 
 # Fetch all the primary care data, narrowed by patient
 engine = common.make_engine(database="modelling_sql_area")
@@ -174,9 +176,37 @@ features_attributes = acs.remove_features(
 
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index).
-all_other_codes = counting.get_all_other_codes(index_spells, icb_basic_tmp)
+all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
 
-# Get the bleeding and ischaemia outcomes
+# The bleeding outcome is defined by the ADAPTT trial bleeding code group,
+# which matches BARC 2-5 bleeding events. Subsequent events occurring more than
+# 48 hours (to attempt to exclude periprocedural events) and less than 365 days are
+# included. Outcomes are allowed to occur in any episode of any spell (including
+# the index spell), but must occur in the primary position (to avoid matching
+# historical/duplicate coding within a spell).
+outcomes = pd.DataFrame()
+
+outcomes[["bleeding", "fatal_bleeding"]] = acs.get_outcomes(
+    index_spells,
+    all_other_codes,
+    date_of_death,
+    cause_of_death,
+    "bleeding_adaptt",
+    "bleeding_adaptt",
+)
+outcomes[["ischaemia", "fatal_ischaemia"]] = acs.get_outcomes(
+    index_spells,
+    all_other_codes,
+    date_of_death,
+    cause_of_death,
+    "ami_stroke_ohm",
+    "cv_death_ohm",
+)
+
+# TODO write up the ischaemia outcome
+
+outcomes = bleeding_outcomes.merge(ischaemia_outcomes, on="spell_id", how="left")
+
 outcomes = acs.get_outcomes(
     index_spells, all_other_codes, date_of_death, cause_of_death
 )

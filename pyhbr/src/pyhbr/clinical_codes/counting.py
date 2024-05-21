@@ -6,7 +6,7 @@ from datetime import timedelta
 
 
 def get_all_other_codes(
-    index_spells: DataFrame, data: dict[str, DataFrame]
+    index_spells: DataFrame, episodes: DataFrame, codes: DataFrame
 ) -> DataFrame:
     """For each patient, get clinical codes in other episodes before/after the index
 
@@ -25,9 +25,8 @@ def get_all_other_codes(
 
     Args:
         index_spells: Contains `episode_id` as an index.
-        data: A dictionary containing two DataFrame values:
-            * "episodes": Contains `episode_id` as an index, and `patient_id` and `episode_start` as columns
-            * "codes": Contains `episode_id` and other code data as columns
+        episodes: Contains `episode_id` as an index, and `patient_id` and `episode_start` as columns
+        codes: Contains `episode_id` and other code data as columns
 
     Returns:
         A table containing columns `index_episode_id`, `other_episode_id`,
@@ -43,7 +42,7 @@ def get_all_other_codes(
     ]
 
     index_episode_info = df.merge(
-        data["episodes"][["patient_id", "episode_start"]], how="left", on="episode_id"
+        episodes[["patient_id", "episode_start"]], how="left", on="episode_id"
     ).rename(
         columns={"episode_start": "index_episode_start", "spell_id": "index_spell_id"}
     )
@@ -51,7 +50,7 @@ def get_all_other_codes(
     other_episodes = (
         index_episode_info.reset_index(names="index_episode_id")
         .merge(
-            data["episodes"][["episode_start", "patient_id", "spell_id"]].reset_index(
+            episodes[["episode_start", "patient_id", "spell_id"]].reset_index(
                 names="other_episode_id"
             ),
             how="left",
@@ -67,7 +66,7 @@ def get_all_other_codes(
     # Use an inner join to filter out other episodes that have no associated codes
     # in any group.
     with_codes = other_episodes.merge(
-        data["codes"], how="inner", left_on="other_episode_id", right_on="episode_id"
+        codes, how="inner", left_on="other_episode_id", right_on="episode_id"
     ).drop(columns=["patient_id", "episode_start", "episode_id"])
 
     return with_codes

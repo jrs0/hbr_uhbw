@@ -1,5 +1,5 @@
 import datetime as dt
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from pyhbr.clinical_codes import counting
 from pyhbr.analysis import describe
 from pyhbr.middle import from_hic  # Need to move the function
@@ -103,49 +103,48 @@ def get_index_spells(
     return index_spells
 
 
-def get_mortality_outcomes(
-    mortality_after_index: DataFrame,
-    bleeding_groups: list[str],
-    ischaemia_groups: list[str],
-) -> DataFrame:
-    """Get the mortality bleeding/ischaemia outcomes, and all-cause mortality
+def get_fatal_outcome(
+    index_spells: DataFrame,
+    date_of_death: DataFrame,
+    cause_of_death: DataFrame,
+    outcome_group: str,
+    max_after: dt.timedelta,
+) -> Series:
+    """Get fatal outcomes defined by a primary code in an ICD-10 code group
 
     Args:
-        window: Table containing the
-        bleeding_groups: List of bleeding outcome groups
-        ischaemia_groups: List of ischaemia outcome groups
+        index_spells: A table containing `spell_id` as Pandas index and a
+            column `episode_id` for the first episode in the index spell.
+        date_of_death: Contains a column date_of_death, with Pandas index
+            `patient_id`
+        cause_of_death: Contains columns `patient_id`, `code` (ICD-10) for
+            cause of death, `position` of the code, and `group`.
+        outcome_group: The name of the ICD-10 code group which defines the fatal
+            outcome.
+        follow_up: The maximum follow-up period after the index for valid outcomes.
 
     Returns:
-
+        A series of boolean containing whether a fatal outcome occurred in the follow-up
+            period.
     """
-    min_after = dt.timedelta(days=3)
-    max_after = dt.timedelta(days=365)
-    max_position = 1
 
-    window = mortality_after_index
-
-    # Record deaths due to any cause in the follow-up window
-    window["death_all_cause"] = (window["survival_time"] > min_after) & (
-        window["survival_time"] < max_after
+    mortality_after_index = (
+        index_spells.reset_index()
+        .merge(date_of_death, on="patient_id", how="left")
+        .merge(cause_of_death, on="patient_id", how="left")
     )
-
-    window["death_bleeding"] = (
-        (window["survival_time"] > min_after)
-        & (window["survival_time"] < max_after)
-        & (window["position"] <= max_position)
-        & (window["group"].isin(bleeding_groups))
+    mortality_after_index["survival_time"] = (
+        mortality_after_index["date_of_death"] - mortality_after_index["spell_start"]
     )
-
-    window["death_ischaemia"] = (
-        (window["survival_time"] > min_after)
-        & (window["survival_time"] < max_after)
-        & (window["position"] <= max_position)
-        & (window["group"].isin(ischaemia_groups))
+    mortality_after_index["outcome"] = (
+        (mortality_after_index["survival_time"] < max_after)
+        & (mortality_after_index["position"] == 1)
+        & (mortality_after_index["group"] == outcome_group)
     )
-
-    # Join the mortality outcomes for each spell back onto
-    # the index
-    return window.filter(regex="spell_id|death_").groupby("spell_id").any().astype(int)
+    fatal_outcome = (
+        mortality_after_index[["spell_id", "outcome"]].groupby("spell_id").any()
+    )
+    return fatal_outcome["outcome"]
 
 
 def get_outcomes(
@@ -153,17 +152,10 @@ def get_outcomes(
     all_other_codes: DataFrame,
     date_of_death: DataFrame,
     cause_of_death: DataFrame,
+    non_fatal_group: str,
+    fatal_group: str,
 ) -> DataFrame:
-    """Get bleeding and ischaemia outcomes
-
-    The bleeding outcome is defined by the ADAPTT trial bleeding code group,
-    which matches BARC 2-5 bleeding events. Subsequent events occurring more than
-    3 days (to attempt to exclude periprocedural events) and less than 365 days are
-    included. Outcomes are allowed to occur in any episode of any spell (including
-    the index spell), but must occur in the primary position (to avoid matching
-    historical/duplicate coding within a spell).
-
-    TODO: the ischaemia outcome definition
+    """Get non-fatal and fatal outcomes defined by code groups
 
     Args:
         index_spells: A table containing `spell_id` as Pandas index and a
@@ -174,66 +166,51 @@ def get_outcomes(
             `patient_id`
         cause_of_death: Contains columns `patient_id`, `code` (ICD-10) for
             cause of death, `position` of the code, and `group`.
+        non_fatal_group: The name of the ICD-10 group defining the non-fatal
+            outcome (the primary diagnosis of subsequent episodes are checked
+            for codes in this group)
+        fatal_group: The name of the ICD-10 group defining the fatal outcome 
+            (the primary diagnosis in the cause-of-death is checked for codes
+            in this group).
 
     Returns:
-        A table with two columns `bleeding` and `ischaemia`, which
-            count the number of subsequent events in the other episodes after
-            the index.
+        A dataframe, indexed by `spell_id` (i.e. the index spell), with columns
+            `all` (which counts the total fatal and non-fatal outcomes),
+            and `fatal` (which just contains the fatal outcome)
     """
 
-    bleeding_groups = ["bleeding_adaptt"]
-    ischaemia_groups = ["ami_stroke_ohm"]
+    # Follow-up time for fatal and non-fatal events
+    max_after = dt.timedelta(days=365)
+
+    # Properties of non-fatal events
     primary_only = True
     exclude_index_spell = False
     first_episode_only = False
     min_after = dt.timedelta(hours=48)
-    max_after = dt.timedelta(days=365)
 
-    mortality_after_index = (
-        index_spells.reset_index()
-        .merge(date_of_death, on="patient_id", how="left")
-        .merge(cause_of_death, on="patient_id", how="left")
+    # Work out fatal outcome
+    fatal = get_fatal_outcome(
+        index_spells, date_of_death, cause_of_death, fatal_group, max_after
     )
-    mortality_after_index["survival_time"] = (
-        mortality_after_index["date_of_death"] - mortality_after_index["spell_start"]
-    )
-
+    
     # Get the episodes (and all their codes) in the follow-up window
     following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 
-    # Count bleeding outcomes
-    bleeding_episodes = counting.filter_by_code_groups(
+    # Get non-fatal outcome
+    outcome_episodes = counting.filter_by_code_groups(
         following_year,
-        bleeding_groups,
+        [non_fatal_group],
         primary_only,
         exclude_index_spell,
         first_episode_only,
     )
-    bleeding_outcome = counting.count_code_groups(index_spells, bleeding_episodes)
-
-    # Count ischaemia outcomes
-    ischaemia_episodes = counting.filter_by_code_groups(
-        following_year,
-        ischaemia_groups,
-        primary_only,
-        exclude_index_spell,
-        first_episode_only,
-    )
-    ischaemia_outcome = counting.count_code_groups(index_spells, ischaemia_episodes)
-
-    outcomes = DataFrame({"bleeding": bleeding_outcome, "ischaemia": ischaemia_outcome})
-
-    death_outcomes = get_mortality_outcomes(
-        mortality_after_index, bleeding_groups, ischaemia_groups
-    )
-
-    # Add the bleeding/ischaemia mortality outcomes.
-    outcomes["bleeding"] += death_outcomes["death_bleeding"]
-    outcomes["ischaemia"] += death_outcomes["death_ischaemia"]
-
-    # Join the mortality outcomes
-    return outcomes.merge(death_outcomes, on="spell_id", how="left")
-
+    non_fatal = counting.count_code_groups(index_spells, outcome_episodes)
+    
+    return DataFrame({
+        "all": non_fatal + fatal,
+        "fatal": fatal
+    })
+    
 
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
     """Get counts of previous clinical codes in code groups before the index.
