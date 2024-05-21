@@ -1,4 +1,4 @@
-= #Implementing Risk Scores on HIC Data#
+= Implementing Risk Scores on HIC Data
 
 This section describes implementations of the already-existing risk scores using data from the Hospital Information Collaborative (HIC) dataset, which is formed from finished consultant episode data, British Cardiovascular Intervention Society (BCIS) audit data from the BHI, and prescription information from the BHI.
 
@@ -86,7 +86,7 @@ NOTE: Initially, an attempt was made to use the "on admission" flag to identify 
 
 == Chronic Kidney Disease
 
-If a laboratory test for eGFR was taken during the index presentation #or at any time period before the index presentation#, use the result to calculate the contribution to the ARC score:
+If a laboratory test for eGFR was taken during the index presentation or at any time period before the index presentation, use the result to calculate the contribution to the ARC score:
 
 [cols="1,1"]
 |===
@@ -99,7 +99,7 @@ If a laboratory test for eGFR was taken during the index presentation #or at any
 |===
 
 
-If no eGFR result is available, fall back on presence of an ICD-10 code #at any time in patient history#:
+If no eGFR result is available, fall back on presence of an ICD-10 code at any time in patient history:
 
 [cols="1,1"]
 |===
@@ -130,7 +130,7 @@ Use the first Hb measurement from the index presentation for the purposes of the
 
 If no Hb measurement is available in the patient history, fall back on ICD-10 codes:
 
-#TODO put in the anaemia codes#
+TODO put in the anaemia codes
 
 If no codes are present in the patient history, assume no ARC HBR criterion.
 
@@ -150,7 +150,7 @@ Depending on when the total number of qualifying events in the patient's history
 
 NOTE: Transfusion is ignored in this definition.
 
-#The ICD-10 codes used to identify bleeding events are shown below#.
+The ICD-10 codes used to identify bleeding events are shown below.
 
 === Thrombocytopenia (Low Platelet Count)
 
@@ -224,6 +224,6 @@ Presence of any of the following medications on admission (at the index ACS/PCI 
 * Etoricoxib
 * Indomethacin
 * Aspirin (high-dose, for pain-relief)
-* #Anything else?#
+* Anything else?
 
 NOTE: In the HIC data, all prescriptions of NSAIDs in the data set indicate a frequency of at least once per day, and therefore qualify.

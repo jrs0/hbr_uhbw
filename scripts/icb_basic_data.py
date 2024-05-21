@@ -26,7 +26,7 @@ importlib.reload(counting)
 start_date = dt.date(2019, 1, 1)
 end_date = dt.date(2025, 1, 1)
 
-# Get the raw HES data
+# Get the raw HES data (this takes a long time ~ 20 minutes)
 engine = common.make_engine(database="abi")
 raw_sus_data = from_icb.get_raw_sus_data(engine, start_date, end_date)
 

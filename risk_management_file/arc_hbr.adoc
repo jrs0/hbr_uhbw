@@ -1,5 +1,5 @@
 [#arc_hbr_score]
-= ARC HBR Score (applies to assessing high bleeding risk)
+= #ARC HBR Score (applies to assessing high bleeding risk)#
 
 _The ARC HBR score cite:[urban2019defining] is a numerical consensus-based score (rather than being a statistically-driven score), where the presence of a major criterion contributes a 1 to the total score, and a minor criterion contributes 0.5 to the total. A patient is considered at HBR if their score is at least 1 (e.g. due to one major criterion, or two minor criteria)._
 
