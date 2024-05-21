@@ -282,22 +282,25 @@ def filter_to_groups(
 
     return codes_table
 
+def get_code_groups(diagnosis_codes: ClinicalCodeTree, procedure_codes: ClinicalCodeTree) -> DataFrame:
+    """Get a table of any diagnosis/procedure code which is in a code group
 
-def get_code_groups(codes: Series, code_tree: ClinicalCodeTree) -> DataFrame:
-    """Normalise a code column and assign codes to groups
+    This function converts the code tree formats into a simple table containing 
+    normalised codes (lowercase, no dot), the documentation string for the code,
+    what group the code is in, and whether it is a diagnosis or procedure code
 
     Args:
-        codes: A column of (potentially non-normalised) clinical
-            codes.
-        code_tree: The clinical codes object (previously loaded from a file)
-            containing code groups to use.
+        diagnosis_codes: The tree of diagnosis codes
+        procedure_codes: The tree of procedure codes
 
     Returns:
-        A table where the first column ("code") is the normalised code
-            obtained from the code column. The second column ("group")
-            contains the group containing the code if the code is in
-
+        A table with columns `code`, `docs`, `group` and `type`.
     """
-    codes_with_groups = codes_in_any_group(code_tree)
-    normalised_codes = codes.apply(normalise_code).rename("code")
-    return normalised_codes.to_frame().merge(codes_with_groups, on="code", how="left")
+
+    diagnosis_groups = codes_in_any_group(diagnosis_codes)
+    procedure_groups = codes_in_any_group(procedure_codes)
+    diagnosis_groups["type"] = "diagnosis"
+    procedure_groups["type"] = "procedure"
+    code_groups = pd.concat([diagnosis_groups, procedure_groups]).reset_index(drop=True)
+    code_groups["type"] = code_groups["type"].astype("category")
+    return code_groups

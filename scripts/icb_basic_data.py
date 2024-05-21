@@ -20,7 +20,7 @@ importlib.reload(counting)
 
 # Set a date range for episode fetch. The primary
 # care data start in Oct 2019. Use an end date
-# in the future to ensure all data is fetched.
+# in the future to ensure all recent data is fetched.
 # Index spell data is limited based on the min/max
 # dates seen in all the datasets below.
 start_date = dt.date(2019, 1, 1)
@@ -40,18 +40,25 @@ raw_sus_data = from_icb.get_raw_sus_data(engine, start_date, end_date)
 common.save_item(raw_sus_data, "raw_sus_data")
 raw_sus_data = common.load_item("raw_sus_data")
 
-# HES data + patient demographics
-episodes_and_codes = from_icb.get_episodes_and_codes(raw_sus_data)
+# Read the code groups and reduce to a table. The remainder of the code
+# uses the code groups dataframe, which you can either get from the code
+# files (as is done here) or create them manually
+diagnosis_codes = clinical_codes.load_from_package("icd10_arc_hbr.yaml")
+procedure_codes = clinical_codes.load_from_package("opcs4_arc_hbr.yaml")
+code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
 
-# Get the index episodes (primary ACS or PCI anywhere in first episode)xs
+# HES data + patient demographics
+episodes, codes = from_icb.get_episodes_and_codes(raw_sus_data, code_groups)
+
+# Get the index episodes (primary ACS or PCI anywhere in first episode)
 # Modify the code groups used to define the index event here.
-index_spells = acs.get_index_spells(episodes_and_codes, "acs_bezin", "all_pci_pathak")
+index_spells = acs.get_index_spells(episodes, codes, "acs_bezin", "all_pci_pathak")
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
 
 # Get date of death and cause of death from registry data
-mortality = from_icb.get_mortality(engine, start_date, end_date)
+date_of_death, cause_of_death = from_icb.get_mortality(engine, start_date, end_date, code_groups)
 
 # Fetch all the primary care data, narrowed by patient
 engine = common.make_engine(database="modelling_sql_area")
@@ -110,10 +117,11 @@ index_spells = index_spells[
 icb_basic_tmp = {
     # Datasets
     "index_spells": index_spells,
-    "episodes": episodes_and_codes["episodes"],
-    "codes": episodes_and_codes["codes"],
-    "date_of_death": mortality["date_of_death"],
-    "cause_of_death": mortality["cause_of_death"],
+    "episodes": episodes,
+    "code_groups": code_groups,
+    "codes": codes,
+    "date_of_death": date_of_death,
+    "cause_of_death": cause_of_death,
     "primary_care_attributes": primary_care_attributes,
     "primary_care_measurements": primary_care_measurements,
     "primary_care_prescriptions": primary_care_prescriptions,

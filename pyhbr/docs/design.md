@@ -75,15 +75,30 @@ All tables are Pandas DataFrames.
 
 #### Episodes
 
-Most analysis is performed in terms of episodes, which correspond to individual consultant interactions within a hospital visit (called a spell). Episode information is stored in a table called `episodes`, which has the following columns:
+Episodes correspond to individual consultant interactions within a hospital visit (called a spell). Episode information is stored in a table called `episodes`, which has the following columns:
 
 * `episode_id` (`str`, Pandas index): uniquely identifies the episode.
 * `patient_id` (`str`): the unique identifier for the patient.
 * `spell_id` (`str`): identifies the spell containing the episode.
 * `episode_start` (`datetime.date`): the episode start time.
+* `age` (`float64`): The patient age at the start of the episode. 
+* `gender` (`category`): One of "male", "female", or "unknown". 
+
+Even though age and gender are demographic properties, it is convenient to keep them in the episodes table because they are eventually stored with index events, which come directly from episodes.
 
 !!! note
     Consider filtering the episodes table based on a date range of interest when it is fetched from the data source. This will speed up subsequent processing.
+
+#### Code Groups
+
+A table of code groups is required as input to functions to identify patients based on aspects of their coded history. This table is called `code_groups`, and has the following structure:
+
+* `code` (`str`): The ICD-10 or OPCS-4 code in normalised form (e.g. "i200")
+* `codes` (`str`): The description of the code
+* `group` (`str`): The name of the code group containing the code
+* `type` (`category`): One of "diagnosis" (for ICD-10 codes) or "procedure" (for OPCS-4 codes)
+
+Only codes which are in a code group are included in the table. Codes may be present in multiple rows if they occur in multiple groups.
 
 #### Codes
 

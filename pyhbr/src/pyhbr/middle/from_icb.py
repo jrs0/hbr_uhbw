@@ -6,7 +6,7 @@ from pyhbr.data_source import icb
 from sqlalchemy import Engine
 from datetime import date
 import datetime as dt
-from pyhbr.clinical_codes import counting
+from pyhbr.clinical_codes import counting, ClinicalCodeTree
 
 
 def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
@@ -41,20 +41,25 @@ def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
 
     # Convert gender to categories
     df["gender"] = df["gender"].replace("9", "0")
+    valid_values = ["0", "1", "2"]
+    df.loc[~df["gender"].isin(valid_values), "gender"] = "0"
     df["gender"] = df["gender"].astype("category")
     df["gender"] = df["gender"].cat.rename_categories(
         {"0": "unknown", "1": "male", "2": "female"}
     )
+    
+    # Convert age to numerical
+    df["age"] = df["age"].astype(float)
 
     return df
 
 
-def get_long_clincial_codes(raw_sus_data: DataFrame) -> DataFrame:
-    """Get a table of the clinical codes in long format
+def get_long_clinical_codes(raw_sus_data: DataFrame) -> DataFrame:
+    """Get a table of the clinical codes in normalised long format
 
     This is modelled on the format of the HIC data, which works
     well, and makes it possible to re-use the code for processing
-    that table
+    that table.
 
     Args:
         raw_sus_data: Must contain one row per episode, and
@@ -64,7 +69,8 @@ def get_long_clincial_codes(raw_sus_data: DataFrame) -> DataFrame:
             or procedure, and n > 1 is for secondary codes.
 
     Returns:
-        A table containing
+        A table containing `episode_id`, `code`, `type`, and
+            position.
     """
 
     # Pivot the wide format to long based on the episode_id
@@ -83,6 +89,7 @@ def get_long_clincial_codes(raw_sus_data: DataFrame) -> DataFrame:
     )
 
     long_codes["position"] = long_codes["position"].astype(int)
+    long_codes["code"] = long_codes["code"].apply(clinical_codes.normalise_code)
 
     # Collect columns of interest and sort for ease of viewing
     return (
@@ -93,9 +100,14 @@ def get_long_clincial_codes(raw_sus_data: DataFrame) -> DataFrame:
 
 
 def get_clinical_codes(
-    raw_sus_data: DataFrame, diagnoses_file: str, procedures_file: str
+    raw_sus_data: DataFrame, code_groups: DataFrame
 ) -> DataFrame:
     """Get clinical codes in long format and normalised form.
+
+    Each row is a code that is contained in some group. Codes in
+    an episode are dropped if they are not in any group, meaning
+    episodes will be dropped if no code in that episode is in any
+    group. 
 
     Args:
         raw_sus_data: Must contain one row per episode, and
@@ -103,36 +115,21 @@ def get_clinical_codes(
             columns `diagnosis_n` and `procedure_n`, for
             n > 0. The value n == 1 is the primary diagnosis
             or procedure, and n > 1 is for secondary codes.
-        diagnoses_file: The diagnoses codes file name (loaded from the package)
-        procedures_file: The procedures codes file name (loaded from the package)
+        code_groups: A table of all the codes in any group, at least containing
+            columns `code`, `group` and `type`.
 
     Returns:
         A table containing diagnoses/procedures, normalised codes, code groups,
             diagnosis positions, and associated episode ID.
     """
 
-    long_codes = get_long_clincial_codes(raw_sus_data)
+    # Get all the clinical codes for all episodes in long format
+    long_codes = get_long_clinical_codes(raw_sus_data)
 
-    diagnosis_codes = clinical_codes.load_from_package(diagnoses_file)
-    procedures_codes = clinical_codes.load_from_package(procedures_file)
-
-    # Fetch the data from the server
-    diagnoses = long_codes[long_codes["type"] == "diagnosis"].copy()
-    procedures = long_codes[long_codes["type"] == "procedure"].copy()
-
-    # Reduce data to only code groups, and combine diagnoses/procedures
-    filtered_diagnoses = clinical_codes.filter_to_groups(diagnoses, diagnosis_codes)
-    filtered_procedures = clinical_codes.filter_to_groups(procedures, procedures_codes)
-
-    # Tag the diagnoses/procedures, and combine the tables
-    filtered_diagnoses["type"] = "diagnosis"
-    filtered_procedures["type"] = "procedure"
-
-    codes = concat([filtered_diagnoses, filtered_procedures])
-    codes["type"] = codes["type"].astype("category")
-
-    return codes
-
+    # Join all the code groups, and drop any codes that are not in any
+    # group (inner join in order to retain all keep all codes in long_codes,
+    # but only if they have an entry in code_groups)
+    return long_codes.merge(code_groups, on=["code", "type"], how="inner")
 
 def get_raw_sus_data(engine: Engine, start_date: date, end_date: date) -> DataFrame:
     """Get the raw SUS (secondary uses services hospital episode statistics)
@@ -155,9 +152,7 @@ def get_raw_sus_data(engine: Engine, start_date: date, end_date: date) -> DataFr
 
     return raw_sus_data
 
-
-
-def get_episodes_and_codes(raw_sus_data: DataFrame) -> dict[str, DataFrame]:
+def get_episodes_and_codes(raw_sus_data: DataFrame, code_groups: DataFrame) -> (DataFrame, DataFrame):
     """Get episode and clinical code data
 
     This batch of data must be fetched first to find index events,
@@ -167,20 +162,22 @@ def get_episodes_and_codes(raw_sus_data: DataFrame) -> dict[str, DataFrame]:
 
     Args:
         raw_sus_data: The raw HES data returned by get_raw_sus_data()
+        code_groups: A table of all the codes in any group, at least containing
+            columns `code`, `group` and `type`.
 
     Returns:
-        A dictionary with "episodes" containing the episodes table
-            (also contains age and gender) and "codes" containing the
-            clinical code data in long format.
+        A tuple containing the episodes table (also contains age and
+            gender) and the codes table containing the clinical code data
+            in long format for any code that is in a diagnosis or 
+            procedure code group.
     """
 
     # Compared to the data fetch, this part is relatively fast, but still very
     # slow (approximately 10% of the total runtime).
     episodes = get_episodes(raw_sus_data)
-    codes = get_clinical_codes(raw_sus_data, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml")
+    codes = get_clinical_codes(raw_sus_data, code_groups)
 
-    return {"episodes": episodes, "codes": codes}
-
+    return episodes, codes
 
 def process_flag_columns(primary_care_attributes: DataFrame) -> DataFrame:
     """Replace NaN with false and convert to bool for a selection of rows
@@ -662,52 +659,63 @@ def hba1c(
 
     return prior_hba1c
 
-def get_mortality(engine: Engine, start_date: date, end_date: date) -> dict[str, DataFrame]:
-    """Get mortality dates and cause of death
+def get_long_cause_of_death(mortality: DataFrame) -> DataFrame:
+    """Get cause-of-death diagnosis codes in normalised long format
 
+    Args:
+        mortality: A table containing `patient_id`, and columns 
+            with names `cause_of_death_n`, where n is an integer 1, 2, ...
+
+    Returns:
+        A table containing the columns `patient_id`, `code` (for ICD-10
+            cause of death diagnosis), and `position` (for primary/secondary
+            position of the code)
+    """
+    df = mortality.filter(regex="(id|cause)").melt(id_vars="patient_id")
+    df["position"] = df["variable"].str.split("_", expand=True).iloc[:, -1].astype(int)
+    df = df[~df["value"].isna()]
+    df["code"] = df["value"].apply(clinical_codes.normalise_code)
+    return df[["patient_id", "code", "position"]]
+
+def get_mortality(engine: Engine, start_date: date, end_date: date, code_groups: DataFrame) -> dict[str, DataFrame]:
+    """Get date of death and cause of death
+    
     Args:
         engine: The connection to the database
         start_date: First date of death that will be included
         end_date: Last date of death that will be included
+        code_groups: A table of all the codes in any group, at least containing
+            columns `code`, `group` and `type`.
 
     Returns:
-        A dictionary containing "date_of_death", with date of
-            death indexed by patient_id, and "cause_of_death",
-            which has columns "patient_id", "position", "code",
-            "group".
+        A tuple containing a date of death table, which is indexed by `patient_id`
+            and has the single column `date_of_death`, and a cause of death table
+            with columns `patient_id`, `code` for the cause of death
+            diagnosis code (ICD-10), and `position` indicating the primary/secondary
+            position of the code (1 is primary, >1 is secondary).
     """
 
     # Fetch the mortality data limited by the date range
     raw_mortality_data = common.get_data(engine, icb.mortality_query, start_date, end_date)
 
-    # Some patient IDs have multiple inconsistent death records. Exclude any patients
-    # with more than one entry
-    df = raw_mortality_data.groupby("patient_id").filter(lambda g: len(g) == 1)
+    # Some patient IDs have multiple inconsistent death records. For these cases,
+    # pick the most recent record. This will ensure that no patients recorded in the
+    # mortality tables are dropped, at the expense of some potential inaccuracies in
+    # the date of death.
+    mortality = raw_mortality_data.sort_values("date_of_death").groupby("patient_id").tail(1)
 
-    mortality = df.set_index("patient_id")[["date_of_death"]]
+    # Get the date of death.
+    date_of_death = mortality.set_index("patient_id")[["date_of_death"]]
 
     # Convert the cause of death to a long format, normalise the codes,
     # and keep only the code and position for each patient.
-    df = df.filter(regex="(id|cause)").melt(id_vars="patient_id")
-    df["position"] = df["variable"].str.split("_", expand=True).iloc[:, -1].astype(int)
-    df = df[~df["value"].isna()]
-    df["code"] = df["value"].apply(clinical_codes.normalise_code)
-    cause_of_death = df[["patient_id", "position", "code"]]
-
-    # Read the code tree containing code groups
-    diagnoses_file = "icd10_arc_hbr.yaml"
-    diagnosis_codes = clinical_codes.load_from_package(diagnoses_file)
+    long_cause_of_death = get_long_cause_of_death(mortality)
 
     # Join the code groups to the codes (does not filter -- leaves
     # NA group for a code not in any group).
-    codes_with_groups = clinical_codes.codes_in_any_group(diagnosis_codes)
-    cause_of_death = cause_of_death.merge(
-        codes_with_groups[["code", "group"]], on="code", how="left"
-    )
+    diagnosis_code_groups = code_groups[code_groups["type"] == "diagnosis"]
+    cause_of_death = long_cause_of_death.merge(
+        diagnosis_code_groups, on="code", how="inner"
+    ).sort_values(["patient_id", "position"]).reset_index(drop=True)
 
-    return {
-        "date_of_death": mortality,
-        "cause_of_death": cause_of_death.sort_values(
-            ["patient_id", "position"]
-        ).reset_index(drop=True),
-    }
+    return date_of_death, cause_of_death

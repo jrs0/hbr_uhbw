@@ -5,7 +5,9 @@ from pyhbr.analysis import describe
 from pyhbr.middle import from_hic  # Need to move the function
 
 
-def get_index_spells(data: dict[str, DataFrame], acs_group: str, pci_group: str) -> DataFrame:
+def get_index_spells(
+    episodes: DataFrame, codes: DataFrame, acs_group: str, pci_group: str
+) -> DataFrame:
     """Get the index spells for ACS/PCI patients
 
     Index spells are defined by the contents of the first episode of
@@ -15,7 +17,7 @@ def get_index_spells(data: dict[str, DataFrame], acs_group: str, pci_group: str)
     * The primary diagnosis of the first episode contains an
       ACS ICD-10 code. This is to ensure that only episodes where the
       main diagnosis of the episode is ACS are considered, and not
-      cases where a secondary ACS is present that could refer to a 
+      cases where a secondary ACS is present that could refer to a
       historical event.
     * There is a PCI procedure in any primary or secondary position
       in the first episode of the spell. It is assumed that a procedure
@@ -32,13 +34,12 @@ def get_index_spells(data: dict[str, DataFrame], acs_group: str, pci_group: str)
     which is derived from the first episode of the spell.
 
     Args:
-        data: A dictionary containing at least these keys:
-            * episodes: All patient episodes. Must contain `episode_id`, `spell_id`
-                and `episode_start`.
-            * codes: All diagnosis/procedure codes by episode. Must contain
-                `episode_id`, `position` (indexed from 1 which is the primary
-                code, >1 are secondary codes), and `group` (containing either `acs`
-                or `pci`).
+        episodes: All patient episodes. Must contain `episode_id`, `spell_id`
+            and `episode_start`.
+        codes: All diagnosis/procedure codes by episode. Must contain
+            `episode_id`, `position` (indexed from 1 which is the primary
+            code, >1 are secondary codes), and `group` (expected to contain
+            the value of the acs_group and pci_group arguments).
         acs_group: The name of the ICD-10 code group used to define ACS.
         pci_group: The name of the OPCS-4 code group used to define PCI
 
@@ -48,15 +49,13 @@ def get_index_spells(data: dict[str, DataFrame], acs_group: str, pci_group: str)
     """
     # Index spells are defined by the contents of the first episode in the
     # spell (to capture the cause of admission to hospital).
-    first_episodes = (
-        data["episodes"].sort_values("episode_start").groupby("spell_id").head(1)
-    )
+    first_episodes = episodes.sort_values("episode_start").groupby("spell_id").head(1)
 
     # Join the diagnosis/procedure codes. The inner join reduces to episodes which
     # have codes in any group, which is a superset of the index episodes -- if an
     # episode has no codes in any code group, it cannot be an index event.
     first_episodes_with_codes = first_episodes.merge(
-        data["codes"], how="inner", on="episode_id"
+        codes, how="inner", on="episode_id"
     )
 
     # ACS matches based on a primary diagnosis of ACS (this is to rule out
@@ -88,9 +87,7 @@ def get_index_spells(data: dict[str, DataFrame], acs_group: str, pci_group: str)
     # Join some useful information about the episode
     index_spells = (
         index_spells.merge(
-            data["episodes"][
-                ["patient_id", "episode_start", "spell_id", "age", "gender"]
-            ],
+            episodes[["patient_id", "episode_start", "spell_id", "age", "gender"]],
             how="left",
             on="episode_id",
         )
@@ -98,11 +95,11 @@ def get_index_spells(data: dict[str, DataFrame], acs_group: str, pci_group: str)
         .reset_index("episode_id")
         .set_index("spell_id")
     )
-    
+
     # Convert the age column to a float. This should probably
     # be done upstream
     index_spells["age"] = index_spells["age"].astype(float)
-    
+
     return index_spells
 
 
