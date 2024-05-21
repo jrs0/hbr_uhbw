@@ -5,7 +5,7 @@ from pyhbr.analysis import describe
 from pyhbr.middle import from_hic  # Need to move the function
 
 
-def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
+def get_index_spells(data: dict[str, DataFrame], acs_group: str, pci_group: str) -> DataFrame:
     """Get the index spells for ACS/PCI patients
 
     Index spells are defined by the contents of the first episode of
@@ -13,9 +13,14 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
     considered an index event if either of the following hold:
 
     * The primary diagnosis of the first episode contains an
-      ACS ICD-10 code.
+      ACS ICD-10 code. This is to ensure that only episodes where the
+      main diagnosis of the episode is ACS are considered, and not
+      cases where a secondary ACS is present that could refer to a 
+      historical event.
     * There is a PCI procedure in any primary or secondary position
-      in the first episode of the spell.
+      in the first episode of the spell. It is assumed that a procedure
+      is only coded in secondary positions if it did occur in that
+      episode.
 
     A prerequisite for spell to be an index spell is that it contains
     episodes present in both the episodes and codes tables. The episodes table
@@ -26,11 +31,6 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
     spell id). It also contains other information about the index spell,
     which is derived from the first episode of the spell.
 
-    If you need to modify this function, note that the group names used to
-    identify ACS/PCI groups are called `acs` and `pci` (present in the
-    codes table). Also note that the position column in the codes table
-    is indexed from 1.
-
     Args:
         data: A dictionary containing at least these keys:
             * episodes: All patient episodes. Must contain `episode_id`, `spell_id`
@@ -39,19 +39,22 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
                 `episode_id`, `position` (indexed from 1 which is the primary
                 code, >1 are secondary codes), and `group` (containing either `acs`
                 or `pci`).
+        acs_group: The name of the ICD-10 code group used to define ACS.
+        pci_group: The name of the OPCS-4 code group used to define PCI
 
     Returns:
         A table of index spells and associated information about the
             first episode of the spell.
     """
     # Index spells are defined by the contents of the first episode in the
-    # spell (to capture to cause of admission to hospital).
+    # spell (to capture the cause of admission to hospital).
     first_episodes = (
         data["episodes"].sort_values("episode_start").groupby("spell_id").head(1)
     )
 
-    # Join the diagnosis/procedure codes (inner join reduces to episodes which
-    # have codes in any group, which is a superset of the index episodes)
+    # Join the diagnosis/procedure codes. The inner join reduces to episodes which
+    # have codes in any group, which is a superset of the index episodes -- if an
+    # episode has no codes in any code group, it cannot be an index event.
     first_episodes_with_codes = first_episodes.merge(
         data["codes"], how="inner", on="episode_id"
     )
@@ -59,13 +62,13 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
     # ACS matches based on a primary diagnosis of ACS (this is to rule out
     # cases where patient history may contain ACS recorded as a secondary
     # diagnosis).
-    acs_match = (first_episodes_with_codes["group"] == "acs_bezin") & (
+    acs_match = (first_episodes_with_codes["group"] == acs_group) & (
         first_episodes_with_codes["position"] == 1
     )
 
     # A PCI match is allowed anywhere in the procedures list, but must still
     # be present in the first episode of the index spell.
-    pci_match = first_episodes_with_codes["group"] == "all_pci_pathak"
+    pci_match = first_episodes_with_codes["group"] == pci_group
 
     # Get all the episodes matching the ACS or PCI condition (multiple rows
     # per episode)
@@ -76,10 +79,10 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
     # or PCI condition was present
     index_spells = DataFrame()
     index_spells["acs_index"] = (
-        matching_episodes["group"].eq("acs_bezin").groupby("episode_id").any()
+        matching_episodes["group"].eq(acs_group).groupby("episode_id").any()
     )
     index_spells["pci_index"] = (
-        matching_episodes["group"].eq("all_pci_pathak").groupby("episode_id").any()
+        matching_episodes["group"].eq(pci_group).groupby("episode_id").any()
     )
 
     # Join some useful information about the episode
@@ -101,95 +104,6 @@ def get_index_spells(data: dict[str, DataFrame]) -> DataFrame:
     index_spells["age"] = index_spells["age"].astype(float)
     
     return index_spells
-
-
-def index_episodes(data: dict[str, DataFrame]) -> DataFrame:
-    """Get the index episodes for ACS/PCI patients
-
-    !!! warning
-        This function is deprecated. Use get_index_spells() instead.
-        Defining index events and subsequent outcomes at an episode
-        level is not a good idea, because several episodes in the
-        same spell (whose clinical codes may be duplicates of the
-        same clinical event) will cause double-counting.
-
-    Index episodes are defined by the contents of the first episode of
-    the spell (i.e. the cause of admission to hospital). Episodes are
-    considered an index event if:
-
-    * The primary diagnosis contains an ACS ICD-10 code; or
-    * There is a PCI procedure in any primary or secondary position
-
-    A prerequisite for an episode to be an index episode is that it
-    is present in both the episodes and codes table. The episodes table
-    contains start-time/spell information, and the codes table contains
-    information about what diagnoses/procedures occurred in the episode.
-
-    The table returned contains only the episodes that match, along
-    with all the information about that episode present in the episodes
-    and codes tables.
-
-    If you need to modify this function, note that the group names used to
-    identify ACS/PCI groups are called `acs` and `pci` (present in the
-    codes table). Also note that the position column in the codes table
-    is indexed from 1.
-
-    Args:
-        data: A dictionary containing at least these keys:
-            * episodes: All patient episodes. Must contain `episode_id`, `spell_id`
-                and `episode_start`.
-            * codes: All diagnosis/procedure codes by episode. Must contain
-                `episode_id`, `position` (indexed from 1 which is the primary
-                code, >1 are secondary codes), and `group` (containing either `acs`
-                or `pci`).
-
-    Returns:
-        The index episodes.
-    """
-
-    # Index episodes are defined by the contents of the first episode in the
-    # spell (to capture to cause of admission to hospital).
-    first_episodes = (
-        data["episodes"].sort_values("episode_start").groupby("spell_id").head(1)
-    )
-
-    # Join the diagnosis/procedure codes (inner join reduces to episodes which
-    # have codes in any group, which is a superset of the index episodes)
-    first_episodes_with_codes = first_episodes.merge(
-        data["codes"], how="inner", on="episode_id"
-    )
-
-    # ACS matches based on a primary diagnosis of ACS (this is to rule out
-    # cases where patient history may contain ACS recorded as a secondary
-    # diagnosis).
-    acs_match = (first_episodes_with_codes["group"] == "acs_bezin") & (
-        first_episodes_with_codes["position"] == 1
-    )
-
-    # A PCI match is allowed anywhere in the procedures list, but must still
-    # be present in the index episode
-    pci_match = first_episodes_with_codes["group"] == "pci"
-
-    # Get all the episodes matching the ACS or PCI condition (multiple rows
-    # per episode)
-    matching_episodes = first_episodes_with_codes[acs_match | pci_match]
-
-    matching_episodes.set_index("episode_id", drop=True, inplace=True)
-
-    # Reduce to one row per episode, and store a flag for whether the ACS
-    # or PCI condition was present
-    index_episodes = DataFrame()
-    index_episodes["acs_index"] = (
-        matching_episodes["group"].eq("acs_bezin").groupby("episode_id").any()
-    )
-    index_episodes["pci_index"] = (
-        matching_episodes["group"].eq("all_pci_pathak").groupby("episode_id").any()
-    )
-
-    # Join some useful information about the episode
-    return index_episodes.merge(
-        data["episodes"][["patient_id", "episode_start"]], how="left", on="episode_id"
-    )
 
 
 def get_mortality_outcomes(

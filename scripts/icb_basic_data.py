@@ -43,8 +43,9 @@ raw_sus_data = common.load_item("raw_sus_data")
 # HES data + patient demographics
 episodes_and_codes = from_icb.get_episodes_and_codes(raw_sus_data)
 
-# Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_spells = acs.get_index_spells(episodes_and_codes)
+# Get the index episodes (primary ACS or PCI anywhere in first episode)xs
+# Modify the code groups used to define the index event here.
+index_spells = acs.get_index_spells(episodes_and_codes, "acs_bezin", "all_pci_pathak")
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
