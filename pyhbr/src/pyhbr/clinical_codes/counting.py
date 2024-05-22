@@ -147,7 +147,7 @@ def filter_by_code_groups(
                 episode start and the other episode start.
 
         code_groups: List of code group names containing clinical codes
-            that will count towards the sum.
+            that will remain in the result.
         primary_only: If False, count any code in any diagnosis/procedure
             position. If True, only count a code if it is the primary
             diagnosis/procedure.
@@ -166,8 +166,8 @@ def filter_by_code_groups(
     df = df[df["group"].isin(code_groups)]
 
     # Duplicated rows correspond to codes in multiple
-    # code groups. A code is duplicated if it has the
-    # same type (diagnosis/procedure) and position as
+    # code groups. A code is duplicated like this if it
+    # has the same type (diagnosis/procedure) and position as
     # another code in the same other episode.
     df = df.drop_duplicates(["other_episode_id", "type", "position"])
 

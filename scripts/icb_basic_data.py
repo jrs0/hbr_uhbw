@@ -143,6 +143,8 @@ common.save_item(icb_basic_tmp, "icb_basic_tmp")
 icb_basic_tmp = common.load_item("icb_basic_tmp")
 
 # Extract some datasets for convenience
+episodes = icb_basic_tmp["episodes"]
+codes = icb_basic_tmp["codes"]
 index_spells = icb_basic_tmp["index_spells"]
 date_of_death = icb_basic_tmp["date_of_death"]
 cause_of_death = icb_basic_tmp["cause_of_death"]
@@ -178,14 +180,44 @@ features_attributes = acs.remove_features(
 # groups before/after the index).
 all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
 
+# Get follow-up window for defining non-fatal outcomes
+min_after = dt.timedelta(hours=48)
+max_after = dt.timedelta(days=365)
+following_year = counting.get_time_window(all_other_codes, min_after, max_after)
+
+# Properties of non-fatal events
+primary_only = True
+exclude_index_spell = True
+first_episode_only = False
+
+# Get the non-fatal bleeding outcomes
+non_fatal_bleeding_group = "bleeding_adaptt"
+non_fatal_bleeding = counting.filter_by_code_groups(
+    following_year,
+    [non_fatal_bleeding_group],
+    primary_only,
+    exclude_index_spell,
+    first_episode_only,
+)
+
+# Get the non-fatal ischaemia outcomes
+non_fatal_ischaemia_group = "ami_stroke_ohm"
+non_fatal_ischaemia = counting.filter_by_code_groups(
+    following_year,
+    [non_fatal_ischaemia_group],
+    primary_only,
+    exclude_index_spell,
+    first_episode_only,
+)
+
+
+
 # The bleeding outcome is defined by the ADAPTT trial bleeding code group,
 # which matches BARC 2-5 bleeding events. Subsequent events occurring more than
 # 48 hours (to attempt to exclude periprocedural events) and less than 365 days are
 # included. Outcomes are allowed to occur in any episode of any spell (including
 # the index spell), but must occur in the primary position (to avoid matching
 # historical/duplicate coding within a spell).
-outcomes = pd.DataFrame()
-
 outcomes[["bleeding", "fatal_bleeding"]] = acs.get_outcomes(
     index_spells,
     all_other_codes,
@@ -194,13 +226,14 @@ outcomes[["bleeding", "fatal_bleeding"]] = acs.get_outcomes(
     "bleeding_adaptt",
     "bleeding_adaptt",
 )
+
 outcomes[["ischaemia", "fatal_ischaemia"]] = acs.get_outcomes(
     index_spells,
     all_other_codes,
     date_of_death,
     cause_of_death,
     "ami_stroke_ohm",
-    "cv_death_ohm",
+    "ami_stroke_ohm",
 )
 
 # TODO write up the ischaemia outcome
