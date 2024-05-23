@@ -103,14 +103,15 @@ def get_index_spells(
     return index_spells
 
 
-def get_fatal_outcome(
+def identify_fatal_outcome(
     index_spells: DataFrame,
     date_of_death: DataFrame,
     cause_of_death: DataFrame,
     outcome_group: str,
+    max_position: int,
     max_after: dt.timedelta,
 ) -> Series:
-    """Get fatal outcomes defined by a primary code in an ICD-10 code group
+    """Get fatal outcomes defined by a diagnosis code in a code group
 
     Args:
         index_spells: A table containing `spell_id` as Pandas index and a
@@ -121,30 +122,111 @@ def get_fatal_outcome(
             cause of death, `position` of the code, and `group`.
         outcome_group: The name of the ICD-10 code group which defines the fatal
             outcome.
-        follow_up: The maximum follow-up period after the index for valid outcomes.
+        max_position: The maximum primary/secondary cause of death that will be
+            checked for the code group.
+        max_after: The maximum follow-up period after the index for valid outcomes.
 
     Returns:
         A series of boolean containing whether a fatal outcome occurred in the follow-up
             period.
     """
 
+    # Inner join to get a table of index patients with death records
     mortality_after_index = (
         index_spells.reset_index()
-        .merge(date_of_death, on="patient_id", how="left")
-        .merge(cause_of_death, on="patient_id", how="left")
+        .merge(date_of_death, on="patient_id", how="inner")
+        .merge(cause_of_death, on="patient_id", how="inner")
     )
     mortality_after_index["survival_time"] = (
         mortality_after_index["date_of_death"] - mortality_after_index["spell_start"]
     )
-    mortality_after_index["outcome"] = (
+
+    # Reduce to only the fatal outcomes that meet the time window and
+    # code inclusion criteria
+    df = mortality_after_index[
         (mortality_after_index["survival_time"] < max_after)
-        & (mortality_after_index["position"] == 1)
+        & (mortality_after_index["position"] <= max_position)
         & (mortality_after_index["group"] == outcome_group)
-    )
-    fatal_outcome = (
-        mortality_after_index[["spell_id", "outcome"]].groupby("spell_id").any()
-    )
-    return fatal_outcome["outcome"]
+    ]
+
+    # Rename the id columns to be compatible with counting.count_code_groups
+    # and select columns of interest
+    return df.rename(columns={"spell_id": "index_spell_id"})[
+        ["index_spell_id", "survival_time", "code", "position", "docs", "group"]
+    ]
+
+
+def filter_by_code_groups(
+    episode_codes: DataFrame,
+    code_group: str,
+    max_position: int,
+    exclude_index_spell: bool,
+) -> DataFrame:
+    """Filter based on matching code conditions occurring in other episodes
+
+    From any table derived from get_all_other_episodes (e.g. the
+    output of get_time_window), identify clinical codes (and
+    therefore episodes) which correspond to an outcome of interest.
+
+    The input table has one row per clinical code, which is grouped
+    into episodes and spells by other columns. The outcome only
+    contains codes that define an episode or spell as an outcome.
+    The result from this function can be used to analyse the make-up
+    of outcomes.
+
+    Args:
+        episode_codes: Table of other episodes to filter.
+            This can be narrowed to either the previous or subsequent
+            year, or a different time frame. (In particular, exclude the
+            index event if required.) The table must contain these
+            columns:
+
+            * `other_episode_id`: The ID of the other episode
+                containing the code (relative to the index episode).
+            * `other_spell_id`: The spell containing the other episode.
+            * `group`: The name of the code group.
+            * `type`: The code type, "diagnosis" or "procedure".
+            * `position`: The position of the code (1 for primary, > 1
+                for secondary).
+            * `time_to_other_episode`: The time elapsed between the index
+                episode start and the other episode start.
+
+        code_group: The code group name used to identify outcomes
+        max_position: The maximum clinical code position that will be allowed
+            to define an outcome. Pass 1 to allow primary diagnosis only,
+            2 to allow primary diagnosis and the first secondary diagnosis,
+            etc.
+        exclude_index_spell: Do not allow any code present in the index
+            spell to define an outcome.
+
+    Returns:
+        A series containing the number of code group occurrences in the
+            other_episodes table.
+    """
+
+    # Reduce to only the code groups of interest
+    df = episode_codes[episode_codes["group"] == code_group]
+
+    # Keep only necessary columns
+    df = df[
+        [
+            "index_spell_id",
+            "other_spell_id",
+            "code",
+            "docs",
+            "position",
+            "time_to_other_episode",
+        ]
+    ]
+
+    # Optionally remove rows corresponding to the index spell
+    if exclude_index_spell:
+        df = df[~(df["other_spell_id"] == df["index_spell_id"])]
+
+    # Only keep codes that match the position-based inclusion criterion
+    df = df[df["position"] <= max_position]
+
+    return df
 
 
 def get_outcomes(
@@ -169,7 +251,7 @@ def get_outcomes(
         non_fatal_group: The name of the ICD-10 group defining the non-fatal
             outcome (the primary diagnosis of subsequent episodes are checked
             for codes in this group)
-        fatal_group: The name of the ICD-10 group defining the fatal outcome 
+        fatal_group: The name of the ICD-10 group defining the fatal outcome
             (the primary diagnosis in the cause-of-death is checked for codes
             in this group).
 
@@ -192,12 +274,12 @@ def get_outcomes(
     fatal = get_fatal_outcome(
         index_spells, date_of_death, cause_of_death, fatal_group, max_after
     )
-    
+
     # Get the episodes (and all their codes) in the follow-up window
     following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 
     # Get non-fatal outcome
-    outcome_episodes = counting.filter_by_code_groups(
+    outcome_episodes = filter_by_code_groups(
         following_year,
         [non_fatal_group],
         primary_only,
@@ -205,12 +287,9 @@ def get_outcomes(
         first_episode_only,
     )
     non_fatal = counting.count_code_groups(index_spells, outcome_episodes)
-    
-    return DataFrame({
-        "all": non_fatal + fatal,
-        "fatal": fatal
-    })
-    
+
+    return DataFrame({"all": non_fatal + fatal, "fatal": fatal})
+
 
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
     """Get counts of previous clinical codes in code groups before the index.
@@ -234,9 +313,8 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
             in that group that appeared in the year before the index.
     """
     code_groups = all_other_codes["group"].unique()
-    primary_only = False
+    max_position = 999 # Allow any primary/secondary position
     exclude_index_spell = False
-    first_episode_only = False
     max_before = dt.timedelta(days=365)
     min_before = dt.timedelta(days=30)
 
@@ -245,12 +323,11 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
 
     code_features = {}
     for group in code_groups:
-        group_episodes = counting.filter_by_code_groups(
+        group_episodes = filter_by_code_groups(
             previous_year,
-            [group],
-            primary_only,
+            group,
+            max_position,
             exclude_index_spell,
-            first_episode_only,
         )
         code_features[group + "_before"] = counting.count_code_groups(
             index_spells, group_episodes

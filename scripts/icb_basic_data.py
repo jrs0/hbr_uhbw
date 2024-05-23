@@ -185,64 +185,103 @@ min_after = dt.timedelta(hours=48)
 max_after = dt.timedelta(days=365)
 following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 
-# Properties of non-fatal events
-primary_only = True
-exclude_index_spell = True
-first_episode_only = False
+# The bleeding outcome is defined by the ADAPTT trial bleeding code group,
+# which matches BARC 2-5 bleeding events. Ischaemia outcomes are defined using
+# a three-point MACE specifically targetting ischaemic outcomes (i.e. only
+# ischaemic stroke is included, rather than haemorrhagic stroke which is sometimes
+# included in MACE definitions).
 
 # Get the non-fatal bleeding outcomes
+# Excluding the index spells appears to have very
+# little effect on the prevalence, so the index spell
+# is excluded to be consistent with ischaemia outcome
+# definition. Increasing maximum code position increases
+# the bleeding rate, but 1 is chosen to restrict to cases
+# where bleeding code is not historical/minor.
+max_position = 1
+exclude_index_spell = True
 non_fatal_bleeding_group = "bleeding_adaptt"
-non_fatal_bleeding = counting.filter_by_code_groups(
+non_fatal_bleeding = acs.filter_by_code_groups(
     following_year,
-    [non_fatal_bleeding_group],
-    primary_only,
+    non_fatal_bleeding_group,
+    max_position,
     exclude_index_spell,
-    first_episode_only,
 )
 
-# Get the non-fatal ischaemia outcomes
+# Get fatal bleeding outcomes. Maximum code
+# position increases count, but is restricted
+# to one to focus on bleeding-caused deaths.
+max_position = 1
+fatal_bleeding_group = "bleeding_adaptt"
+fatal_bleeding = acs.identify_fatal_outcome(
+    index_spells,
+    date_of_death,
+    cause_of_death,
+    fatal_bleeding_group,
+    max_position,
+    max_after,
+)
+
+# Get the non-fatal ischaemia outcomes. Allowing
+# outcomes from the index spell considerably
+# increases the ischaemia rate to about 25%, which
+# seems to high to be reasonable. This could be
+# due to (e.g.) a majority of ACS patients having two
+# acute episodes to treat the index event. Excluding
+# the index event brings the prevalence down to around 6%,
+# more in line with published research. Allowing
+# secondary codes somewhat increases the number of outcomes.
+max_position = 1
+exclude_index_spell = True
 non_fatal_ischaemia_group = "ami_stroke_ohm"
-non_fatal_ischaemia = counting.filter_by_code_groups(
+non_fatal_ischaemia = acs.filter_by_code_groups(
     following_year,
-    [non_fatal_ischaemia_group],
-    primary_only,
+    non_fatal_ischaemia_group,
+    max_position,
     exclude_index_spell,
-    first_episode_only,
 )
 
-
-
-# The bleeding outcome is defined by the ADAPTT trial bleeding code group,
-# which matches BARC 2-5 bleeding events. Subsequent events occurring more than
-# 48 hours (to attempt to exclude periprocedural events) and less than 365 days are
-# included. Outcomes are allowed to occur in any episode of any spell (including
-# the index spell), but must occur in the primary position (to avoid matching
-# historical/duplicate coding within a spell).
-outcomes[["bleeding", "fatal_bleeding"]] = acs.get_outcomes(
+# Get the fatal ischaemia outcomes. Restricting
+# to primary cause of death produces no events for
+# the group cv_death_ohm (cardiac arrest appears to
+# only ever be recorded in a secondary position).
+# Only the first secondary position is allowed,
+# in an attempt to restrict to cardiovascular death
+# which does not have another cause.
+fatal_ischaemia_group = "cv_death_ohm"
+max_position = 2
+fatal_ischaemia = acs.identify_fatal_outcome(
     index_spells,
-    all_other_codes,
     date_of_death,
     cause_of_death,
-    "bleeding_adaptt",
-    "bleeding_adaptt",
+    fatal_ischaemia_group,
+    max_position,
+    max_after,
 )
 
-outcomes[["ischaemia", "fatal_ischaemia"]] = acs.get_outcomes(
-    index_spells,
-    all_other_codes,
-    date_of_death,
-    cause_of_death,
-    "ami_stroke_ohm",
-    "ami_stroke_ohm",
+# Count the non-fatal bleeding/ischaemia outcomes
+outcomes = pd.DataFrame()
+outcomes["non_fatal_bleeding"] = counting.count_code_groups(
+    index_spells, non_fatal_bleeding
+)
+outcomes["non_fatal_ischaemia"] = counting.count_code_groups(
+    index_spells, non_fatal_ischaemia
+)
+outcomes["fatal_bleeding"] = counting.count_code_groups(index_spells, fatal_bleeding)
+outcomes["fatal_ischaemia"] = counting.count_code_groups(index_spells, fatal_ischaemia)
+
+# Reduce the outcomes to boolean, and make aggregate
+# (fatal/non-fatal) columns
+bool_outcomes = outcomes > 0
+bool_outcomes["bleeding"] = (
+    bool_outcomes["fatal_bleeding"] | bool_outcomes["non_fatal_bleeding"]
+)
+bool_outcomes["ischaemia"] = (
+    bool_outcomes["fatal_ischaemia"] | bool_outcomes["non_fatal_ischaemia"]
 )
 
-# TODO write up the ischaemia outcome
-
-outcomes = bleeding_outcomes.merge(ischaemia_outcomes, on="spell_id", how="left")
-
-outcomes = acs.get_outcomes(
-    index_spells, all_other_codes, date_of_death, cause_of_death
-)
+# Quick check on prevalences
+100 * bool_outcomes.sum() / len(bool_outcomes)
 
 features_codes = acs.get_code_features(index_spells, all_other_codes)
 
@@ -267,7 +306,7 @@ features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_s
 # for saving.
 icb_basic_data = {
     "icb_basic_tmp": icb_basic_tmp,
-    "outcomes": outcomes,
+    "outcomes": bool_outcomes,
     "features_index": features_index,
     "features_codes": features_codes,
     "features_attributes": features_attributes,
