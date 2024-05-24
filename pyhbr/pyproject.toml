@@ -1,6 +1,6 @@
 [project]
 name = "pyhbr"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
   { name="John Scott", email="john.scott@uhbw.nhs.uk" },
 ]
@@ -20,8 +20,10 @@ dependencies = [
   "gitpython",
   "scikit-learn",
   "matplotlib",
-  "pyqt6"
 ]
+
+[project.optional-dependencies]
+gui = ["pyqt6"]
 
 [project.gui-scripts]
 codes-editor = "pyhbr.clinical_codes.codes_editor.codes_editor:run_app"
