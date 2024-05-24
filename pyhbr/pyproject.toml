@@ -4,7 +4,7 @@ version = "0.0.2"
 authors = [
   { name="John Scott", email="john.scott@uhbw.nhs.uk" },
 ]
-description = "Tools for bleeding/ischaemia risk prediction in PCI patients"
+description = "Tools for bleeding/ischaemia risk estimation in PCI patients"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [

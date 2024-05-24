@@ -145,11 +145,6 @@ def objective_fn(
         p_hir: Observed prevalence of high ischaemia risk
         p_hbr: Observed prevalence of high bleeding risk
 
-            which are the observed prevalences of all combinations of
-            outcomes in the baseline group, along with the known
-            prevalences of high bleeding and high ischaemia risk
-            in the baseline group.
-
     Return:
         The L2 distance between the observed prevalences and the
             prevalences implied by the choice of x.
