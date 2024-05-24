@@ -211,6 +211,8 @@ non_fatal_bleeding = acs.filter_by_code_groups(
 # Get fatal bleeding outcomes. Maximum code
 # position increases count, but is restricted
 # to one to focus on bleeding-caused deaths.
+# Bleeding codes typically show up in the primary
+# or first secondary
 max_position = 1
 fatal_bleeding_group = "bleeding_adaptt"
 fatal_bleeding = acs.identify_fatal_outcome(
@@ -240,6 +242,11 @@ non_fatal_ischaemia = acs.filter_by_code_groups(
     max_position,
     exclude_index_spell,
 )
+
+# This is how to look at patients with a particular spell
+df = codes.merge(episodes, on="episode_id", how="left")
+spell = df[df["spell_id"] == "1613481717937990639"].drop_duplicates(["episode_id", "code", "type", "position"])
+spell.sort_values(["episode_start", "type", "position"])
 
 # Get the fatal ischaemia outcomes. Restricting
 # to primary cause of death produces no events for
