@@ -24,17 +24,18 @@ print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
 
 # Create a table of dataset and outcomes information
-binary_outcomes = binary_outcomes > 0
 start_date = icb_basic_data["icb_basic_tmp"]["index_start"]
 end_date = icb_basic_data["icb_basic_tmp"]["index_end_date"]
-num_acs = len(binary_outcomes)
-fatal_bleeding = binary_outcomes.sum().loc["death_bleeding"]
-total_bleeding = binary_outcomes.sum().loc["bleeding"]
-non_fatal_bleeding = total_bleeding - fatal_bleeding
-fatal_ischaemia = binary_outcomes.sum().loc["death_ischaemia"]
-total_ischaemia = binary_outcomes.sum().loc["ischaemia"]
-non_fatal_ischaemia = total_ischaemia - fatal_ischaemia
-all_cause_death = binary_outcomes.sum().loc["death_all_cause"]
+num_acs = len(outcomes)
+
+fatal_bleeding = outcomes.sum().loc["fatal_bleeding"]
+non_fatal_bleeding = outcomes.sum().loc["non_fatal_bleeding"]
+total_bleeding = outcomes.sum().loc["bleeding"]
+
+fatal_ischaemia = outcomes.sum().loc["fatal_ischaemia"]
+non_fatal_ischaemia = outcomes.sum().loc["non_fatal_ischaemia"]
+total_ischaemia = outcomes.sum().loc["ischaemia"]
+
 
 # Folder in which to save plots and other data
 res_folder = "../hbr_papers/resources/"

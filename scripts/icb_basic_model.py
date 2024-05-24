@@ -34,9 +34,6 @@ features = (
     .merge(features_attributes, how="left", on="spell_id")
 )
 
-# Convert to a binary outcome (rather than a count)
-binary_outcome = outcomes > 0
-
 # Create a random state from a seed
 seed = 0
 random_state = RandomState(seed)
@@ -44,7 +41,7 @@ random_state = RandomState(seed)
 # Create the train/test split
 test_proportion = 0.25
 X_train, X_test, y_train, y_test = train_test_split(
-    features, binary_outcome, test_size=test_proportion, random_state=random_state
+    features, outcomes, test_size=test_proportion, random_state=random_state
 )
 
 # Using a larger number of bootstrap resamples will make
