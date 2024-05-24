@@ -1,6 +1,6 @@
 [project]
 name = "pyhbr"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   { name="John Scott", email="john.scott@uhbw.nhs.uk" },
 ]
