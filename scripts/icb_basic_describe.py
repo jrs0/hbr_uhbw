@@ -1,19 +1,20 @@
 import numpy as np
 import pandas as pd
+import scipy
 from pyhbr import common
 from pyhbr.analysis import describe
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-icb_basic_data = common.load_item("icb_basic_data")
+data = common.load_item("icb_basic_data")
 
 # For convenience
-outcomes = icb_basic_data["outcomes"]
-features_index = icb_basic_data["features_index"]  # bool-only
-features_codes = icb_basic_data["features_codes"]  # float-only
-features_prescriptions = icb_basic_data["features_prescriptions"]  # float-only
-features_measurements = icb_basic_data["features_measurements"]  # float-only
-features_attributes = icb_basic_data["features_attributes"]  # float, category, Int8
+outcomes = data["outcomes"]
+features_index = data["features_index"]  # bool-only
+features_codes = data["features_codes"]  # float-only
+features_prescriptions = data["features_prescriptions"]  # float-only
+features_measurements = data["features_measurements"]  # float-only
+features_attributes = data["features_attributes"]  # float, category, Int8
 
 # Check outcomes
 missing_outcomes = describe.proportion_missingness(outcomes)
@@ -23,9 +24,13 @@ prevalence_outcomes = describe.get_column_rates(outcomes)
 print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
 
+# Get prevalences of all combinations of bleeding/ischaemia
+# outcomes, which is used as an input to the hbr_tradeoff app
+100*pd.crosstab(outcomes["bleeding"], outcomes["ischaemia"])/len(outcomes)
+
 # Create a table of dataset and outcomes information
-start_date = icb_basic_data["icb_basic_tmp"]["index_start"]
-end_date = icb_basic_data["icb_basic_tmp"]["index_end_date"]
+start_date = data["icb_basic_tmp"]["index_start"]
+end_date = data["icb_basic_tmp"]["index_end_date"]
 num_acs = len(outcomes)
 
 fatal_bleeding = outcomes.sum().loc["fatal_bleeding"]

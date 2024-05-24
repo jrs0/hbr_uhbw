@@ -25,10 +25,10 @@
 # The following prevalences of outcomes following ACS/PCI will
 # be assumed (corresponding to group B):
 #
-# NI + NB: 80%
-# I + NB: 18%
-# NI + B: 1%
-# I + B: 1%
+# NI + NB: 92.2%
+# I + NB: 6.6%
+# NI + B: 1.0%
+# I + B: 0.2%
 #
 # Success of the intervention used in group A is defined by
 # a reduction in the rate of * + B outcomes, that comes with
@@ -71,7 +71,7 @@ p_b_ni_nb = (
         "Proportion with no ischaemia and no bleeding (%)",
         min_value=0.0,
         max_value=100.0,
-        value=80.0,
+        value=92.2,
         step=0.1,
     )
     / 100.0
@@ -81,7 +81,7 @@ p_b_i_nb = (
         "Proportion with ischaemia but no bleeding (%)",
         min_value=0.0,
         max_value=100.0,
-        value=18.0,
+        value=6.6,
         step=0.1,
     )
     / 100.0
@@ -101,7 +101,7 @@ p_b_i_b = (
         "Proportion with bleeding and ischaemia (%)",
         min_value=0.0,
         max_value=100.0,
-        value=1.0,
+        value=0.2,
     )
     / 100
 )

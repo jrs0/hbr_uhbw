@@ -1,3 +1,4 @@
+import pandas as pd
 import matplotlib.pyplot as plt
 import scipy
 
@@ -15,15 +16,29 @@ importlib.reload(roc)
 importlib.reload(describe)
 
 # Folder in which to save plots and other data
-res_folder = "../hbr_papers/resources/"
+res_folder = "figures/"
 
 # Load the data
-icb_basic_models = common.load_item("icb_basic_models")
+models = common.load_item("icb_basic_models")
 
 # These levels will define high risk for bleeding and ischaemia
+#
+# Various options are available for choosing this risk level:
+#
+# 1. Using established thresholds from the literature. For high
+#    bleeding risk, one such threshold is 4%, defined by the ARC
+#    HBR definition. (Need to find a similar concensus threshold
+#    for ischaemia risk.)
+# 2. Use the outcome prevalence in the training set. This would
+#    be an estimate of the observed average risk across the whole
+#    sample
+#
+# Currently option 2 is used below
+bleeding_threshold = models["y_test"]["bleeding"].mean()
+ischaemia_threshold = models["y_test"]["ischaemia"].mean()
 high_risk_thresholds = {
-    "bleeding": 0.01,  # (could use 4% from ARC HBR)
-    "ischaemia": 0.2,  # Could pick the median risk, or take from literature
+    "bleeding": bleeding_threshold,
+    "ischaemia": ischaemia_threshold
 }
 
 # Map the model names to strings for the report
@@ -46,8 +61,8 @@ figsize = (11, 5)
 for model in model_names.keys():
 
     # Get the model
-    fit_results = icb_basic_models["fit_results"][model]
-    y_test = icb_basic_models["y_test"]
+    fit_results = models["fit_results"][model]
+    y_test = models["y_test"]
 
     # Plot the ROC curves for the models
     fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -88,14 +103,16 @@ for model in model_names.keys():
         plt.savefig(res_folder + f"calibration_{model}_{outcome}.png")
 
 # Get the table of model summary metrics
-summary = describe.get_summary_table(icb_basic_models, high_risk_thresholds, names)
+summary = describe.get_summary_table(models, high_risk_thresholds, names)
 with open(res_folder + "summary.tex", "w") as f:
     f.write(summary.to_latex())
 
+# Get prevalence of each outcome type
+models["icb_basic_data"]["outcomes"][["bleeding", "ischaemia"]].sum()
 
 model = "random_forest"
-fit_results = icb_basic_models["fit_results"][model]
-y_test = icb_basic_models["y_test"]
+fit_results = models["fit_results"][model]
+y_test = models["y_test"]
 probs = fit_results["probs"]
 
 outcome = "ischaemia"
@@ -108,7 +125,7 @@ print(f"Significant at {100*sig_level:.2f}% level: {pvalue < sig_level}")
 # Want to create a contingency table between estimated bleeding/ischaemia
 # risk quadrant and the observed outcomes
 
-estimated_risk = DataFrame(
+estimated_risk = pd.DataFrame(
     {
         "estimated_high_bleeding_risk": probs["bleeding"].iloc[:, 0]
         > high_risk_thresholds["bleeding"],
