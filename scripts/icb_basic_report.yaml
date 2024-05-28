@@ -1,0 +1,33 @@
+title: "Bleeding/Ischaemia Risk Models"
+subtitle: "Trained using hospital episode statistics and primary care data"
+author: "John Scott"
+
+# References
+bib_file: "../risk_management_file/ref.bib"
+
+# Jinja2 templates
+templates_folder: "templates"
+report_template: "report.qmd"
+
+# Path to input figures
+image_source_dir: "../figures"
+
+# Build output locations
+build_directory: "build"
+report_subfolder: "icb_basic_report" 
+
+# Models to include
+models:
+  random_forest:
+      text: "random forest"
+      title": "Random Forest"
+      abbr: "RF"
+  logistic_regression:
+      "text": "logistic regression"
+      "title": "Logistic Regression"
+      "abbr": "LR"
+  "xgboost":
+      "text": "XGBoost"
+      "title": "XGBoost"
+      "abbr": "XGB"
+
