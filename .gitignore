@@ -31,3 +31,6 @@ figures/
 _output
 .quarto/
 *.tex
+
+# Generated data
+build/

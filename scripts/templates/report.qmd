@@ -1,0 +1,29 @@
+---
+title: {{ title }}
+subtitle: {{ subtitle }}
+date: now
+date-format: short
+author: {{ author }}
+engine: jupyter
+jupyter: python3
+toc: true
+number-sections: true
+bibliography: {{ bib_file }}  
+
+format:
+  html:
+    css: styles.css
+    html-math-method: katex
+  pdf:
+    documentclass: report
+    margin-left: 30mm
+    margin-right: 30mm
+---
+
+This is a simple quarto report.
+
+{% for model in models.values() %}
+{% with model=model %}
+{% include "model_page.qmd" %}
+{% endwith %}
+{% endfor %}

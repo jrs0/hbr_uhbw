@@ -1,7 +1,7 @@
 project:
   output-dir: _output
   render: 
-    - icb_basic_report.qmd
+    - icb_basic_report_gen.qmd
 
 execute:
   echo: false
@@ -19,11 +19,3 @@ toc: true
 number-sections: true
 bibliography: ../risk_management_file/ref.bib  
   
-format:
-  html:
-    css: styles.css
-    html-math-method: katex
-  pdf:
-    documentclass: report
-    margin-left: 30mm
-    margin-right: 30mm

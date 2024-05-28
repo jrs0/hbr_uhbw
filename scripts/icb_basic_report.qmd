@@ -4,8 +4,6 @@ subtitle: "Trained using hospital episode statistics and primary care data"
 ---
 
 ```{python}
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 from IPython.display import display, Markdown
 
 # Map the model names to strings for the report
@@ -25,51 +23,7 @@ outcome_names = {"bleeding": "B", "ischaemia": "I"}
 num_models = len(model_names)
 for m, (model, model_strings) in enumerate(model_names.items()):
     display(Markdown(f"\n## {model_strings[1]}"))
-
-    img = mpimg.imread('../figures/roc_xgboost.png')
-    imgplot = plt.imshow(img)
-    plt.show()
-
-""" 
-    bleeding_outcome = list(outcome_names)[0]
-    ischaemia_outcome = list(outcome_names)[1]
-
-    plot_roc_and_calibration_2x2(dataset, model, bleeding_outcome, ischaemia_outcome)
-
-    # Place a short summary about the model here
-    display(Markdown(get_model_description(model) + "\n"))
-
-    # Place a discussion of model stability here
-    model_summary = summary[summary["Model"] == model_title.title()]
-    bleeding_summary = model_summary[
-        model_summary["Outcome"] == outcome_names[bleeding_outcome].title()
-    ]
-    ischaemia_summary = model_summary[
-        model_summary["Outcome"] == outcome_names[ischaemia_outcome].title()
-    ]
-
-    bleeding_roc_auc = bleeding_summary.iloc[0]["ROC AUC"]
-    bleeding_calibration = bleeding_summary.iloc[0]["Cal. Error"]
-    bleeding_instability = bleeding_summary.iloc[0]["Instability"]
-
-    ischaemia_roc_auc = ischaemia_summary.iloc[0]["ROC AUC"]
-    ischaemia_calibration = ischaemia_summary.iloc[0]["Cal. Error"]
-    ischaemia_instability = ischaemia_summary.iloc[0]["Instability"]
-
-    text = (
-        f"For prediction of bleeding, the model achieved s ROC AUC of {bleeding_roc_auc:.2f}, "
-        f"a calibration error of {bleeding_calibration:.2f}, and an instability of {bleeding_instability:.2f}. "
-        f"For prediction of ischaemia, the model achieved a ROC AUC of {ischaemia_roc_auc:.2f}, "
-        f"a calibration error of {ischaemia_calibration:.2f}, and an instability of {ischaemia_instability:.2f}. "
-    )
-
-    display(Markdown(text + "\n"))
+    display(Markdown("![something](../figures/roc_xgboost.png)"))
 
     display(Markdown("{{< pagebreak >}}"))
-    plot_instability_2x2(dataset, model, bleeding_outcome, ischaemia_outcome)
-
-    title = f"Bleeding/Ischaemia risk tradeoff using {model_title}"
-    plot_risk_tradeoff(dataset, model, bleeding_outcome, ischaemia_outcome, title)
-
-    display(Markdown("{{< pagebreak >}}")) """
 ```

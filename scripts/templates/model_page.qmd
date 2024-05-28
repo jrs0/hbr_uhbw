@@ -1,0 +1,11 @@
+## {{ model["title"] }}
+
+This is a summary of the {{ model["text"] }} model ({{ model["abbr"] }})
+
+![ROC curves for {{ model["text"] }} model]({{ model["roc_curves_image"] }})
+
+{#
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+#}
