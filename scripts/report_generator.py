@@ -52,14 +52,15 @@ image_dest_dir.mkdir(parents=True, exist_ok=True)
 variables = copy.deepcopy(config)
 variables["bib_file"] = "ref.bib"
 
-# Copy images to the build folder
-for name, model in config["models"].items():
+# Copy images to the build folder. 
+for name, model in variables["models"].items():
+    
+    # ROC curves
     roc_image = Path(f"roc_{name}.png")
     shutil.copy(image_source_dir / roc_image, image_dest_dir / roc_image)
-    variables["roc_curves_image"] = Path("images") / roc_image
+    model["roc_curves_image"] = Path("images") / roc_image
 
 # Copy static files to output folder
-print(config["bib_file"])
 shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))
 
 # Render the report template and write it to the build directory

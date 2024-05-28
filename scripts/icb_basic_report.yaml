@@ -20,14 +20,14 @@ report_subfolder: "icb_basic_report"
 models:
   random_forest:
       text: "random forest"
-      title": "Random Forest"
+      title: "Random Forest"
       abbr: "RF"
   logistic_regression:
-      "text": "logistic regression"
-      "title": "Logistic Regression"
-      "abbr": "LR"
-  "xgboost":
-      "text": "XGBoost"
-      "title": "XGBoost"
-      "abbr": "XGB"
+      text: "logistic regression"
+      title: "Logistic Regression"
+      abbr: "LR"
+  xgboost:
+      text: "XGBoost"
+      title: "XGBoost"
+      abbr: "XGB"
 
