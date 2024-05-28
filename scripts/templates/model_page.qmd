@@ -2,10 +2,18 @@
 
 This is a summary of the {{ model["text"] }} model ({{ model["abbr"] }})
 
-![ROC curves for {{ model["text"] }} model]({{ model["roc_curves_image"] }})
+![ROC curves for the {{ model["text"] }} model]({{ model["roc_curves_image"] }})
 
-{#
 {% raw %}
 {{< pagebreak >}}
 {% endraw %}
-#}
+
+![Stability curves for the {{ model["text"] }} model for bleeding]({{ model["stability_bleeding_image"] }})
+![Calibration of the {{ model["text"] }} model for bleeding]({{ model["calibration_bleeding_image"] }})
+![Stability curves for the {{ model["text"] }} model for ischaemia]({{ model["stability_ischaemia_image"] }})
+![Calibration of the {{ model["text"] }} model for ischaemia]({{ model["calibration_ischaemia_image"] }})
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+    

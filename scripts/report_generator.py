@@ -13,9 +13,24 @@ from pyhbr import common
 
 # Provide the option to render the quarto
 parser = argparse.ArgumentParser("report_generator")
-parser.add_argument("-f", "--config-file", required=True, help="Specify the config file describing the report")
-parser.add_argument("-r", "--render", help="Render the auto-generated quarto report", action="store_true")
-parser.add_argument("-c", "--clean", help="Remove the build directory for this report", action="store_true")
+parser.add_argument(
+    "-f",
+    "--config-file",
+    required=True,
+    help="Specify the config file describing the report",
+)
+parser.add_argument(
+    "-r",
+    "--render",
+    help="Render the auto-generated quarto report",
+    action="store_true",
+)
+parser.add_argument(
+    "-c",
+    "--clean",
+    help="Remove the build directory for this report",
+    action="store_true",
+)
 args = parser.parse_args()
 
 # Read the configuration file
@@ -54,18 +69,39 @@ save_dir = Path(config["save_dir"])
 variables = copy.deepcopy(config)
 variables["bib_file"] = "ref.bib"
 
+
+def copy_most_recent_image(image_name: str) -> Path:
+    """Find the most recent image with the given name and copy it to the build directory.
+
+    NOTE: uses image_dest_dir from outer scope
+
+    Args:
+        image_name: The image base name
+
+    Returns:
+        The path of the image relative to the project build subfolder
+            that can be referenced in the report.
+    """
+    image_path = common.pick_most_recent_saved_file(image_name, save_dir, "png")
+    image_file_name = image_path.name
+    shutil.copy(image_path, image_dest_dir / image_file_name)
+    return Path("images") / image_file_name
+
+
 # Copy the most recent version of each figure into the
 # build directory
 for name, model in variables["models"].items():
-    
+
     # ROC curves
-    roc_image_name = f"icb_basic_{name}_roc"
-    roc_image_path = common.pick_most_recent_saved_file(roc_image_name, save_dir, "png")
-    roc_image_file_name = roc_image_path.name
-    shutil.copy(roc_image_path, image_dest_dir / roc_image_file_name)
-    model["roc_curves_image"] = Path("images") / roc_image_file_name
-    
-    
+    model["roc_curves_image"] = copy_most_recent_image(f"icb_basic_{name}_roc")
+
+    plots = ["stability", "calibration"]
+    outcomes = ["bleeding", "ischaemia"]
+    for outcome in outcomes:
+        for plot in plots:
+            model[f"{plot}_{outcome}_image"] = copy_most_recent_image(
+                f"icb_basic_{name}_{plot}_{outcome}"
+            )
 
 # Copy static files to output folder
 shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))
