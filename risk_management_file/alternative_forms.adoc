@@ -79,6 +79,15 @@ The primary disadvantages are:
 * Potential lack of alignment with existing systems, in terms of deployment and ongoing maintenance.
 * Potential lack of integration between the new system and already-existing workflows (the system may become "yet another IT system to have to use")
 
+
+=== PowerBI Dashboard
+
+This is quite similar to the new-software option above. In this version, the application would be a PowerBI dashboard (available as a web URL in the Cardiology department).
+
+The primary advantage of this option is that PowerBI can access various clinical systems in UHBW. Data could be pulled automatically from these systems and used to populate risk scores.
+
+There is also support for development of PowerBI apps within UHBW, which would make the prototyping process quicker than development of new software.
+
 === Integration Into Cardiology Centricity Workflow (CCW)
 
 The CCW software is an IT system used in the Bristol Heart Institute to manage information about cardiology patients; in particular, it is used by clinicians to input compulsory information for the British Cardiovascular Intervention Society (BCIS) audit. Some of this information is used to populate an automatically generated discharge note, in PDF format.
