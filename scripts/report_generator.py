@@ -18,7 +18,6 @@ parser.add_argument("-c", "--clean", help="Remove the build directory for this r
 args = parser.parse_args()
 
 # Read the configuration file
-
 with open(args.config_file) as stream:
     try:
         config = yaml.safe_load(stream)

@@ -123,4 +123,4 @@ model_data = {
     "y_test": y_test,
     "icb_basic_data": icb_basic_data,
 }
-common.save_item(model_data, "icb_basic_{model_name}", save_dir=config["save_dir"])
+common.save_item(model_data, f"icb_basic_{model_name}", save_dir=config["save_dir"])
