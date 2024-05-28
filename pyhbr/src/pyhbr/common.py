@@ -175,7 +175,7 @@ def current_timestamp() -> int:
     return int(time())
 
 
-def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
+def get_saved_files_by_name(name: str, save_dir: str, extension: str) -> DataFrame:
     """Get all saved data files matching name
 
     Get the list of files in the save_dir folder matching
@@ -192,6 +192,7 @@ def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
         name: The name of the saved file to load. This matches name in
             the filename name_commit_timestamp.pkl.
         save_dir: The directory to search for files.
+        extension: What file extension to look for. Do not include the dot.
 
     Returns:
         A dataframe with columns `path`, `commit` and `created_data`.
@@ -212,7 +213,7 @@ def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
     # (including underscores and letters and numbers), so splitting on
     # _ would not work. The name can then be removed.
     files["name"] = files["path"].str.replace(
-        r"_([0-9]|[a-zA-Z])*_\d*\.pkl", "", regex=True
+        fr"_([0-9]|[a-zA-Z])*_\d*\.{extension}", "", regex=True
     )
 
     # Remove all the files whose name does not match, and drop
@@ -220,7 +221,7 @@ def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
     files = files[files["name"] == name]
     if files.shape[0] == 0:
         raise ValueError(
-            f"There is not dataset with the name '{name}' in the datasets directory"
+            f"There is no file with the name '{name}' in the datasets directory"
         )
     files["commit_and_timestamp"] = files["path"].str.replace(name + "_", "")
 
@@ -233,7 +234,7 @@ def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
         raise RuntimeError(
             "Failed to parse files in the datasets folder. "
             "Ensure that all files have the correct format "
-            "name_commit_timestamp.(rds|pkl), and "
+            "name_commit_timestamp.extension, and "
             "remove any files not matching this "
             "pattern. TODO handle this error properly, "
             "see save_datasets.py."
@@ -246,7 +247,7 @@ def get_saved_files_by_name(name: str, save_dir: str) -> DataFrame:
     return recent_first
 
 
-def pick_saved_file_interactive(name: str, save_dir: str) -> str | None:
+def pick_saved_file_interactive(name: str, save_dir: str, extension: str = "pkl") -> str | None:
     """Select a file matching name interactively
 
     Print a list of the saved items in the save_dir folder, along
@@ -258,13 +259,14 @@ def pick_saved_file_interactive(name: str, save_dir: str) -> str | None:
     Args:
         name: The name of the saved file to list
         save_dir: The directory to search for files
+        extension: What file extension to look for. Do not include the dot.
 
     Returns:
         The absolute path to the interactively selected file, or None
             if the interactive load was aborted.
     """
 
-    recent_first = get_saved_files_by_name(name, save_dir)
+    recent_first = get_saved_files_by_name(name, save_dir, extension)
     print(recent_first)
 
     num_datasets = recent_first.shape[0]
@@ -288,7 +290,7 @@ def pick_saved_file_interactive(name: str, save_dir: str) -> str | None:
     return full_path
 
 
-def pick_most_recent_saved_file(name: str, save_dir: str) -> str:
+def pick_most_recent_saved_file(name: str, save_dir: str, extension: str = "pkl") -> str:
     """Get the path to the most recent file matching name.
 
     Like pick_saved_file_interactive, but automatically selects the most
@@ -297,11 +299,12 @@ def pick_most_recent_saved_file(name: str, save_dir: str) -> str:
     Args:
         name: The name of the saved file to list
         save_dir: The directory to search for files
+        extension: What file extension to look for. Do not include the dot.
 
     Returns:
         The absolute path to the most recent matching file.
     """
-    recent_first = get_saved_files_by_name(name, save_dir)
+    recent_first = get_saved_files_by_name(name, save_dir, extension)
     full_path = os.path.join(save_dir, recent_first.loc[0, "path"])
     return full_path
 
@@ -347,7 +350,7 @@ def save_item(
     not quite reflect the state of the running code).
 
     Args:
-        item: The python object to saave (e.g. pandas DataFrame)
+        item: The python object to save (e.g. pandas DataFrame)
         name: The name of the item. The filename will be created by adding
             a suffix for the current commit and the timestamp to show when the
             data was saved (format: `name_commit_timestamp.pkl`)
@@ -376,7 +379,7 @@ def save_item(
 
 
 def load_item(name: str, interactive: bool = False, save_dir: str = "save_data") -> Any:
-    """Load a previously saved item from file
+    """Load a previously saved item (pickle) from file
 
     Use this function to load a file that was previously saved using
     save_item(). By default, the latest version of the item will be returned
@@ -402,9 +405,9 @@ def load_item(name: str, interactive: bool = False, save_dir: str = "save_data")
 
     """
     if interactive:
-        item_path = pick_saved_file_interactive(name, save_dir)
+        item_path = pick_saved_file_interactive(name, save_dir, "pkl")
     else:
-        item_path = pick_most_recent_saved_file(name, save_dir)
+        item_path = pick_most_recent_saved_file(name, save_dir, "pkl")
 
     if item_path is None:
         print("Aborted (interactive) load item")
