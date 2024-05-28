@@ -1,8 +1,19 @@
 project:
   output-dir: _output
+  render: 
+    - icb_basic_report.qmd
 
 execute:
   echo: false
+  warning: false
+  error: true
+
+engine: jupyter
+jupyter: python3
+
+date: now
+date-format: short
+author: John Scott
 
 toc: true
 number-sections: true

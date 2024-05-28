@@ -79,7 +79,6 @@ The primary disadvantages are:
 * Potential lack of alignment with existing systems, in terms of deployment and ongoing maintenance.
 * Potential lack of integration between the new system and already-existing workflows (the system may become "yet another IT system to have to use")
 
-
 === PowerBI Dashboard
 
 This is quite similar to the new-software option above. In this version, the application would be a PowerBI dashboard (available as a web URL in the Cardiology department).
