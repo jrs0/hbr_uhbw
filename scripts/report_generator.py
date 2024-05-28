@@ -9,6 +9,7 @@ import copy
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 import yaml
+from pyhbr import common
 
 # Provide the option to render the quarto
 parser = argparse.ArgumentParser("report_generator")
@@ -42,22 +43,29 @@ report_dir.mkdir(parents=True, exist_ok=True)
 if args.clean:
     shutil.rmtree(report_dir)
 
-# Set the directory for storing images
-image_source_dir = Path(config["image_source_dir"])
+# Make the output folder for images in the build directory
 image_dest_dir = report_dir / Path("images")
 image_dest_dir.mkdir(parents=True, exist_ok=True)
+
+# Get the path to saved data files
+save_dir = Path(config["save_dir"])
 
 # Copy the config and adjust to create Jinja2 variables
 variables = copy.deepcopy(config)
 variables["bib_file"] = "ref.bib"
 
-# Copy images to the build folder. 
+# Copy the most recent version of each figure into the
+# build directory
 for name, model in variables["models"].items():
     
     # ROC curves
-    roc_image = Path(f"roc_{name}.png")
-    shutil.copy(image_source_dir / roc_image, image_dest_dir / roc_image)
-    model["roc_curves_image"] = Path("images") / roc_image
+    roc_image_name = f"icb_basic_{name}_roc"
+    roc_image_path = common.pick_most_recent_saved_file(roc_image_name, save_dir, "png")
+    roc_image_file_name = roc_image_path.name
+    shutil.copy(roc_image_path, image_dest_dir / roc_image_file_name)
+    model["roc_curves_image"] = Path("images") / roc_image_file_name
+    
+    
 
 # Copy static files to output folder
 shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))

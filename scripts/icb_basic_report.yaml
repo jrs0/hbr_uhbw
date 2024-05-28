@@ -9,8 +9,8 @@ bib_file: "../risk_management_file/ref.bib"
 templates_folder: "templates"
 report_template: "report.qmd"
 
-# Path to input figures
-image_source_dir: "../figures"
+# Path to input saved files
+save_dir: "../save_data"
 
 # Build output locations
 build_directory: "build"
