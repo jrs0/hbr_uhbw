@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy
@@ -14,32 +15,6 @@ importlib.reload(stability)
 importlib.reload(common)
 importlib.reload(roc)
 importlib.reload(describe)
-
-# Folder in which to save plots and other data
-res_folder = "figures/"
-
-# Load the data
-models = common.load_item("icb_basic_models")
-
-# These levels will define high risk for bleeding and ischaemia
-#
-# Various options are available for choosing this risk level:
-#
-# 1. Using established thresholds from the literature. For high
-#    bleeding risk, one such threshold is 4%, defined by the ARC
-#    HBR definition. (Need to find a similar concensus threshold
-#    for ischaemia risk.)
-# 2. Use the outcome prevalence in the training set. This would
-#    be an estimate of the observed average risk across the whole
-#    sample
-#
-# Currently option 2 is used below
-bleeding_threshold = models["y_test"]["bleeding"].mean()
-ischaemia_threshold = models["y_test"]["ischaemia"].mean()
-high_risk_thresholds = {
-    "bleeding": bleeding_threshold,
-    "ischaemia": ischaemia_threshold
-}
 
 # Map the model names to strings for the report
 model_names = {
@@ -60,9 +35,31 @@ figsize = (11, 5)
 # Loop over all the models
 for model in model_names.keys():
 
+    model_data = common.load_item(f"icb_basic_{model}", save_dir="../save_data")
+
+    # These levels will define high risk for bleeding and ischaemia
+    #
+    # Various options are available for choosing this risk level:
+    #
+    # 1. Using established thresholds from the literature. For high
+    #    bleeding risk, one such threshold is 4%, defined by the ARC
+    #    HBR definition. (Need to find a similar concensus threshold
+    #    for ischaemia risk.)
+    # 2. Use the outcome prevalence in the training set. This would
+    #    be an estimate of the observed average risk across the whole
+    #    sample
+    #
+    # Currently option 2 is used below
+    bleeding_threshold = model_data["y_test"]["bleeding"].mean()
+    ischaemia_threshold = model_data["y_test"]["ischaemia"].mean()
+    high_risk_thresholds = {
+        "bleeding": bleeding_threshold,
+        "ischaemia": ischaemia_threshold
+    }
+
     # Get the model
-    fit_results = models["fit_results"][model]
-    y_test = models["y_test"]
+    fit_results = model_data["fit_results"]
+    y_test = model_data["y_test"]
 
     # Plot the ROC curves for the models
     fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -75,7 +72,7 @@ for model in model_names.keys():
         f"ROC Curves for Models {names.model_name(model, 'bleeding')} and {names.model_name(model, 'ischaemia')}"
     )
     plt.tight_layout()
-    plt.savefig(res_folder + f"roc_{model}.png")
+    plt.savefig(common.make_new_save_item_path(f"icb_basic_{model}_roc", "../save_data", "png"))
 
     for outcome in ["bleeding", "ischaemia"]:
 
@@ -89,7 +86,7 @@ for model in model_names.keys():
             f"Stability of {outcome.title()} Model {names.model_name(model, outcome)}"
         )
         plt.tight_layout()
-        plt.savefig(res_folder + f"stability_{model}_{outcome}.png")
+        plt.savefig(common.make_new_save_item_path(f"icb_basic_{model}_stability_{outcome}", "../save_data", "png"))
 
         # Plot the calibrations
         fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -100,7 +97,9 @@ for model in model_names.keys():
             f"Calibration of {outcome.title()} Model {names.model_name(model, outcome)}"
         )
         plt.tight_layout()
-        plt.savefig(res_folder + f"calibration_{model}_{outcome}.png")
+        plt.savefig(common.make_new_save_item_path(f"icb_basic_{model}_calibration_{outcome}", "../save_data", "png"))
+
+exit()
 
 # Get the table of model summary metrics
 summary = describe.get_summary_table(models, high_risk_thresholds, names)

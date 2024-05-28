@@ -7,6 +7,7 @@ A collection of routines used by the data source or analysis functions.
 from dataclasses import dataclass
 
 import os
+from pathlib import Path
 from typing import Callable, Any
 from time import time
 import pickle
@@ -290,7 +291,7 @@ def pick_saved_file_interactive(name: str, save_dir: str, extension: str = "pkl"
     return full_path
 
 
-def pick_most_recent_saved_file(name: str, save_dir: str, extension: str = "pkl") -> str:
+def pick_most_recent_saved_file(name: str, save_dir: str, extension: str = "pkl") -> Path:
     """Get the path to the most recent file matching name.
 
     Like pick_saved_file_interactive, but automatically selects the most
@@ -302,11 +303,10 @@ def pick_most_recent_saved_file(name: str, save_dir: str, extension: str = "pkl"
         extension: What file extension to look for. Do not include the dot.
 
     Returns:
-        The absolute path to the most recent matching file.
+        The relative path to the most recent matching file.
     """
     recent_first = get_saved_files_by_name(name, save_dir, extension)
-    full_path = os.path.join(save_dir, recent_first.loc[0, "path"])
-    return full_path
+    return Path(save_dir) / Path(recent_first.loc[0, "path"])
 
 
 def requires_commit() -> bool:
@@ -329,6 +329,24 @@ def requires_commit() -> bool:
         # No need to commit if not repository
         return False
 
+def make_new_save_item_path(name: str, save_dir: str, extension: str) -> Path:
+    """Make the path to save a new item to the save_dir
+
+    The name will have the format name_{current_common}_{timestamp}.{extension}.
+
+    Args:
+        name: The base name for the new filename
+        save_dir: The folder in which to place the item
+        extension: The file extension (omit the dot)
+
+    Returns:
+        The relative path to the new object to be saved
+    """
+    
+    # Make the file suffix out of the current git
+    # commit hash and the current time
+    filename = f"{name}_{current_commit()}_{current_timestamp()}.{extension}"
+    return Path(save_dir) / Path(filename)
 
 def save_item(
     item: Any, name: str, save_dir: str = "save_data/", enforce_clean_branch=True
@@ -365,15 +383,11 @@ def save_item(
             "Aborting save_item() because branch is not clean. Commit your changes before saving item to increase the chance of reproducing the item based on the filename commit hash."
         )
 
-    if not os.path.isdir(save_dir):
+    if not Path(save_dir).exists():
         print(f"Creating missing folder '{save_dir}' for storing item")
-        os.mkdir(save_dir)
+        Path(save_dir).mkdir(parents=true, exist_ok=True)
 
-    # Make the file suffix out of the current git
-    # commit hash and the current time
-    filename = f"{name}_{current_commit()}_{current_timestamp()}.pkl"
-    path = os.path.join(save_dir, filename)
-
+    path = make_new_save_item_path(name, save_dir, "pkl")
     with open(path, "wb") as file:
         pickle.dump(item, file)
 
