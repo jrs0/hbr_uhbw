@@ -99,32 +99,25 @@ def nearly_constant(data: DataFrame, threshold: float) -> Series:
 
     return data.apply(low_variance).rename("nearly_constant")
 
-@dataclass
-class Names:
-    model_names: dict[str, str]
-    outcome_names: dict[str, str]
-    
-    def model_name(self, model: str, outcome: str) -> str:
-        """Get the short name for a model
-
-        Args:
-            model: The model key
-            outcome: The outcome key
-
-        Returns:
-            A short name for the model, for use in reports.
-        """
-        return f"{self.model_names[model]}-{self.outcome_names[outcome]}"
-
 def get_summary_table(
     models: dict[str, Any],
     high_risk_thresholds: dict[str, float],
-    names: Names
+    config: dict[str, Any]
 ):
     """Get a table of model metric comparison across different models
 
     Args:
-        models: Model saved data
+        models: A map from model names to model data (containing the
+            key "fit_results")
+        high_risk_thresholds: A dictionary containing the keys
+            "bleeding" and "ischaemia" mapped to the thresholds
+            used to determine whether a patient is at high risk
+            from the models.
+        config: The config file used as input to the results and
+            report generator scripts. It must contain the keys
+            "outcomes" and "models", which are dictionaries
+            containing the outcome or model name and a sub-key
+            "abbr" which contains a short name of the outcome/model.
     """
     model_names = []
     instabilities = []
@@ -133,9 +126,15 @@ def get_summary_table(
     low_risk_reclass = []
     high_risk_reclass = []
 
-    for model, fit_results in models["fit_results"].items():
+    for model, model_data in models.items():
         for outcome in ["bleeding", "ischaemia"]:
-            model_names.append(names.model_name(model, outcome))
+            
+            fit_results = model_data["fit_results"]
+            
+            # Abbreviated model name
+            model_abbr = config["models"][model]["abbr"]
+            outcome_abbr = config["outcomes"][outcome]["abbr"]
+            model_names.append(f"{model_abbr}-{outcome_abbr}")
 
             probs = fit_results["probs"]
 
@@ -178,7 +177,7 @@ def get_summary_table(
             risk_accuracy.append(f"{100*accuracy_mean:.2f}%, 95% CI [{100*ci_lower:.2f}%, {100*ci_upper:.2f}%]")
 
             threshold = high_risk_thresholds[outcome]
-            y_test = models["y_test"][outcome]
+            y_test = model_data["y_test"][outcome]
             df = stability.get_reclass_probabilities(probs[outcome], y_test, threshold)
             high_risk = (df["original_risk"] >= threshold).sum()
             high_risk_and_unstable = (

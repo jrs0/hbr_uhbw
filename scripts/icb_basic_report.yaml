@@ -19,15 +19,25 @@ report_subfolder: "icb_basic_report"
 # Models to include
 models:
   random_forest:
-      text: "random forest"
-      title: "Random Forest"
-      abbr: "RF"
+    text: "random forest"
+    title: "Random Forest"
+    abbr: "RF"
   logistic_regression:
-      text: "logistic regression"
-      title: "Logistic Regression"
-      abbr: "LR"
+    text: "logistic regression"
+    title: "Logistic Regression"
+    abbr: "LR"
   xgboost:
-      text: "XGBoost"
-      title: "XGBoost"
-      abbr: "XGB"
+    text: "XGBoost"
+    title: "XGBoost"
+    abbr: "XGB"
 
+# Outcome names
+outcomes:
+  bleeding:
+    text: "bleeding"
+    title: "Bleeding" 
+    abbr: "B"
+  ischaemia:
+    text: "ischaemia"
+    title: "Ischaemia"
+    abbr: "I"

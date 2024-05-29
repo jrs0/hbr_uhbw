@@ -1,7 +1,20 @@
+import argparse
+
+# Keep this near the top otherwise help hangs
+parser = argparse.ArgumentParser("icb_basic_results")
+parser.add_argument(
+    "-f",
+    "--config-file",
+    required=True,
+    help="Specify the config file describing the model files that exist",
+)
+args = parser.parse_args()
+
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy
+import yaml
 
 from pyhbr import common
 from pyhbr.analysis import roc
@@ -16,26 +29,26 @@ importlib.reload(common)
 importlib.reload(roc)
 importlib.reload(describe)
 
-# Map the model names to strings for the report
-model_names = {
-    "random_forest": "RF",
-    "logistic_regression": "LR",
-    "xgboost": "XGB",
-}
-
-# Map the outcome names to strings for the report
-outcome_names = {"bleeding": "B", "ischaemia": "I"}
-
-names = describe.Names(model_names, outcome_names)
+# Read the configuration file
+with open(args.config_file) as stream:
+    try:
+        config = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(f"Failed to load config file: {exc}")
+        exit(1)
 
 # Set the aspect ratio for the figures to roughly 2:1,
 # because each plot is two graphs side-by-side
 figsize = (11, 5)
 
-# Loop over all the models
-for model in model_names.keys():
+# Load all the models into memory
+models = {}
+for model in config["models"].keys():
+    models[model] = common.load_item(f"icb_basic_{model}", save_dir=config["save_dir"])
 
-    model_data = common.load_item(f"icb_basic_{model}", save_dir="../save_data")
+
+# Loop over all the models creating the output graphs
+for model_name, model_data in models.items():
 
     # These levels will define high risk for bleeding and ischaemia
     #
@@ -54,12 +67,16 @@ for model in model_names.keys():
     ischaemia_threshold = model_data["y_test"]["ischaemia"].mean()
     high_risk_thresholds = {
         "bleeding": bleeding_threshold,
-        "ischaemia": ischaemia_threshold
+        "ischaemia": ischaemia_threshold,
     }
 
     # Get the model
     fit_results = model_data["fit_results"]
     y_test = model_data["y_test"]
+
+    model_abbr = config["models"][model]["abbr"]
+    bleeding_abbr = config["outcomes"]["bleeding"]["abbr"]
+    ischaemia_abbr = config["outcomes"]["ischaemia"]["abbr"]
 
     # Plot the ROC curves for the models
     fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -69,12 +86,18 @@ for model in model_names.keys():
         roc_aucs = fit_results["roc_aucs"][outcome]
         roc.plot_roc_curves(ax[n], roc_curves, roc_aucs, title)
     plt.suptitle(
-        f"ROC Curves for Models {names.model_name(model, 'bleeding')} and {names.model_name(model, 'ischaemia')}"
+        f"ROC Curves for Models {model_abbr}-{bleeding_abbr} and {model_abbr}-{ischaemia_abbr}"
     )
     plt.tight_layout()
-    plt.savefig(common.make_new_save_item_path(f"icb_basic_{model}_roc", "../save_data", "png"))
+    plt.savefig(
+        common.make_new_save_item_path(
+            f"icb_basic_{model}_roc", config["save_dir"], "png"
+        )
+    )
 
     for outcome in ["bleeding", "ischaemia"]:
+
+        outcome_abbr = config["outcomes"][outcome]["abbr"]
 
         # Plot the stability
         fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -83,10 +106,14 @@ for model in model_names.keys():
             ax, outcome, probs, y_test, high_risk_thresholds
         )
         plt.suptitle(
-            f"Stability of {outcome.title()} Model {names.model_name(model, outcome)}"
+            f"Stability of {outcome.title()} Model {model_abbr}-{outcome_abbr}"
         )
         plt.tight_layout()
-        plt.savefig(common.make_new_save_item_path(f"icb_basic_{model}_stability_{outcome}", "../save_data", "png"))
+        plt.savefig(
+            common.make_new_save_item_path(
+                f"icb_basic_{model}_stability_{outcome}", config["save_dir"], "png"
+            )
+        )
 
         # Plot the calibrations
         fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -94,17 +121,20 @@ for model in model_names.keys():
         calibration.plot_calibration_curves(ax[0], calibrations[outcome])
         calibration.draw_calibration_confidence(ax[1], calibrations[outcome][0])
         plt.suptitle(
-            f"Calibration of {outcome.title()} Model {names.model_name(model, outcome)}"
+            f"Calibration of {outcome.title()} Model {model_abbr}-{outcome_abbr}"
         )
         plt.tight_layout()
-        plt.savefig(common.make_new_save_item_path(f"icb_basic_{model}_calibration_{outcome}", "../save_data", "png"))
-
-exit()
+        plt.savefig(
+            common.make_new_save_item_path(
+                f"icb_basic_{model}_calibration_{outcome}", config["save_dir"], "png"
+            )
+        )
 
 # Get the table of model summary metrics
-summary = describe.get_summary_table(models, high_risk_thresholds, names)
-with open(res_folder + "summary.tex", "w") as f:
-    f.write(summary.to_latex())
+summary = describe.get_summary_table(models, high_risk_thresholds, config)
+common.save_item(summary, "icb_basic_summary", config["save_dir"])
+
+exit()
 
 # Get prevalence of each outcome type
 models["icb_basic_data"]["outcomes"][["bleeding", "ischaemia"]].sum()
@@ -138,7 +168,7 @@ outcome = y_test[["bleeding", "ischaemia"]]
 table = pd.crosstab(
     [
         estimated_risk["estimated_high_ischaemia_risk"],
-        estimated_risk["estimated_high_bleeding_risk"],   
+        estimated_risk["estimated_high_bleeding_risk"],
     ],
     [outcome["ischaemia"], outcome["bleeding"]],
 )
