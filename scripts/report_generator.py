@@ -107,6 +107,10 @@ def copy_most_recent_file(
             This can be used as a string in the report to locate the item.
     """
     src_path = common.pick_most_recent_saved_file(name, save_dir, extension)
+    
+    # Create the destination directory if it does not exist
+    (report_dir / dest_dir).mkdir(parents=True, exist_ok=True)
+    
     dest_path = report_dir / dest_dir / src_path.name
     shutil.copy(src_path, dest_path)
     return dest_dir / src_path.name
@@ -118,17 +122,34 @@ variables["summary_table_file"] = copy_most_recent_file(
 )
 
 # Get the table of outcome prevalences
-variables["summary_table_file"] = copy_most_recent_file(
-    "icb_basic_summary", "pkl", save_dir, report_dir, Path("tables")
+variables["outcome_prevalences_file"] = copy_most_recent_file(
+    "icb_basic_outcome_prevalences", "pkl", save_dir, report_dir, Path("tables")
 )
 
-data_path = common.pick_most_recent_saved_file("icb_basic_data", save_dir)
-shutil.copy(data_path, report_dir / data_path.name)
-variables["data_file"] = data_path.name
+# For reference
+variables["data_file"] = copy_most_recent_file(
+    "icb_basic_data", "pkl", save_dir, report_dir, Path("tables")
+)
+
+# Load the data (this is the same file copied above)
+data = common.load_item("icb_basic_data", save_dir=save_dir)
+variables["index_start"] = data["icb_basic_tmp"]["index_start"]
+variables["index_end"] = data["icb_basic_tmp"]["index_end_date"]
+variables["num_index_spells"] = len(data["icb_basic_tmp"]["index_spells"])
 
 # Copy the most recent version of each figure into the
 # build directory
 for name, model in variables["models"].items():
+
+    # Copy the model file
+    model["file"] = copy_most_recent_file(
+        f"icb_basic_{name}", "pkl", save_dir, report_dir, Path("models")
+    )
+    
+    # Save the test set proportion (every model is the same,
+    # so overwriting is fine)
+    model_data = common.load_item(f"icb_basic_{name}", save_dir=save_dir)
+    variables["test_proportion"] = model_data["config"]["test_proportion"]
 
     # ROC curves
     model["roc_curves_image"] = copy_most_recent_image(f"icb_basic_{name}_roc")

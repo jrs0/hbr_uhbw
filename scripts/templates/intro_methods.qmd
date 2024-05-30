@@ -50,10 +50,10 @@ The system wide dataset (SWD) is a Bristol, North Somerset, and South Gloucester
 Patients are considered for inclusion based on the primary and secondary diagnoses and procedures in HES data. For a hospital spell to be considered an index event:
 
 * The primary diagnosis of the first episode must contain an ACS ICD-10 code; or
-*There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
+* There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
 
 
-Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, `{python} num_index_events` index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
+Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, {{ num_index_events }} index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
 
 The list of bleeding and ischaemia ICD-10 and OPCS-4 codes are included in supplementary information.
 
@@ -69,12 +69,12 @@ A summary of the total number of each outcome is shown in Table~\ref{tab:outcome
 #| label: tbl-outcome-prevalence
 #| tbl-cap: "Total number of outcomes that occurred within 1 year of the index ACS. The dataset contains {{ num_index_events }} ACS events between the dates {{ index_start }} and {{ index_end }}"
 
-pd.read_pickle("{{ outcome_table_file }}")
+pd.read_pickle("{{ outcome_prevalences_file }}")
 ```
 
 # Models
 
-We randomly split the data into a training set (`{python} 1 - test_set_proportion`) and a testing set (`{python}test_set_proportion). The testing set is not used in the model fitting process. We trained multiple models on each training set:
+We randomly split the data into a training set ({{ 1 - test_proportion }}) and a testing set ({{ test_proportion }}). The testing set is not used in the model fitting process. We trained multiple models on each training set:
 
 {% for model in models.values() %}
 * **{{ model["title"] }} ({{ model["abbr" ]}})**: {{ model["description"] }}
