@@ -74,7 +74,7 @@ for model_name, model_data in models.items():
     fit_results = model_data["fit_results"]
     y_test = model_data["y_test"]
 
-    model_abbr = config["models"][model]["abbr"]
+    model_abbr = config["models"][model_name]["abbr"]
     bleeding_abbr = config["outcomes"]["bleeding"]["abbr"]
     ischaemia_abbr = config["outcomes"]["ischaemia"]["abbr"]
 
@@ -91,7 +91,7 @@ for model_name, model_data in models.items():
     plt.tight_layout()
     plt.savefig(
         common.make_new_save_item_path(
-            f"icb_basic_{model}_roc", config["save_dir"], "png"
+            f"icb_basic_{model_name}_roc", config["save_dir"], "png"
         )
     )
 
@@ -111,7 +111,7 @@ for model_name, model_data in models.items():
         plt.tight_layout()
         plt.savefig(
             common.make_new_save_item_path(
-                f"icb_basic_{model}_stability_{outcome}", config["save_dir"], "png"
+                f"icb_basic_{model_name}_stability_{outcome}", config["save_dir"], "png"
             )
         )
 
@@ -126,7 +126,7 @@ for model_name, model_data in models.items():
         plt.tight_layout()
         plt.savefig(
             common.make_new_save_item_path(
-                f"icb_basic_{model}_calibration_{outcome}", config["save_dir"], "png"
+                f"icb_basic_{model_name}_calibration_{outcome}", config["save_dir"], "png"
             )
         )
 

@@ -20,7 +20,7 @@ format:
     margin-right: 30mm
 ---
 
-This is a simple quarto report.
+
 
 {% for model in models.values() %}
 {% with model=model %}
