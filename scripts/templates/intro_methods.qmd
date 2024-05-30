@@ -1,0 +1,126 @@
+# Introduction
+
+Patients with acute coronary syndromes who undergo an intervention that requires the prescription of blood thinning medication are subject to an assessment of relative bleeding/ischaemia risk by the clinician, in order to make an appropriate choice of therapy [@capodanno2023dual].
+
+Blood thinning therapies, such as dual antiplatelet therapy (DAPT) or triple therapy, are prescribed to patients having a stent implant for three months to a year. While the risk of further acute ischaemia, such as stent thrombosis, is reduced in this timeframe, the risk of bleeding is increased. However, the cardiologist may not be alerted to patients with severe bleeding complications, and other health care professionals may be reticent to adjust DAPT medication [@pufulete2019comprehensive].
+
+Ideally, patients at high bleeding risk could be flagged at the point of prescription, so that cardiologists could account for the increased risk of bleeding, and potentially prescribe a less-potent therapy option.
+
+Assessing bleeding risk is complex because it depends on many factors which are not always directly available to the clinician. As a result, consideration of bleeding risk when prescribing blood thinning therapy would likely increase if a tool could automatically assign each patient a reliable bleeding risk on presentation, without requiring prompting by the clinician.
+
+Bleeding risk alone is not useful; it must be considered along with ischaemia risk, because the overarching goal is to simultaneously optimise both bleeding and ischaemic outcomes [@urban2021assessing].
+
+Bleeding risk is a time-varying quantity; it depends on many factors such as comorbidities, and dynamic physiological factors. An ideal tool would track these factors over the course of therapy, and alert the clinician to changes in risk level.
+
+The basis for any such tool is a robust estimate of bleeding and ischaemia risk. Several models for both outcomes exist, including consensus-based scores and statistical models. Often these are developed with highly cultivated datasets, specifically targetting known risk factors. We investigate models based on machine learning approaches using administrative datasets, motivated by the desire to utilise features from large regional databases of primary and secondary care patient data.
+
+We apply a methodology based on the stability and calibration of the models to assess how well they estimate the one-year probability of an adverse outcome (either bleeding or further ischaemia).
+
+```{python}
+#| label: tbl-summary
+#| tbl-cap: "Summary of model stability and accuracy metrics. Bleeding models are named -B and ischaemia models -I. The spread of metrics derived using bootstrapping are expressed using the 2.5% and 97.5% quantiles, using the notation Q [x,y]. Uncertainty of the risk estimate is assessed using a 95% confidence interval written CI [x,y]. The instability column (reflecting the consistency of the estimated risk) and the uncertainty column (an estimate of risk accuracy) are both absolute errors in percentage points, meaning they are added directly to the estimated risk to obtain the expected variability. A full discussion of the interpretation of each column is contained in Section III below."
+
+pd.read_pickle("{{ summary_table_file }}")
+```
+
+# Background
+
+Models or scores for assessing the risk of bleeding or ischaemia can have two kinds of outputs: discrete categorisation of patients as "high risk" or "low risk"; or estimation of the probability that an outcome will occur. 
+
+A simple ascertainment of bleeding risk is available by using the ARC high bleeding risk (HBR) criteria [@urban2019defining]. The score classifies a patient as either high or low risk depending on a set of factors including comorbidities and physiological measurements.
+
+An alternative approach is the bleeding and ischaemia risk trade-off model [@urban2021assessing] which develops a pair of Cox proportional hazards models to estimate the probability of bleeding and ischaemic events. This model is intended for application only to patients that are qualify as ARC HBR.
+
+Another score is DAPT [@yeh2016development], which ranks patients on a scale -2 to 10 according to whether they have more bleeding or more ischaemia risk. However, this model is intended for deciding continuation of therapy at 12 months, rather than initial prescription.
+
+# Methods
+
+We assess multiple different machine learning models, trained on multiple different datasets, for the estimation of one-year probability of bleeding and further ischaemia outcome, using the approach described below.
+
+\subsection{Input Data}
+
+We obtain a cohort of ACS patients from Hospital Episode Statistics (HES), which is a national administrative dataset available across the UK. This dataset defines both the inclusion criteria and the outcomes.
+
+We also obtain features (input predictors to the machine learning algorithms) from HES data, by identifying patients with groups of diagnosis and procedure codes that corresponding to risk factors identified in other models and the wider literature.
+
+The system wide dataset (SWD) is a Bristol, North Somerset, and South Gloucestershire-specific repository of primary care patient information, which includes flags for comorbidities and risk factors, and some physiological measurements. These are also used as predictors in the models.
+
+\subsubsection{Inclusion Criteria}
+
+Patients are considered for inclusion based on the primary and secondary diagnoses and procedures in HES data. For a hospital spell to be considered an index event:
+
+\begin{itemize}
+    \item The primary diagnosis of the first episode must contain an ACS ICD-10 code; or
+    \item There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
+\end{itemize}
+
+Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, {{ num_index_events }} index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
+
+The list of bleeding and ischaemia ICD-10 and OPCS-4 codes are included in supplementary information.
+
+\subsubsection{Endpoints}
+
+Bleeding and ischaemia endpoints are based on the presence of a primary diagnosis code in a subsequent spell occurring up to one year after the index spell. The index spell was excluded because multiple episodes in the index spell often encode the same ACS, which would contribute false-positive outcomes. A disadvantage of this approach is that further ischaemia that occurs soon after the index event is excluded in our analysis.
+
+Fatal bleeding and ischaemia outcomes, based on a bleeding or ischaemia primary cause of death ICD-10 code in a Civil Registration Mortality database, are included in the outcome count.
+
+A summary of the total number of each outcome is shown in Table~\ref{tab:outcomes}.
+
+```{python}
+#| label: tbl-outcome-prevalence
+#| tbl-cap: "Total number of outcomes that occurred within 1 year of the index ACS. The dataset contains {{ num_index_events }} ACS events between the dates {{ index_start }} and {{ index_end }}"
+
+pd.read_pickle("{{ outcome_table_file }}")
+```
+
+# Models
+
+We randomly split the data into a training set ({{ 1 - test_set_proportion}}) and a testing set ({{ test_set_proportion }}). The testing set is not used in the model fitting process. We trained multiple models on each training set:
+
+{% for model in models.values() %}
+* **{{ model["title"] }} ({{ model["abbr" ]}})**: {{ model["description"] }}
+{% endfor %}
+
+# Verification
+
+We apply classification machine learning models in this paper, which we train as if we are predicting whether a bleeding event or ischaemic event will occur. It is essential to understand that this is conceptually different from the way classification models are normally used.
+
+In a typical application of machine learning, the ``ground truth'' of the testing set is immediately verifiable (i.e. it is possible to check its classes are labelled correctly), which is why direct agreement of the model class with the entry in the testing set is suitable as a benchmark for the model's performance.
+
+In our case, both bleeding and ischaemia are relatively rare events, and clinically relevant ``high risk'' is not necessarily a large quantitative increase in absolute risk. For example, for bleeding, ARC define high bleeding risk as >4%, whereas a patient with a 1% bleeding risk would be at low risk.
+
+The testing set, containing actual occurrences of bleeding and ischaemic events, is therefore not the ``ground truth'' of interest, because an individual patient outcome neither confirms nor denies that patient was at high risk.
+
+Instead, the fundamental tools we employ to assess the accuracy of the model risk estimates are the model stability and calibration~[@riley2022stability] described below.
+
+## Stability: Are patient risk estimates consistent?
+
+We require the model to make consistent estimates of patient risk, not subject to large random fluctuations. The resilience of a model's risk estimates to the randomness involved in the input data and the training process is called stability.
+
+A proxy to assess stability is to compare the estimates from the model with the estimates from bootstrap models, which are trained on versions of the training set that are resampled with replacement. These resampled datasets should be similar to the primary training dataset, and should lead to similar models.
+
+The risk estimates from the primary model are compared with the estimates from all the bootstrap models, for each patient. Large discrepancies are considered to indicate the expected variability in risk estimates from the primary model.
+
+## Calibration: Is the estimated risk accurate?
+
+If a table of "true risks" were available, it would be possible to assess the accuracy of the estimated risks using a simple measure such as mean-square-error, similarly to how a linear regression model is checked. Since the true risk is unknown, a method is required to estimate the true risk.
+
+Estimating true risk requires an estimate of prevalence in groups of similar patients. We group patients by the risks that the model produces (thereby making an assumption that the model is reasonable), and estimate the prevalence within each group. These prevalences are compared with the average risk estimated by the model, to assess the model accuracy. If the model risk estimates agree with the prevalences, it is a well calibrated model.
+
+Good agreement between the estimated prevalence and the model risk estimate is evidence that the risk estimates may be accurate.
+
+In order to estimate the prevalence, we collect patients into groups of equal size and similar risk. Estimates of the prevalence within these groups is subject to an uncertainty which is a function of the sample size, which is critical to the conclusions we draw in this paper.
+
+## Summary of Metric Interpretations
+
+We conclude this section with a detailed interpretation of all the columns in Table~\ref{tab:summary}.
+
+
+* **Instability**: This column shows the expected fluctuations between estimates from models trained on similar data. For example, for a patient with a risk estimate of 1\%, an instability of 0.5\% implies the model could well have output 0.5\% or 1.5\%. It does not relate to the accuracy of the estimate, but instead can be interpreted as showing a measure of the precision. Results are empirically gathered from bootstrapping, and are presented as the median, 2.5\% and 97.5\% quantiles of the observed absolute risk differences.
+* $H\to L$: If a high-risk threshold is used to classify patients based on the risk estimate, there is a chance that the instability described above will lead to a patient reclassification, if the risk estimate is near the threshold. The column is the proportion of high risk patients who are more than 50\% likely to be reclassed as low risk by a similar model.
+
+    For bleeding, a threshold of 4\% is used to indicate high risk. For ischaemia models, the threshold used is 20\%.
+    
+* $L\to H$: Similarly, this column is the proportion of low risk patients who have more than 50\% chance to be reclassified as high risk by a bootstrap model.
+* Estimated Risk Uncertainty: This column shows an estimate of the absolute error in the risk estimates, based on the assumption of a normally distributed estimate of prevalence in the calibration plot. For a patient with risk 3\%, an estimated risk uncertainty of 5\% indicates that the patient's true risk could be from 0\% to 8\%. The trustworthiness of this parameter is a strong function of the sample size of the testing set.
+* **ROC AUC**: The area under the receiver operating characteristic curve is based on the assumption that the model is predicting deterministic events. For two patients $A$ and $B$ in the testing set where $A$ has an event and $B$ does not, the AUC is the probability that $A$ will receive a higher risk estimate than $B$.

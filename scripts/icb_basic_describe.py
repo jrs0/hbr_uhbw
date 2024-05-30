@@ -24,9 +24,10 @@ prevalence_outcomes = describe.get_column_rates(outcomes)
 print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
 
+
 # Get prevalences of all combinations of bleeding/ischaemia
 # outcomes, which is used as an input to the hbr_tradeoff app
-100*pd.crosstab(outcomes["bleeding"], outcomes["ischaemia"])/len(outcomes)
+100 * pd.crosstab(outcomes["bleeding"], outcomes["ischaemia"]) / len(outcomes)
 
 # Create a table of dataset and outcomes information
 start_date = data["icb_basic_tmp"]["index_start"]
@@ -51,11 +52,13 @@ outcomes_map = {
     "Non-Fatal Bleeding": f"{int(non_fatal_bleeding)} ({100*non_fatal_bleeding/num_acs:.2f}%)",
     "Any Ischaemia": f"{int(total_ischaemia)} ({100*total_ischaemia/num_acs:.2f}%)",
     "Fatal Ischaemia": f"{int(fatal_ischaemia)} ({100*fatal_ischaemia/num_acs:.2f}%)",
-    "Non-Fatal Ischaemia": f"{int(non_fatal_ischaemia)} ({100*non_fatal_ischaemia/num_acs:.2f}%)"
+    "Non-Fatal Ischaemia": f"{int(non_fatal_ischaemia)} ({100*non_fatal_ischaemia/num_acs:.2f}%)",
 }
-outcomes_table = pd.DataFrame({"Event": outcomes_map.keys(), "Patient Count": outcomes_map.values()})
-with open(res_folder + "outcomes.tex", 'w') as f:
-     f.write(outcomes_table.to_latex())
+outcomes_table = pd.DataFrame(
+    {"Event": outcomes_map.keys(), "Patient Count": outcomes_map.values()}
+)
+with open(res_folder + "outcomes.tex", "w") as f:
+    f.write(outcomes_table.to_latex())
 
 # Check prescriptions
 missing_prescriptions = describe.proportion_missingness(features_prescriptions)
@@ -77,10 +80,12 @@ print(prevalence_prescriptions)
 measurement_names = {
     "bp_systolic": "Blood pressure (sys.), mmHg",
     "bp_diastolic": "Blood pressure (dia.), mmHg",
-    "hba1c": "HbA1c, mmol/mol",    
+    "hba1c": "HbA1c, mmol/mol",
 }
-long = features_measurements.rename(columns=measurement_names).melt(var_name="Measurement", value_name="Result")
-sns.displot(long, x = "Result", hue="Measurement")
+long = features_measurements.rename(columns=measurement_names).melt(
+    var_name="Measurement", value_name="Result"
+)
+sns.displot(long, x="Result", hue="Measurement")
 plt.title("Non-missing primary-care measurements (up to 2 months before index)")
 plt.tight_layout()
 plt.show()
@@ -132,11 +137,15 @@ numeric_names = {
     "polypharmacy_acute": "Pharm. (Acute)",
     "bmi": "BMI",
     "alcohol_units": "Alcohol",
-    "efi_category": "EFI"
+    "efi_category": "EFI",
 }
-numeric_attributes = features_attributes.select_dtypes(include="float").rename(columns=numeric_names)
-missing_numeric = describe.proportion_missingness(numeric_attributes).rename("Percent Missingness")
-sns.barplot(100*missing_numeric)
+numeric_attributes = features_attributes.select_dtypes(include="float").rename(
+    columns=numeric_names
+)
+missing_numeric = describe.proportion_missingness(numeric_attributes).rename(
+    "Percent Missingness"
+)
+sns.barplot(100 * missing_numeric)
 plt.xticks(rotation=90)
 plt.xlabel("Feature name")
 plt.title("Proportion of missingness in numerical attributes")
@@ -144,11 +153,11 @@ plt.tight_layout()
 plt.show()
 
 # Plot numeric attributes
-long = numeric_attributes.melt(var_name = "Numeric Feature", value_name="Numeric Value")
-sns.displot(long, x = "Numeric Value", hue="Numeric Feature")
+long = numeric_attributes.melt(var_name="Numeric Feature", value_name="Numeric Value")
+sns.displot(long, x="Numeric Value", hue="Numeric Feature")
 plt.title("Other numerical non-missing primary care attributes")
 plt.tight_layout()
-plt.xlim(0,100)
+plt.xlim(0, 100)
 plt.show()
 
 

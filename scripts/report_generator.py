@@ -67,8 +67,6 @@ save_dir = Path(config["save_dir"])
 
 # Copy the config and adjust to create Jinja2 variables
 variables = copy.deepcopy(config)
-variables["bib_file"] = "ref.bib"
-
 
 def copy_most_recent_image(image_name: str) -> Path:
     """Find the most recent image with the given name and copy it to the build directory.
@@ -92,6 +90,11 @@ summary_path = common.pick_most_recent_saved_file("icb_basic_summary", save_dir)
 shutil.copy(summary_path, report_dir / summary_path.name)
 variables["summary_table_file"] = summary_path.name
 
+# Get the table of outcome prevalences
+data_path = common.pick_most_recent_saved_file("icb_basic_data", save_dir)
+shutil.copy(data_path, report_dir / data_path.name)
+variables["data_file"] = data_path.name
+
 # Copy the most recent version of each figure into the
 # build directory
 for name, model in variables["models"].items():
@@ -109,6 +112,7 @@ for name, model in variables["models"].items():
 
 # Copy static files to output folder
 shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))
+shutil.copy(config["citation_style"], report_dir / Path("style.csl"))
 
 # Render the report template and write it to the build directory
 doc = template.render(variables)

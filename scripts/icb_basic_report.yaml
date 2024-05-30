@@ -1,9 +1,10 @@
-title: "Bleeding/Ischaemia Risk Models"
+title: "Bleeding and Ischaemia Risk Estimation Models"
 subtitle: "Trained using hospital episode statistics and primary care data"
 author: "John Scott"
 
 # References
 bib_file: "../risk_management_file/ref.bib"
+citation_style: "citation_style.csl"
 
 # Jinja2 templates
 templates_folder: "templates"
@@ -22,14 +23,26 @@ models:
     text: "random forest"
     title: "Random Forest"
     abbr: "RF"
+    description: >
+      The risk estimate is an average over decision trees, each of which
+      estimates the risk by recursively dividing the input predictors into
+      ranges and estimating the prevalence within each range of inputs. 100
+      trees are used, and each tree is capped at a depth of 10 to avoid overfitting.
   logistic_regression:
     text: "logistic regression"
     title: "Logistic Regression"
     abbr: "LR"
+    description: >
+       The risk is obtained by fitting the logistic regression model to the events,
+       using the input features are variables. A penalty term is added to handle
+       collinearity of the predictors and to penalize overfitting.
   xgboost:
     text: "XGBoost"
     title: "XGBoost"
     abbr: "XGB"
+    description: >
+      An alternative tree-based method, similar to random forest, that uses a
+      different algorithm to obtained train the model.
 
 # Outcome names
 outcomes:
@@ -41,3 +54,5 @@ outcomes:
     text: "ischaemia"
     title: "Ischaemia"
     abbr: "I"
+
+

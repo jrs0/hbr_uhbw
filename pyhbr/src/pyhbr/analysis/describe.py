@@ -208,6 +208,40 @@ def get_summary_table(
         }
     ).set_index("Model", drop=True)
 
+def get_outcome_prevalence(outcomes: DataFrame) -> DataFrame:
+    """Get the prevalence of each outcome as a percentage.
+    
+    This function takes the outcomes dataframe used to define
+    the y vector of the training/testing set and calculates the
+    prevalence of each outcome in a form suitable for inclusion
+    in a report.
+
+    Args:
+        outcomes: A dataframe with the columns "fatal_{outcome}",
+            "non_fatal_{outcome}", and "{outcome}" (for the total),
+            where {outcome} is "bleeding" or "ischaemia". Each row
+            is an index spell, and the elements in the table are
+            boolean (whether or not the outcome occurred).
+
+    Returns:
+        A table with the prevalence of each outcome, and a multi-index
+            containing the "Outcome" ("Bleeding" or "Ischaemia"), and
+            the outcome "Type" (fatal, total, etc.)
+    """
+    df = 100*outcomes.rename(
+        columns={
+            "bleeding": "Bleeding.Total",
+            "non_fatal_bleeding": "Bleeding.Non-Fatal (BARC 2-4)",
+            "fatal_bleeding": "Bleeding.Fatal (BARC 5)",
+            "ischaemia": "Ischaemia.Total",
+            "non_fatal_ischaemia": "Ischaemia.Non-Fatal (MI/Stroke)",
+            "fatal_ischaemia": "Ischaemia.Fatal (CV Death)"
+        }
+    ).melt(value_name="Prevalence (%)").groupby("variable").sum() / len(outcomes)
+    df = df.reset_index()
+    df[["Outcome", "Type"]] = df["variable"].str.split(".", expand=True)
+    return df.set_index(["Outcome", "Type"])[["Prevalence (%)"]]
+
 def pvalue_chi2_high_risk_vs_outcome(
     probs: DataFrame, y_test: Series, high_risk_threshold: float
 ) -> float:

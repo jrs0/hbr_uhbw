@@ -1,4 +1,0 @@
-```{python}
-summary = pd.read_pickle("{{ summary_table_file }}")
-summary
-```

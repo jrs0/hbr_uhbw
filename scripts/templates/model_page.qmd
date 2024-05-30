@@ -2,16 +2,16 @@
 
 This is a summary of the {{ model["text"] }} model ({{ model["abbr"] }})
 
-![ROC curves for the {{ model["text"] }} model]({{ model["roc_curves_image"] }})
+![ROC curves for the {{ model["text"] }} model]({{ model["roc_curves_image"] }}){{ '{#' }}fig-roc-{{ model["abbr"] }}}
 
 {% raw %}
 {{< pagebreak >}}
 {% endraw %}
 
-![Stability curves for the {{ model["text"] }} model for bleeding]({{ model["stability_bleeding_image"] }})
-![Calibration of the {{ model["text"] }} model for bleeding]({{ model["calibration_bleeding_image"] }})
-![Stability curves for the {{ model["text"] }} model for ischaemia]({{ model["stability_ischaemia_image"] }})
-![Calibration of the {{ model["text"] }} model for ischaemia]({{ model["calibration_ischaemia_image"] }})
+![Stability curves for the {{ model["text"] }} model for bleeding]({{ model["stability_bleeding_image"] }}){{ '{#' }}fig-stability-bleeding-{{ model["abbr"] }}}
+![Calibration of the {{ model["text"] }} model for bleeding]({{ model["calibration_bleeding_image"] }}){{ '{#' }}fig-calibration-bleeding-{{ model["abbr"] }}}
+![Stability curves for the {{ model["text"] }} model for ischaemia]({{ model["stability_ischaemia_image"] }}){{ '{#' }}fig-stability-ischaemia-{{ model["abbr"] }}}
+![Calibration of the {{ model["text"] }} model for ischaemia]({{ model["calibration_ischaemia_image"] }}){{ '{#' }}fig-stability-calibration-{{ model["abbr"] }}}
 
 {% raw %}
 {{< pagebreak >}}

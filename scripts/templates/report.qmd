@@ -8,10 +8,26 @@ engine: jupyter
 jupyter: python3
 toc: true
 number-sections: true
-bibliography: {{ bib_file }}  
+bibliography: ref.bib
+csl: style.csl
+abstract: >
+  Patients presenting with acute coronary syndromes, such as those who undergo percutaneous coronary
+  intervention for myocardial infarction, are often placed on dual antiplatelet therapy to mitigate
+  the risk of further ischaemic events. However, care must be taken to avoid causing severe bleeding
+  complications in patients who are at high bleeding risk. Tools that estimate both the bleeding and
+  ischaemia risk would be valuable to cardiologists, especially given the rareness of bleeding complications,
+  and the complex mix of factors that influences risk.
+  We present the performance of several machine learning classification algorithms to estimate
+  bleeding and ischaemic risk, using input features from hospital episode statistics and primary care data.
+  Model stability is assessed by bootstrap resampling the training set, retraining the models, and assessing
+  how consistently the bootstrapped models agree on risk estimates. Accuracy is assessed by the model
+  calibration, which compares the model-estimated risk with an estimate of the outcome prevalence in model-defined
+  risk groups. 
 
 execute:
   echo: false
+
+tbl-cap-location: bottom
 
 format:
   html:
@@ -25,9 +41,12 @@ format:
 
 ```{python}
 import pandas as pd
+
+# Read the data file containing the raw data used for modelling
+data = pd.read_pickle({{ data_file_name }})
 ```
 
-{% include "summary.qmd" %}
+{% include "intro_methods.qmd" %}
 
 {% for model in models.values() %}
 {% with model=model %}
