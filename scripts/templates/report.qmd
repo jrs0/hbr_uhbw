@@ -10,6 +10,9 @@ toc: true
 number-sections: true
 bibliography: {{ bib_file }}  
 
+execute:
+  echo: false
+
 format:
   html:
     css: styles.css
@@ -19,6 +22,10 @@ format:
     margin-left: 30mm
     margin-right: 30mm
 ---
+
+```{python}
+import pandas as pd
+```
 
 {% include "summary.qmd" %}
 

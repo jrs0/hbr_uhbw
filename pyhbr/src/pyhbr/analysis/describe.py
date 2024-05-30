@@ -206,7 +206,7 @@ def get_summary_table(
             "Estimated Risk Uncertainty": risk_accuracy,
             "ROC AUC": aucs,
         }
-    )
+    ).set_index("Model", drop=True)
 
 def pvalue_chi2_high_risk_vs_outcome(
     probs: DataFrame, y_test: Series, high_risk_threshold: float
