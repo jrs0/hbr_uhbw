@@ -20,7 +20,7 @@ format:
     margin-right: 30mm
 ---
 
-
+{% include "summary.qmd" %}
 
 {% for model in models.values() %}
 {% with model=model %}

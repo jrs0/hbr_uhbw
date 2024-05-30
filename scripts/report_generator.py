@@ -87,6 +87,10 @@ def copy_most_recent_image(image_name: str) -> Path:
     shutil.copy(image_path, image_dest_dir / image_file_name)
     return Path("images") / image_file_name
 
+# Copy the summary table into the report directory
+summary_path = common.pick_most_recent_saved_file("icb_basic_summary", save_dir)
+shutil.copy(summary_path, report_dir / summary_path.name)
+variables["summary_table_file"] = summary_path.name
 
 # Copy the most recent version of each figure into the
 # build directory

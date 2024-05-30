@@ -1,4 +1,6 @@
 ```{python}
-from pyhbr import common
-common.load_item()
+import pandas as pd
+
+summary = pd.read_pickle("{{ summary_table_file }}")
+summary
 ```
