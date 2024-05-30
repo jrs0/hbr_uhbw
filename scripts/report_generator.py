@@ -118,6 +118,9 @@ variables["summary_table_file"] = copy_most_recent_file(
 )
 
 # Get the table of outcome prevalences
+variables["summary_table_file"] = copy_most_recent_file(
+    "icb_basic_summary", "pkl", save_dir, report_dir, Path("tables")
+)
 
 data_path = common.pick_most_recent_saved_file("icb_basic_data", save_dir)
 shutil.copy(data_path, report_dir / data_path.name)

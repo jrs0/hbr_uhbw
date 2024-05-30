@@ -137,6 +137,7 @@ common.save_item(summary, "icb_basic_summary", config["save_dir"])
 # Get the table of outcome prevalences
 data = common.load_item("icb_basic_data", config["save_dir"])
 outcome_prevalences = describe.get_outcome_prevalence(data["outcomes"])
+common.save_item(outcome_prevalences, "icb_basic_outcome_prevalences", config["save_dir"])
 
 exit()
 
