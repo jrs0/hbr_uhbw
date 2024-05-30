@@ -37,7 +37,7 @@ Another score is DAPT [@yeh2016development], which ranks patients on a scale -2 
 
 We assess multiple different machine learning models, trained on multiple different datasets, for the estimation of one-year probability of bleeding and further ischaemia outcome, using the approach described below.
 
-\subsection{Input Data}
+## Input Data
 
 We obtain a cohort of ACS patients from Hospital Episode Statistics (HES), which is a national administrative dataset available across the UK. This dataset defines both the inclusion criteria and the outcomes.
 
@@ -45,20 +45,19 @@ We also obtain features (input predictors to the machine learning algorithms) fr
 
 The system wide dataset (SWD) is a Bristol, North Somerset, and South Gloucestershire-specific repository of primary care patient information, which includes flags for comorbidities and risk factors, and some physiological measurements. These are also used as predictors in the models.
 
-\subsubsection{Inclusion Criteria}
+## Inclusion Criteria
 
 Patients are considered for inclusion based on the primary and secondary diagnoses and procedures in HES data. For a hospital spell to be considered an index event:
 
-\begin{itemize}
-    \item The primary diagnosis of the first episode must contain an ACS ICD-10 code; or
-    \item There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
-\end{itemize}
+* The primary diagnosis of the first episode must contain an ACS ICD-10 code; or
+*There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
 
-Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, {{ num_index_events }} index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
+
+Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, `{python} num_index_events` index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
 
 The list of bleeding and ischaemia ICD-10 and OPCS-4 codes are included in supplementary information.
 
-\subsubsection{Endpoints}
+## Endpoints
 
 Bleeding and ischaemia endpoints are based on the presence of a primary diagnosis code in a subsequent spell occurring up to one year after the index spell. The index spell was excluded because multiple episodes in the index spell often encode the same ACS, which would contribute false-positive outcomes. A disadvantage of this approach is that further ischaemia that occurs soon after the index event is excluded in our analysis.
 
@@ -75,7 +74,7 @@ pd.read_pickle("{{ outcome_table_file }}")
 
 # Models
 
-We randomly split the data into a training set ({{ 1 - test_set_proportion}}) and a testing set ({{ test_set_proportion }}). The testing set is not used in the model fitting process. We trained multiple models on each training set:
+We randomly split the data into a training set (`{python} 1 - test_set_proportion`) and a testing set (`{python}test_set_proportion). The testing set is not used in the model fitting process. We trained multiple models on each training set:
 
 {% for model in models.values() %}
 * **{{ model["title"] }} ({{ model["abbr" ]}})**: {{ model["description"] }}
@@ -114,7 +113,6 @@ In order to estimate the prevalence, we collect patients into groups of equal si
 ## Summary of Metric Interpretations
 
 We conclude this section with a detailed interpretation of all the columns in Table~\ref{tab:summary}.
-
 
 * **Instability**: This column shows the expected fluctuations between estimates from models trained on similar data. For example, for a patient with a risk estimate of 1\%, an instability of 0.5\% implies the model could well have output 0.5\% or 1.5\%. It does not relate to the accuracy of the estimate, but instead can be interpreted as showing a measure of the precision. Results are empirically gathered from bootstrapping, and are presented as the median, 2.5\% and 97.5\% quantiles of the observed absolute risk differences.
 * $H\to L$: If a high-risk threshold is used to classify patients based on the risk estimate, there is a chance that the instability described above will lead to a patient reclassification, if the risk estimate is near the threshold. The column is the proportion of high risk patients who are more than 50\% likely to be reclassed as low risk by a similar model.

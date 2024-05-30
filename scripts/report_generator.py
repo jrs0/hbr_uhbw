@@ -68,6 +68,7 @@ save_dir = Path(config["save_dir"])
 # Copy the config and adjust to create Jinja2 variables
 variables = copy.deepcopy(config)
 
+
 def copy_most_recent_image(image_name: str) -> Path:
     """Find the most recent image with the given name and copy it to the build directory.
 
@@ -85,12 +86,39 @@ def copy_most_recent_image(image_name: str) -> Path:
     shutil.copy(image_path, image_dest_dir / image_file_name)
     return Path("images") / image_file_name
 
+
+def copy_most_recent_file(
+    name: str, extension: str, save_dir: str, report_dir: Path, dest_dir: Path
+) -> Path:
+    """Find the most recent file with the given name and copy it to the destination
+
+    Args:
+        name: The base name of the file to copy
+        extension: The file extension of the file to copy
+        save_dir: The directory in which to locate the file
+            to copy
+        report_dir: The path to the report output directory relative to
+            the working directory
+        dest_dir: The destination directory name in which to place the file
+            relative to the report directory
+
+    Returns:
+        The path to the copied item, relative to the report directory.
+            This can be used as a string in the report to locate the item.
+    """
+    src_path = common.pick_most_recent_saved_file(name, save_dir, extension)
+    dest_path = report_dir / dest_dir / src_path.name
+    shutil.copy(src_path, dest_path)
+    return dest_dir / src_path.name
+
+
 # Copy the summary table into the report directory
-summary_path = common.pick_most_recent_saved_file("icb_basic_summary", save_dir)
-shutil.copy(summary_path, report_dir / summary_path.name)
-variables["summary_table_file"] = summary_path.name
+variables["summary_table_file"] = copy_most_recent_file(
+    "icb_basic_summary", "pkl", save_dir, report_dir, Path("tables")
+)
 
 # Get the table of outcome prevalences
+
 data_path = common.pick_most_recent_saved_file("icb_basic_data", save_dir)
 shutil.copy(data_path, report_dir / data_path.name)
 variables["data_file"] = data_path.name

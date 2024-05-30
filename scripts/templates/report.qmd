@@ -43,7 +43,17 @@ format:
 import pandas as pd
 
 # Read the data file containing the raw data used for modelling
-data = pd.read_pickle({{ data_file_name }})
+data = pd.read_pickle("{{ data_file }}")
+
+outcomes = data["outcomes"]
+
+num_index_events = len(data["icb_basic_tmp"]["index_spells"])
+index_start = data["icb_basic_tmp"]["index_start"]
+index_end = data["icb_basic_tmp"]["index_end_date"] # Fix this upstream
+
+# Get modelling info from the first model file
+first_model = next(iter(models.values()))
+test_set_proportion = first_model["test_set_proportion"]
 ```
 
 {% include "intro_methods.qmd" %}
