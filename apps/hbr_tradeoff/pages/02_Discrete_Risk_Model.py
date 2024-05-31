@@ -327,10 +327,10 @@ p_i_nb_lir_lbr = x[2]
 p_i_b_lir_lbr = 1 - x[0] - x[1] - x[2]
 
 st.write(f"Cost = {cost}")
-st.write(f"p_ni_nb_lir = {p_ni_nb_lir_lbr}")
-st.write(f"p_ni_b_lir = {p_ni_b_lir_lbr}")
-st.write(f"p_i_nb_lir = {p_i_nb_lir_lbr}")
-st.write(f"p_i_b_lir = {p_i_b_lir_lbr}")
+st.write(f"p_ni_nb_lir = {100*p_ni_nb_lir_lbr:.2f}%")
+st.write(f"p_ni_b_lir = {100*p_ni_b_lir_lbr:.2f}%")
+st.write(f"p_i_nb_lir = {100*p_i_nb_lir_lbr:.2f}%")
+st.write(f"p_i_b_lir = {100*p_i_b_lir_lbr:.2f}%")
 
 baseline_risks = st.container(border=True)
 baseline_risks.header("Output 1: Baseline Risks", divider="blue")
