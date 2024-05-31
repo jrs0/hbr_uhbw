@@ -103,6 +103,25 @@ p_b_hbr = simple_prob_input(
     high_risk_container, "Proportion at high bleeding risk (HBR) (%)", 30.0
 )
 
+risk_ratio_container = st.container(border=True)
+risk_ratio_container.header("Input 3: Risk Ratios for high risk classes", divider=True)
+risk_ratio_container.write(
+    "Input the risk ratios between the high-risk class and the low-risk class for each outcome"
+)
+risk_ratio_container.write(
+    "This value combines with the prevalence of the high risk category (Input 2) and the prevalence of actual outcomes (Input 1) to define the absolute risk of the high and low risk categories."
+)
+risk_ratio_container.write(
+    "The default value of 30% HBR follows from the estimated proportion of patients meeting the ARC HBR criteria, whereas the HIR default 50% is based on the estimate for the ESC/EACTS HIR definition."
+)
+
+rr_hir = simple_prob_input(
+    risk_ratio_container, "Risk ratio for HIR class compared to LIR", 1.1
+)
+rr_hbr = simple_prob_input(
+    risk_ratio_container, "Risk ratio for HBR class compared to LBR", 1.2
+)
+
 # There are four unknowns in this simple model of underlying
 # discrete bleeding/ischaemia risk. High/low bleeding/ischaemia
 # risk categories are assumed to be independent, and we know
@@ -123,89 +142,158 @@ def objective_fn(
     p_i_b: float,
     p_hir: float,
     p_hbr: float,
+    rr_hir: float,
+    rr_hbr: float,
 ) -> float:
-    """Low/high bleeding risk object
+    """Low/high bleeding risk objective
 
-    Object function to numerically find probabilities of
-    outcomes in the low and high bleeding and ischaemia
-    groups, by assuming independence of HIR and HBR risk
-    groups.
+    Objective function to numerically find probabilities of
+    combinations of outcomes in the low and high bleeding
+    and ischaemia groups, by assuming independence of the
+    inputted HIR and HBR risk ratios.
 
     Args:
         x: The unknown to be found by the optimisation
             procedure. The array contains these values:
-            [p_i_lir, p_b_lbr, rr_hir, rr_hbr], which are
-            the risks in the LBR/LIR group, and the relative
-            risks to get to the HBR and HIR groups (the risk
-            groups for each outcome are assumed independent).
+            [x_ni_nb, x_ni_b, x_i_nb], which are
+            the absolute risks of the outcome combinations
+            in the LIR/LBR group. The final risk x_i_b is
+            obtained by requiring that the items add up to
+            1.
         p_ni_nb: Observed no ischaemia/no bleeding prevalence
         p_ni_b: Observed no ischaemia but bleeding prevalence
         p_i_nb: Observed ischaemia but no bleeding prevalence
         p_i_b: Observed ischaemia and bleeding prevalence
         p_hir: Observed prevalence of high ischaemia risk
         p_hbr: Observed prevalence of high bleeding risk
+        rr_hir: Risk ratio of HIR to LIR class
+        rr_hbr: Risk ratio of HBR to LBR class
 
     Return:
         The L2 distance between the observed prevalences and the
             prevalences implied by the choice of x.
     """
 
-    # Unpack all the unknowns
-    p_i_lir = x[0]
-    p_b_lbr = x[1]
-    rr_hir = x[2]
-    rr_hbr = x[3]
+    # Unpack all the unknowns (these are the absolute risks
+    # for a patient in the LIR/LBR group)
+    p_ni_nb_lir_lbr = x[0]
+    p_ni_b_lir_lbr = x[1]
+    p_i_nb_lir_lbr = x[2]
+    p_i_b_lir_lbr = 1 - x[0] - x[1] - x[2]
+
+    # Assuming the risk ratios for HIR and HBR act independently,
+    # calculate what the absolute risks would be for patients in
+    # other risk categories
+
+    # For a patient in the HBR group (but the LIR group), the
+    # chance of a bleed is higher by the HBR risk ratio. The
+    # chance of no bleed is obtained by assuming the total
+    # proportion of ischaemia outcomes has not changed (since
+    # patients are still LIR).
+    p_ni_b_lir_hbr = rr_hbr * p_ni_b_lir_lbr
+    p_ni_lir_lbr = p_ni_nb_lir_lbr + p_ni_b_lir_lbr  # previous P(no ischaemia)
+    p_ni_nb_lir_hbr = p_ni_lir_lbr - p_ni_b_lir_hbr
+
+    # Do the same calculation for the chance of an ischaemia
+    # outcome (probability unaffected) for a patient in the HBR group.
+    p_i_b_lir_hbr = rr_hbr * p_i_b_lir_lbr
+    p_i_lir_lbr = p_i_nb_lir_lbr + p_i_b_lir_lbr  # previous P(ischaemia)
+    p_i_nb_lir_hbr = p_i_lir_lbr - p_i_b_lir_hbr
+
+    # Before moving on, check that the absolute outcome risks
+    # in the LIR/HBR group add up to 1
+    p = p_ni_nb_lir_hbr + p_ni_b_lir_hbr + p_i_nb_lir_hbr + p_i_b_lir_hbr
+    if np.abs(p - 1.0) > 1e-5:
+        raise RuntimeError(
+            f"Total proportions in LIR/HBR group must add to one; these add up to {100*p:.2f}%"
+        )
+
+    # Now, repeat these two calculations for patients at HIR
+    # but not HBR. This time, chance of ischaemia shifts
+    # upwards by the HIR risk ratio, but overall bleeding rate
+    # remains the same.
+    p_i_nb_hir_lbr = rr_hir * p_i_nb_lir_lbr
+    p_nb_lir_lbr = p_ni_nb_lir_lbr + p_i_nb_lir_lbr  # previous P(no bleed)
+    p_ni_nb_hir_lbr = p_nb_lir_lbr - p_i_nb_hir_lbr
+
+    # Repeat for the chance of a bleeding outcome (probability
+    # unaffected
+    p_i_b_hir_lbr = rr_hir * p_i_b_lir_lbr
+    p_b_lir_lbr = p_ni_b_lir_lbr + p_i_b_lir_lbr  # previous P(bleed)
+    p_ni_b_hir_lbr = p_b_lir_lbr - p_i_b_hir_lbr
+
+    # Check that the absolute outcome risks
+    # in the HIR/LBR group add up to 1
+    p = p_ni_nb_hir_lbr + p_ni_b_hir_lbr + p_i_nb_hir_lbr + p_i_b_hir_lbr
+    if np.abs(p - 1.0) > 1e-5:
+        raise RuntimeError(
+            f"Total proportions in HIR/LBR group must add to one; these add up to {100*p:.2f}%"
+        )
+
+    # The final set of calculations is for patients at both
+    # HBR and HIR. This time, the independence of risk ratios
+    # assumptions is used to say that:
+    p_i_b_hir_hbr = rr_hir * rr_hbr * p_i_b_lir_lbr
+
+    # This time, the marginals (probability of total ischaemia
+    # and total bleeding) are assumed to scale with the individual
+    # risk ratios. First, for total ischaemia probability:
+    p_i_hir_hbr = rr_hir * p_i_lir_lbr
+    p_i_nb_hir_hbr = p_i_hir_hbr - p_i_b_hir_hbr
+
+    # And for the total bleeding marginal in the HBR/HIR group
+    p_b_hir_hbr = rr_hbr * p_b_lir_lbr
+    p_ni_b_hir_hbr = p_b_hir_hbr - p_i_b_hir_hbr
+
+    # Finally, the chance of neither event is obtained by requiring
+    # all the probabilities to add up to 1.
+    p_ni_nb_hir_hbr = 1 - p_ni_b_hir_hbr - p_i_nb_hir_hbr - p_i_b_hir_hbr
+
+    # No need to check sum to one here because they do by construction
+    # of the previous line.
 
     # Calculate what the observed prevalences would
-    # be if x were correct
-
-    # Terms contributing to no ischaemia and no bleeding
-    # Patient is LIR and LBR
-    a = (1 - p_hir) * (1 - p_i_lir) * (1 - p_hbr) * (1 - p_b_lbr)
-    # Patient is LIR and HBR
-    b = (1 - p_hir) * (1 - p_i_lir) * p_hbr * (1 - rr_hbr * p_b_lbr)
-    # Patient is HIR and LBR
-    c = p_hir * (1 - rr_hir * p_i_lir) * (1 - p_hbr) * (1 - p_b_lbr)
-    # Patient is HIR and HBR
-    d = p_hir * (1 - rr_hir * p_i_lir) * p_hbr * (1 - rr_hbr * p_b_lbr)
-    # Sum up all contributions
+    # be if x were correct -- the absolute risks in each
+    # category are scaled by the prevalence of that category
+    p_lir_lbr = (1 - p_hir) * (1 - p_hbr)
+    p_lir_hbr = (1 - p_hir) * p_hbr
+    p_hir_lbr = p_hir * (1 - p_hbr)
+    p_hir_hbr = p_hir * p_hbr
+    
+    # No ischaemia/no bleeding outcomes
+    a = p_ni_nb_lir_lbr * p_lir_lbr
+    b = p_ni_nb_lir_hbr * p_lir_hbr
+    c = p_ni_nb_hir_lbr * p_hir_lbr
+    d = p_ni_nb_hir_hbr * p_hir_hbr
     p_x_ni_nb = a + b + c + d
+    
+    # No ischaemia/bleeding
+    a = p_ni_b_lir_lbr * p_lir_lbr
+    b = p_ni_b_lir_hbr * p_lir_hbr
+    c = p_ni_b_hir_lbr * p_hir_lbr
+    d = p_ni_b_hir_hbr * p_hir_hbr
+    p_x_ni_b = a + b + c + d 
+    
+    # Ischaemia/no bleeding
+    a = p_i_nb_lir_lbr * p_lir_lbr
+    b = p_i_nb_lir_hbr * p_lir_hbr
+    c = p_i_nb_hir_lbr * p_hir_lbr
+    d = p_i_nb_hir_hbr * p_hir_hbr
+    p_x_i_nb = a + b + c + d 
 
-    # Terms contributing to no ischaemia but bleeding
-    # Patient is LIR and LBR
-    a = (1 - p_hir) * (1 - p_i_lir) * (1 - p_hbr) * p_b_lbr
-    # Patient is LIR and HBR
-    b = (1 - p_hir) * (1 - p_i_lir) * p_hbr * rr_hbr * p_b_lbr
-    # Patient is HIR and LBR
-    c = p_hir * (1 - rr_hir * p_i_lir) * (1 - p_hbr) * p_b_lbr
-    # Patient is HIR and HBR
-    d = p_hir * (1 - rr_hir * p_i_lir) * p_hbr * rr_hbr * p_b_lbr
-    # Sum up all contributions
-    p_x_ni_b = a + b + c + d
+    # Ischaemia/bleeding
+    a = p_i_b_lir_lbr * p_lir_lbr
+    b = p_i_b_lir_hbr * p_lir_hbr
+    c = p_i_b_hir_lbr * p_hir_lbr
+    d = p_i_b_hir_hbr * p_hir_hbr
+    p_x_i_b = a + b + c + d 
 
-    # Terms contributing to ischaemia but no bleeding
-    # Patient is LIR and LBR
-    a = (1 - p_hir) * p_i_lir * (1 - p_hbr) * (1 - p_b_lbr)
-    # Patient is LIR and HBR
-    b = (1 - p_hir) * p_i_lir * p_hbr * (1 - rr_hbr * p_b_lbr)
-    # Patient is HIR and LBR
-    c = p_hir * rr_hir * p_i_lir * (1 - p_hbr) * (1 - p_b_lbr)
-    # Patient is HIR and HBR
-    d = p_hir * rr_hir * p_i_lir * p_hbr * (1 - rr_hbr * p_b_lbr)
-    # Sum up all contributions
-    p_x_i_nb = a + b + c + d
-
-    # Terms contributing to ischaemia and bleeding
-    # Patient is LIR and LBR
-    a = (1 - p_hir) * p_i_lir * (1 - p_hbr) * p_b_lbr
-    # Patient is LIR and HBR
-    b = (1 - p_hir) * p_i_lir * p_hbr * rr_hbr * p_b_lbr
-    # Patient is HIR and LBR
-    c = p_hir * rr_hir * p_i_lir * (1 - p_hbr) * p_b_lbr
-    # Patient is HIR and HBR
-    d = p_hir * rr_hir * p_i_lir * p_hbr * rr_hbr * p_b_lbr
-    # Sum up all contributions
-    p_x_i_b = a + b + c + d
+    # Perform a final check that the answer adds up to 1
+    p = p_x_ni_nb + p_x_ni_b + p_x_i_nb + p_x_i_b
+    if np.abs(p - 1.0) > 1e-5:
+        raise RuntimeError(
+            f"Calculated hypothetical prevalences must add to one; these add up to {100*p:.2f}%"
+        )    
 
     # Compare the calculated prevalences with the observed
     # prevalences and return the cost (L2 distance)
@@ -217,15 +305,15 @@ def objective_fn(
 
 
 # Set bounds on the probabilities which must be between
-# zero and one. Ensure that the risk ratios are larger than
-# one (so that the high risk groups have greater risk than
-# the low risk groups)
-bounds = scipy.optimize.Bounds([0, 0, 1, 1], [1, 1, np.inf, np.inf])
+# zero and one (note that there are only three unknowns
+# because the fourth is derived from the constraint that
+# they add up to one.
+bounds = scipy.optimize.Bounds([0, 0, 0], [1, 1, 1])
 
 # Solve for the unknown low risk group probabilities and independent
 # risk ratios by minimising the objective function
-args = (p_b_ni_nb, p_b_ni_b, p_b_i_nb, p_b_i_b, p_b_hir, p_b_hbr)
-initial_x = 4 * [0]
+args = (p_b_ni_nb, p_b_ni_b, p_b_i_nb, p_b_i_b, p_b_hir, p_b_hbr, rr_hir, rr_hbr)
+initial_x = 3 * [0]
 res = scipy.optimize.minimize(objective_fn, x0=initial_x, args=args, bounds=bounds)
 x = res.x
 
@@ -233,18 +321,16 @@ x = res.x
 cost = objective_fn(x, *args)
 
 # Solved probabilities of bleeding/ischaemia in LBR/LIR groups
-p_b_i_lir = x[0]
-p_b_b_lbr = x[1]
-
-# Solved risk ratios for high bleeding/high ischaemia risk
-rr_hir = x[2]
-rr_hbr = x[3]
+p_ni_nb_lir_lbr = x[0]
+p_ni_b_lir_lbr = x[1]
+p_i_nb_lir_lbr = x[2]
+p_i_b_lir_lbr = 1 - x[0] - x[1] - x[2]
 
 st.write(f"Cost = {cost}")
-st.write(f"p_b_i_lir = {p_b_i_lir}")
-st.write(f"p_b_b_lbr = {p_b_b_lbr}")
-st.write(f"rr_hir = {rr_hir}")
-st.write(f"rr_hbr = {rr_hbr}")
+st.write(f"p_ni_nb_lir = {p_ni_nb_lir_lbr}")
+st.write(f"p_ni_b_lir = {p_ni_b_lir_lbr}")
+st.write(f"p_i_nb_lir = {p_i_nb_lir_lbr}")
+st.write(f"p_i_b_lir = {p_i_b_lir_lbr}")
 
 baseline_risks = st.container(border=True)
 baseline_risks.header("Output 1: Baseline Risks", divider="blue")
