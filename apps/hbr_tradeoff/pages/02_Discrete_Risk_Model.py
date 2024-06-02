@@ -468,7 +468,7 @@ baseline_col_1.write(
 baseline_col_1.write((100*p_lir_lbr).style.format("{:.2f}%"))
 
 # HIR/LBR
-p_class_hir_lbr = (1 - p_b_hir) * p_b_hbr
+p_class_hir_lbr = p_b_hir * (1 - p_b_hbr)
 p_hir_lbr = get_p_hir_lbr(p_lir_lbr, rr_hir)
 baseline_col_1.subheader(
     f"HIR/LBR ({100 * p_class_hir_lbr:.2f}%)",
@@ -480,7 +480,7 @@ baseline_col_1.write(
 baseline_col_1.write((100*p_hir_lbr).style.format("{:.2f}%"))
 
 # LIR/HBR
-p_class_lir_hbr = p_b_hir * (1 - p_b_hbr)
+p_class_lir_hbr = (1 - p_b_hir) * p_b_hbr
 p_lir_hbr = get_p_lir_hbr(p_lir_lbr, rr_hbr)
 baseline_col_2.subheader(
     f"LIR/HBR ({100 * p_class_lir_hbr:.2f}%)",
@@ -817,15 +817,19 @@ rr_int_b_hir_hbr = simple_positive_input(
 
 # Probability of intervention (estimate LIR/HBR) given real category is LIR/LBR
 p_int_lir_lbr = q_i_tnr * (1 - q_b_tnr)
+p_no_int_lir_lbr = 1 - p_int_lir_lbr
 
 # Probability of intervention (estimate LIR/HBR) given real category is LIR/HBR
 p_int_lir_hbr = q_i_tnr * q_b_tpr
+p_no_int_lir_hbr = 1 - p_int_lir_hbr
 
 # Probability of intervention (estimate LIR/HBR) given real category is HIR/LBR
 p_int_hir_lbr = (1 - q_i_tpr) * (1 - q_b_tnr)
+p_no_int_hir_lbr = 1 - p_int_hir_lbr
 
 # Probability of intervention (estimate LIR/HBR) given real category is HIR/HBR
 p_int_hir_hbr = (1 - q_i_tpr) * q_b_tpr
+p_no_int_hir_hbr = 1 - p_int_hir_hbr
 
 # Get intervention probability by weighting according to the prevalence of the
 # true risk categories
@@ -835,27 +839,55 @@ c = p_class_hir_lbr * p_int_hir_lbr
 d = p_class_hir_hbr * p_int_hir_hbr
 p_int = a + b + c + d
 
+# Also calculate the probability of no intervention and check
+# that the sum is one
+a = p_class_lir_lbr * p_no_int_lir_lbr
+b = p_class_lir_hbr * p_no_int_lir_hbr
+c = p_class_hir_lbr * p_no_int_hir_lbr
+d = p_class_hir_hbr * p_no_int_hir_hbr
+p_no_int = a + b + c + d
+
+if np.abs((p_int + p_no_int) - 1.0) > 1e-7:
+    raise RuntimeError(f"P(int) + P(no int) != 1 (instead {p_int + p_no_int})")
+
 # Within the intervention group, the risk of each outcome is modified differently,
 # as below. In each case, starting with the outcome risks for a patient in that class,
 # the risk is modified by the risk ratios specified for the intervention effects in
-# that class.
-a = p_class_lir_lbr * get_p_hir_hbr(p_lir_lbr, rr_int_i_lir_lbr, rr_int_b_lir_lbr)
-b = p_class_lir_hbr * get_p_hir_hbr(p_lir_hbr, rr_int_i_lir_hbr, rr_int_b_lir_hbr)
-c = p_class_hir_lbr * get_p_hir_hbr(p_hir_lbr, rr_int_i_hir_lbr, rr_int_b_hir_lbr)
-d = p_class_hir_hbr * get_p_hir_hbr(p_hir_hbr, rr_int_i_hir_hbr, rr_int_b_hir_hbr)
+# that class. (Note this calculation is probabilities given that an intervention occurred)
+# The structure of this calculation is:
+#
+# P(outcomes | intervention) = P(outcomes | A)P(A), 
+#
+# where A is a "true" risk category, and P(outcomes) is the risks for patients in
+# category A after being modified by the intervention.
+a = get_p_hir_hbr(p_lir_lbr, rr_int_i_lir_lbr, rr_int_b_lir_lbr) * p_class_lir_lbr
+b = get_p_hir_hbr(p_lir_hbr, rr_int_i_lir_hbr, rr_int_b_lir_hbr) * p_class_lir_hbr
+c = get_p_hir_hbr(p_hir_lbr, rr_int_i_hir_lbr, rr_int_b_hir_lbr) * p_class_hir_lbr
+d = get_p_hir_hbr(p_hir_hbr, rr_int_i_hir_hbr, rr_int_b_hir_hbr) * p_class_hir_hbr
 p_int_outcomes = a + b + c + d
 
-# The probability of not performing an intervention is 1 - p_int. The outcomes
-# in this group are the observed prevalences (?)
-p_no_int_outcomes = x_to_dataframe([p_b_ni_nb, p_b_ni_b, p_b_i_nb])
+# Within the no-intervention group, calculate the expected outcome probabilities.
+a = p_lir_lbr * p_class_lir_lbr
+b = p_lir_hbr * p_class_lir_hbr
+c = p_hir_lbr * p_class_hir_lbr
+d = p_hir_hbr * p_class_hir_hbr
+p_no_int_outcomes = a + b + c + d
+
+# This is the same as the following formula, but the reason is not simply that
+# "these are the background outcome prevalences with no intervention" -- the reason
+# is that a model could exist which has no bleeding in the "non-intervention group"
+# (i.e. if it could predict the future). The reason for this equality is more 
+# something like the models risk estimates are independent of the outcomes in each
+# risk category.
+#p_no_int_outcomes = x_to_dataframe([p_b_ni_nb, p_b_ni_b, p_b_i_nb])
 
 # Calculate overall new outcomes
-p_new_outcomes = p_int * p_int_outcomes + (1 - p_int) * p_no_int_outcomes
+p_new_outcomes = p_int * p_int_outcomes + p_no_int * p_no_int_outcomes
 
 # Do a sanity check
 total_prob = p_new_outcomes.sum().sum()
 if np.abs(total_prob - 1.0) > 1e-7:
-    raise RuntimeError("Invalid total probability {total_prob} in output prevalence")
+    raise RuntimeError(f"Invalid total probability {total_prob} in output prevalence")
 
 output_container = st.container(border=True)
 output_container.header("Output: Outcome Proportions using Tool", divider=True)
