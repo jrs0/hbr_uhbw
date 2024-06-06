@@ -8,9 +8,10 @@ outcome prevalences).
 import numpy as np
 import streamlit as st
 from pandas import DataFrame
-from utils import dict_to_dataframe, simple_prob_input
+import utils
+import inputs
 
-def input_prevalences(parent, defaults: dict[str, float]) -> DataFrame:
+def prevalences(parent, defaults: dict[str, float]) -> DataFrame:
     """User input for non-independent proportions of outcomes
 
     Use this function to get (e.g. baseline) proportions of bleeding
@@ -37,16 +38,16 @@ def input_prevalences(parent, defaults: dict[str, float]) -> DataFrame:
     default_i_b = 1.0 - default_ni_nb - default_ni_b - default_i_nb
 
     # Get the user inputs
-    ni_nb = simple_prob_input(
+    ni_nb = inputs.simple_prob(
         parent, "Proportion with no ischaemia and no bleeding (%)", 100*default_ni_nb
     )
-    i_nb = simple_prob_input(
+    i_nb = inputs.simple_prob(
         parent, "Proportion with ischaemia but no bleeding (%)", 100*default_i_nb
     )
-    ni_b = simple_prob_input(
+    ni_b = inputs.simple_prob(
         parent, "Proportion with bleeding but no ischaemia (%)", 100*default_ni_b
     )
-    i_b = simple_prob_input(
+    i_b = inputs.simple_prob(
         parent, "Proportion with bleeding and ischaemia (%)", 100*default_i_b
     )
 
@@ -57,7 +58,46 @@ def input_prevalences(parent, defaults: dict[str, float]) -> DataFrame:
             f"Total proportions must add up to 100%; these add up to {100*total:.2f}%"
         )
 
-    return dict_to_dataframe({"ni_nb": ni_nb, "ni_b": ni_b, "i_nb": i_nb})
+    return utils.dict_to_dataframe({"ni_nb": ni_nb, "ni_b": ni_b, "i_nb": i_nb})
 
 
-    
+def simple_prob(parent, title: str, default_value: float) -> float:
+    """Simple numerical input for setting probabilities
+
+    Args:
+        parent: The parent in which the number_input will be rendered
+            (e.g. st)
+        title: The name for the number_input (printed above the input box)
+        default_value: The value to place in the number_input
+    """
+    return (
+        parent.number_input(
+            title,
+            min_value=0.0,
+            max_value=100.0,
+            value=default_value,
+            step=0.1,
+        )
+        / 100.0
+    )
+
+
+def simple_positive(
+    parent, title: str, default_value: float, key: str = None
+) -> float:
+    """Simple numerical input for setting positive values
+
+    Args:
+        parent: The parent in which the number_input will be rendered
+            (e.g. st)
+        title: The name for the number_input (printed above the input box)
+        default_value: The value to place in the number_input.
+        key: A unique value to distinguish this widget from others
+    """
+
+    if key is None:
+        key = title
+
+    return parent.number_input(
+        title, min_value=0.0, value=default_value, step=0.1, key=key
+    )

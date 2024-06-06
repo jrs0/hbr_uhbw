@@ -37,6 +37,8 @@
 import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
+import inputs
+import utils
 
 st.title("Deterministic Model")
 st.write("*Baseline patients are assumed to have determinsitic outcomes, which have a chance of being modified by the intervention.*")
@@ -66,165 +68,18 @@ baseline_container.write(
     "Set the basline proportions of bleeding and ischaemia outcomes in PCI patients. This is the characteristics of a PCI population not having any intervention based on estimated bleeding/ischaemia risk."
 )
 
-p_b_ni_nb = (
-    baseline_container.number_input(
-        "Proportion with no ischaemia and no bleeding (%)",
-        min_value=0.0,
-        max_value=100.0,
-        value=92.2,
-        step=0.1,
-    )
-    / 100.0
-)
-p_b_i_nb = (
-    baseline_container.number_input(
-        "Proportion with ischaemia but no bleeding (%)",
-        min_value=0.0,
-        max_value=100.0,
-        value=6.6,
-        step=0.1,
-    )
-    / 100.0
-)
-p_b_ni_b = (
-    baseline_container.number_input(
-        "Proportion with bleeding but no ischaemia (%)",
-        min_value=0.0,
-        max_value=100.0,
-        value=1.0,
-        step=0.1,
-    )
-    / 100.0
-)
-p_b_i_b = (
-    baseline_container.number_input(
-        "Proportion with bleeding and ischaemia (%)",
-        min_value=0.0,
-        max_value=100.0,
-        value=0.2,
-    )
-    / 100
-)
+# Get the user-input baseline prevalences (i.e. without performing interventions
+# based on a bleeding/ischaemia risk model outcome)
+defaults = {"ni_nb": 0.922, "ni_b": 0.01, "i_nb": 0.066}
+p_observed = inputs.prevalences(baseline_container, defaults)
 
-total_prob = p_b_ni_nb + p_b_ni_b + p_b_i_nb + p_b_i_b
-if np.abs(total_prob - 1.0) > 1e-5:
-    st.error(
-        f"Total proportions must add up to 100%; these add up to {100*total_prob:.2f}%"
-    )
-
-
-def get_ppv(fpr: float, fnr: float, prev: float) -> float:
-    """Calculate the positive predictive value.
-
-    The positive predictive value is the probability that
-    a positive prediction is correct. It is defined by
-
-    PPV = N(correctly predicted positive) / N(all predicted positive)
-
-    It can be written as:
-
-    PPV = P(correctly predicted positive) / [P(correctly predicted positive) + P(wrongly predicted positive)]
-
-    Those terms can be calculated using the true/false positive
-    rates and the prevalence, using:
-
-    P(correctly predicted positive) = TPR * P(being positive)
-    P(wrongly predicted positive) = FPR * P(being negative)
-
-    The rates P(being positive) and P(being negative) are the
-    prevalence and 1-prevalence.
-
-    Args:
-        fpr: False positive rate
-        fnr: False negative rate
-        prev: Prevalence
-
-    Returns:
-        The positive predictive value.
-    """
-    tpr = 1 - fnr
-    p_correct_pos = tpr * prev
-    p_wrong_pos = fpr * (1 - prev)
-    return p_correct_pos / (p_correct_pos + p_wrong_pos)
-
-
-def get_npv(fpr: float, fnr: float, prev: float) -> float:
-    """Calculate the negative predictive value.
-
-    The negative predictive value is the probability that
-    a negative prediction is correct. It is defined by
-
-    NPV = N(correctly predicted negative) / N(all predicted negative)
-
-    It can be written as:
-
-    NPV = P(correctly predicted negative) / [P(correctly predicted negative) + P(wrongly predicted negative)]
-
-    Those terms can be calculated using the true/false negative
-    rates and the prevalence, using:
-
-    P(correctly predicted negative) = TNR * P(being negative)
-    P(wrongly predicted negative) = FNR * P(being positive)
-
-    The rates P(being positive) and P(being negative) are the
-    prevalence and 1-prevalence.
-
-    Args:
-        fpr: False positive rate
-        fnr: False negative rate
-        prev: Prevalence
-
-    Returns:
-        The negative predictive value.
-    """
-    tnr = 1 - fpr
-    p_correct_neg = tnr * (1 - prev)
-    p_wrong_neg = fnr * prev
-    return p_correct_neg / (p_correct_neg + p_wrong_neg)
-
-
-def get_fpr(ppv: float, npv: float, prev: float) -> float:
-    """Calculate the false positive rate.
-
-    The false positive rate is the probability that a patient
-    who is negative will be predicted positive. It is defined by:
-
-    FPR = N(wrongly predicted positive) / N(all negative)
-
-    Args:
-        ppv: Positive predictive value
-        npv: Negative predictive value
-        prev: Prevalence
-
-    Returns:
-        The false positive rate
-    """
-    q = 1 - prev
-    numerator = (q - npv) * (ppv - 1)
-    denom = q * (ppv + npv - 1)
-    return numerator / denom
-
-
-def get_fnr(ppv: float, npv: float, prev: float) -> float:
-    """Calculate the false negative rate.
-
-    The false negative rate is the probability that a patient
-    who is positive will be predicted negative. It is defined by:
-
-    FNR = N(wrongly predicted negative) / N(all postive)
-
-    Args:
-        ppv: Positive predictive value
-        npv: Negative predictive value
-        prev: Prevalence
-
-    Returns:
-        The false positive rate
-    """
-    numerator = (prev - ppv) * (npv - 1)
-    denom = prev * (ppv + npv - 1)
-    return numerator / denom
-
+# Get the variables for convenience (the first "b" in the variable
+# name means baseline, as opposed to "p_a_" (below) after the intervention
+# has occurred.
+p_b_ni_nb = p_observed.loc["No Ischaemia", "No Bleed"]
+p_b_ni_b = p_observed.loc["No Ischaemia", "Bleed"]
+p_b_i_nb = p_observed.loc["Ischaemia", "No Bleed"]
+p_b_i_b = p_observed.loc["Ischaemia", "Bleed"]
 
 # DETERMINISTIC MODELS
 #
@@ -576,44 +431,18 @@ roc_container.write(
 
 fig, ax = plt.subplots()
 
-
-def simple_auc(tpr: float, tnr: float) -> float:
-    """Simple estimate of required AUC
-
-    Assuming a ROC curve that passes through one point defined by
-    the give true-positive and true-negative rates, calculate the
-    area under the piecewise-linear ROC curve.
-
-    A ROC curve is a plot of the true-positive rate on the y-axis
-    against the false-positive rate (1 - true-negative rate) on
-    the x-axis.
-
-    Args:
-        tpr: True-positive rate.
-        tnr: True-negative rate.
-
-    Returns:
-        The required estimated AUC
-    """
-    # Calculate each area component
-    middle_rect = tnr * tpr  # note x-axis is inverted
-    left_triangle = 0.5 * (1 - tnr) * tpr
-    right_triangle = 0.5 * tnr * (1 - tpr)
-    return middle_rect + left_triangle + right_triangle
-
-
 # Plot baseline
 ax.plot([0.0, 100], [0.0, 100], "--")
 
 # Bleeding model ROC
 data = {"x": [0.0, 100 * (1 - q_b_tnr), 100.0], "y": [0.0, 100 * q_b_tpr, 100.0]}
-auc = simple_auc(q_b_tpr, q_b_tnr)
+auc = utils.simple_auc(q_b_tpr, q_b_tnr)
 ax.plot(data["x"], data["y"], color="r", label=f"Bleeding model (AUC > {auc:.2f})")
 ax.fill_between(data["x"], data["y"], [0.0] * 3, color="r", alpha=0.05)
 
 # Ischaemia model ROC
 data = {"x": [0.0, 100 * (1 - q_i_tnr), 100.0], "y": [0.0, 100 * q_i_tpr, 100.0]}
-auc = simple_auc(q_i_tpr, q_i_tnr)
+auc = utils.simple_auc(q_i_tpr, q_i_tnr)
 ax.plot(data["x"], data["y"], color="b", label=f"Ischaemia model (AUC > {auc:.2f})")
 ax.fill_between(data["x"], data["y"], [0.0] * 3, color="b", alpha=0.05)
 
@@ -835,11 +664,6 @@ n = output_container.number_input(
     value=5000,
 )
 
-bleeding_before = int(n * (p_b_i_b + p_b_ni_b))
-bleeding_after = int(n * (p_a_i_b + p_a_ni_b))
-ischaemia_before = int(n * (p_b_i_b + p_b_i_nb))
-ischaemia_after = int(n * (p_a_i_b + p_a_i_nb))
-
 output_container.write(
     "In this theoretical model, bleeding and ischaemia events are considered equally severe, so success is measured by counting the number of bleeding events reduced and comparing it in absolute terms to the number of ischaemia events added."
 )
@@ -848,13 +672,24 @@ output_container.write(
     f"**Expected changes in outcomes of a pool of {n} patients, compared to baseline**"
 )
 
-bleeding_increase = int(bleeding_after - bleeding_before)
-ischaemia_increase = ischaemia_after - ischaemia_before
-previous_adverse_outcomes = bleeding_before + ischaemia_before
-total_adverse_outcomes = bleeding_after + ischaemia_after
-outcome_difference = total_adverse_outcomes - previous_adverse_outcomes
+# In the sample size of n, scale the probabilities to obtain counts of
+# patients having each outcome
+bleeding_before = int(n * (p_b_i_b + p_b_ni_b))
+ischaemia_before = int(n * (p_b_i_b + p_b_i_nb))
+total_before = bleeding_before + ischaemia_before
 
+# Calculate the outcomes as a result of the intervention
+bleeding_after = int(n * (p_a_i_b + p_a_ni_b))
+ischaemia_after = int(n * (p_a_i_b + p_a_i_nb))
+total_after = bleeding_after + ischaemia_after
+
+# Calculate the changes in outcomes
+bleeding_increase = bleeding_after - bleeding_before
+ischaemia_increase = ischaemia_after - ischaemia_before
+total_increase = total_after - total_before
+
+# Show the summary of outcome changes
 col1, col2, col3 = output_container.columns(3)
 col1.metric("Bleeding", bleeding_after, bleeding_increase, delta_color="inverse")
 col2.metric("Ischaemia", ischaemia_after, ischaemia_increase, delta_color="inverse")
-col3.metric("Total Adverse Outcomes", total_adverse_outcomes, outcome_difference, delta_color="inverse")
+col3.metric("Total Adverse Outcomes", total_after, total_increase, delta_color="inverse")

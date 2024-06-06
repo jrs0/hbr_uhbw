@@ -4,9 +4,8 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 
-
-from inputs import input_prevalences
-from utils import simple_prob_input, simple_positive_input
+import inputs
+import utils
 
 st.title("Discrete Risk Model")
 st.write(
@@ -51,11 +50,7 @@ baseline_container.write(
 # Get the user-input baseline prevalences (i.e. without performing interventions
 # based on a bleeding/ischaemia risk model outcome)
 defaults = {"ni_nb": 0.922, "ni_b": 0.01, "i_nb": 0.066}
-baseline_prevalences = input_prevalences(baseline_container, defaults)
-p_b_ni_nb = baseline_prevalences.loc["No Ischaemia", "No Bleed"]
-p_b_ni_b = baseline_prevalences.loc["No Ischaemia", "Bleed"]
-p_b_i_nb = baseline_prevalences.loc["Ischaemia", "No Bleed"]
-p_b_i_b = baseline_prevalences.loc["Ischaemia", "Bleed"]
+p_observed = inputs.prevalences(baseline_container, defaults)
 
 high_risk_container = st.container(border=True)
 high_risk_container.header("Input 2: Number of Patients at High Risk", divider=True)
@@ -69,10 +64,10 @@ high_risk_container.write(
     "The default value of 30% HBR follows from the estimated proportion of patients meeting the ARC HBR criteria, whereas the HIR default 50% is based on the estimate for the ESC/EACTS HIR definition."
 )
 
-p_b_hir = simple_prob_input(
+p_b_hir = inputs.simple_prob(
     high_risk_container, "Proportion at high ischaemia risk (HIR) (%)", 50.0
 )
-p_b_hbr = simple_prob_input(
+p_b_hbr = inputs.simple_prob(
     high_risk_container, "Proportion at high bleeding risk (HBR) (%)", 30.0
 )
 
@@ -85,10 +80,10 @@ risk_ratio_container.write(
     "This value combines with the prevalence of the high risk category (Input 2) and the prevalence of actual outcomes (Input 1) to define the absolute risk of the high and low risk categories."
 )
 
-rr_hir = simple_positive_input(
+rr_hir = inputs.simple_positive(
     risk_ratio_container, "Risk ratio for HIR class compared to LIR", 1.5
 )
-rr_hbr = simple_positive_input(
+rr_hbr = inputs.simple_positive(
     risk_ratio_container, "Risk ratio for HBR class compared to LBR", 1.5
 )
 
@@ -103,196 +98,9 @@ rr_hbr = simple_positive_input(
 # from knowing the overall outcome prevalence to calculate these
 # unknowns.
 
-
-def get_p_lir_hbr(p_lir_lbr: pd.DataFrame, rr_hbr: float) -> pd.DataFrame:
-    """Get the probabilities of outcomes in the LIR/HBR group
-
-    Args:
-        p_lir_lbr: The matrix of LIR/LBR probabilities.
-        rr_hbr: The relative risk of the high bleeding risk group
-
-    Raises:
-        RuntimeError if probabilities do not add up to one.
-
-    Returns:
-        A dataframe containing the probabilities of ischaemia
-            as the index and bleeding as the columns.
-    """
-
-    p_ni_nb_lir_lbr = p_lir_lbr.loc["No Ischaemia", "No Bleed"]
-    p_ni_b_lir_lbr = p_lir_lbr.loc["No Ischaemia", "Bleed"]
-    p_i_nb_lir_lbr = p_lir_lbr.loc["Ischaemia", "No Bleed"]
-    p_i_b_lir_lbr = p_lir_lbr.loc["Ischaemia", "Bleed"]
-
-    # For a patient in the HBR group (but the LIR group), the
-    # chance of a bleed is higher by the HBR risk ratio. The
-    # chance of no bleed is obtained by assuming the total
-    # proportion of ischaemia outcomes has not changed (since
-    # patients are still LIR).
-    p_ni_b_lir_hbr = rr_hbr * p_ni_b_lir_lbr
-    p_ni_lir_lbr = p_ni_nb_lir_lbr + p_ni_b_lir_lbr  # previous P(no ischaemia)
-    p_ni_nb_lir_hbr = p_ni_lir_lbr - p_ni_b_lir_hbr
-
-    # Do the same calculation for the chance of an ischaemia
-    # outcome (probability unaffected) for a patient in the HBR group.
-    p_i_b_lir_hbr = rr_hbr * p_i_b_lir_lbr
-    p_i_lir_lbr = p_i_nb_lir_lbr + p_i_b_lir_lbr  # previous P(ischaemia)
-    p_i_nb_lir_hbr = p_i_lir_lbr - p_i_b_lir_hbr
-
-    # Before moving on, check that the absolute outcome risks
-    # in the LIR/HBR group add up to 1
-    p = p_ni_nb_lir_hbr + p_ni_b_lir_hbr + p_i_nb_lir_hbr + p_i_b_lir_hbr
-    if np.abs(p - 1.0) > 1e-5:
-        raise RuntimeError(
-            f"Total proportions in LIR/HBR group must add to one; these add up to {100*p:.2f}%"
-        )
-
-    data = {
-        "No Bleed": [p_ni_nb_lir_hbr, p_i_nb_lir_hbr],
-        "Bleed": [p_ni_b_lir_hbr, p_i_b_lir_hbr],
-    }
-    return pd.DataFrame(data, index=["No Ischaemia", "Ischaemia"])
-
-
-def get_p_hir_lbr(p_lir_lbr: pd.DataFrame, rr_hir: float) -> pd.DataFrame:
-    """Get the probabilities of outcomes in the HIR/LBR group
-
-    Args:
-        p_lir_lbr: The matrix of LIR/LBR probabilities.
-        rr_hir: The relative risk of the high ischaemia risk group
-
-    Raises:
-        RuntimeError if probabilities do not add up to one.
-
-    Returns:
-        A dataframe containing the probabilities of ischaemia
-            as the index and bleeding as the columns.
-    """
-
-    p_ni_nb_lir_lbr = p_lir_lbr.loc["No Ischaemia", "No Bleed"]
-    p_ni_b_lir_lbr = p_lir_lbr.loc["No Ischaemia", "Bleed"]
-    p_i_nb_lir_lbr = p_lir_lbr.loc["Ischaemia", "No Bleed"]
-    p_i_b_lir_lbr = p_lir_lbr.loc["Ischaemia", "Bleed"]
-
-    # Now, repeat these two calculations for patients at HIR
-    # but not HBR. This time, chance of ischaemia shifts
-    # upwards by the HIR risk ratio, but overall bleeding rate
-    # remains the same.
-    p_i_nb_hir_lbr = rr_hir * p_i_nb_lir_lbr
-    p_nb_lir_lbr = p_ni_nb_lir_lbr + p_i_nb_lir_lbr  # previous P(no bleed)
-    p_ni_nb_hir_lbr = p_nb_lir_lbr - p_i_nb_hir_lbr
-
-    # Repeat for the chance of a bleeding outcome (probability
-    # unaffected
-    p_i_b_hir_lbr = rr_hir * p_i_b_lir_lbr
-    p_b_lir_lbr = p_ni_b_lir_lbr + p_i_b_lir_lbr  # previous P(bleed)
-    p_ni_b_hir_lbr = p_b_lir_lbr - p_i_b_hir_lbr
-
-    # Check that the absolute outcome risks
-    # in the HIR/LBR group add up to 1
-    p = p_ni_nb_hir_lbr + p_ni_b_hir_lbr + p_i_nb_hir_lbr + p_i_b_hir_lbr
-    if np.abs(p - 1.0) > 1e-5:
-        raise RuntimeError(
-            f"Total proportions in HIR/LBR group must add to one; these add up to {100*p:.2f}%"
-        )
-
-    data = {
-        "No Bleed": [p_ni_nb_hir_lbr, p_i_nb_hir_lbr],
-        "Bleed": [p_ni_b_hir_lbr, p_i_b_hir_lbr],
-    }
-    return pd.DataFrame(data, index=["No Ischaemia", "Ischaemia"])
-
-
-def get_p_hir_hbr(
-    p_lir_lbr: pd.DataFrame, rr_hir: float, rr_hbr: float
-) -> pd.DataFrame:
-    """Get the probabilities of outcomes in the HIR/HBR group
-
-    Args:
-        p_lir_lbr: The matrix of LIR/LBR probabilities.
-        rr_hir: The relative risk of the high ischaemia risk group
-        rr_hbr: The relative risk of the high bleeding risk group
-
-    Raises:
-        RuntimeError if probabilities do not add up to one.
-
-    Returns:
-        A dataframe containing the probabilities of ischaemia
-            as the index and bleeding as the columns.
-    """
-
-    p_ni_nb_lir_lbr = p_lir_lbr.loc["No Ischaemia", "No Bleed"]
-    p_ni_b_lir_lbr = p_lir_lbr.loc["No Ischaemia", "Bleed"]
-    p_i_nb_lir_lbr = p_lir_lbr.loc["Ischaemia", "No Bleed"]
-    p_i_b_lir_lbr = p_lir_lbr.loc["Ischaemia", "Bleed"]
-
-    # The final set of calculations is for patients at both
-    # HBR and HIR. This time, the independence of risk ratios
-    # assumptions is used to say that:
-    p_i_b_hir_hbr = rr_hir * rr_hbr * p_i_b_lir_lbr
-
-    # This time, the marginals (probability of total ischaemia
-    # and total bleeding) are assumed to scale with the individual
-    # risk ratios. First, for total ischaemia probability:
-    p_i_lir_lbr = p_i_nb_lir_lbr + p_i_b_lir_lbr  # previous P(ischaemia)
-    p_i_hir_hbr = rr_hir * p_i_lir_lbr
-    p_i_nb_hir_hbr = p_i_hir_hbr - p_i_b_hir_hbr
-
-    # And for the total bleeding marginal in the HBR/HIR group
-    p_b_lir_lbr = p_ni_b_lir_lbr + p_i_b_lir_lbr  # previous P(bleed)
-    p_b_hir_hbr = rr_hbr * p_b_lir_lbr
-    p_ni_b_hir_hbr = p_b_hir_hbr - p_i_b_hir_hbr
-
-    # Finally, the chance of neither event is obtained by requiring
-    # all the probabilities to add up to 1.
-    p_ni_nb_hir_hbr = 1 - p_ni_b_hir_hbr - p_i_nb_hir_hbr - p_i_b_hir_hbr
-
-    # No need to check sum to one here because they do by construction
-    # of the previous line.
-
-    data = {
-        "No Bleed": [p_ni_nb_hir_hbr, p_i_nb_hir_hbr],
-        "Bleed": [p_ni_b_hir_hbr, p_i_b_hir_hbr],
-    }
-    return pd.DataFrame(data, index=["No Ischaemia", "Ischaemia"])
-
-
-def x_to_dataframe(x: list[float]) -> pd.DataFrame:
-    """Convert the optimisation parameter to a dataframe
-
-    Args:
-        x: The optimisation parameter containing the LIR/LBR
-            probabilities. The array contains these values:
-            [x_ni_nb, x_ni_b, x_i_nb], which are
-            the absolute risks of the outcome combinations
-            in the LIR/LBR group. The final risk x_i_b is
-            obtained by requiring that the items add up to
-            1.
-
-    Returns:
-        A table of outcome probabilities containing ischaemia
-            outcome as index and bleeding outcome as column.
-    """
-    # Unpack all the unknowns (these are the absolute risks
-    # for a patient in the LIR/LBR group)
-    p_ni_nb_lir_lbr = x[0]
-    p_ni_b_lir_lbr = x[1]
-    p_i_nb_lir_lbr = x[2]
-    p_i_b_lir_lbr = 1 - x[0] - x[1] - x[2]
-
-    data = {
-        "No Bleed": [p_ni_nb_lir_lbr, p_i_nb_lir_lbr],
-        "Bleed": [p_ni_b_lir_lbr, p_i_b_lir_lbr],
-    }
-    return pd.DataFrame(data, index=["No Ischaemia", "Ischaemia"])
-
-
 def objective_fn(
     x: list[float],
-    p_ni_nb: float,
-    p_ni_b: float,
-    p_i_nb: float,
-    p_i_b: float,
+    p_observed: pd.DataFrame,
     p_hir: float,
     p_hbr: float,
     rr_hir: float,
@@ -313,10 +121,9 @@ def objective_fn(
             in the LIR/LBR group. The final risk x_i_b is
             obtained by requiring that the items add up to
             1.
-        p_ni_nb: Observed no ischaemia/no bleeding prevalence
-        p_ni_b: Observed no ischaemia but bleeding prevalence
-        p_i_nb: Observed ischaemia but no bleeding prevalence
-        p_i_b: Observed ischaemia and bleeding prevalence
+        p_observed: Observed prevalance of bleeding and ischaemia
+            outcomes. Columns "No Bleed" and "Bleed", and index
+            "No Ischaemia" and "Ischaemia"
         p_hir: Observed prevalence of high ischaemia risk
         p_hbr: Observed prevalence of high bleeding risk
         rr_hir: Risk ratio of HIR to LIR class
@@ -327,50 +134,39 @@ def objective_fn(
             prevalences implied by the choice of x.
     """
 
-    p_lir_lbr = x_to_dataframe(x)
-
     # Assuming the risk ratios for HIR and HBR act independently,
     # calculate what the absolute risks would be for patients in
     # other risk categories
+    p_lir_lbr = utils.list_to_dataframe(x)
+    p_lir_hbr = utils.scale_dependent_probs(p_lir_lbr, 1.0, rr_hbr)
+    p_hir_lbr = utils.scale_dependent_probs(p_lir_lbr, rr_hir, 1.0)
+    p_hir_hbr = utils.scale_dependent_probs(p_lir_lbr, rr_hir, rr_hbr)
 
-    p_lir_hbr = get_p_lir_hbr(p_lir_lbr, rr_hbr)
-    p_hir_lbr = get_p_hir_lbr(p_lir_lbr, rr_hir)
-    p_hir_hbr = get_p_hir_hbr(p_lir_lbr, rr_hir, rr_hbr)
-
-    # Calculate what the observed prevalences would
-    # be if x were correct -- the absolute risks in each
-    # category are scaled by the prevalence of that category
+    # Calculate the proportions of people in each category,
+    # from the user inputs.
     w_lir_lbr = (1 - p_hir) * (1 - p_hbr)
     w_lir_hbr = (1 - p_hir) * p_hbr
     w_hir_lbr = p_hir * (1 - p_hbr)
     w_hir_hbr = p_hir * p_hbr
 
-    # Weight the classes to obtain the overall outcomes
+    # Weight the outcome probabilities according to the number
+    # of people in each risk category
     a = w_lir_lbr * p_lir_lbr
     b = w_lir_hbr * p_lir_hbr
     c = w_hir_lbr * p_hir_lbr
     d = w_hir_hbr * p_hir_hbr
-    p_outcomes = a + b + c + d
+    new_outcomes = a + b + c + d
 
     # Perform a final check that the answer adds up to 1
-    a = p_outcomes.loc["No Ischaemia", "No Bleed"]
-    b = p_outcomes.loc["No Ischaemia", "Bleed"]
-    c = p_outcomes.loc["Ischaemia", "No Bleed"]
-    d = p_outcomes.loc["Ischaemia", "Bleed"]
-    p = a + b + c + d
-    if np.abs(p - 1.0) > 1e-5:
+    total = new_outcomes.sum().sum()
+    if np.abs(total - 1.0) > 1e-5:
         raise RuntimeError(
-            f"Calculated hypothetical prevalences must add to one; these add up to {100*p:.2f}%"
+            f"Calculated hypothetical prevalences must add to one; these add up to {100*total:.2f}%"
         )
 
     # Compare the calculated prevalences with the observed
     # prevalences and return the cost (L2 distance)
-    w = (a - p_ni_nb) ** 2
-    x = (b - p_ni_b) ** 2
-    y = (c - p_i_nb) ** 2
-    z = (d - p_i_b) ** 2
-    return w + x + y + z
-
+    return np.linalg.norm(p_observed.to_numpy() - new_outcomes.to_numpy())
 
 # Set bounds on the probabilities which must be between
 # zero and one (note that there are only three unknowns
@@ -380,16 +176,29 @@ bounds = scipy.optimize.Bounds([0, 0, 0], [1, 1, 1])
 
 # Solve for the unknown low risk group probabilities and independent
 # risk ratios by minimising the objective function
-args = (p_b_ni_nb, p_b_ni_b, p_b_i_nb, p_b_i_b, p_b_hir, p_b_hbr, rr_hir, rr_hbr)
-initial_x = 3 * [0]
+args = (p_observed, p_b_hir, p_b_hbr, rr_hir, rr_hbr)
+initial_x = [0, 0, 0]
 res = scipy.optimize.minimize(objective_fn, x0=initial_x, args=args, bounds=bounds)
 x = res.x
 
 # Check the solution is correct
 cost = objective_fn(x, *args)
+if cost > 1e-5:
+    st.warning(f"Optimisation did not find an exact solution: cost = {cost}")
 
-# Solved probabilities of bleeding/ischaemia in LBR/LIR groups
-p_lir_lbr = x_to_dataframe(x)
+# Get the solved probabilities of outcomes in each of the 
+# risk classes (the output from the optimisation above)
+p_lir_lbr = utils.list_to_dataframe(x)
+p_hir_lbr = utils.scale_dependent_probs(p_lir_lbr, rr_hir, 1.0)
+p_lir_hbr = utils.scale_dependent_probs(p_lir_lbr, 1.0, rr_hbr)
+p_hir_hbr = utils.scale_dependent_probs(p_lir_lbr, rr_hir, rr_hbr)
+
+# Calculate the proportions of people in each category,
+# from the user inputs.
+w_lir_lbr = (1 - p_b_hir) * (1 - p_b_hbr)
+w_lir_hbr = (1 - p_b_hir) * p_b_hbr
+w_hir_lbr = p_b_hir * (1 - p_b_hbr)
+w_hir_hbr = p_b_hir * p_b_hbr
 
 baseline_risks = st.container(border=True)
 baseline_risks.header("Output 1: Model of Baseline Risk", divider="blue")
@@ -406,9 +215,8 @@ baseline_risks.write(
 baseline_col_1, baseline_col_2 = baseline_risks.columns(2)
 
 # LIR/LBR
-p_class_lir_lbr = (1 - p_b_hir) * (1 - p_b_hbr)
 baseline_col_1.subheader(
-    f"LIR/LBR ({100 * p_class_lir_lbr:.2f}%)",
+    f"LIR/LBR ({100 * w_lir_lbr:.2f}%)",
     divider="green",
 )
 baseline_col_1.write(
@@ -417,10 +225,8 @@ baseline_col_1.write(
 baseline_col_1.write((100*p_lir_lbr).style.format("{:.2f}%"))
 
 # HIR/LBR
-p_class_hir_lbr = p_b_hir * (1 - p_b_hbr)
-p_hir_lbr = get_p_hir_lbr(p_lir_lbr, rr_hir)
 baseline_col_1.subheader(
-    f"HIR/LBR ({100 * p_class_hir_lbr:.2f}%)",
+    f"HIR/LBR ({100 * w_hir_lbr:.2f}%)",
     divider="orange",
 )
 baseline_col_1.write(
@@ -429,10 +235,8 @@ baseline_col_1.write(
 baseline_col_1.write((100*p_hir_lbr).style.format("{:.2f}%"))
 
 # LIR/HBR
-p_class_lir_hbr = (1 - p_b_hir) * p_b_hbr
-p_lir_hbr = get_p_lir_hbr(p_lir_lbr, rr_hbr)
 baseline_col_2.subheader(
-    f"LIR/HBR ({100 * p_class_lir_hbr:.2f}%)",
+    f"LIR/HBR ({100 * w_lir_hbr:.2f}%)",
     divider="orange",
 )
 baseline_col_2.write(
@@ -441,10 +245,8 @@ baseline_col_2.write(
 baseline_col_2.write((100*p_lir_hbr).style.format("{:.2f}%"))
 
 # HIR/HBR
-p_class_hir_hbr = p_b_hir * p_b_hbr
-p_hir_hbr = get_p_hir_hbr(p_lir_lbr, rr_hir, rr_hbr)
 baseline_col_2.subheader(
-    f"HIR/HBR ({100 * p_class_hir_hbr:.2f}%)",
+    f"HIR/HBR ({100 * w_hir_hbr:.2f}%)",
     divider="red",
 )
 baseline_col_2.write(
@@ -618,44 +420,18 @@ roc_container.write(
 
 fig, ax = plt.subplots()
 
-
-def simple_auc(tpr: float, tnr: float) -> float:
-    """Simple estimate of required AUC
-
-    Assuming a ROC curve that passes through one point defined by
-    the give true-positive and true-negative rates, calculate the
-    area under the piecewise-linear ROC curve.
-
-    A ROC curve is a plot of the true-positive rate on the y-axis
-    against the false-positive rate (1 - true-negative rate) on
-    the x-axis.
-
-    Args:
-        tpr: True-positive rate.
-        tnr: True-negative rate.
-
-    Returns:
-        The required estimated AUC
-    """
-    # Calculate each area component
-    middle_rect = tnr * tpr  # note x-axis is inverted
-    left_triangle = 0.5 * (1 - tnr) * tpr
-    right_triangle = 0.5 * tnr * (1 - tpr)
-    return middle_rect + left_triangle + right_triangle
-
-
 # Plot baseline
 ax.plot([0.0, 100], [0.0, 100], "--")
 
 # Bleeding model ROC
 data = {"x": [0.0, 100 * (1 - q_b_tnr), 100.0], "y": [0.0, 100 * q_b_tpr, 100.0]}
-auc = simple_auc(q_b_tpr, q_b_tnr)
+auc = utils.simple_auc(q_b_tpr, q_b_tnr)
 ax.plot(data["x"], data["y"], color="r", label=f"Bleeding model (AUC > {auc:.2f})")
 ax.fill_between(data["x"], data["y"], [0.0] * 3, color="r", alpha=0.05)
 
 # Ischaemia model ROC
 data = {"x": [0.0, 100 * (1 - q_i_tnr), 100.0], "y": [0.0, 100 * q_i_tpr, 100.0]}
-auc = simple_auc(q_i_tpr, q_i_tnr)
+auc = utils.simple_auc(q_i_tpr, q_i_tnr)
 ax.plot(data["x"], data["y"], color="b", label=f"Ischaemia model (AUC > {auc:.2f})")
 ax.fill_between(data["x"], data["y"], [0.0] * 3, color="b", alpha=0.05)
 
@@ -691,10 +467,10 @@ intervention_col_1.subheader(
 intervention_col_1.write(
     "What effect does the intervention have on patients with low risk for both bleeding and ischaemia?"
 )
-rr_int_i_lir_lbr = simple_positive_input(
+rr_int_i_lir_lbr = inputs.simple_positive(
     intervention_col_1, "Ischaemia risk ratio", 1.0, key="rr_int_i_lir_lbr"
 )
-rr_int_b_lir_lbr = simple_positive_input(
+rr_int_b_lir_lbr = inputs.simple_positive(
     intervention_col_1, "Bleeding risk ratio", 1.0, key="rr_int_b_lir_lbr"
 )
 
@@ -706,10 +482,10 @@ intervention_col_1.subheader(
 intervention_col_1.write(
     "What effect does the intervention have on patients with high ischaemia risk but low bleeding risk?"
 )
-rr_int_i_hir_lbr = simple_positive_input(
+rr_int_i_hir_lbr = inputs.simple_positive(
     intervention_col_1, "Ischaemia risk ratio", 1.2, key="rr_int_i_hir_lbr"
 )
-rr_int_b_hir_lbr = simple_positive_input(
+rr_int_b_hir_lbr = inputs.simple_positive(
     intervention_col_1, "Bleeding risk ratio", 1.0, key="rr_int_b_hir_lbr"
 )
 
@@ -721,10 +497,10 @@ intervention_col_2.subheader(
 intervention_col_2.write(
     "What effect does the intervention have on patients with high bleeding risk but low ischaemia risk?"
 )
-rr_int_i_lir_hbr = simple_positive_input(
+rr_int_i_lir_hbr = inputs.simple_positive(
     intervention_col_2, "Ischaemia risk ratio", 1.0, key="rr_int_i_lir_hbr"
 )
-rr_int_b_lir_hbr = simple_positive_input(
+rr_int_b_lir_hbr = inputs.simple_positive(
     intervention_col_2, "Bleeding risk ratio", 0.8, key="rr_int_b_lir_hbr"
 )
 
@@ -736,10 +512,10 @@ intervention_col_2.subheader(
 intervention_col_2.write(
     "What effect does the intervention have on patients with high risk for both bleeding and ischaemia?"
 )
-rr_int_i_hir_hbr = simple_positive_input(
+rr_int_i_hir_hbr = inputs.simple_positive(
     intervention_col_2, "Ischaemia risk ratio", 1.2, key="rr_int_i_hir_hbr"
 )
-rr_int_b_hir_hbr = simple_positive_input(
+rr_int_b_hir_hbr = inputs.simple_positive(
     intervention_col_2, "Bleeding risk ratio", 0.8, key="rr_int_b_hir_hbr"
 )
 
@@ -782,18 +558,18 @@ p_no_int_hir_hbr = 1 - p_int_hir_hbr
 
 # Get intervention probability by weighting according to the prevalence of the
 # true risk categories
-a = p_class_lir_lbr * p_int_lir_lbr
-b = p_class_lir_hbr * p_int_lir_hbr
-c = p_class_hir_lbr * p_int_hir_lbr
-d = p_class_hir_hbr * p_int_hir_hbr
+a = w_lir_lbr * p_int_lir_lbr
+b = w_lir_hbr * p_int_lir_hbr
+c = w_hir_lbr * p_int_hir_lbr
+d = w_hir_hbr * p_int_hir_hbr
 p_int = a + b + c + d
 
 # Also calculate the probability of no intervention and check
 # that the sum is one
-a = p_class_lir_lbr * p_no_int_lir_lbr
-b = p_class_lir_hbr * p_no_int_lir_hbr
-c = p_class_hir_lbr * p_no_int_hir_lbr
-d = p_class_hir_hbr * p_no_int_hir_hbr
+a = w_lir_lbr * p_no_int_lir_lbr
+b = w_lir_hbr * p_no_int_lir_hbr
+c = w_hir_lbr * p_no_int_hir_lbr
+d = w_hir_hbr * p_no_int_hir_hbr
 p_no_int = a + b + c + d
 
 if np.abs((p_int + p_no_int) - 1.0) > 1e-7:
@@ -809,17 +585,17 @@ if np.abs((p_int + p_no_int) - 1.0) > 1e-7:
 #
 # where A is a "true" risk category, and P(outcomes) is the risks for patients in
 # category A after being modified by the intervention.
-a = get_p_hir_hbr(p_lir_lbr, rr_int_i_lir_lbr, rr_int_b_lir_lbr) * p_class_lir_lbr
-b = get_p_hir_hbr(p_lir_hbr, rr_int_i_lir_hbr, rr_int_b_lir_hbr) * p_class_lir_hbr
-c = get_p_hir_hbr(p_hir_lbr, rr_int_i_hir_lbr, rr_int_b_hir_lbr) * p_class_hir_lbr
-d = get_p_hir_hbr(p_hir_hbr, rr_int_i_hir_hbr, rr_int_b_hir_hbr) * p_class_hir_hbr
+a = utils.scale_dependent_probs(p_lir_lbr, rr_int_i_lir_lbr, rr_int_b_lir_lbr) * w_lir_lbr
+b = utils.scale_dependent_probs(p_lir_hbr, rr_int_i_lir_hbr, rr_int_b_lir_hbr) * w_lir_hbr
+c = utils.scale_dependent_probs(p_hir_lbr, rr_int_i_hir_lbr, rr_int_b_hir_lbr) * w_hir_lbr
+d = utils.scale_dependent_probs(p_hir_hbr, rr_int_i_hir_hbr, rr_int_b_hir_hbr) * w_hir_hbr
 p_int_outcomes = a + b + c + d
 
 # Within the no-intervention group, calculate the expected outcome probabilities.
-a = p_lir_lbr * p_class_lir_lbr
-b = p_lir_hbr * p_class_lir_hbr
-c = p_hir_lbr * p_class_hir_lbr
-d = p_hir_hbr * p_class_hir_hbr
+a = p_lir_lbr * w_lir_lbr
+b = p_lir_hbr * w_lir_hbr
+c = p_hir_lbr * w_hir_lbr
+d = p_hir_hbr * w_hir_hbr
 p_no_int_outcomes = a + b + c + d
 
 # This is the same as the following formula, but the reason is not simply that
@@ -852,11 +628,6 @@ n = output_container.number_input(
     value=5000,
 )
 
-bleeding_before = int(n * (p_b_i_b + p_b_ni_b))
-bleeding_after = int(n * p_new_outcomes["Bleed"].sum())
-ischaemia_before = int(n * (p_b_i_b + p_b_i_nb))
-ischaemia_after = int(n * p_new_outcomes.loc["Ischaemia"].sum())
-
 output_container.write(
     "In this theoretical model, bleeding and ischaemia events are considered equally severe, so success is measured by counting the number of bleeding events reduced and comparing it in absolute terms to the number of ischaemia events added."
 )
@@ -865,16 +636,27 @@ output_container.write(
     f"**Expected changes in outcomes of a pool of {n} patients, compared to baseline**"
 )
 
-bleeding_increase = int(bleeding_after - bleeding_before)
-ischaemia_increase = ischaemia_after - ischaemia_before
-previous_adverse_outcomes = bleeding_before + ischaemia_before
-total_adverse_outcomes = bleeding_after + ischaemia_after
-outcome_difference = total_adverse_outcomes - previous_adverse_outcomes
+# In the sample size of n, scale the probabilities to obtain counts of
+# patients having each outcome
+bleeding_before = int(n * p_observed["Bleed"].sum())
+ischaemia_before = int(n * p_observed.loc["Ischaemia"].sum())
+total_before = bleeding_before + ischaemia_before
 
+# Calculate the outcomes as a result of the intervention
+bleeding_after = int(n * p_new_outcomes["Bleed"].sum())
+ischaemia_after = int(n * p_new_outcomes.loc["Ischaemia"].sum())
+total_after = bleeding_after + ischaemia_after
+
+# Calculate the changes in outcomes
+bleeding_increase = bleeding_after - bleeding_before
+ischaemia_increase = ischaemia_after - ischaemia_before
+total_increase = total_after - total_before
+
+# Show the summary of outcome changes
 col1, col2, col3 = output_container.columns(3)
 col1.metric("Bleeding", bleeding_after, bleeding_increase, delta_color="inverse")
 col2.metric("Ischaemia", ischaemia_after, ischaemia_increase, delta_color="inverse")
-col3.metric("Total Adverse Outcomes", total_adverse_outcomes, outcome_difference, delta_color="inverse")
+col3.metric("Total Adverse Outcomes", total_after, total_increase, delta_color="inverse")
 
 
 
