@@ -52,6 +52,10 @@ baseline_container.write(
 # based on a bleeding/ischaemia risk model outcome)
 defaults = {"ni_nb": 0.922, "ni_b": 0.01, "i_nb": 0.066}
 baseline_prevalences = input_prevalences(baseline_container, defaults)
+p_b_ni_nb = baseline_prevalences.loc["No Ischaemia", "No Bleed"]
+p_b_ni_b = baseline_prevalences.loc["No Ischaemia", "Bleed"]
+p_b_i_nb = baseline_prevalences.loc["Ischaemia", "No Bleed"]
+p_b_i_b = baseline_prevalences.loc["Ischaemia", "Bleed"]
 
 high_risk_container = st.container(border=True)
 high_risk_container.header("Input 2: Number of Patients at High Risk", divider=True)

@@ -33,7 +33,7 @@ def dict_to_dataframe(x: dict[str, float]) -> DataFrame:
     ni_nb = x["ni_nb"]
     ni_b = x["ni_b"]
     i_nb = x["i_nb"]
-    i_b = 1.0 - ni_nb - ni_b - i_nb - i_nb
+    i_b = 1.0 - ni_nb - ni_b - i_nb
     
     data = {
         "No Bleed": [ni_nb, i_nb],
