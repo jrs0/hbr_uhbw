@@ -4,6 +4,10 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 
+
+from inputs import input_prevalences
+from utils import simple_prob_input, simple_positive_input
+
 st.title("Discrete Risk Model")
 st.write(
     "*Baseline patients are dichotomised into high and low risk groups, but all patients in the same group share the same risk (the risks do not follow a continuous distribution).*"
@@ -44,69 +48,10 @@ baseline_container.write(
     "Set the basline proportions of bleeding and ischaemia outcomes in PCI patients. This is the characteristics of a PCI population not having any intervention based on estimated bleeding/ischaemia risk."
 )
 
-
-def simple_prob_input(parent, title: str, default_value: float) -> float:
-    """Simple numerical input for setting probabilities
-
-    Args:
-        parent: The parent in which the number_input will be rendered
-            (e.g. st)
-        title: The name for the number_input (printed above the input box)
-        default_value: The value to place in the number_input
-    """
-    return (
-        parent.number_input(
-            title,
-            min_value=0.0,
-            max_value=100.0,
-            value=default_value,
-            step=0.1,
-        )
-        / 100.0
-    )
-
-
-def simple_positive_input(parent, title: str, default_value: float, key: str = None) -> float:
-    """Simple numerical input for setting positive values
-
-    Args:
-        parent: The parent in which the number_input will be rendered
-            (e.g. st)
-        title: The name for the number_input (printed above the input box)
-        default_value: The value to place in the number_input.
-        key: A unique value to distinguish this widget from others
-    """
-    
-    if key is None:
-        key = title
-    
-    return parent.number_input(
-        title,
-        min_value=0.0,
-        value=default_value,
-        step=0.1,
-        key=key
-    )
-
-
-p_b_ni_nb = simple_prob_input(
-    baseline_container, "Proportion with no ischaemia and no bleeding (%)", 92.2
-)
-p_b_i_nb = simple_prob_input(
-    baseline_container, "Proportion with ischaemia but no bleeding (%)", 6.6
-)
-p_b_ni_b = simple_prob_input(
-    baseline_container, "Proportion with bleeding but no ischaemia (%)", 1.0
-)
-p_b_i_b = simple_prob_input(
-    baseline_container, "Proportion with bleeding and ischaemia (%)", 0.2
-)
-
-total_prob = p_b_ni_nb + p_b_ni_b + p_b_i_nb + p_b_i_b
-if np.abs(total_prob - 1.0) > 1e-5:
-    st.error(
-        f"Total proportions must add up to 100%; these add up to {100*total_prob:.2f}%"
-    )
+# Get the user-input baseline prevalences (i.e. without performing interventions
+# based on a bleeding/ischaemia risk model outcome)
+defaults = {"ni_nb": 0.922, "ni_b": 0.01, "i_nb": 0.066}
+baseline_prevalences = input_prevalences(baseline_container, defaults)
 
 high_risk_container = st.container(border=True)
 high_risk_container.header("Input 2: Number of Patients at High Risk", divider=True)
