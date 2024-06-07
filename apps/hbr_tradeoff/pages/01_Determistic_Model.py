@@ -39,9 +39,12 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import inputs
 import utils
+import roc
 
 st.title("Deterministic Model")
-st.write("*Baseline patients are assumed to have determinsitic outcomes, which have a chance of being modified by the intervention.*")
+st.write(
+    "*Baseline patients are assumed to have determinsitic outcomes, which have a chance of being modified by the intervention.*"
+)
 
 st.write(
     "This page contains a simple theoretical model to estimate the effect of using a bleeding/ischaemia risk estimation tool selectively intervene in PCI patients to reduce their bleeding risk."
@@ -81,141 +84,6 @@ p_b_ni_b = p_observed.loc["No Ischaemia", "Bleed"]
 p_b_i_nb = p_observed.loc["Ischaemia", "No Bleed"]
 p_b_i_b = p_observed.loc["Ischaemia", "Bleed"]
 
-# DETERMINISTIC MODELS
-#
-# In the models below, it is assumed that the outcomes are deterministic
-# in the group A, and the job of the prediction tool is to predict these
-# outcomes so as to establish the group who will bleed, and apply an
-# intervention to them.
-
-# Model 0: Exact prediction of bleeding/ischaemia, intervention
-# completely removes bleeding event (no effect on ischaemia)
-#
-# In this model, it is assumed that bleeding and ischaemia outcomes
-# can be predicted exactly, and the intervention (modification of DAPT)
-# is such that a bleeding outcome can be entirely (deterministically) removed
-# without affecting the ischaemia outcome. No calculation is required to
-# establish the outcomes under this model, because all * + B outcomes
-# would be added to * + NB categories, resulting in:
-#
-p_a_ni_nb = p_b_ni_nb + p_b_ni_b
-p_a_i_nb = p_b_i_nb + p_b_i_b
-p_a_ni_b = 0
-p_a_i_b = 0
-
-# Model 1: Exact prediction of bleeding/ischaemia, intervention has
-# probability p to remove bleeding event (no effect on ischaemia)
-#
-# In this model, it is assumed that a patient who will bleed is
-# identified deterministically, but the intervention will only
-# remove the bleeding event with probability p. However, the
-# ischaemia event will not be modified.
-#
-p = 0.2
-p_a_ni_nb = p_b_ni_nb + p * p_b_ni_b
-p_a_i_nb = p_b_i_nb + p * p_b_i_b
-p_a_ni_b = (1 - p) * p_b_ni_b
-p_a_i_b = (1 - p) * p_b_i_b
-
-# Model 2: Exact prediction of bleeding/ischaemia, intervention has
-# probability p to remove bleeding event, and probability p to add
-# ischaemia event
-#
-# In this model, bleeding events will be removed with some
-# probability, but there is the same probability that an
-# ischaemia event is introduced. Since the prediction of original
-# outcome is exact (and therefore the intervention is highly
-# tailored), there is no effect on outcomes in the group who would
-# not bleed (98%)
-#
-# Here, the decrease in bleeding outweighs the increase in ischaemia
-# in whatever proportional split there is between ischaemia and
-# non ischaemia in the bleeding group. For example, for a split of
-# 50%, bleeding reduced by twice as much as ischaemia increases
-# (because all the bleeding events are subject to p, but only half
-# of the ischaemia events are, the other half already having an
-# ischaemia event.
-#
-p = 0.2
-p_a_ni_nb = (
-    p_b_ni_nb + p * (1 - p) * p_b_ni_b
-)  # Bleeding removed and no ischaemia added
-p_a_i_nb = (
-    p_b_i_nb + p * p_b_i_b + p * p * p_b_ni_b
-)  # Bleeding removed, and either ischaemia added or already present
-p_a_ni_b = (1 - p) * (1 - p) * p_b_ni_b  # Bleeding and ischaema both unaffected
-p_a_i_b = (1 - p) * p_b_i_b + (
-    1 - p
-) * p * p_b_ni_b  # Bleeding unaffected but ischaemia introduced
-
-# Model 3: Inexact prediction of bleeding with probability q,
-# intervention completely removes a bleeding event
-# and has no effect on ischaemia outcomes
-#
-# In this model, all the bleeding events correctly predicted will
-# be eliminated, and there is no possible adverse effect on ischaemia.
-# Therefore, the proportion q of bleeding events will be eliminated,
-# that is.
-#
-q = 0.8
-p_a_ni_nb = p_b_ni_nb + q * p_b_ni_b
-p_a_i_nb = p_b_i_nb + q * p_b_i_b
-p_a_ni_b = (1 - q) * p_b_ni_b
-p_a_i_b = (1 - q) * p_b_i_b
-
-# Model 4: Inexact prediction of bleeding with probability q,
-# intervention has probability p to remove bleeding event, and
-# probability p to add ischaemia event
-#
-# Note that this model, like all the models above, applies the
-# intervention only based on the prediction of bleeding (whether
-# or not the patient is predicted to have further ischaemia is
-# ignored).
-#
-# Here, by getting the prediction of bleeding wrong a proportion of
-# the time, approximately that same proportion of patients will
-# incorrectly receive an intervention that increases the ischaemia
-# risk. Since the pool of bleeding patients is so small, it doesn't
-# take much for the total ischaemia increase to outweigh the bleeding
-# decrease.
-#
-# This model motivates consideration of an intervention that depends
-# on both the ischaemia and risk prediction:
-#
-# - If predicted NI/B, apply main intervention X
-# - If predicted I/B, apply intervention Y designed not to increase
-#   ischaemia risk.
-#
-q = 0.7
-p = 0.2
-
-# - Previous NI/NB, (right) no intervention
-# - Previous NI/NB, (wrong) intervention, no change in outcomes
-# - Previous NI/B, (right) intervention, remove bleeding and no ischaemia change
-p_a_ni_nb = q * p_b_ni_nb + (1 - q) * (1 - p) * p_b_ni_nb + q * p * (1 - p) * p_b_ni_b
-
-# - Previous I/NB, (right) no intervention
-# - Previous I/NB, (wrong) intervention, no change in outcomes
-# - Previous I/B, (right) intervention, remove bleeding
-# - Previous NI/NB, (wrong) intervention adds ischaemia
-# - Previous NI/B, (right) intervention, remove bleeding but adds ischaemia
-p_a_i_nb = (
-    q * p_b_i_nb
-    + (1 - q) * p_b_i_nb
-    + (1 - q) * p * p_b_ni_nb
-    + q * p * p * p_b_ni_b
-    + q * p * p_b_i_b
-)
-
-# - Previous NI/B, (right) intervention, no change in bleeding/ischaemia
-# - Previous NI/B, (wrong) no intervention
-p_a_ni_b = q * (1 - p) * (1 - p) * p_b_ni_b + (1 - q) * p_b_ni_b
-
-# - Previous I/B, (right) intervention, no change in bleeding
-# - Previous I/B, (wrong) no intervention
-# - Previous NI/B, (right) intervention, no change in bleeding but adds ischaemia
-p_a_i_b = q * (1 - p) * p_b_i_b + (1 - q) * p_b_i_b + q * (1 - p) * p * p_b_ni_b
-
 # Model 5: Full Deterministic Model
 #
 # In this model, predictions are made for whether the patient will have bleeding
@@ -242,7 +110,7 @@ p_a_i_b = q * (1 - p) * p_b_i_b + (1 - q) * p_b_i_b + q * (1 - p) * p * p_b_ni_b
 # Note that both X and Y can only reduce bleeding and increase ischaemia
 # in this model. Note also that X and Y are mutually exclusive.
 #
-# Notethat splitting the interventions into X and Y in this model
+# Note that splitting the interventions into X and Y in this model
 # may be misleading, because those in the ideal Y group have a deterministic
 # ischaemia event anyway, so there is no improvement due to the reduced
 # intensity of Y. If the model included a model of patient risk which is
@@ -252,7 +120,6 @@ p_a_i_b = q * (1 - p) * p_b_i_b + (1 - q) * p_b_i_b + q * (1 - p) * p * p_b_ni_b
 # should be given the less intensive therapy -- this is just a defect
 # of the model.
 #
-
 
 st.write(
     "A group of patients have their bleeding/ischaemia risk estimated by a tool (assumed to be a black box). In this model, the tool attempts to predict the bleeding/ischaemia outcomes a patient will have."
@@ -265,197 +132,15 @@ st.info(
     icon="ℹ️",
 )  # Warning, i is a funny character!
 
-model_container = st.container(border=True)
-model_container.header("Input 2: Model Accuracy", divider=True)
+# Print the model-accuracy input box and get the results
+accuracy = inputs.model_accuracy()
+q_b_tpr = accuracy["tpr_b"]
+q_b_tnr = accuracy["tnr_b"]
+q_i_tpr = accuracy["tpr_i"]
+q_i_tnr = accuracy["tnr_i"]
 
-model_container.write(
-    "Set the true-positive and true-negative rates for the models predicting each outcome. Alternatively (equivalently), choose to input false-positive and false-negative rates."
-)
-
-use_negative_rates = model_container.toggle(
-    "Use Negative Rates",
-    value=False,
-    help="Choose whether to input true-positive/negative rates or false-positive/negative rates. True-positive and false-negative rates (being all predictions out of a group who are definitely positive) add up to 100%; similarly, true-negative and false-positive rates add up to 100%.",
-)
-
-model_columns = model_container.columns(2)
-
-# Set default true-positive/true-negative values
-if "q_b_tpr" not in st.session_state:
-    st.session_state["q_b_tpr"] = 0.8
-if "q_b_tnr" not in st.session_state:
-    st.session_state["q_b_tnr"] = 0.8
-if "q_i_tpr" not in st.session_state:
-    st.session_state["q_i_tpr"] = 0.85
-if "q_i_tnr" not in st.session_state:
-    st.session_state["q_i_tnr"] = 0.85
-
-model_columns[0].subheader("Bleeding Model")
-model_columns[0].write(
-    "Set the bleeding model's ability to identify high- and low-risk patients."
-)
-
-# Get true-positive/true-negative rates for the bleeding model from the user
-if not use_negative_rates:
-    st.session_state["q_b_tpr"] = (
-        model_columns[0].number_input(
-            "True-positive rate (%)",
-            key="input_q_b_tpr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["q_b_tpr"],
-            step=0.1,
-            help="The true-positive rates determine how well high-bleeding-risk patients are picked up. A high number will increase the chance of making targetted reductions in bleeding patients.",
-        )
-        / 100.0
-    )
-    st.session_state["q_b_tnr"] = (
-        model_columns[0].number_input(
-            "True-negative rate (%)",
-            key="input_q_b_tnr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["q_b_tnr"],
-            step=0.1,
-            help="A high true-negative rate is the same as a low false-positive rate, which reduces low-risk patients being exposed to an intervention unnecessarily.",
-        )
-        / 100.0
-    )
-else:
-    st.session_state["q_b_tpr"] = 1 - (
-        model_columns[0].number_input(
-            "False-negative rate (%)",
-            key="input_q_b_fnr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * (1 - st.session_state["q_b_tpr"]),
-            step=0.1,
-            help="A low false-negative rate is the same as a high true-positive rate, which increases the chance of identifting high-bleedin-risk patients who require intervention.",
-        )
-        / 100.0
-    )
-    st.session_state["q_b_tnr"] = 1 - (
-        model_columns[0].number_input(
-            "False-positive rate (%)",
-            key="input_q_b_fpr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * (1 - st.session_state["q_b_tnr"]),
-            step=0.1,
-            help="A low false-positive rate prevents low-bleeding-risk patients being exposed to an intervention unnecessarily.",
-        )
-        / 100.0
-    )
-
-model_columns[1].subheader("Ischaemia Model")
-model_columns[1].write(
-    "Set the ischaemia model's ability to identify high- and low-risk patients."
-)
-
-# Get true-positive/true-negative rates for the bleeding model from the user
-if not use_negative_rates:
-    st.session_state["q_i_tpr"] = (
-        model_columns[1].number_input(
-            "True-positive rate (%)",
-            key="input_q_i_tpr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["q_i_tpr"],
-            step=0.1,
-            help="The true-positive rates determine how well high-ischaemia-risk patients are picked up. A high number will increase the chance of making targetted reductions in bleeding patients.",
-        )
-        / 100.0
-    )
-    st.session_state["q_i_tnr"] = (
-        model_columns[1].number_input(
-            "True-negative rate (%)",
-            key="input_q_i_tnr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["q_i_tnr"],
-            step=0.1,
-            help="A high true-negative rate is the same as a low false-positive rate, which reduces low-ischaemia-risk patients being exposed to an intervention unnecessarily.",
-        )
-        / 100.0
-    )
-else:
-    st.session_state["q_i_tpr"] = 1 - (
-        model_columns[1].number_input(
-            "False-negative rate (%)",
-            key="input_q_i_fnr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * (1 - st.session_state["q_i_tpr"]),
-            step=0.1,
-            help="A low false-negative rate is the same as a high true-positive rate, which increases the chance of identifting high-ischaemia-risk patients who require intervention.",
-        )
-        / 100.0
-    )
-    st.session_state["q_i_tnr"] = 1 - (
-        model_columns[1].number_input(
-            "False-positive rate (%)",
-            key="input_q_i_fpr",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * (1 - st.session_state["q_i_tnr"]),
-            step=0.1,
-            help="A low false-positive rate prevents low-ischaemia-risk patients being exposed to an intervention unnecessarily.",
-        )
-        / 100.0
-    )
-
-# Expose the model accuracies as variables for convenience
-q_b_tpr = st.session_state["q_b_tpr"]
-q_b_tnr = st.session_state["q_b_tnr"]
-q_i_tpr = st.session_state["q_i_tpr"]
-q_i_tnr = st.session_state["q_i_tnr"]
-
-roc_expander = st.expander(
-    "**What ROC Curve would achieve this accuracy?**", expanded=False
-)
-
-roc_container = roc_expander.container(border=True)
-roc_container.header("Required ROC Curves", divider=True)
-roc_container.write(
-    "The ROC curve is a plot of true-positive rate on the y-axis against false-positive rate on the x-axis, for various thresholds that might be used to decide that a patient is high risk."
-)
-roc_container.write(
-    "The accuracy specification above determines a single coordinate on this plot, which the ROC curve must pass though if the model is to have the required accuracy. Better models will require the ROC curve to pass through a point near the top-left corner."
-)
-roc_container.write(
-    "The area under the ROC curve (AUC) is only relevant insofar as a ROC curve passing through a point near the top-left corner will likely have a high AUC."
-)
-roc_container.write(
-    "Below, two hypothetical ROC curves are plotted (one for the bleeding model and one for the ischaemia model), which pass through the required points."
-)
-
-fig, ax = plt.subplots()
-
-# Plot baseline
-ax.plot([0.0, 100], [0.0, 100], "--")
-
-# Bleeding model ROC
-data = {"x": [0.0, 100 * (1 - q_b_tnr), 100.0], "y": [0.0, 100 * q_b_tpr, 100.0]}
-auc = utils.simple_auc(q_b_tpr, q_b_tnr)
-ax.plot(data["x"], data["y"], color="r", label=f"Bleeding model (AUC > {auc:.2f})")
-ax.fill_between(data["x"], data["y"], [0.0] * 3, color="r", alpha=0.05)
-
-# Ischaemia model ROC
-data = {"x": [0.0, 100 * (1 - q_i_tnr), 100.0], "y": [0.0, 100 * q_i_tpr, 100.0]}
-auc = utils.simple_auc(q_i_tpr, q_i_tnr)
-ax.plot(data["x"], data["y"], color="b", label=f"Ischaemia model (AUC > {auc:.2f})")
-ax.fill_between(data["x"], data["y"], [0.0] * 3, color="b", alpha=0.05)
-
-ax.set_xlabel("False-positive rate (%)")
-ax.set_ylabel("True-positive rate (%)")
-ax.set_title("Bleeding Model")
-ax.legend(loc="lower right")
-
-roc_container.pyplot(fig)
-roc_container.write(
-    "The ROC AUC is calculated for the minimum convex shapes that pass through the required point. A more realistic ROC curve that passes through the point would likely have a slightly higher area, due to the extra curvature in the straight segments."
-)
-
+# Show the required ROC curve to achieve this accuracy
+roc.show_roc_expander(accuracy)
 
 st.write(
     "When the tool predicts a bleed, one of two interventions are made. If no ischaemia is predicted, an aggressive intervention $X$ is made (e.g. a change in DAPT therapy), which has $X_b\%$ chance to remove a bleeding event, and $X_i\%$ chance to add an ischaemia event."
@@ -692,4 +377,6 @@ total_increase = total_after - total_before
 col1, col2, col3 = output_container.columns(3)
 col1.metric("Bleeding", bleeding_after, bleeding_increase, delta_color="inverse")
 col2.metric("Ischaemia", ischaemia_after, ischaemia_increase, delta_color="inverse")
-col3.metric("Total Adverse Outcomes", total_after, total_increase, delta_color="inverse")
+col3.metric(
+    "Total Adverse Outcomes", total_after, total_increase, delta_color="inverse"
+)
