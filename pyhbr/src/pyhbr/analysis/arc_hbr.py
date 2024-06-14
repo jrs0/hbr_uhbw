@@ -55,16 +55,16 @@ def arc_hbr_age(has_age: DataFrame) -> Series:
     Calculate the age ARC HBR criterion (0.5 points if > 75 at index, 0 otherwise.
 
     Args:
-        has_age: Dataframe indexed by episode_id which has a column `age`
+        has_age: Dataframe which has a column `age`
 
     Returns:
         A series of values 0.5 (if age > 75 at index) or 0 otherwise, indexed
-            by `episode_id`.
+            by input dataframe index.
     """
     return Series(np.where(has_age["age"] > 75, 0.5, 0), index=has_age.index)
 
 
-def arc_hbr_oac(index_episodes: DataFrame, data: HicData) -> Series:
+def arc_hbr_oac(index_spells: DataFrame, data: HicData) -> Series:
     """Calculate the oral-anticoagulant ARC HBR criterion
 
     1.0 point if an one of the OACs "warfarin", "apixaban",
@@ -88,8 +88,8 @@ def arc_hbr_oac(index_episodes: DataFrame, data: HicData) -> Series:
     # Get all the episodes in the index spell (not just the index
     # episode), and then get a map from spell_id back to to the index
     # episode_id
-    all_spell_episodes = all_index_spell_episodes(index_episodes, data.episodes)
-    spell_id_to_index_episode = index_episodes.merge(
+    all_spell_episodes = all_index_spell_episodes(index_spells, data.episodes)
+    spell_id_to_index_episode = index_spells.merge(
         all_spell_episodes, how="left", on="episode_id"
     )[["spell_id", "episode_id"]]
 
@@ -437,7 +437,7 @@ def arc_hbr_ischaemic_stroke_ich(has_prior_ischaemic_stroke: DataFrame) -> Serie
 
 
 def get_features(
-    index_episodes: DataFrame,
+    index_spells: DataFrame,
     previous_year: DataFrame,
     data: HicData,
     index_result_fn: Callable[[str, DataFrame, HicData], Series]
@@ -448,8 +448,8 @@ def get_features(
     from which the ARC score will be computed)
 
     Args:
-        index_episodes: Contains `acs_index` and `pci_index` columns (indexed
-            by `episode_id`)
+        index_spells: Contains `acs_index` and `pci_index` columns (indexed
+            by `spell_id`)
         previous_year: Contains the all_other_codes table narrowed to the previous
             year (for the purposes of counting code groups).
         data: Contains DataFrame attributes `demographics` and
@@ -473,37 +473,37 @@ def get_features(
     bavm_ich_groups = ["bavm", "ich"]
     ischaemic_stroke_groups = ["ischaemic_stroke"]
     feature_data = {
-        "age": calculate_age(index_episodes, data.demographics),
-        "gender": get_gender(index_episodes, data.demographics),
-        "index_egfr": index_result_fn("egfr", index_episodes, data),
-        "index_hb": index_result_fn("hb", index_episodes, data),
-        "index_platelets": index_result_fn("platelets", index_episodes, data),
+        "age": calculate_age(index_spells, data.demographics),
+        "gender": get_gender(index_spells, data.demographics),
+        "index_egfr": index_result_fn("egfr", index_spells, data),
+        "index_hb": index_result_fn("hb", index_spells, data),
+        "index_platelets": index_result_fn("platelets", index_spells, data),
         # Only use primary position, as proxy for "requiring hospitalisation".
         # Note: logic will need to account for "first episode" when multiple
         # episodes are used.
         "prior_bleeding_12": counting.count_code_groups(
-            index_episodes, previous_year, bleeding_groups, False
+            index_spells, previous_year, bleeding_groups, False
         ),
         "prior_cirrhosis": counting.count_code_groups(
-            index_episodes, previous_year, cirrhosis_groups, True
+            index_spells, previous_year, cirrhosis_groups, True
         ),
         "prior_portal_hyp": counting.count_code_groups(
-            index_episodes, previous_year, portal_hyp_groups, True
+            index_spells, previous_year, portal_hyp_groups, True
         ),
         "prior_bavm_ich": counting.count_code_groups(
-            index_episodes, previous_year, bavm_ich_groups, True
+            index_spells, previous_year, bavm_ich_groups, True
         ),
         "prior_ischaemic_stroke": counting.count_code_groups(
-            index_episodes, previous_year, ischaemic_stroke_groups, True
+            index_spells, previous_year, ischaemic_stroke_groups, True
         ),
         # TODO: transfusion
         "prior_cancer": counting.count_code_groups(
-            index_episodes, previous_year, cancer_groups, True
+            index_spells, previous_year, cancer_groups, True
         ),
         # TODO: add cancer therapy
     }
     features = DataFrame(feature_data)
-    features[["acs_index", "pci_index"]] = index_episodes[["acs_index", "pci_index"]]
+    features[["acs_index", "pci_index"]] = index_spells[["acs_index", "pci_index"]]
     return features
 
 

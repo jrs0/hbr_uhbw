@@ -33,11 +33,20 @@ engine = common.make_engine()
 hic_data = from_hic.HicData(engine, start_date, end_date)
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
-index_episodes = acs.index_episodes(hic_data)
+index_spells = acs.get_index_spells(
+    hic_data.episodes,
+    hic_data.codes,
+    "acs_bezin",
+    "all_pci_pathak",
+    variables=["admission", "discharge"],
+)
+
 
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index)
-all_other_codes = counting.get_all_other_codes(index_episodes, hic_data)
+all_other_codes = counting.get_all_other_codes(
+    index_spells, hic_data.episodes, hic_data.codes
+)
 
 # Get the episodes that occurred in the previous year (for clinical code features)
 max_before = dt.timedelta(days=365)
@@ -66,8 +75,10 @@ bleeding_outcome = counting.count_code_groups(
 )
 
 # Get the bleed episodes (for chart review) -- bleeding in any position
-groups = following_year[following_year["group"].isin(bleeding_groups)].groupby("base_episode_id")
-for key, _  in groups:
+groups = following_year[following_year["group"].isin(bleeding_groups)].groupby(
+    "base_episode_id"
+)
+for key, _ in groups:
     print(groups.get_group(key), "\n\n")
 
 arc_hbr.plot_index_measurement_distribution(features)

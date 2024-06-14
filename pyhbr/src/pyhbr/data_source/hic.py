@@ -59,6 +59,8 @@ def episodes_query(engine: Engine, start_date: date, end_date: date) -> Select:
         table.col("spell_identifier").cast(String).label("spell_id"),
         table.col("episode_start_time").label("episode_start"),
         table.col("episode_end_time").label("episode_end"),
+        table.col("admission_date_time").label("admission"),
+        table.col("discharge_date_time").label("discharge"),
     ).where(
         table.col("episode_start_time") >= start_date,
         table.col("episode_end_time") <= end_date,
