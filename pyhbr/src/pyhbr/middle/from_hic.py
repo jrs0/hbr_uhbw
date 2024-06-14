@@ -363,8 +363,11 @@ def get_prescriptions(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
             prescription group (oac or nsaid), frequency (in doses per day),
             and link to the associated episode.
     """
-    prescriptions = get_unlinked_prescriptions(engine)
-    return link_to_episodes(prescriptions, episodes, "order_date")
+
+    # Do not link the prescriptions to episode
+    return get_unlinked_prescriptions(engine)
+
+    #return link_to_episodes(prescriptions, episodes, "order_date")
 
 
 def get_lab_results(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
@@ -387,8 +390,11 @@ def get_lab_results(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
             platelet count, and eGFR (kidney function). The columns are
             `sample_date`, `test_name`, `episode_id`.
     """
-    lab_results = get_unlinked_lab_results(engine)
-    return link_to_episodes(lab_results, episodes, "sample_date")
+
+    # Do not link to episodes
+    return get_unlinked_lab_results(engine)
+
+    #return link_to_episodes(lab_results, episodes, "sample_date")
 
 def get_gender(episodes: DataFrame, demographics: DataFrame) -> Series:
     """Get gender from the demographics table for each index event

@@ -8,6 +8,8 @@ from pandas import DataFrame, Series, cut
 import seaborn as sns
 from pyhbr.middle.from_hic import HicData
 from pyhbr.clinical_codes import counting
+import datetime as dt
+
 
 def arc_hbr_age(has_age: DataFrame) -> Series:
     """Calculate the age ARC-HBR criterion
@@ -24,13 +26,33 @@ def arc_hbr_age(has_age: DataFrame) -> Series:
     return Series(np.where(has_age["age"] > 75, 0.5, 0), index=has_age.index)
 
 
-def arc_hbr_oac(index_spells: DataFrame, data: HicData) -> Series:
-    """Calculate the oral-anticoagulant ARC HBR criterion
+def arc_hbr_medicine(index_spells: DataFrame, episodes: DataFrame, prescriptions: DataFrame, medicine_group: str, arc_score: float) -> Series:
+    """Calculate the oral-anticoagulant/NSAID ARC HBR criterion
+
+    Pass the list of medicines which qualifies for the OAC
+    ARC criterion, along with the ARC score; or pass the same
+    data for the NSAID criterion.
+
+    The score is added if a prescription of the medicine is seen
+    at any time during the patient spell.
+
+    Notes on the OAC and NSAID criteria:
 
     1.0 point if an one of the OACs "warfarin", "apixaban",
     "rivaroxaban", "edoxaban", "dabigatran", is present
     in the index spell (meaning the index episode, or any
     other episode in the spell).
+
+    1.0 point is added if an one of the following NSAIDs is present
+    on admission:
+
+    * Ibuprofen
+    * Naproxen
+    * Diclofenac
+    * Celecoxib
+    * Mefenamic acid
+    * Etoricoxib
+    * Indomethacin
 
     !!! note
         The on admission flag could be used to imply expected
@@ -38,34 +60,33 @@ def arc_hbr_oac(index_spells: DataFrame, data: HicData) -> Series:
         out all OAC prescriptions in the HIC data.
 
     Args:
-        index_episodes: Index `episode_id` is used to narrow prescriptions.
+        index_spells: Index `spell_id` is used to narrow prescriptions.
         prescriptions: Contains `name` (of medicine).
 
     Returns:
-        The OAC ARC score for each index event.
+        The ARC score for each index spell
     """
 
-    # Get all the episodes in the index spell (not just the index
-    # episode), and then get a map from spell_id back to to the index
-    # episode_id
-    all_spell_episodes = all_index_spell_episodes(index_spells, data.episodes)
-    spell_id_to_index_episode = index_spells.merge(
-        all_spell_episodes, how="left", on="episode_id"
-    )[["spell_id", "episode_id"]]
+    # Get all the data required
+    df = (
+        index_spells.reset_index("spell_id")
+        .merge(prescriptions, on="patient_id", how="left")
+        .merge(episodes[["admission", "discharge"]], on="episode_id", how="left")
+    )
 
-    # Get all the prescriptions that happened in the index spell, and keep
-    # track of which index episode is linked to the spell
-    df = all_spell_episodes.merge(data.prescriptions, how="left", on="episode_id")
+    # Filter by prescription name and only keep only prescriptions ordered between
+    # admission and discharge
+    correct_prescription = (df["group"] == medicine_group)
+    within_spell = (df["order_date"] >= df["admission"]) & (
+        df["order_date"] <= df["discharge"]
+    )
 
-    # Find which index spells have an OAC prescription anywhere
-    oac_list = ["warfarin", "apixaban", "rivaroxaban", "edoxaban", "dabigatran"]
-    df["oac"] = df["name"].isin(oac_list)
-    index_spells_with_oac = DataFrame(df.groupby("spell_id")["oac"].any())
-    oac_criterion = index_spells_with_oac.merge(
-        spell_id_to_index_episode, how="left", on="spell_id"
-    ).set_index("episode_id")["oac"]
+    # Populate the rows of df with the score
+    df["arc_score"] = 0.0
+    df.loc[correct_prescription & within_spell, "arc_score"] = 1.0
 
-    return oac_criterion.astype("float")
+    # Group by the index spell id and get the max score
+    return df.groupby("spell_id").max("arc_score")["arc_score"]
 
 def arc_hbr_nsaid(index_episodes: DataFrame, prescriptions: DataFrame) -> Series:
     """Calculate the non-steroidal anti-inflamatory drug (NSAID) ARC HBR criterion
@@ -129,12 +150,15 @@ def min_index_result(
 
     return min_result_or_nan["result"].rename(f"index_{test_name}")
 
-def all_index_spell_episodes(index_episodes: DataFrame, episodes: DataFrame) -> DataFrame:
+
+def all_index_spell_episodes(
+    index_episodes: DataFrame, episodes: DataFrame
+) -> DataFrame:
     """Get all the other episodes in the index spell
 
-    This is a dataframe of index spells (defined as the spell containing 
+    This is a dataframe of index spells (defined as the spell containing
     an episode in index_episodes), along with all the episodes in that
-    spell (including the index episode itself). This is useful for 
+    spell (including the index episode itself). This is useful for
     performing operations at index-spell granularity
 
     Args:
@@ -152,9 +176,10 @@ def all_index_spell_episodes(index_episodes: DataFrame, episodes: DataFrame) -> 
         .merge(episodes["spell_id"], how="left", on="episode_id")
         .set_index("spell_id")
     )
-    return index_spells.merge(
-        episodes.reset_index(), how="left", on="spell_id"
-    )[["episode_id", "spell_id"]]
+    return index_spells.merge(episodes.reset_index(), how="left", on="spell_id")[
+        ["episode_id", "spell_id"]
+    ]
+
 
 def first_index_spell_result(
     test_name: str,
@@ -203,6 +228,61 @@ def first_index_spell_result(
     first_result_or_nan = index_episodes.merge(
         first_lab_result[["result", "episode_id"]], how="left", on="episode_id"
     ).set_index("episode_id")
+
+    return first_result_or_nan["result"].rename(f"index_{test_name}")
+
+
+def first_lab_result_after_admission(
+    test_name: str,
+    index_spells: DataFrame,
+    lab_results: DataFrame,
+    episodes: DataFrame,
+) -> Series:
+    """Get the (first) lab result associated to the index spell
+
+    Compared to min_index_result, this function accounts for the
+    possibility that a lab result was not associated with the first
+    episode of the spell, and is therefore missed. The minimum value
+    is not taken, because of the possibility that a value in a later
+    episode is smaller due to some other cause.
+
+    Args:
+        test_name: Which lab measurement to get.
+        index_spells: Has an `spell_id` index.
+        lab_results: Has a `test_name` column matching the `test_name` argument,
+            and a `result` column for the numerical test result.
+        episodes: Indexed by `episode_id`, and contains `admission`
+            and `discharge` columns.
+
+    Returns:
+        A series containing the first lab result with the given name after
+            admission.
+    """
+
+    # Get all the lab results done between admission and discharge
+    df = (
+        index_spells.reset_index("spell_id")
+        .merge(lab_results, on="patient_id", how="left")
+        .merge(episodes[["admission", "discharge"]], on="episode_id", how="left")
+    )
+
+    # Filter by test name and only keep labs done during the spell
+    correct_test = df["test_name"] == test_name
+    within_spell = (df["sample_date"] >= df["admission"]) & (
+        df["sample_date"] <= df["discharge"]
+    )
+    relevant_labs = df[correct_test & within_spell]
+
+    # Get the first lab result
+    first_lab_result = (
+        relevant_labs.sort_values("sample_date").groupby("spell_id").head(1)
+    )
+
+    # Some index episodes do not have an measurement, so join
+    # to get all index episodes (NaN means no index measurement)
+    first_result_or_nan = index_spells.merge(
+        first_lab_result[["result", "spell_id"]], how="left", on="spell_id"
+    ).set_index("spell_id")
 
     return first_result_or_nan["result"].rename(f"index_{test_name}")
 
@@ -274,6 +354,7 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
         np.select(arc_score_conditions, arc_scores, default=0.0),
         index=df.index,
     )
+
 
 def arc_hbr_tcp(has_index_platelets: DataFrame) -> Series:
     """Calculate the ARC HBR thrombocytopenia (low platelet count) criterion
@@ -400,7 +481,7 @@ def get_features(
     index_spells: DataFrame,
     previous_year: DataFrame,
     data: HicData,
-    index_result_fn: Callable[[str, DataFrame, HicData], Series]
+    index_result_fn: Callable[[str, DataFrame, HicData], Series],
 ) -> DataFrame:
     """Index/prior history features for calculating ARC HBR
 
@@ -517,6 +598,7 @@ def get_arc_hbr_score(features: DataFrame, data: HicData) -> DataFrame:
     }
     return DataFrame(arc_score_data)
 
+
 def plot_index_measurement_distribution(features: DataFrame):
     """Plot a histogram of measurement results at the index
 
@@ -548,21 +630,24 @@ def plot_index_measurement_distribution(features: DataFrame):
     g.figure.subplots_adjust(top=0.95)
     g.ax.set_title("Distribution of Laboratory Test Results in ACS/PCI index events")
 
+
 def plot_arc_score_distribution(arc_hbr_score: DataFrame):
     arc_hbr_pretty = arc_hbr_score.rename(
-    columns={
-        "arc_hbr_age": "Age",
-        "arc_hbr_oac": "OAC",
-        "arc_hbr_ckd": "CKD",
-        "arc_hbr_anaemia": "Anaemia",
-        "arc_hbr_cancer": "Cancer",
-        "arc_hbr_tcp": "Thrombocytopenia",
-        "arc_hbr_prior_bleeding": "Prior Bleeding",
-        "arc_hbr_cirrhosis_portal_hyp": "Cirrhosis + Portal Hyp.",
-        "arc_hbr_nsaid": "NSAID",
+        columns={
+            "arc_hbr_age": "Age",
+            "arc_hbr_oac": "OAC",
+            "arc_hbr_ckd": "CKD",
+            "arc_hbr_anaemia": "Anaemia",
+            "arc_hbr_cancer": "Cancer",
+            "arc_hbr_tcp": "Thrombocytopenia",
+            "arc_hbr_prior_bleeding": "Prior Bleeding",
+            "arc_hbr_cirrhosis_portal_hyp": "Cirrhosis + Portal Hyp.",
+            "arc_hbr_nsaid": "NSAID",
         }
     )
-    for_bar_plot = arc_hbr_pretty.melt(var_name="ARC HBR Criterion", value_name="ARC Score")
+    for_bar_plot = arc_hbr_pretty.melt(
+        var_name="ARC HBR Criterion", value_name="ARC Score"
+    )
     plt.xticks(rotation=90)
     plt.title("Proportion of Index Episodes Meeting ARC HBR Criteria")
     sns.countplot(
@@ -571,11 +656,13 @@ def plot_arc_score_distribution(arc_hbr_score: DataFrame):
         hue="ARC Score",
     )
 
-def plot_prescriptions_distribution(data: HicData):
-    
+
+# Note: not working now due to non-linked prescriptions
+def plot_prescriptions_distribution(episodes: DataFrame, prescriptions: DataFrame):
+
     # Join all the episodes to get a reflection of the amount
     # of episodes missing any prescriptions.
-    df = data.episodes.merge(data.prescriptions, how="left", on="episode_id")[
+    df = episodes.merge(prescriptions, how="left", on="episode_id")[
         ["name", "group", "on_admission"]
     ]
     pretty_presc = df.rename(
@@ -595,5 +682,5 @@ def plot_prescriptions_distribution(data: HicData):
         x="Medicine",
         hue="Class",
         order=pretty_presc["Medicine"].value_counts().index,
-        stat="percent"
+        stat="percent",
     )

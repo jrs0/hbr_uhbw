@@ -67,19 +67,93 @@ features = arc_hbr.get_features(
     index_episodes, previous_year, hic_data, arc_hbr.first_index_spell_result
 )
 
-# Get the raw features going into the ARC HBR score
-features = index_spells[["age", "gender"]]
-features["index_egfr"] = 
 
+# Get the raw features going into the ARC HBR score
+features = index_spells[["age", "gender"]].copy()
+features["index_egfr"] = arc_hbr.first_lab_result_after_admission(
+    "egfr", index_spells, lab_results, episodes
+)
+features["index_hb"] = arc_hbr.first_lab_result_after_admission(
+    "hb", index_spells, lab_results, episodes
+)
+features["index_platelets"] = arc_hbr.first_lab_result_after_admission(
+    "platelets", index_spells, lab_results, episodes
+)
+
+
+def prior_codes(group: str) -> pd.Series:
+    """Get the prior codes for this code group
+
+    Note: uses variables in this environment.
+    """
+    filter = acs.filter_by_code_groups(
+        previous_year,
+        group,
+        999,
+        True,
+    )
+    return counting.count_code_groups(index_spells, filter)
+
+
+features["prior_bleeding_12"] = prior_codes("bleeding_adaptt")
+features["prior_cirrhosis"] = prior_codes("cirrhosis")
+features["prior_portal_hyp"] = prior_codes("portal_hypertension")
+features["prior_bavm"] = prior_codes("bavm")
+features["prior_ich"] = prior_codes("ich")
+features["prior_bavm_ich"] = features["prior_bavm"] + features["prior_ich"]
+features["prior_ischaemic_stroke"] = prior_codes("ischaemic_stroke")
+features["prior_cancer"] = prior_codes("ischaemic_cancer")
 
 # Calculate the ARC HBR score from the more granular features.
-arc_hbr_score = arc_hbr.get_arc_hbr_score(features, hic_data)
-
-# Get the bleeding outcome
-bleeding_groups = ["bleeding_al_ani"]
-bleeding_outcome = counting.count_code_groups(
-    index_episodes, following_year, bleeding_groups, True
+arc_hbr_score = pd.DataFrame(index=features.index)
+arc_hbr_score["arc_hbr_age"] = arc_hbr.arc_hbr_age(features)
+arc_hbr_score["arc_hbr_oac"] = arc_hbr.arc_hbr_medicine(
+    index_spells,
+    episodes,
+    prescriptions,
+    "oac",
+    1.0,
 )
+arc_hbr_score["arc_hbr_oac"].sum()
+arc_hbr_score["arc_hbr_nsaid"] = arc_hbr.arc_hbr_medicine(
+    index_spells,
+    episodes,
+    prescriptions,
+    "nsaid",
+    1.0,
+)
+arc_hbr_score["arc_hbr_nsaid"].sum()
+arc_hbr_score["arc_hbr_ckd"] = arc_hbr.arc_hbr_ckd(features)
+arc_hbr_score["arc_hbr_anaemia"] = arc_hbr.arc_hbr_anaemia(features)
+arc_hbr_score["arc_hbr_tcp"] = arc_hbr.arc_hbr_tcp(features)
+arc_hbr_score["arc_hbr_prior_bleeding"] = arc_hbr.arc_hbr_prior_bleeding(features)
+arc_hbr_score["arc_hbr_cirrhosis_portal_hyp"] = arc_hbr.arc_hbr_cirrhosis_ptl_hyp(features)
+arc_hbr_score["arc_hbr_stroke_ich"] = arc_hbr.arc_hbr_ischaemic_stroke_ich(features)
+arc_hbr_score["arc_hbr_cancer"] = arc_hbr.arc_hbr_cancer(features)
+
+# The bleeding outcome is defined by the ADAPTT trial bleeding code group,
+# which matches BARC 2-5 bleeding events. Ischaemia outcomes are defined using
+# a three-point MACE specifically targetting ischaemic outcomes (i.e. only
+# ischaemic stroke is included, rather than haemorrhagic stroke which is sometimes
+# included in MACE definitions).
+
+# Get the non-fatal bleeding outcomes
+# Excluding the index spells appears to have very
+# little effect on the prevalence, so the index spell
+# is excluded to be consistent with ischaemia outcome
+# definition. Increasing maximum code position increases
+# the bleeding rate, but 1 is chosen to restrict to cases
+# where bleeding code is not historical/minor.
+max_position = 1
+exclude_index_spell = True
+non_fatal_bleeding_group = "bleeding_adaptt"
+non_fatal_bleeding = acs.filter_by_code_groups(
+    following_year,
+    non_fatal_bleeding_group,
+    max_position,
+    exclude_index_spell,
+)
+bleeding_outcome = non_fatal_bleeding
 
 # Get the bleed episodes (for chart review) -- bleeding in any position
 groups = following_year[following_year["group"].isin(bleeding_groups)].groupby(
@@ -94,12 +168,15 @@ plt.show()
 arc_hbr.plot_arc_score_distribution(arc_hbr_score)
 plt.show()
 
-arc_hbr.plot_prescriptions_distribution(hic_data)
+arc_hbr.plot_prescriptions_distribution(episodes, prescriptions)
 plt.show()
 
 # Package the data up for saving
 data = {
-    "hic_data": hic_data,
+    "episodes": episodes,
+    "codes": codes,
+    "prescriptions": prescriptions,
+    "lab_results": lab_results,
     "index_episodes": index_episodes,
     "features": features,
     "arc_hbr_score": arc_hbr_score,
