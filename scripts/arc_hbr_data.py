@@ -30,23 +30,25 @@ end_date = dt.date(2030, 1, 1)
 
 # Fetch data
 engine = common.make_engine()
-hic_data = from_hic.HicData(engine, start_date, end_date)
+codes = from_hic.get_clinical_codes(
+    engine, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml"
+)  # slow
+episodes = from_hic.get_episodes(engine, start_date, end_date)  # fast
+prescriptions = from_hic.get_prescriptions(engine, episodes)  # fast
+lab_results = from_hic.get_lab_results(engine, episodes)  # really slow
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 index_spells = acs.get_index_spells(
-    hic_data.episodes,
-    hic_data.codes,
+    episodes,
+    codes,
     "acs_bezin",
     "all_pci_pathak",
-    variables=["admission", "discharge"],
 )
 
 
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index)
-all_other_codes = counting.get_all_other_codes(
-    index_spells, hic_data.episodes, hic_data.codes
-)
+all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
 
 # Get the episodes that occurred in the previous year (for clinical code features)
 max_before = dt.timedelta(days=365)
@@ -64,6 +66,11 @@ following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 features = arc_hbr.get_features(
     index_episodes, previous_year, hic_data, arc_hbr.first_index_spell_result
 )
+
+# Get the raw features going into the ARC HBR score
+features = index_spells[["age", "gender"]]
+features["index_egfr"] = 
+
 
 # Calculate the ARC HBR score from the more granular features.
 arc_hbr_score = arc_hbr.get_arc_hbr_score(features, hic_data)

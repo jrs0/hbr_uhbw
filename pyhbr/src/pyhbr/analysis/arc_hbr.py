@@ -9,46 +9,6 @@ import seaborn as sns
 from pyhbr.middle.from_hic import HicData
 from pyhbr.clinical_codes import counting
 
-
-def get_gender(index_episodes: DataFrame, demographics: DataFrame) -> Series:
-    """Get gender from the demographics table for each index event
-
-    Args:
-        index_episodes: Indexed by `episode_id` and having column `patient_id`
-        demographics: Having columns `patient_id` and `gender`.
-
-    Returns:
-        A series containing gender indexed by `episode_id`
-    """
-    gender = index_episodes.merge(demographics, how="left", on="patient_id")["gender"]
-    gender.index = index_episodes.index
-    return gender
-
-
-def calculate_age(index_episodes: DataFrame, demographics: DataFrame) -> Series:
-    """Calculate the patient age at index
-
-    The HIC data contains only year_of_birth, which is used here. In order
-    to make an unbiased estimate of the age, birthday is assumed to be
-    2nd july (halfway through the year).
-
-    Args:
-        index_episodes: Contains `episode_start` date and column `patient_id`,
-            indexed by `episode_id`.
-        demographics: Contains `year_of_birth` date and index `patient_id`.
-
-    Returns:
-        A series containing age, indexed by `episode_id`.
-    """
-    df = index_episodes.merge(demographics, how="left", on="patient_id")
-    age_offset = np.where(
-        (df["episode_start"].dt.month < 7) & (df["episode_start"].dt.day < 2), 1, 0
-    )
-    age_at_index = df["episode_start"].dt.year - df["year_of_birth"] - age_offset
-    age_at_index.index = index_episodes.index
-    return age_at_index
-
-
 def arc_hbr_age(has_age: DataFrame) -> Series:
     """Calculate the age ARC-HBR criterion
 
@@ -473,8 +433,8 @@ def get_features(
     bavm_ich_groups = ["bavm", "ich"]
     ischaemic_stroke_groups = ["ischaemic_stroke"]
     feature_data = {
-        "age": calculate_age(index_spells, data.demographics),
-        "gender": get_gender(index_spells, data.demographics),
+        "age": index_spells["age"],
+        "gender": index_spells["gender"],
         "index_egfr": index_result_fn("egfr", index_spells, data),
         "index_hb": index_result_fn("hb", index_spells, data),
         "index_platelets": index_result_fn("platelets", index_spells, data),

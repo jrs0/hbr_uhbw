@@ -2,12 +2,13 @@
 """
 
 import pandas as pd
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from sqlalchemy import Engine
 from pyhbr import clinical_codes
 from pyhbr.common import get_data
 from pyhbr.data_source import hic
 from datetime import date, timedelta
+import numpy as np
 
 
 def get_clinical_codes(
@@ -389,6 +390,42 @@ def get_lab_results(engine: Engine, episodes: pd.DataFrame) -> pd.DataFrame:
     lab_results = get_unlinked_lab_results(engine)
     return link_to_episodes(lab_results, episodes, "sample_date")
 
+def get_gender(episodes: DataFrame, demographics: DataFrame) -> Series:
+    """Get gender from the demographics table for each index event
+
+    Args:
+        episodes: Indexed by `episode_id` and having column `patient_id`
+        demographics: Having columns `patient_id` and `gender`.
+
+    Returns:
+        A series containing gender indexed by `episode_id`
+    """
+    gender = episodes.merge(demographics, how="left", on="patient_id")["gender"]
+    gender.index = episodes.index
+    return gender
+
+def calculate_age(episodes: DataFrame, demographics: DataFrame) -> Series:
+    """Calculate the patient age at each episode
+
+    The HIC data contains only year_of_birth, which is used here. In order
+    to make an unbiased estimate of the age, birthday is assumed to be
+    2nd july (halfway through the year).
+
+    Args:
+        episodes: Contains `episode_start` date and column `patient_id`,
+            indexed by `episode_id`.
+        demographics: Contains `year_of_birth` date and index `patient_id`.
+
+    Returns:
+        A series containing age, indexed by `episode_id`.
+    """
+    df = episodes.merge(demographics, how="left", on="patient_id")
+    age_offset = np.where(
+        (df["episode_start"].dt.month < 7) & (df["episode_start"].dt.day < 2), 1, 0
+    )
+    age = df["episode_start"].dt.year - df["year_of_birth"] - age_offset
+    age.index = episodes.index
+    return age
 
 def get_episodes(engine: Engine, start_date: date, end_date: date) -> pd.DataFrame:
     """Get the table of episodes
@@ -399,10 +436,18 @@ def get_episodes(engine: Engine, start_date: date, end_date: date) -> pd.DataFra
         end_date:  The end date (inclusive) for returned episodes
 
     Returns:
-        The episode date, indexed by episode_id
+        The episode data, indexed by episode_id. This contains
+            the columns `patient_id`, `spell_id`, `episode_start`,
+            `admission`, `discharge`, `age`, and `gender`
+
     """
-    df = get_data(engine, hic.episodes_query, start_date, end_date)
-    return df.set_index("episode_id", drop=True)
+    episodes = get_data(engine, hic.episodes_query, start_date, end_date)
+    episodes = episodes.set_index("episode_id", drop=True)
+    demographics = get_demographics(engine)
+    episodes["age"] = calculate_age(episodes, demographics)
+    episodes["gender"] = get_gender(episodes, demographics) 
+
+    return episodes
 
 
 def get_demographics(engine: Engine) -> pd.DataFrame:
@@ -439,30 +484,3 @@ def get_demographics(engine: Engine) -> pd.DataFrame:
     )
 
     return df
-
-
-class HicData:
-    def __init__(self, engine: Engine, start_date: date, end_date: date):
-        """Get the HIC dataset (collection of 5 tables)
-
-        Args:
-            engine: The connection to the database
-            start_date: The start date (inclusive) for returned episodes
-            end_date:  The end date (inclusive) for returned episodes
-
-        Raises:
-            RuntimeError: if the episode_id is not unique
-        """
-
-        self.codes = get_clinical_codes(
-            engine, "icd10_arc_hbr.yaml", "opcs4_arc_hbr.yaml"
-        )  # slow
-        self.episodes = get_episodes(engine, start_date, end_date)  # fast
-        self.prescriptions = get_prescriptions(engine, self.episodes)  # fast
-        self.lab_results = get_lab_results(engine, self.episodes)  # really slow
-        self.demographics = get_demographics(engine)
-
-        if self.episodes.value_counts("episode_id").max() > 1:
-            raise RuntimeError(
-                "Found non-unique episode IDs; subsequent script will be invalid"
-            )

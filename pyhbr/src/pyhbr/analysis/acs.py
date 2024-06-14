@@ -6,7 +6,7 @@ from pyhbr.middle import from_hic  # Need to move the function
 
 
 def get_index_spells(
-    episodes: DataFrame, codes: DataFrame, acs_group: str, pci_group: str, variables: list[str] = None
+    episodes: DataFrame, codes: DataFrame, acs_group: str, pci_group: str
 ) -> DataFrame:
     """Get the index spells for ACS/PCI patients
 
@@ -35,26 +35,18 @@ def get_index_spells(
 
     Args:
         episodes: All patient episodes. Must contain `episode_id`, `spell_id`
-            and `episode_start`.
+            and `episode_start`, `age` and `gender`.
         codes: All diagnosis/procedure codes by episode. Must contain
             `episode_id`, `position` (indexed from 1 which is the primary
             code, >1 are secondary codes), and `group` (expected to contain
             the value of the acs_group and pci_group arguments).
         acs_group: The name of the ICD-10 code group used to define ACS.
         pci_group: The name of the OPCS-4 code group used to define PCI
-        variables: A list of variables to keep in the returned index table
-            from the input episodes. This is useful if some data sources 
-            contain the age/gender in the episodes table. By default, "age"
-            and "gender" will be added as columns (if this variable is None,
-            for backwards compatibility with other code).
 
     Returns:
         A table of index spells and associated information about the
             first episode of the spell.
     """
-
-    if variables is None:
-        variables = ["age", "gender"]
 
     # Index spells are defined by the contents of the first episode in the
     # spell (to capture the cause of admission to hospital).
@@ -96,7 +88,7 @@ def get_index_spells(
     # Join some useful information about the episode
     index_spells = (
         index_spells.merge(
-            episodes[["patient_id", "episode_start", "spell_id"] + variables],
+            episodes[["patient_id", "episode_start", "spell_id", "age", "gender"]],
             how="left",
             on="episode_id",
         )
@@ -107,8 +99,7 @@ def get_index_spells(
 
     # Convert the age column to a float. This should probably
     # be done upstream
-    if "age" in variables:
-        index_spells["age"] = index_spells["age"].astype(float)
+    index_spells["age"] = index_spells["age"].astype(float)
 
     return index_spells
 
