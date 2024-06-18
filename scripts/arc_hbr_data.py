@@ -61,24 +61,8 @@ max_after = dt.timedelta(days=365)
 following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 
 # Calculate more granular features as an intermediate step for calculating the
-# ARC HBR score. Choose a function to extract the a value for the laboratory
-# measurements at index.
-features = arc_hbr.get_features(
-    index_episodes, previous_year, hic_data, arc_hbr.first_index_spell_result
-)
-
-
-# Get the raw features going into the ARC HBR score
-features = index_spells[["age", "gender"]].copy()
-features["index_egfr"] = arc_hbr.first_lab_result_after_admission(
-    "egfr", index_spells, lab_results, episodes
-)
-features["index_hb"] = arc_hbr.first_lab_result_after_admission(
-    "hb", index_spells, lab_results, episodes
-)
-features["index_platelets"] = arc_hbr.first_lab_result_after_admission(
-    "platelets", index_spells, lab_results, episodes
-)
+# ARC HBR score.
+features = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
 
 
 def prior_codes(group: str) -> pd.Series:
@@ -127,7 +111,9 @@ arc_hbr_score["arc_hbr_ckd"] = arc_hbr.arc_hbr_ckd(features)
 arc_hbr_score["arc_hbr_anaemia"] = arc_hbr.arc_hbr_anaemia(features)
 arc_hbr_score["arc_hbr_tcp"] = arc_hbr.arc_hbr_tcp(features)
 arc_hbr_score["arc_hbr_prior_bleeding"] = arc_hbr.arc_hbr_prior_bleeding(features)
-arc_hbr_score["arc_hbr_cirrhosis_portal_hyp"] = arc_hbr.arc_hbr_cirrhosis_ptl_hyp(features)
+arc_hbr_score["arc_hbr_cirrhosis_portal_hyp"] = arc_hbr.arc_hbr_cirrhosis_ptl_hyp(
+    features
+)
 arc_hbr_score["arc_hbr_stroke_ich"] = arc_hbr.arc_hbr_ischaemic_stroke_ich(features)
 arc_hbr_score["arc_hbr_cancer"] = arc_hbr.arc_hbr_cancer(features)
 
