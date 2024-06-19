@@ -143,24 +143,16 @@ q_i_tnr = accuracy["tnr_i"]
 roc.show_roc_expander(accuracy)
 
 st.write(
-    "When the tool predicts a bleed, one of two interventions are made. If no ischaemia is predicted, an aggressive intervention $X$ is made (e.g. a change in DAPT therapy), which has $X_b\%$ chance to remove a bleeding event, and $X_i\%$ chance to add an ischaemia event."
-)
-st.write(
-    "If, however, ischaemia is also predicted, then a less aggressive intervention $Y$ is made (e.g. no modification of therapy, but advice to the clinicians and patients that bleeding risk is high. It has chance $Y_b\%$ to remove a bleeding event, and $Y_i\%$ chance to add an ischaemia event."
+    "When the tool predicts a bleed, an interventions is made, which has a fixed probability of removing a bleeding event, and a fixed probability to add an ischaemia event."
 )
 
 intervention_container = st.container(border=True)
 intervention_container.header("Input 3: Intervention Effectiveness", divider=True)
 intervention_container.write(
-    "Set the probabilities for each intervention to reduce bleeding, and increase ischaemia."
+    "Set the probabilities for the intervention to reduce bleeding and increase ischaemia."
 )
 intervention_container.write(
-    "In this model, an intervention can only reduce the chance of bleeding, and can only increase the chance of ischaemia."
-)
-x_and_y_separate = intervention_container.toggle(
-    "Y is different from X",
-    value=False,
-    help="By default, only one intervention $X$ is used on all high bleeding risk patients. Click here to allow use of a different intervention $Y$ for when a patient is flagged as high-ischaemia risk.",
+    "In this model, the intervention can only reduce the amount of bleeding, and can only increase the amount of ischaemia."
 )
 
 # Set default intervention effectiveness
@@ -168,90 +160,36 @@ if "x_b" not in st.session_state:
     st.session_state["x_b"] = 0.5
 if "x_i" not in st.session_state:
     st.session_state["x_i"] = 0.5
-if "y_b" not in st.session_state:
-    st.session_state["y_b"] = 0.5
-if "y_i" not in st.session_state:
-    st.session_state["y_i"] = 0.5
 
-if not x_and_y_separate:
-    st.session_state["x_b"] = (
-        intervention_container.number_input(
-            "Probability that a bleeding event is removed (%)",
-            key="input_xy_b",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["x_b"],
-            step=0.1,
-        )
-        / 100.0
+st.session_state["x_b"] = (
+    intervention_container.number_input(
+        "Probability that a bleeding event is removed (%)",
+        key="input_xy_b",
+        min_value=0.0,
+        max_value=100.0,
+        value=100 * st.session_state["x_b"],
+        step=0.1,
     )
-    st.session_state["y_b"] = st.session_state["x_b"]
-    st.session_state["x_i"] = (
-        intervention_container.number_input(
-            "Probability that an ischaemia event is introduced (%)",
-            key="input_xy_i",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["x_i"],
-            step=0.1,
-        )
-        / 100.0
+    / 100.0
+)
+st.session_state["x_i"] = (
+    intervention_container.number_input(
+        "Probability that an ischaemia event is introduced (%)",
+        key="input_xy_i",
+        min_value=0.0,
+        max_value=100.0,
+        value=100 * st.session_state["x_i"],
+        step=0.1,
     )
-    st.session_state["y_i"] = st.session_state["x_i"]
-else:
-    intervention_columns = intervention_container.columns(2)
-    intervention_columns[0].subheader("Intervention $X$")
-    intervention_columns[1].subheader("Intervention $Y$")
-    st.session_state["x_b"] = (
-        intervention_columns[0].number_input(
-            "Probability that a bleeding event is removed (%)",
-            key="input_x_b",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["x_b"],
-            step=0.1,
-        )
-        / 100.0
-    )
-    st.session_state["x_i"] = (
-        intervention_columns[0].number_input(
-            "Probability that an ischaemia event is removed (%)",
-            key="input_x_i",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["x_i"],
-            step=0.1,
-        )
-        / 100.0
-    )
-    st.session_state["y_b"] = (
-        intervention_columns[1].number_input(
-            "Probability that a bleeding event is removed (%)",
-            key="input_y_b",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["y_b"],
-            step=0.1,
-        )
-        / 100.0
-    )
-    st.session_state["y_i"] = (
-        intervention_columns[1].number_input(
-            "Probability that an ischaemia event is removed (%)",
-            key="input_y_i",
-            min_value=0.0,
-            max_value=100.0,
-            value=100 * st.session_state["y_i"],
-            step=0.1,
-        )
-        / 100.0
-    )
+    / 100.0
+)
 
 # Get the variables for convenience
+# TODO: need to remove y_b/y_i
 x_b = st.session_state["x_b"]
 x_i = st.session_state["x_i"]
-y_b = st.session_state["y_b"]
-y_i = st.session_state["y_i"]
+y_b = x_b
+y_i = x_i
 
 st.write(
     "Based on the inputs above, there is a probability that a patient's outcomes will be correctly predicted, and a probability that an intervention to reduce bleeding will be successful (i.e. reduce bleeding and not increase ischaemia)."
