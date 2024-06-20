@@ -196,6 +196,11 @@ The code groups are defined as follows:
     |Ischaemic stroke|I63.* | Cerebral infarction |
     |CV death |I46.1 | Sudden cardiac death, so described |
     ||I46.9| Cardiac arrest, unspecified |
+    ||I21.* | (Fatal) acute myocardial infarction |
+    ||I22.* | (Fatal) subsequent myocardial infarction |
+    ||I63.* | (Fatal) ischaemic stroke |
+
+    Although the reference only lists `I46.1` and `I46.9` as CV death, deaths with a primary cause of death of myocardial infarction or ischaemic stroke are also included in our CV death definition (`Fatal` is prepended to indicate that the code must be present in a cause-of-death ICD-10 code column).
 
 Disadvantages of this code group includes the lack of definition in whether the primary/secondary positions are used, and lack of validation. Similarly to the bleeding groups, basic validation may be performed by a chart analysis.
 

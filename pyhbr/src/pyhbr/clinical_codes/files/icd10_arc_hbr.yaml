@@ -8294,6 +8294,7 @@ categories:
         - bleeding_adaptt
         - hussain_ami_stroke
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I20
         name: I20
       - categories:
@@ -8406,6 +8407,7 @@ categories:
         - ihd_bezin
         - hussain_ami_stroke
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I23
         name: I23
       - categories:
@@ -8434,6 +8436,7 @@ categories:
         - bleeding_adaptt
         - hussain_ami_stroke
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I24
         name: I24
       - categories:
@@ -8490,6 +8493,7 @@ categories:
         - acs_bezin
         - hussain_ami_stroke
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I25
         name: I25
       docs: Ischaemic heart diseases
@@ -8500,7 +8504,6 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
-      - cv_death_ohm
       index:
       - I20
       - I25
@@ -9122,6 +9125,7 @@ categories:
         - bleeding_cadth
         - ischaemic_stroke
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I60
         name: I60
       - categories:
@@ -9169,6 +9173,7 @@ categories:
         - bleeding_cadth
         - ischaemic_stroke
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I61
         name: I61
       - categories:
@@ -9191,6 +9196,7 @@ categories:
         exclude:
         - ischaemic_stroke
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I62
         name: I62
       - categories:
@@ -9241,6 +9247,7 @@ categories:
         - ischaemic_stroke
         - bleeding_barc
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I64
         name: I64
       - categories:
@@ -9272,6 +9279,7 @@ categories:
         - ischaemic_stroke
         - bleeding_barc
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I65
         name: I65
       - categories:
@@ -9306,6 +9314,7 @@ categories:
         - ischaemic_stroke
         - bleeding_barc
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I66
         name: I66
       - categories:
@@ -9349,6 +9358,7 @@ categories:
         - ischaemic_stroke
         - bleeding_barc
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I67
         name: I67
       - categories:
@@ -9374,6 +9384,7 @@ categories:
         - ischaemic_stroke
         - bleeding_barc
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I68
         name: I68
       - categories:
@@ -9410,6 +9421,7 @@ categories:
         - ischaemic_stroke
         - bleeding_barc
         - ami_stroke_ohm
+        - cv_death_ohm
         index: I69
         name: I69
       docs: Cerebrovascular diseases
@@ -9420,7 +9432,6 @@ categories:
       - acs_bezin
       - ihd_bezin
       - portal_hypertension
-      - cv_death_ohm
       index:
       - I60
       - I69
