@@ -159,43 +159,29 @@ grid_options = grid_builder.build()
 
 # Configure other properties directly
 grid_options["tooltipShowDelay"] = 500
-grid_options["rowSelection"] = "multiple"
+grid_options["rowSelection"] = "single"
 
 grid_return = AgGrid(arc_score, grid_options, allow_unsafe_jscode=True)
 
-if grid_return.selected_rows is not None:
-    records = grid_return.selected_rows.to_dict(orient="records")
-
-    if len(records) > 0:
-
-        cols = st.columns(len(records))
-
-        for col, record in zip(cols, records):
-            c = col.container(border=True)
-
-            # Set divider colour based on ARC score
-            if record["arc_score_total"] < 0.5:
-                colour = "green"
-            elif record["arc_score_total"] < 1.0:
-                colour = "orange"
-            else:
-                colour = "red"
-
-            c.header(
-                f"{record['name']} :{colour}[{record['arc_score_total']}]",
-                divider=colour,
-            )
-
-            # Convert the data back into a presentable format
-            df = pd.DataFrame.from_records([record])
-            c.write(df.columns)
-            cols = {
-                "gender": "Gender",
-                "age": "Age",
-                "index_hb": "Haemoglobin",
-                "index_egfr": "eGFR",
-                "index_platelets": "Platelet Count",
-                "prior_bleeding_12": "Prior Bleeding",
-            }
-            scores = df[cols.keys()].rename(cols).melt()
-            c.write(scores)
+sel = grid_return.selected_rows
+if sel is not None:
+    
+    if sel["arc_score_total"][0] < 0.5:
+        colour = "green"
+    elif sel["arc_score_total"][0] < 1.0:
+        colour = "orange"
+    else:
+        colour = "red"
+    
+    c = st.container(border=True)
+    c.header(f"{sel['name'][0]} :{colour}[{sel['arc_score_total'][0]:.1f}]", divider=colour)
+    
+    cols = c.columns(13)
+    
+    criteria = {
+        "index_hb": "Haemoglobin",
+        "index_platelets": "Platelet Count",
+        "index_egfr": "eGFR" 
+    }
+    
+    c.write(sel)
