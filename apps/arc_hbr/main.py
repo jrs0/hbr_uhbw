@@ -161,7 +161,7 @@ grid_options = grid_builder.build()
 grid_options["tooltipShowDelay"] = 500
 grid_options["rowSelection"] = "single"
 
-grid_return = AgGrid(arc_score, grid_options, allow_unsafe_jscode=True)
+grid_return = AgGrid(arc_score, grid_options, allow_unsafe_jscode=True, enable_enterprise_modules=False)
 
 sel = grid_return.selected_rows
 if sel is not None:
