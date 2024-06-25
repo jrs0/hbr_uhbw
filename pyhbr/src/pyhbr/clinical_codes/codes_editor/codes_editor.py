@@ -11,8 +11,19 @@ from pathlib import Path
 
 from pyhbr import clinical_codes
 
+def make_category_layout(category: clinical_codes.Category):
 
+    layout = QVBoxLayout()
 
+    title_layout = QHBoxLayout()
+    name = QLabel(category.name)
+    docs = QLabel(category.docs)
+    title_layout.addWidget(name)
+    title_layout.addWidget(docs)
+
+    layout.addLayout(title_layout)
+    return layout
+    
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -89,6 +100,13 @@ class MainWindow(QMainWindow):
         self.group_layout.addWidget(self.delete_group)
         layout.addLayout(self.group_layout)
 
+        main_codes = QVBoxLayout()
+        category_layout = make_category_layout(self.codes_tree.categories[0])
+
+        main_codes.addLayout(category_layout)
+
+        layout.addLayout(main_codes)
+        
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
