@@ -1,112 +1,159 @@
-import numpy as np
-from pandas import DataFrame, Series, cut
+import sys
+import pandas as pd
 
-def ckd(has_index_egfr: DataFrame) -> Series:
-    """Calculate the ARC HBR chronic kidney disease (CKD) criterion
-
-    The ARC HBR CKD criterion is calculated based on the eGFR as
-    follows:
-
-    | eGFR                           | Score |
-    |--------------------------------|-------|
-    | eGFR < 30 mL/min               | 1.0   |
-    | 30 mL/min \<= eGFR < 60 mL/min | 0.5   |
-    | eGFR >= 60 mL/min              | 0.0   |
-
-    If the eGFR is NaN, set score to zero (TODO: fall back to ICD-10
-    codes in this case)
-
-    Args:
-        has_index_egfr: Dataframe having the column `index_egfr` (in units of mL/min)
-            with the eGFR measurement at index, or NaN which means no eGFR
-            measurement was found at the index.
-
-    Returns:
-        A series containing the CKD ARC criterion, based on the eGFR at
-            index.
+def scores(edit_data: dict[str, str | int | float | None]) -> dict[str, float]:
+    """Return a dictionary of the ARC score for each criterion
     """
 
-    # Replace NaN values for now with 100 (meaning score 0.0)
-    df = has_index_egfr["index_egfr"].fillna(90)
-
-    # Using a high upper limit to catch any high eGFR values. In practice,
-    # the highest value is 90 (which comes from the string ">90" in the database).
-    return cut(df, [0, 30, 60, 10000], right=False, labels=[1.0, 0.5, 0.0])
-
-
-def anaemia(has_index_hb_and_gender: DataFrame) -> Series:
-    """Calculate the ARC HBR anaemia (low Hb) criterion
-
-    Calculates anaemia based on the worst (lowest) index Hb measurement
-    and gender currently. Should be modified to take most recent Hb value
-    or clinical code.
-
-    Args:
-        has_index_hb_and_gender: Dataframe having the column `index_hb` containing the
-            Hb measurement (g/dL) at the index event, or NaN if no Hb measurement
-            was made. Also contains `gender` (categorical with categories "male",
-            "female", and "unknown").
-
-    Returns:
-        A series containing the HBR score for the index episode.
-    """
-
-    df = has_index_hb_and_gender
-
-    # Evaluated in order
-    arc_score_conditions = [
-        df["index_hb"] < 11.0,  # Major for any gender
-        df["index_hb"] < 11.9,  # Minor for any gender
-        (df["index_hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
-        df["index_hb"] >= 12.9,  # None for any gender
+    this_module = sys.modules[__name__]
+        
+    criteria = [
+        "age",
+        "oac",
+        "cancer",
+        "nsaid",
+        "prior_surgery_trauma",
+        "planned_surgery",
+        "cirrhosis_ptl_hyp",
+        "hb",
+        "egfr",
+        "platelets",
+        "prior_bleeding",
+        "prior_ich_stroke",
     ]
-    arc_scores = [1.0, 0.5, 0.5, 0.0]
 
-    # Default is used to fill missing Hb score with 0.0 for now. TODO: replace with
-    # fall-back to recent Hb, or codes.
-    return Series(
-        np.select(arc_score_conditions, arc_scores, default=0.0),
-        index=df.index,
-    )
+    scores = {}
+    for criterion in criteria:
+        calc = getattr(this_module, f"{criterion}_score")
+        scores[f"{criterion}_score"] = calc(edit_data)
 
+    return scores
 
-def tcp(has_index_platelets: DataFrame) -> Series:
-    """Calculate the ARC HBR thrombocytopenia (low platelet count) criterion
-
-    The score is 1.0 if platelet count < 100e9/L, otherwise it is 0.0.
-
-    Args:
-        has_index_platelets: Has column `index_platelets`, which is the
-            platelet count measurement in the index.
-
-    Returns:
-        Series containing the ARC score
+def all_scores(edit_records: list[dict[str, str | int | float | None]]):
+    """Calculate ARC score data for all patients
     """
-    return Series(
-        np.where(has_index_platelets["index_platelets"] < 100, 1.0, 0),
-        index=has_index_platelets.index,
-    )
+    records = []
+    for edit_data in edit_records:
+        edit_scores = scores(edit_data)
+        edit_scores["t_number"] = edit_data["t_number"]
+        records.append(edit_scores)
+    return pd.DataFrame.from_records(records)
+
+
+def age_score(data) -> float | None:
+    if data["age"] is None:
+        return None
+    elif data["age"] < 75:
+        return 0.0
+    else: 
+        return 0.5
+
+def oac_score(data) -> float | None:
+    if data["oac"] is None:
+        return None
+    elif data["oac"] == "Yes":
+        return 1.0
+    else: 
+        return 0.0
+
+def cancer_score(data) -> float | None:
+    if data["cancer"] is None:
+        return None
+    elif data["cancer"] == "Yes":
+        return 1.0
+    else: 
+        return 0.0
     
+def nsaid_score(data) -> float | None:
+    if data["nsaid"] is None:
+        return None
+    elif data["nsaid"] == "Yes":
+        return 0.5
+    else: 
+        return 0.0
+
+def prior_surgery_trauma_score(data) -> float | None:
+    if data["prior_surgery_trauma"] is None:
+        return None
+    elif data["prior_surgery_trauma"] == "Yes":
+        return 1.0
+    else: 
+        return 0.0
+
+def planned_surgery_score(data) -> float | None:
+    if data["planned_surgery"] is None:
+        return None
+    elif data["planned_surgery"] == "Yes":
+        return 1.0
+    else: 
+        return 0.0
     
-def prior_bleeding(has_prior_bleeding: DataFrame) -> Series:
-    """Calculate the prior bleeding/transfusion ARC HBR criterion
-
-    This function takes a dataframe with a column prior_bleeding_12
-    with a count of the prior bleeding events in the previous year.
-
-    TODO: Input needs a separate column for bleeding in 6 months and
-    bleeding in a year, so distinguish 0.5 from 1. Also need to add
-    transfusion.
-
-    Args:
-        has_prior_bleeding: Has a column `prior_bleeding_12` with a count
-            of the number of bleeds occurring one year before the index.
-            Has `episode_id` as the index.
-
-    Returns:
-        The ARC HBR bleeding/transfusion criterion (0.0, 0.5, or 1.0)
+def cirrhosis_ptl_hyp_score(data) -> float | None:
+    if data["cirrhosis_ptl_hyp"] is None:
+        return None
+    elif data["cirrhosis_ptl_hyp"] == "Yes":
+        return 1.0
+    else: 
+        return 0.0
+    
+def hb_score(data) -> float | None:
+    """Anaemia score
     """
-    return Series(
-        np.where(has_prior_bleeding["prior_bleeding_12"] > 0, 0.5, 0),
-        index=has_prior_bleeding.index,
-    )
+    hb = data["hb"]
+    gender = data["gender"]
+
+    # Need to handle gender None
+    if hb is None:
+        return None
+    elif hb < 11.0: # Major for any gender
+        return 1.0 
+    elif hb < 11.9: # Minor for any gender
+        return 0.5
+    elif (hb < 12.9) and (gender == "Male"):
+        return 0.5
+    else:
+        return 0.0
+
+def egfr_score(data) -> float | None:
+    """Renal function score
+    """
+    egfr = data["egfr"]
+
+    if egfr is None:
+        return None
+    elif egfr < 30.0:
+        return 1.0 
+    elif egfr < 60.0:
+        return 0.5
+    else:
+        return 0.0
+    
+def platelets_score(data) -> float | None:
+    """Thrombocytopenia score
+    """
+    if data["platelets"] is None:
+        return None
+    elif data["platelets"] < 100:
+        return 1.0
+    else: 
+        return 0.0
+
+def prior_bleeding_score(data) -> float | None:
+    if data["prior_bleeding"] is None:
+        return None
+    elif data["prior_bleeding"] == "< 6 months or recurrent":
+        return 1.0
+    elif data["prior_bleeding"] == "< 12 months":
+        return 0.5
+    else:
+        return 0.0
+
+def prior_ich_stroke_score(data) -> float | None:
+    if data["prior_ich_stroke"] is None:
+        return None
+    elif data["prior_ich_stroke"] == "bAVM, ICH, or moderate/severe ischaemic stroke < 6 months":
+        return 1.0
+    elif data["prior_ich_stroke"] == "Any prior ischaemic stroke":
+        return 0.5
+    else:
+        return 0.0

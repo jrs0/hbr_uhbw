@@ -1,404 +1,137 @@
 import streamlit as st
+from editor import editor
+from mock_patient import Random
+import arc
+
 import pandas as pd
+from st_aggrid import AgGrid, JsCode, GridOptionsBuilder
 
-import components
-import utils
-
-
-def age_score(data) -> float | None:
-    if data["age"] is None:
-        return None
-    elif data["age"] < 75:
-        return 0.0
-    else: 
-        return 0.5
-
-def oac_score(data) -> float | None:
-    if data["oac"] is None:
-        return None
-    elif data["oac"] == "Yes":
-        return 1.0
-    else: 
-        return 0.0
-
-def cancer_score(data) -> float | None:
-    if data["cancer"] is None:
-        return None
-    elif data["cancer"] == "Yes":
-        return 1.0
-    else: 
-        return 0.0
+# This is a mock -- replace will function that fetches real data
+@st.cache_data
+def get_init_records():
+    seed = 6
+    random = Random(seed=seed)
+    return [random.random_patient() for n in range(10)]
     
-def nsaid_score(data) -> float | None:
-    if data["nsaid"] is None:
-        return None
-    elif data["nsaid"] == "Yes":
-        return 0.5
-    else: 
-        return 0.0
-
-def prior_surgery_trauma_score(data) -> float | None:
-    if data["prior_surgery_trauma"] is None:
-        return None
-    elif data["prior_surgery_trauma"] == "Yes":
-        return 1.0
-    else: 
-        return 0.0
-
-def planned_surgery_score(data) -> float | None:
-    if data["planned_surgery"] is None:
-        return None
-    elif data["planned_surgery"] == "Yes":
-        return 1.0
-    else: 
-        return 0.0
-    
-def cirrhosis_ptl_hyp_score(data) -> float | None:
-    if data["cirrhosis_ptl_hyp"] is None:
-        return None
-    elif data["cirrhosis_ptl_hyp"] == "Yes":
-        return 1.0
-    else: 
-        return 0.0
-    
-def hb_score(data) -> float | None:
-    """Anaemia score
-    """
-    hb = data["hb"]
-    gender = data["gender"]
-    
-    if hb < 11.0: # Major for any gender
-        return 1.0 
-    elif hb < 11.9: # Minor for any gender
-        return 0.5
-    elif (hb < 12.9) and (gender == "Male"):
-        return 0.5
-    else:
-        return 0.0
-
-def egfr_score(data) -> float | None:
-    """Renal function score
-    """
-    egfr = data["egfr"]
-    
-    if egfr < 30.0:
-        return 1.0 
-    elif egfr < 60.0:
-        return 0.5
-    else:
-        return 0.0
-    
-def platelets_score(data) -> float | None:
-    """Thrombocytopenia score
-    """
-    if data["platelets"] is None:
-        return None
-    elif data["platelets"] < 100:
-        return 1.0
-    else: 
-        return 0.0
-
-def prior_bleeding_score(data) -> float | None:
-    if data["prior_bleeding"] is None:
-        return None
-    elif data["prior_bleeding"] == "< 6 months or recurrent":
-        return 1.0
-    elif data["prior_bleeding"] == "< 12 months":
-        return 0.5
-    else:
-        return 0.0
-
-def prior_ich_stroke_score(data) -> float | None:
-    if data["prior_ich_stroke"] is None:
-        return None
-    elif data["prior_ich_stroke"] == "bAVM, ICH, or moderate/severe ischaemic stroke < 6 months":
-        return 1.0
-    elif data["prior_ich_stroke"] == "Any prior ischaemic stroke":
-        return 0.5
-    else:
-        return 0.0
-    
-def score_to_colour(score: float | None) -> str | None:
-    if score is None:
-        return None
-    elif score < 0.5:
-        return "green"
-    elif score < 1.0:
-        return "orange"
-    else:
-        return "red"
-
-def age_string(data) -> str:
-    if data["age"] is None:
-        return f":grey[missing]"
-    else:
-        score = age_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['age']}]"
-
-def oac_string(data) -> str:
-    if data["oac"] is None:
-        return f":grey[missing]"
-    else:
-        score = oac_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['oac']}]"
-
-def prior_surgery_trauma_string(data) -> str:
-    if data["prior_surgery_trauma"] is None:
-        return f":grey[missing]"
-    else:
-        score = prior_surgery_trauma_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['prior_surgery_trauma']}]"
-
-def planned_surgery_string(data) -> str:
-    if data["planned_surgery"] is None:
-        return f":grey[missing]"
-    else:
-        score = planned_surgery_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['planned_surgery']}]"
-    
-def cancer_string(data) -> str:
-    if data["cancer"] is None:
-        return f":grey[missing]"
-    else:
-        score = cancer_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['cancer']}]"
-    
-def nsaid_string(data) -> str:
-    if data["nsaid"] is None:
-        return f":grey[missing]"
-    else:
-        score = nsaid_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['nsaid']}]"
-    
-def gender_string(data) -> str:
-    if data["gender"] is None:
-        return f":grey[missing]"
-    else:
-        return data["gender"]
-
-def hb_string(data) -> str:
-    if data["hb"] is None:
-        return f":grey[missing]"
-    else:
-        score = hb_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['hb']:.1f} g/dL]"
-
-def egfr_string(data) -> str:
-    if data["egfr"] is None:
-        return f":grey[missing]"
-    else:
-        score = egfr_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['egfr']:.1f} mL/min]"
-    
-def platelets_string(data) -> str:
-    if data["platelets"] is None:
-        return f":grey[missing]"
-    else:
-        score = platelets_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['platelets']:.1f} ×10⁹/L]"
-
-def prior_bleeding_string(data) -> str:
-    if data["prior_bleeding"] is None:
-        return f":grey[missing]"
-    else:
-        score = prior_bleeding_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['prior_bleeding']}]"
-
-def prior_ich_stroke_string(data) -> str:
-    if data["prior_ich_stroke"] is None:
-        return f":grey[missing]"
-    else:
-        score = prior_ich_stroke_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['prior_ich_stroke']}]"
-    
-def cirrhosis_ptl_hyp_string(data) -> str:
-    if data["cirrhosis_ptl_hyp"] is None:
-        return f":grey[missing]"
-    else:
-        score = cirrhosis_ptl_hyp_score(data)
-        colour = score_to_colour(score)
-        return f":{colour}[{data['cirrhosis_ptl_hyp']}]"
-    
-def strike(value: str):
-    return f"~{value}~"
-
 st.set_page_config(layout="wide", page_title="ARC HBR Calculator")
 
-c = st.container(border=True)
-c.header("Raw Data")
+# Create the page layout container
+summary = st.container()
+detail = st.container()
+
+# Get the initial records and create the edited records variable
+init_records = get_init_records()
+if "edit_records" not in st.session_state:
+    st.session_state["edit_records"] = init_records
+edit_records = st.session_state["edit_records"]
+
+def create_adjust_records(init_records) -> list[dict[str, bool]]:
+
+    adjust_records = []
+    for record in init_records:
+        t_number = record["t_number"]
+        adjust_records.append({
+            "t_number": t_number,
+            "age": False,
+            "gender": False,
+            "oac": False,
+            "cancer": False,
+            "nsaid": False,
+            "prior_surgery_trauma": False,
+            "planned_surgery": False,
+            "cirrhosis_ptl_hyp": False,
+            "hb": False,
+            "egfr": False,
+            "platelets": False,
+            "prior_bleeding": False,
+            "prior_ich_stroke": False,
+        })
+
+    return adjust_records
+                            
+# Track the state of which values are adjusted
+if "adjust_records" not in st.session_state:
+    st.session_state["adjust_records"] = create_adjust_records(init_records)
+                              
+adjust_records = st.session_state["adjust_records"]
+
+init_records_df = pd.DataFrame.from_records(init_records)
+print(init_records_df)
+
+edit_records_df = pd.DataFrame.from_records(edit_records)
+print(edit_records_df)
+
+# Calculate the ARC score based on the edited data
+edit_scores_df = arc.all_scores(edit_records)
+
+print(edit_scores_df)
+
+# Join all the data together
+all_df = edit_records_df.merge(edit_scores_df, on="t_number", how="left")
+
+# Create the summary box
+grid_builder = GridOptionsBuilder.from_dataframe(all_df)
+grid_options = grid_builder.build()
 
 
-init_data = {
-    "age": 71,
-    "oac": "Yes",
-    "gender": "Male",
-    "hb": 11.2,
-    "platelets": 99,
-    "egfr": 50,
-    "prior_bleeding": None,
-    "cirrhosis_ptl_hyp": None,
-    "nsaid": "No",
-    "cancer": "No",
-    "prior_ich_stroke": None,
-    "prior_surgery_trauma": "No",
-    "planned_surgery": None,
-}
+st.write(adjust_records)
 
-if "edit_data" not in st.session_state:
-    st.session_state["edit_data"] = init_data
+# Configure other properties directly
+grid_options["tooltipShowDelay"] = 500
+grid_options["rowSelection"] = "single"
 
-# For convenience
-edit_data = st.session_state["edit_data"]
+grid_return = AgGrid(
+    all_df, grid_options,
+    allow_unsafe_jscode=True,
+    enable_enterprise_modules=False
+)
 
-def age_editor(parent, edit):
-    return parent.number_input(
-        "Edit age", label_visibility="collapsed", step=1, disabled=not edit
-    )
+def get_record_by_tnumber(
+        t_number: str,
+        records: list[dict[str, str | int | float | None]]
+) -> dict[str, str | int | float | None] | None:
 
-def oac_editor(parent, edit):
-    return parent.selectbox(
-        "Edit oac", ["Yes", "No"], label_visibility="collapsed", disabled=not edit
-    )
+    for record in records:
+        if record["t_number"] == t_number:
+            return record
 
-def prior_surgery_trauma_editor(parent, edit):
-    return parent.selectbox(
-        "Edit surgery/trauma", ["Yes", "No"], label_visibility="collapsed", disabled=not edit
-    )
+    return None
 
-def planned_surgery_editor(parent, edit):
-    return parent.selectbox(
-        "Edit planned surgery", ["Yes", "No"], label_visibility="collapsed", disabled=not edit
-    )
+def update_record_by_tnumber(
+        t_number: str,
+        new_record: dict[str, str | int | float | None],
+        records: list[dict[str, str | int | float | None]],
+):
 
-def cancer_editor(parent, edit):
-    return parent.selectbox(
-        "Edit cancer", ["Yes", "No"], label_visibility="collapsed", disabled=not edit
-    )
+    for n in range(len(records)):
+        if records[n]["t_number"] == t_number:
+            records[n] = new_record
+            
+# Get selected row (if any)
+sel = grid_return.selected_rows
 
-def nsaid_editor(parent, edit):
-    return parent.selectbox(
-        "Edit nsaid", ["Yes", "No"], label_visibility="collapsed", disabled=not edit
-    )
+if sel is not None:
 
-def cirrhosis_ptl_hyp_editor(parent, edit):
-    return parent.selectbox(
-        "Edit cirrhosis", ["Yes", "No"], label_visibility="collapsed", disabled=not edit
-    )
+    # Expect at most one row
+    if len(sel) > 1:
+        st.error("Unexpected selection of more than one row")
+    
+    t_number = sel["t_number"][0]
+    print(t_number)
+    
+    init_data = get_record_by_tnumber(t_number, init_records)
+    edit_data = get_record_by_tnumber(t_number, edit_records)
+    adjusts = get_record_by_tnumber(t_number, adjust_records)
+    
+    # Edit the raw data and return the edited version
+    edit_data, adjusts = editor(detail, init_data, edit_data, adjusts)
 
-def gender_editor(parent, edit):
-    return parent.selectbox(
-        "Edit gender", ["Male", "Female"], label_visibility="collapsed", disabled=not edit
-    )
+    print(edit_data)
+    
+    # Write back the edited data
+    update_record_by_tnumber(t_number, edit_data, edit_records)
+    st.session_state["edit_records"] = edit_records
 
-def hb_editor(parent, edit):
-    return parent.number_input(
-        "Edit Hb", label_visibility="collapsed", step=0.1, disabled=not edit
-    )
-
-def egfr_editor(parent, edit):
-    return parent.number_input(
-        "Edit eGFR", label_visibility="collapsed", step=1, disabled=not edit
-    )
-
-def platelets_editor(parent, edit):
-    return parent.number_input(
-        "Edit Platelets", label_visibility="collapsed", step=0.1, disabled=not edit
-    )
-
-def prior_bleeding_editor(parent, edit):
-    return parent.selectbox(
-        "Edit Prior Bleeding",
-        [
-            "< 6 months or recurrent",
-            "< 12 months",
-            "No bleeding"
-        ],
-        label_visibility="collapsed", disabled=not edit
-    )
-
-def prior_ich_stroke_editor(parent, edit):
-    return parent.selectbox(
-        "Edit Prior ICH/Stroke",
-        [
-            "bAVM, ICH, or moderate/severe ischaemic stroke < 6 months",
-            "Any prior ischaemic stroke",
-            "No ICH/ischaemic stroke"
-        ],
-        label_visibility="collapsed", disabled=not edit
-    )
-
-def raw_data_input(col, editor_fn, string_fn, key, title, desc, icon, init_data, edit_data):
-    r = col.container(border=True)
-
-    icon_col, d = r.columns([0.2, 0.8])
-    utils.write_svg(icon_col, icon)
-
-    check_field, edit_field = r.columns([0.3, 0.7])
-    edit = check_field.checkbox("Adjust?", key=f"{key}_edit_checkbox")
-    result = editor_fn(edit_field, edit)
-    if edit:
-        edit_data[key] = result
-    else:
-        edit_data[key] = init_data[key]
-
-
-    # Get the initial value of the parameter
-    init_string = string_fn(init_data)
-
-    # Print the edit value if it is different
-    if edit_data[key] == init_data[key]:
-        full_string = init_string
-    else:
-        init_string = strike(init_string)
-        edit_string = string_fn(edit_data)
-        full_string = f"{init_string} {edit_string}"
-
-    d.write(f"**{title}: {full_string}**")
-    d.write(desc)
-
-print(init_data)
-print(edit_data)
-
-row = c.container()
-cols = row.columns(3)
-
-raw_data_input(cols[0], age_editor, age_string, "age", "Age", "", "static/elderly.svg", init_data, edit_data)
-raw_data_input(cols[1], gender_editor, gender_string, "gender", "Gender", "", "static/gender.svg", init_data, edit_data)
-raw_data_input(cols[2], hb_editor, hb_string, "hb", "Haemoglobin", "", "static/blood.svg", init_data, edit_data)
-
-row = c.container()
-cols = row.columns(3)
-
-raw_data_input(cols[0], platelets_editor, platelets_string, "platelets", "Platelets", "", "static/blood_test.svg", init_data, edit_data)
-raw_data_input(cols[1], egfr_editor, egfr_string, "egfr", "eGFR", "", "static/kidney.svg", init_data, edit_data)
-raw_data_input(cols[2], prior_bleeding_editor, prior_bleeding_string, "prior_bleeding", "Prior bleeding", "Prior bleeding must require hospitalisation or transfusion, and excludes intracranial bleeding.", "static/transfusion.svg", init_data, edit_data)
-
-row = c.container()
-cols = row.columns(3)
-
-raw_data_input(cols[0], oac_editor, oac_string, "oac", "OAC", "Anticipated long-term use of oral anticoagulants", "static/pill_bottle.svg", init_data, edit_data)
-raw_data_input(cols[1], cirrhosis_ptl_hyp_editor, cirrhosis_ptl_hyp_string, "cirrhosis_ptl_hyp", "Cirrhosis/Portal Hypertension", "Criterion requires both cirrhosis and portal hypertension.", "static/liver.svg", init_data, edit_data)
-raw_data_input(cols[2], nsaid_editor, nsaid_string, "nsaid", "Oral NSAID/Steroids", "Anticipated long-term use >= 4 days/week.", "static/pills.svg", init_data, edit_data)
-
-row = c.container()
-cols = row.columns(3)
-
-raw_data_input(cols[0], cancer_editor, cancer_string, "cancer", "Cancer", "Criterion requires diagnosis within 12 months or active cancer therapy.", "static/lungs.svg", init_data, edit_data)
-raw_data_input(cols[1], prior_ich_stroke_editor, prior_ich_stroke_string, "prior_ich_stroke", "ICH/Ischaemic Stroke", "", "static/brain.svg", init_data, edit_data)
-raw_data_input(cols[2], prior_surgery_trauma_editor, prior_surgery_trauma_string, "prior_surgery_trauma", "Prior Major Surgery/Trauma", "Criterion requires either major surgery or trauma in past 30 days.", "static/scalpel.svg", init_data, edit_data)
-
-row = c.container()
-cols = row.columns(3)
-
-raw_data_input(cols[0], planned_surgery_editor, planned_surgery_string, "planned_surgery", "Planned Surgery on DAPT", "Criterion requires major non-deferrable surgery planned while will be on DAPT", "static/scalpel.svg", init_data, edit_data)
+    # Write back the adjust record
+    update_record_by_tnumber(t_number, adjusts, adjust_records)
+    st.session_state["adjust_records"] = adjust_records
