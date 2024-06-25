@@ -4,7 +4,6 @@ from mock_patient import Random
 import arc
 
 import pandas as pd
-from st_aggrid import AgGrid, JsCode, GridOptionsBuilder
 
 # This is a mock -- replace will function that fetches real data
 @st.cache_data
@@ -70,21 +69,7 @@ print(edit_scores_df)
 all_df = edit_records_df.merge(edit_scores_df, on="t_number", how="left")
 
 # Create the summary box
-grid_builder = GridOptionsBuilder.from_dataframe(all_df)
-grid_options = grid_builder.build()
-
-
-st.write(adjust_records)
-
-# Configure other properties directly
-grid_options["tooltipShowDelay"] = 500
-grid_options["rowSelection"] = "single"
-
-grid_return = AgGrid(
-    all_df, grid_options,
-    allow_unsafe_jscode=True,
-    enable_enterprise_modules=False
-)
+summary.dataframe(all_df)
 
 def get_record_by_tnumber(
         t_number: str,
@@ -108,7 +93,7 @@ def update_record_by_tnumber(
             records[n] = new_record
             
 # Get selected row (if any)
-sel = grid_return.selected_rows
+sel = None
 
 if sel is not None:
 
