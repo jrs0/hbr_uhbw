@@ -1,4 +1,5 @@
 import arc
+import sys
 
 def score_to_colour(score: float | None) -> str | None:
     if score is None:

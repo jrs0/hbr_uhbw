@@ -45,7 +45,6 @@ class Random:
         """
         return {
             "name": self.random_name(),
-            "t_number": self.random_tnumber(),
             "age": self.random_int(70, 10),
             "oac": self.random_choice(["Yes", "No"]),
             "gender": self.random_choice(["Male", "Female"]),

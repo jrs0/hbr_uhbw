@@ -1,5 +1,5 @@
 import sys
-import pandas as pd
+import utils
 
 def scores(edit_data: dict[str, str | int | float | None]) -> dict[str, float]:
     """Return a dictionary of the ARC score for each criterion
@@ -29,16 +29,16 @@ def scores(edit_data: dict[str, str | int | float | None]) -> dict[str, float]:
 
     return scores
 
-def all_scores(edit_records: list[dict[str, str | int | float | None]]):
-    """Calculate ARC score data for all patients
+def all_scores(records: dict[str, [dict[str, str | int | float | None]]]):
+    """Calculate ARC score data for all patients, as a dataframe
     """
-    records = []
-    for edit_data in edit_records:
-        edit_scores = scores(edit_data)
-        edit_scores["t_number"] = edit_data["t_number"]
-        records.append(edit_scores)
-    return pd.DataFrame.from_records(records)
 
+    score_records = {}
+    for t_number, record in records.items():
+        score_record = scores(record)
+        score_records[t_number] = score_record
+
+    return utils.records_to_df(score_records)
 
 def age_score(data) -> float | None:
     if data["age"] is None:

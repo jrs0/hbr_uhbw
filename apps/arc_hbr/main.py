@@ -75,7 +75,6 @@ arc_score.insert(1, "arc_score_total", arc_score.filter(regex="arc_score*").sum(
 
 grid_builder = GridOptionsBuilder.from_dataframe(arc_score)
 
-
 def make_arc_score_styler(arc_field: str) -> JsCode:
     """Create a javascript styler for ARC score cells"""
     return JsCode(
