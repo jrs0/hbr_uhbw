@@ -35,7 +35,11 @@ def make_arc_score_styler(arc_field: str) -> JsCode:
     return JsCode(
         f"""
         function(params) {{
-            if (params.data.{arc_field} < 0.5) {{
+            if (params.data.{arc_field} === null) {{
+                return {{
+                    'color': 'grey',    
+                }}
+            }} else if (params.data.{arc_field} < 0.5) {{
                 return {{
                     'color': 'green',
                 }}
@@ -89,26 +93,28 @@ def show_summary_table(parent, init_records, edit_records, selected_row):
         "egfr": "mL/min",
     }
 
-    # Logic needs to preserve None values
+    # Fix this overcomplicated logic
     for col in columns:
 
         df[col] = df[col].astype("object")
         
         for n in range(len(df)):
             edited = df.loc[n, f"{col}_edited"]
-            value = df.loc[n, col]
+            value = str(df.loc[n, col])
             
-            if (value is not None) and not pd.isna(value):
+            if (value != "None") and (value != "nan"):
                 if col in units:
                     value = f"{value} {units[col]}"
                 if edited:
                     value = f"✎ {value}"
+            else:
+                value = "Missing"
 
             df.loc[n, col] = value
                 
     grid_builder = GridOptionsBuilder.from_dataframe(df)
 
-
+    print(df)
 
     grid_builder.configure_column(
         field="name",
