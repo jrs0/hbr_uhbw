@@ -43,14 +43,17 @@ if "selected_row" not in ss:
 
 try:
     selected_row = ss["summary_table_key"]["selectedItems"][0]["rowIndex"]
-except (KeyError, IndexError):
+except:
     selected_row = 0
 
 edit_records = ss["edit_records"]
 
+# Print the summary table
 grid_return = summary_data.show_summary_table(summary, init_records, edit_records, selected_row)
 
 def update_edit_records(t_number, key):
+    """Callback to update edit_records on any change in the editor
+    """
     print(f"Changing state of {key}")
     checkbox_state = ss[f"{key}_edit_checkbox"]
     print(f"New edit-checkbox state is {checkbox_state}")
@@ -68,7 +71,7 @@ def update_edit_records(t_number, key):
 sel = grid_return.selected_rows
 if sel is not None:
 
-    detail.write(sel)
+    print("Printing detail")
 
     data = utils.df_to_records(sel)
 
@@ -78,12 +81,24 @@ if sel is not None:
     t_number = next(iter(data))
     arc_total = data[t_number]["arc_total"]
     
+    # Regenerate the summary records (for some reason
+    # ag grid does not return the updated data). 
+    # init and edit records are up to date here because
+    # of the callback. This is overkill because of
+    # all the recomputing, but it works for now.
+    summary_records = summary_data.get_records(init_records, edit_records)    
+    scores = arc.all_scores(summary_records)
+    summary_df = utils.records_to_df(summary_records)
+    df = summary_df.merge(scores, on="t_number", how="left")
+    df["arc_total"] = df.filter(regex="score").sum(axis=1)
+    arc_total = df.set_index("t_number").loc[t_number, "arc_total"]
+    
     init_record = init_records[t_number]
     edit_record = edit_records[t_number]
-
+    
     callback = lambda key: update_edit_records(t_number, key)
-    edit_record = editor(detail, t_number, arc_total, init_record, edit_record, callback)
+    editor(detail, t_number, arc_total, init_record, edit_record, callback)
+else:
+    print("Got none")
     
-    edit_records[t_number] = edit_record
-
-    
+print("End")

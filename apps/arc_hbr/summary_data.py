@@ -1,4 +1,4 @@
-from st_aggrid import AgGrid, JsCode, GridOptionsBuilder
+from st_aggrid import AgGrid, JsCode, GridOptionsBuilder, GridUpdateMode
 import utils
 import arc
 import pandas as pd
@@ -124,7 +124,7 @@ def show_summary_table(parent, init_records, edit_records, selected_row):
         pinned="left",
         lockPinned=True,
         headerName="ARC Score",
-        cellStyle=make_arc_score_styler("arc_score")
+        cellStyle=make_arc_score_styler("arc_total")
     )
 
     grid_builder.configure_column(
@@ -156,7 +156,7 @@ def show_summary_table(parent, init_records, edit_records, selected_row):
     )
 
     grid_builder.configure_column(
-        field="cirrhosis_ptl_hyp", headerName="Cirrhosis with portal hypertension", cellStyle=make_arc_score_styler("prior_bleeding_score")
+        field="cirrhosis_ptl_hyp", headerName="Cirrhosis with portal hypertension", cellStyle=make_arc_score_styler("cirrhosis_ptl_hyp_score")
     )
 
     grid_builder.configure_column(
@@ -203,5 +203,6 @@ def show_summary_table(parent, init_records, edit_records, selected_row):
             grid_options,
             allow_unsafe_jscode=True,
             enable_enterprise_modules=False,
-            key="summary_table_key"
+            key="summary_table_key",
+            update_mode = GridUpdateMode.VALUE_CHANGED | GridUpdateMode.SELECTION_CHANGED
         )
