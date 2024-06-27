@@ -98,7 +98,7 @@ def raw_data_input(col, editor_fn, string_fn, key, title, desc, icon, init_data,
     # Get the previous edited state then update according to
     # the value of the checkbox
     edit = edit_data[key] is not None
-    edit = check_field.checkbox("Edit?", key=f"{key}_edit_checkbox", value=edit, on_change=callback, args=(key,))
+    edit = check_field.checkbox("✎ Edit?", key=f"{key}_edit_checkbox", value=edit, on_change=callback, args=(key,))
     
     result = editor_fn(edit_field, edit, callback)
     if edit:
