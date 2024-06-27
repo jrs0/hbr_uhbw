@@ -37,9 +37,18 @@ init_records = get_init_records()
 if "edit_records" not in ss:
     ss["edit_records"] = utils.get_empty_edit_records(init_records)
 
+if "selected_row" not in ss:
+    pass
+
+
+try:
+    selected_row = ss["summary_table_key"]["selectedItems"][0]["rowIndex"]
+except (KeyError, IndexError):
+    selected_row = 0
+
 edit_records = ss["edit_records"]
 
-grid_return = summary_data.show_summary_table(summary, init_records, edit_records)
+grid_return = summary_data.show_summary_table(summary, init_records, edit_records, selected_row)
 
 def update_edit_records(t_number, key):
     print(f"Changing state of {key}")

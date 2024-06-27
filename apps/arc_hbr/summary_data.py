@@ -52,7 +52,7 @@ def make_arc_score_styler(arc_field: str) -> JsCode:
         """
     )
     
-def show_summary_table(parent, init_records, edit_records):
+def show_summary_table(parent, init_records, edit_records, selected_row):
     """Calculate the summary and show as a AG grid
     """
     
@@ -189,16 +189,19 @@ def show_summary_table(parent, init_records, edit_records):
     for col in hidden_cols:
         grid_builder.configure_column(field=col, hide=True)
 
+    grid_builder.configure_selection("single", pre_selected_rows = [selected_row])
+
     grid_options = grid_builder.build()
         
     # Configure other properties directly
     grid_options["tooltipShowDelay"] = 500
-    grid_options["rowSelection"] = "single"
+    #grid_options["rowSelection"] = "single"
 
     with parent:
         return AgGrid(
             df,
             grid_options,
             allow_unsafe_jscode=True,
-            enable_enterprise_modules=False
+            enable_enterprise_modules=False,
+            key="summary_table_key"
         )
