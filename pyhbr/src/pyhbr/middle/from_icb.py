@@ -8,7 +8,6 @@ from datetime import date
 import datetime as dt
 from pyhbr.clinical_codes import counting, ClinicalCodeTree
 
-
 def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
     """Get the episodes table
 
