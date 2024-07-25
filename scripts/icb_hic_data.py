@@ -24,19 +24,12 @@ importlib.reload(counting)
 # in the future to ensure all recent data is fetched.
 # Index spell data is limited based on the min/max
 # dates seen in all the datasets below.
-start_date = dt.date(2019, 1, 1)
+start_date = dt.date(2018, 1, 1)
 end_date = dt.date(2025, 1, 1)
 
-# Fetch the list of episodes from the HIC table -- this will
-# speed up subsequent queries
-msa_engine =  common.make_engine(database="modelling_sql_area")
-hic_episodes = common.get_data(msa_engine, hic_icb.episode_id_query)
-patient_ids = hic_episodes.patient_id.unique()
-
-# Get the raw HES data (this takes a long time ~ 20 minutes)
+# Get the raw HES data (this takes a long time ~ 20 minutes, up to 2 hours
+# at UHBW).
 abi_engine = common.make_engine(database="abi")
-dfs = common.get_data_by_patient(abi_engine, icb.sus_query, patient_ids, start_date, end_date)
-
 raw_sus_data = from_icb.get_raw_sus_data(abi_engine, start_date, end_date)
 
 # Note that the SUS data is limited to in-area patients only, so that
@@ -47,7 +40,13 @@ raw_sus_data = from_icb.get_raw_sus_data(abi_engine, start_date, end_date)
 # The full dataset is large, so using a save point
 # to speed up script development
 common.save_item(raw_sus_data, "raw_sus_data")
-raw_sus_data = common.load_item("raw_sus_data")
+raw_sus_data, raw_sus_data_path = common.load_item("raw_sus_data")
+
+# Fetch the list of episodes from the HIC table -- this will
+# speed up subsequent queries
+msa_engine =  common.make_engine(database="modelling_sql_area")
+hic_episodes = common.get_data(msa_engine, hic_icb.episode_id_query)
+patient_ids = hic_episodes.patient_id.unique()
 
 # Read the code groups and reduce to a table. The remainder of the code
 # uses the code groups dataframe, which you can either get from the code

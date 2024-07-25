@@ -392,7 +392,7 @@ def save_item(
         pickle.dump(item, file)
 
 
-def load_item(name: str, interactive: bool = False, save_dir: str = "save_data") -> Any:
+def load_item(name: str, interactive: bool = False, save_dir: str = "save_data") -> (Any, Path):
     """Load a previously saved item (pickle) from file
 
     Use this function to load a file that was previously saved using
@@ -414,8 +414,9 @@ def load_item(name: str, interactive: bool = False, save_dir: str = "save_data")
         save_fir: Which folder to load the item from.
 
     Returns:
-        The python object loaded from file, or None for an interactive load that
-            is cancelled by the user.
+        A tuple, with the python object loaded from file as first element and the
+            Path to the item as the second element, or None if the user cancelled
+            an interactive load.
 
     """
     if interactive:
@@ -425,7 +426,7 @@ def load_item(name: str, interactive: bool = False, save_dir: str = "save_data")
 
     if item_path is None:
         print("Aborted (interactive) load item")
-        return
+        return None
 
     print(f"Loading {item_path}")
 
@@ -433,7 +434,7 @@ def load_item(name: str, interactive: bool = False, save_dir: str = "save_data")
     # pandas must be installed (otherwise you will get module not found).
     # The same goes for a pickle storing an object from any other library.
     with open(item_path, "rb") as file:
-        return pickle.load(file)
+        return pickle.load(file), item_path
 
 def chunks(patient_ids: list[str], n: int) -> list[list[str]]:
     """Divide a list of patient ids into n-sized chunks
