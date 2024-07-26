@@ -8,13 +8,15 @@ import pandas as pd
 from pyhbr import common, clinical_codes
 from pyhbr.analysis import acs
 from pyhbr.clinical_codes import counting
-from pyhbr.data_source import icb, hic_icb
-from pyhbr.middle import from_icb
+from pyhbr.data_source import icb, hic_icb, hic
+from pyhbr.middle import from_icb, from_hic
 
 importlib.reload(common)
 importlib.reload(acs)
 importlib.reload(from_icb)
+importlib.reload(from_hic)
 importlib.reload(icb)
+importlib.reload(hic)
 importlib.reload(hic_icb)
 importlib.reload(clinical_codes)
 importlib.reload(counting)
@@ -46,7 +48,10 @@ raw_sus_data, raw_sus_data_path = common.load_item("raw_sus_data")
 # speed up subsequent queries
 msa_engine =  common.make_engine(database="modelling_sql_area")
 hic_episodes = common.get_data(msa_engine, hic_icb.episode_id_query)
-patient_ids = hic_episodes.patient_id.unique()
+hic_patient_ids = hic_episodes.patient_id.unique()
+
+# Reduce the sus data to only the patients in the HIC data
+reduced_sus_data = raw_sus_data[raw_sus_data["patient_id"].isin(hic_patient_ids)]
 
 # Read the code groups and reduce to a table. The remainder of the code
 # uses the code groups dataframe, which you can either get from the code
@@ -56,7 +61,7 @@ procedure_codes = clinical_codes.load_from_package("opcs4_arc_hbr.yaml")
 code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
 
 # HES data + patient demographics
-episodes, codes = from_icb.get_episodes_and_codes(raw_sus_data, code_groups)
+episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 # Modify the code groups used to define the index event here.
@@ -67,26 +72,23 @@ patient_ids = index_spells["patient_id"].unique()
 
 # Get date of death and cause of death from registry data
 date_of_death, cause_of_death = from_icb.get_mortality(
-    engine, start_date, end_date, code_groups
+    abi_engine, start_date, end_date, code_groups
 )
 
-# Fetch all the primary care data, narrowed by patient
-engine = common.make_engine(database="modelling_sql_area")
-
-# Primary care prescriptions
+# Primary care prescriptions (very slow)
 dfs = common.get_data_by_patient(
-    engine, icb.primary_care_prescriptions_query, patient_ids
+    msa_engine, icb.primary_care_prescriptions_query, patient_ids
 )
 primary_care_prescriptions = pd.concat(dfs).reset_index(drop=True)
 
-# Primary care measurements
+# Primary care measurements (slow)
 dfs = common.get_data_by_patient(
-    engine, icb.primary_care_measurements_query, patient_ids
+    msa_engine, icb.primary_care_measurements_query, patient_ids
 )
 primary_care_measurements = pd.concat(dfs).reset_index(drop=True)
 
-# Primary care attributes
-dfs = common.get_data_by_patient(engine, icb.primary_care_attributes_query, patient_ids)
+# Primary care attributes (slow)
+dfs = common.get_data_by_patient(msa_engine, icb.primary_care_attributes_query, patient_ids)
 with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
 primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
 
@@ -123,8 +125,14 @@ index_spells = index_spells[
     & (index_spells["spell_start"] > index_start)
 ]
 
+# Fetch the raw lab results data
+lab_results = from_icb.get_unlinked_lab_results(msa_engine)  # really slow
+
+# Fetch raw secondary-care prescriptions data
+secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(msa_engine, "HIC_Pharmacy")  # fast
+
 # Combine the datasets for saving
-icb_basic_tmp = {
+icb_hic_tmp = {
     # Datasets
     "index_spells": index_spells,
     "episodes": episodes,
@@ -135,6 +143,8 @@ icb_basic_tmp = {
     "primary_care_attributes": primary_care_attributes,
     "primary_care_measurements": primary_care_measurements,
     "primary_care_prescriptions": primary_care_prescriptions,
+    "secondary_care_prescriptions": secondary_care_prescriptions,
+    "lab_results": lab_results,
     # Metadata
     "start_date": start_date,
     "end_date": end_date,
@@ -142,13 +152,15 @@ icb_basic_tmp = {
     "common_end": common_end,
     "index_start": index_start,
     "index_end_date": index_end,
+    # Other items
+    "raw_sus_data_file": raw_sus_data_path.name,
 }
 
 # Save point for the intermediate data
-common.save_item(icb_basic_tmp, "icb_basic_tmp")
+common.save_item(icb_hic_tmp, "icb_hic_tmp")
 
 # Load the data from file
-icb_basic_tmp = common.load_item("icb_basic_tmp")
+icb_hic_tmp = common.load_item("icb_hic_tmp")
 
 # Extract some datasets for convenience
 episodes = icb_basic_tmp["episodes"]

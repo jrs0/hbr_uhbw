@@ -73,7 +73,7 @@ def check_const_column(df: pd.DataFrame, col_name: str, expect: str):
         )
 
 
-def get_unlinked_lab_results(engine: Engine) -> pd.DataFrame:
+def get_unlinked_lab_results(engine: Engine, table_name: str = "cv1_pathology_blood") -> pd.DataFrame:
     """Get laboratory results from the HIC database (unlinked to episode)
 
     This function returns data for the following three
@@ -94,6 +94,8 @@ def get_unlinked_lab_results(engine: Engine) -> pd.DataFrame:
 
     Args:
         engine: The connection to the database
+        table_name: This defaults to "cv1_pathology_blood" for UHBW, but
+            can be overwritten with "HIC_Bloods" for ICB.
 
     Returns:
         Table of laboratory results, including Hb (haemoglobin),
@@ -196,7 +198,7 @@ def filter_by_medicine(df: DataFrame) -> DataFrame:
 
     return df
 
-def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
+def get_unlinked_prescriptions(engine: Engine, table_name: str = "cv1_pharmacy_prescribing") -> pd.DataFrame:
     """Get relevant prescriptions from the HIC data (unlinked to episode)
 
     This function is tailored towards the calculation of the
@@ -212,6 +214,8 @@ def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
 
     Args:
         engine: The connection to the database
+        table_name: Defaults to "cv1_pharmacy_prescribing" for UHBW, but can
+            be overwritten by "HIC_Pharmacy" for ICB.
 
     Returns:
         The table of prescriptions, including the patient_id,
@@ -220,7 +224,7 @@ def get_unlinked_prescriptions(engine: Engine) -> pd.DataFrame:
             doses per day).
     """
 
-    df = get_data(engine, hic.pharmacy_prescribing_query)
+    df = get_data(engine, hic.pharmacy_prescribing_query, table_name)
 
     # Create a new `group` column containing the medicine type
     df = filter_by_medicine(df)

@@ -116,7 +116,6 @@ def procedures_query(engine: Engine) -> Select:
         table.col("procedure_code_opcs").label("code"),
     )
 
-
 def pathology_blood_query(engine: Engine, investigations: list[str]) -> Engine:
     """Get the table of blood test results in the HIC data
 
@@ -179,6 +178,7 @@ def pathology_blood_query(engine: Engine, investigations: list[str]) -> Engine:
     Returns:
         SQL query to retrieve blood tests table
     """
+    
     table = CheckedTable("cv1_pathology_blood", engine)
     return select(
         table.col("subject").cast(String).label("patient_id"),
@@ -193,8 +193,7 @@ def pathology_blood_query(engine: Engine, investigations: list[str]) -> Engine:
         table.col("result_upper_range"),
     ).where(table.col("investigation_code").in_(investigations))
 
-
-def pharmacy_prescribing_query(engine: Engine) -> Select:
+def pharmacy_prescribing_query(engine: Engine, table_name: str = "cv1_pharmacy_prescribing") -> Select:
     """Get medicines prescribed to patients over time
 
     This table contains information about medicines 
@@ -222,13 +221,22 @@ def pharmacy_prescribing_query(engine: Engine) -> Select:
 
     Args:
         engine: the connection to the database
+        table_name: This defaults to "cv1_pharmacy_prescribing" for UHBW,
+            but can be overwritten with "HIC_Pharmacy" for ICB.
 
     Returns:
         SQL query to retrieve procedures table
     """
-    table = CheckedTable("cv1_pharmacy_prescribing", engine)
+    
+    # This field name depends on UHBW vs. ICB.
+    if table_name == "cv1_pharmacy_prescribing":
+        patient_id_field = "subject"
+    else:
+        patient_id_field = "nhs_number"
+    
+    table = CheckedTable(table_name, engine)
     return select(
-        table.col("subject").cast(String).label("patient_id"),
+        table.col(patient_id_field).cast(String).label("patient_id"),
         table.col("order_date_time").label("order_date"),
         table.col("medication_name").label("name"),
         table.col("ordered_dose").label("dose"),

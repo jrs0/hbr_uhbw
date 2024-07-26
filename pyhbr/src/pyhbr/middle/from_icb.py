@@ -2,11 +2,14 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series, concat
 from pyhbr import clinical_codes, common
-from pyhbr.data_source import icb
+from pyhbr.data_source import icb, hic_icb
 from sqlalchemy import Engine
 from datetime import date
 import datetime as dt
 from pyhbr.clinical_codes import counting, ClinicalCodeTree
+
+from pyhbr.middle.from_hic import check_const_column
+from pyhbr.middle import from_hic
 
 def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
     """Get the episodes table
@@ -718,3 +721,75 @@ def get_mortality(engine: Engine, start_date: date, end_date: date, code_groups:
     ).sort_values(["patient_id", "position"]).reset_index(drop=True)
 
     return date_of_death, cause_of_death
+
+
+def get_unlinked_lab_results(engine: Engine) -> pd.DataFrame:
+    """Get laboratory results from the HIC database (unlinked to episode)
+
+    This function returns data for the following three
+    tests, identified by one of these values in the
+    `test_name` column:
+
+    * `hb`: haemoglobin (unit: g/dL)
+    * `egfr`: eGFR (unit: mL/min)
+    * `platelets`: platelet count (unit: 10^9/L)
+
+    The test result is associated to a `patient_id`,
+    and the time when the sample for the test was collected
+    is stored in the `sample_date` column.
+
+    Some values in the underlying table contain inequalities
+    in the results column, which have been removed (so
+    egfr >90 becomes 90).
+
+    Args:
+        engine: The connection to the database
+
+    Returns:
+        Table of laboratory results, including Hb (haemoglobin),
+            platelet count, and eGFR (kidney function). The columns are
+            `patient_id`, `test_name`, and `sample_date`.
+
+    """
+    
+    test_of_interest = {
+        "Haemoglobin": "hb",
+        "eGFR/1.73m2 (CKD-EPI)": "egfr",
+        "Platelets": "platelets",
+    }
+    
+    df = common.get_data(engine, hic_icb.pathology_blood_query, test_of_interest.keys())
+    
+    # Only keep tests of interest: platelets, egfr, and hb
+    df = df[df["test_name"].isin(test_of_interest.keys())]
+
+    # Rename the items
+    df["test_name"] = df["test_name"].map(test_of_interest)
+
+    # Check egfr unit
+    rows = df[df["test_name"] == "egfr"]
+    check_const_column(rows, "unit", "mL/min")
+
+    # Check hb unit
+    rows = df[df["test_name"] == "hb"]
+    check_const_column(rows, "unit", "g/L")
+
+    # Check platelets unit (note 10*9/L is not a typo)
+    rows = df[df["test_name"] == "platelets"]
+    check_const_column(rows, "unit", "10*9/L")
+
+    # Some values include an inequality; e.g.:
+    # - egfr: >90
+    # - platelets: <3
+    #
+    # Remove instances of < or > to enable conversion
+    # to float.
+    df["result"] = df["result"].str.replace("<|>", "", regex=True)
+
+    # Convert results column to float
+    df["result"] = df["result"].astype(float)
+
+    # Convert hb units to g/dL (to match ARC HBR definition)
+    df.loc[df["test_name"] == "hb", "result"] /= 10.0
+
+    return df[["patient_id", "sample_date", "test_name", "result"]]
