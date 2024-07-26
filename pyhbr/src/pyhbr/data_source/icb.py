@@ -81,6 +81,11 @@ def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
         table.col("PBRspellID").cast(String).label("spell_id"),
         table.col("StartDate_ConsultantEpisode").label("episode_start"),
         table.col("EndDate_ConsultantEpisode").label("episode_end"),
+        # Using the start and the end of the spells as admission/discharge
+        # times for the purposes of identifying lab results and prescriptions
+        # within the spell.
+        table.col("StartDate_HospitalProviderSpell").label("admission"),
+        table.col("EndDate_HospitalProviderSpell").label("discharge"),
     ]
 
     # Diagnosis and procedure columns are renamed to (diagnosis|procedure)_n,
