@@ -10,6 +10,7 @@ from pyhbr.analysis import acs
 from pyhbr.clinical_codes import counting
 from pyhbr.data_source import icb, hic_icb, hic
 from pyhbr.middle import from_icb, from_hic
+from pyhbr.analysis import arc_hbr
 
 importlib.reload(common)
 importlib.reload(acs)
@@ -46,7 +47,7 @@ raw_sus_data, raw_sus_data_path = common.load_item("raw_sus_data")
 
 # Fetch the list of episodes from the HIC table -- this will
 # speed up subsequent queries
-msa_engine =  common.make_engine(database="modelling_sql_area")
+msa_engine = common.make_engine(database="modelling_sql_area")
 hic_episodes = common.get_data(msa_engine, hic_icb.episode_id_query)
 hic_patient_ids = hic_episodes.patient_id.unique()
 
@@ -88,7 +89,9 @@ dfs = common.get_data_by_patient(
 primary_care_measurements = pd.concat(dfs).reset_index(drop=True)
 
 # Primary care attributes (slow)
-dfs = common.get_data_by_patient(msa_engine, icb.primary_care_attributes_query, patient_ids)
+dfs = common.get_data_by_patient(
+    msa_engine, icb.primary_care_attributes_query, patient_ids
+)
 with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
 primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
 
@@ -129,7 +132,9 @@ index_spells = index_spells[
 lab_results = from_icb.get_unlinked_lab_results(msa_engine)  # really slow
 
 # Fetch raw secondary-care prescriptions data
-secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(msa_engine, "HIC_Pharmacy")  # fast
+secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(
+    msa_engine, "HIC_Pharmacy"
+)  # fast
 
 # Combine the datasets for saving
 icb_hic_tmp = {
@@ -160,17 +165,31 @@ icb_hic_tmp = {
 common.save_item(icb_hic_tmp, "icb_hic_tmp")
 
 # Load the data from file
-icb_hic_tmp = common.load_item("icb_hic_tmp")
+icb_hic_tmp, icb_hic_tmp_path = common.load_item("icb_hic_tmp")
 
 # Extract some datasets for convenience
-episodes = icb_basic_tmp["episodes"]
-codes = icb_basic_tmp["codes"]
-index_spells = icb_basic_tmp["index_spells"]
-date_of_death = icb_basic_tmp["date_of_death"]
-cause_of_death = icb_basic_tmp["cause_of_death"]
-primary_care_attributes = icb_basic_tmp["primary_care_attributes"]
-primary_care_prescriptions = icb_basic_tmp["primary_care_prescriptions"]
-primary_care_measurements = icb_basic_tmp["primary_care_measurements"]
+episodes = icb_hic_tmp["episodes"]
+codes = icb_hic_tmp["codes"]
+index_spells = icb_hic_tmp["index_spells"]
+date_of_death = icb_hic_tmp["date_of_death"]
+cause_of_death = icb_hic_tmp["cause_of_death"]
+primary_care_attributes = icb_hic_tmp["primary_care_attributes"]
+primary_care_prescriptions = icb_hic_tmp["primary_care_prescriptions"]
+secondary_care_prescriptions = icb_hic_tmp["secondary_care_prescriptions"]
+primary_care_measurements = icb_hic_tmp["primary_care_measurements"]
+lab_results = icb_hic_tmp["lab_results"]
+
+# fake data -- fix later
+episodes["admission"] = episodes["episode_start"]
+episodes["discharge"] = episodes["episode_start"] + dt.timedelta(days=3)
+
+# Get features from the lab results
+lab_features = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
+
+# Process the prescriptions into features
+features_secondary_prescriptions = acs.get_secondary_care_prescriptions_features(
+    secondary_care_prescriptions, index_spells, episodes
+)
 
 # Preprocess the SWD columns
 primary_care_attributes["smoking"] = from_icb.preprocess_smoking(
@@ -265,7 +284,9 @@ non_fatal_ischaemia = acs.filter_by_code_groups(
 
 # This is how to look at patients with a particular spell
 df = codes.merge(episodes, on="episode_id", how="left")
-spell = df[df["spell_id"] == "1613481717937990639"].drop_duplicates(["episode_id", "code", "type", "position"])
+spell = df[df["spell_id"] == "1613481717937990639"].drop_duplicates(
+    ["episode_id", "code", "type", "position"]
+)
 spell.sort_values(["episode_start", "type", "position"])
 
 # Get the fatal ischaemia outcomes. Restricting
@@ -325,20 +346,21 @@ features_measurements = prior_blood_pressure.merge(
     prior_hba1c, how="left", on="spell_id"
 )
 
-# Get basic index features (drop instead of keep in case new
+# Get hic index features (drop instead of keep in case new
 # features are added)
 features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_start"])
 
 # Combine all tables (features and outcomes) into a single table
 # for saving.
-icb_basic_data = {
-    "icb_basic_tmp": icb_basic_tmp,
+icb_hic_data = {
+    "icb_hic_tmp_file": icb_hic_tmp_path.name,
     "outcomes": bool_outcomes,
     "features_index": features_index,
     "features_codes": features_codes,
     "features_attributes": features_attributes,
     "features_prescriptions": features_prescriptions,
+    "features_secondary_prescriptions": features_secondary_prescriptions,
     "features_measurements": features_measurements,
 }
 
-common.save_item(icb_basic_data, "icb_basic_data")
+common.save_item(icb_hic_data, "icb_hic_data")

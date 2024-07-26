@@ -3,6 +3,7 @@ from pandas import DataFrame, Series
 from pyhbr.clinical_codes import counting
 from pyhbr.analysis import describe
 from pyhbr.middle import from_hic  # Need to move the function
+import pandas as pd
 
 
 def get_index_spells(
@@ -496,3 +497,37 @@ def prescriptions_before_index(
     ).add_prefix("prior_")
 
     return all_counts
+
+def get_secondary_care_prescriptions_features(
+    prescriptions: DataFrame, index_spells: DataFrame, episodes: DataFrame
+) -> DataFrame:
+    """Get dummy feature columns for OAC and NSAID medications on admission
+    
+    Args:
+        prescriptions: The table of secondary care prescriptions, containing
+            a `group` column and `spell_id`.
+        index_spells: The index spells, which must be indexed by `spell_id`
+        episodes: The episodes table containing `admission` and `discharge`,
+            for linking prescriptions to spells.
+    """
+
+    # Get all the data required
+    df = (
+        index_spells.reset_index("spell_id")
+        .merge(prescriptions, on="patient_id", how="left")
+        .merge(episodes[["admission", "discharge"]], on="episode_id", how="left")
+    )
+
+    # Keep only prescriptions ordered between admission and discharge
+    # marked as present on admission
+    within_spell = (df["order_date"] >= df["admission"]) & (
+        df["order_date"] <= df["discharge"]
+    )
+
+    # Filter and create dummy variables for on-admission medication
+    dummies = pd.get_dummies(
+        df[within_spell & df["on_admission"]].set_index("spell_id")["group"]
+    ).groupby("spell_id").max().astype(int)
+
+    # Join back onto index events and set missing entries to zero
+    return index_spells[[]].merge(dummies, how="left", on="spell_id").fillna(0)
