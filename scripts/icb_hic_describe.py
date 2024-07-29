@@ -16,7 +16,7 @@ features_prescriptions = data["features_prescriptions"]  # float-only
 features_measurements = data["features_measurements"]  # float-only
 features_attributes = data["features_attributes"]  # float, category, Int8
 features_secondary_prescriptions = data["features_secondary_prescriptions"]
-
+features_lab = data["features_lab"]
 
 # Check outcomes
 missing_outcomes = describe.proportion_missingness(outcomes)
@@ -25,7 +25,6 @@ print(missing_outcomes)
 prevalence_outcomes = describe.get_column_rates(outcomes)
 print("The rate of occurrence of each outcome is:")
 print(prevalence_outcomes)
-
 
 # Get prevalences of all combinations of bleeding/ischaemia
 # outcomes, which is used as an input to the hbr_tradeoff app
