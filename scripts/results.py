@@ -48,7 +48,7 @@ analysis_name = config["analysis_name"]
 # Load all the models into memory
 models = {}
 for model in config["models"].keys():
-    models[model] = common.load_item(f"{analysis_name}_{model}", save_dir=config["save_dir"])
+    models[model], model_path = common.load_item(f"{analysis_name}_{model}", save_dir=config["save_dir"])
 
 
 # Loop over all the models creating the output graphs
