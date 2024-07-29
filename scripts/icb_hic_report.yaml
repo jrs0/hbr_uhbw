@@ -1,0 +1,63 @@
+title: "Bleeding and Ischaemia Risk Estimation Models"
+subtitle: "Trained using hospital episode statistics and primary care data"
+author: "John Scott"
+
+# Path to load data from and save data to.
+save_dir: "../save_data"
+
+# Base name for this analysis. The string "_data" is
+# appended to this name to create the file to load. This
+# base name is also used as the prefix for saved files.
+analysis_name: "icb_hic"
+
+# References
+bib_file: "../risk_management_file/ref.bib"
+citation_style: "citation_style.csl"
+
+# Jinja2 templates
+templates_folder: "templates"
+report_template: "report.qmd"
+
+# Build output locations. The report will be
+# placed in a folder called {analysis_name}_report
+build_directory: "build"
+
+# Models to include
+models:
+  # random_forest:
+  #   text: "random forest"
+  #   title: "Random Forest"
+  #   abbr: "RF"
+  #   description: >
+  #     The risk estimate is an average over decision trees, each of which
+  #     estimates the risk by recursively dividing the input predictors into
+  #     ranges and estimating the prevalence within each range of inputs. 100
+  #     trees are used, and each tree is capped at a depth of 10 to avoid overfitting.
+  logistic_regression:
+    text: "logistic regression"
+    title: "Logistic Regression"
+    abbr: "LR"
+    description: >
+       The risk is obtained by fitting the logistic regression model to the events,
+       using the input features are variables. A penalty term is added to handle
+       collinearity of the predictors and to penalize overfitting.
+  # xgboost:
+  #   text: "XGBoost"
+  #   title: "XGBoost"
+  #   abbr: "XGB"
+  #   description: >
+  #     An alternative tree-based method, similar to random forest, that uses a
+  #     different algorithm to obtained train the model.
+
+# Outcome names
+outcomes:
+  bleeding:
+    text: "bleeding"
+    title: "Bleeding" 
+    abbr: "B"
+  ischaemia:
+    text: "ischaemia"
+    title: "Ischaemia"
+    abbr: "I"
+
+
