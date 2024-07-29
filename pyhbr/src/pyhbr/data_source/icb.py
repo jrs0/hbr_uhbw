@@ -85,7 +85,7 @@ def sus_query(engine: Engine, start_date: date, end_date: date) -> Select:
         # times for the purposes of identifying lab results and prescriptions
         # within the spell.
         table.col("StartDate_HospitalProviderSpell").label("admission"),
-        table.col("EndDate_HospitalProviderSpell").label("discharge"),
+        table.col("DischargeDate_FromHospitalProviderSpell").label("discharge"),
     ]
 
     # Diagnosis and procedure columns are renamed to (diagnosis|procedure)_n,

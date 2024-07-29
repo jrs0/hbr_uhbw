@@ -27,7 +27,7 @@ importlib.reload(counting)
 # in the future to ensure all recent data is fetched.
 # Index spell data is limited based on the min/max
 # dates seen in all the datasets below.
-start_date = dt.date(2018, 1, 1)
+start_date = dt.date(2019, 1, 1)
 end_date = dt.date(2025, 1, 1)
 
 # Get the raw HES data (this takes a long time ~ 20 minutes, up to 2 hours
