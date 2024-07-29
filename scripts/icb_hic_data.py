@@ -180,7 +180,7 @@ primary_care_measurements = icb_hic_tmp["primary_care_measurements"]
 lab_results = icb_hic_tmp["lab_results"]
 
 # Get features from the lab results
-lab_features = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
+features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
 
 # Process the prescriptions into features
 features_secondary_prescriptions = acs.get_secondary_care_prescriptions_features(
@@ -350,17 +350,22 @@ features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_s
 # for saving.
 icb_hic_data = {
     "icb_hic_tmp_file": icb_hic_tmp_path.name,
+    # Outcomes
     "outcomes": bool_outcomes,
     "non_fatal_bleeding": non_fatal_bleeding,
     "fatal_bleeding": fatal_bleeding,
     "non_fatal_ischaemia": non_fatal_ischaemia,
     "fatal_ischaemia": fatal_ischaemia,
+    # HES data
     "features_index": features_index,
     "features_codes": features_codes,
+    # SWD data
     "features_attributes": features_attributes,
     "features_prescriptions": features_prescriptions,
-    "features_secondary_prescriptions": features_secondary_prescriptions,
     "features_measurements": features_measurements,
+    # HIC (UHBW) data
+    "features_secondary_prescriptions": features_secondary_prescriptions,
+    "features_lab": features_lab,
 }
 
 common.save_item(icb_hic_data, "icb_hic_data")
