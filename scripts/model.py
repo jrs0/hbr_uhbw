@@ -41,8 +41,8 @@ with open(args.config_file) as stream:
         print(f"Failed to load config file: {exc}")
         exit(1)
 
-# This is used to load a file, and is also used as the prefix for all
-# saved data files.
+# This is used to load a file, and is also used
+# as the prefix for all saved data files.
 analysis_name = config["analysis_name"]
 
 # Load outcome and training data

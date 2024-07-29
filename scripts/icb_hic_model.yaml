@@ -24,9 +24,9 @@ num_bins: 5
 
 # Models to fit
 models:
-  random_forest:
-    pipe_fn: "pyhbr.analysis.model.make_random_forest"
+  #random_forest:
+  #  pipe_fn: "pyhbr.analysis.model.make_random_forest"
   logistic_regression:
     pipe_fn: "pyhbr.analysis.model.make_logistic_regression"
-  xgboost:
-    pipe_fn: "pyhbr.analysis.model.make_xgboost"
+  #xgboost:
+  #  pipe_fn: "pyhbr.analysis.model.make_xgboost"
