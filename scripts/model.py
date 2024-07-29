@@ -57,8 +57,8 @@ features = outcomes[[]]
 # Load all features -- these are the items in the data file that
 # have a key that starts with "features_"
 for key in data.keys():
-    print(key, type(key))
     if "features_" in key:
+        print(f"Joining {key} into features dataframe")
         features = features.merge(data[key], how="left", on="spell_id")
 
 # Create a random state from a seed
