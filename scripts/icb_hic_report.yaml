@@ -24,15 +24,15 @@ build_directory: "build"
 
 # Models to include
 models:
-  # random_forest:
-  #   text: "random forest"
-  #   title: "Random Forest"
-  #   abbr: "RF"
-  #   description: >
-  #     The risk estimate is an average over decision trees, each of which
-  #     estimates the risk by recursively dividing the input predictors into
-  #     ranges and estimating the prevalence within each range of inputs. 100
-  #     trees are used, and each tree is capped at a depth of 10 to avoid overfitting.
+  random_forest:
+    text: "random forest"
+    title: "Random Forest"
+    abbr: "RF"
+    description: >
+      The risk estimate is an average over decision trees, each of which
+      estimates the risk by recursively dividing the input predictors into
+      ranges and estimating the prevalence within each range of inputs. 100
+      trees are used, and each tree is capped at a depth of 10 to avoid overfitting.
   logistic_regression:
     text: "logistic regression"
     title: "Logistic Regression"
@@ -41,13 +41,13 @@ models:
        The risk is obtained by fitting the logistic regression model to the events,
        using the input features are variables. A penalty term is added to handle
        collinearity of the predictors and to penalize overfitting.
-  # xgboost:
-  #   text: "XGBoost"
-  #   title: "XGBoost"
-  #   abbr: "XGB"
-  #   description: >
-  #     An alternative tree-based method, similar to random forest, that uses a
-  #     different algorithm to obtained train the model.
+  xgboost:
+    text: "XGBoost"
+    title: "XGBoost"
+    abbr: "XGB"
+    description: >
+      An alternative tree-based method, similar to random forest, that uses a
+      different algorithm to obtained train the model.
 
 # Outcome names
 outcomes:
