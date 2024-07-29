@@ -1,7 +1,7 @@
 import argparse
 
 # Keep this near the top otherwise help hangs
-parser = argparse.ArgumentParser("icb_hic_model")
+parser = argparse.ArgumentParser("model")
 parser.add_argument(
     "-f",
     "--config-file",
@@ -41,28 +41,25 @@ with open(args.config_file) as stream:
         print(f"Failed to load config file: {exc}")
         exit(1)
 
+# This is used to load a file, and is also used as the prefix for all
+# saved data files.
+data_file_name = config["data_file_name"]
+
 # Load outcome and training data
-data, data_path = common.load_item("icb_hic_data", save_dir=config["save_dir"])
+data, data_path = common.load_item(data_file_name, save_dir=config["save_dir"])
 
 # For convenience
 outcomes = data["outcomes"]
-features_index = data["features_index"]  # bool-only
-features_codes = data["features_codes"]  # float-only
-features_prescriptions = data["features_prescriptions"]  # float-only
-features_measurements = data["features_measurements"]  # float-only
-features_attributes = data["features_attributes"]  # float, category, Int8
-features_secondary_prescriptions = data["features_secondary_prescriptions"]
-features_lab = data["features_lab"]
 
-# Combine all the features
-features = (
-    features_index.merge(features_codes, how="left", on="spell_id")
-    .merge(features_prescriptions, how="left", on="spell_id")
-    .merge(features_measurements, how="left", on="spell_id")
-    .merge(features_attributes, how="left", on="spell_id")
-    .merge(features_secondary_prescriptions, how="left", on="spell_id")
-    .merge(features_lab, how="left", on="spell_id")
-)
+# Base the features dataframe on the outcomes index
+features = outcomes[[]]
+
+# Load all features -- these are the items in the data file that
+# have a key that starts with "features_"
+for key in data.keys():
+    if "features_" in key:
+        print(f"Joining {key} into features dataframe")
+        features.merge(data[key], how="left", on="spell_id")
 
 # Create a random state from a seed
 seed = config["seed"]
@@ -125,6 +122,6 @@ model_data = {
     "X_test": X_test,
     "y_train": y_train,
     "y_test": y_test,
-    "data": data,
+    "data_file": data_path.name,
 }
-common.save_item(model_data, f"icb_basic_{model_name}", save_dir=config["save_dir"])
+common.save_item(model_data, f"{data_file_name}_{model_name}", save_dir=config["save_dir"])
