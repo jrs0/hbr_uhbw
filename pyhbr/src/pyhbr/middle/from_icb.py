@@ -36,7 +36,7 @@ def get_episodes(raw_sus_data: DataFrame) -> DataFrame:
             `episode_start`, `spell_id` and `patient_id`.
     """
     df = (
-        raw_sus_data[["spell_id", "patient_id", "episode_start", "age", "gender"]]
+        raw_sus_data[["spell_id", "patient_id", "episode_start", "admission", "discharge", "age", "gender"]]
         .reset_index(names="episode_id")
         .set_index("episode_id")
     )

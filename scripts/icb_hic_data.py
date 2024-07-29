@@ -179,10 +179,6 @@ secondary_care_prescriptions = icb_hic_tmp["secondary_care_prescriptions"]
 primary_care_measurements = icb_hic_tmp["primary_care_measurements"]
 lab_results = icb_hic_tmp["lab_results"]
 
-# fake data -- fix later
-episodes["admission"] = episodes["episode_start"]
-episodes["discharge"] = episodes["episode_start"] + dt.timedelta(days=3)
-
 # Get features from the lab results
 lab_features = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
 
