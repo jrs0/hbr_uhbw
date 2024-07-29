@@ -139,7 +139,7 @@ summary = describe.get_summary_table(models, high_risk_thresholds, config)
 common.save_item(summary, f"{analysis_name}_summary", config["save_dir"])
 
 # Get the table of outcome prevalences
-data = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
+data, data_path = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
 outcome_prevalences = describe.get_outcome_prevalence(data["outcomes"])
 common.save_item(outcome_prevalences, f"{analysis_name}_outcome_prevalences", save_dir=config["save_dir"])
 
