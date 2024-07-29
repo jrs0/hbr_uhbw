@@ -351,6 +351,10 @@ features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_s
 icb_hic_data = {
     "icb_hic_tmp_file": icb_hic_tmp_path.name,
     "outcomes": bool_outcomes,
+    "non_fatal_bleeding": non_fatal_bleeding,
+    "fatal_bleeding": fatal_bleeding,
+    "non_fatal_ischaemia": non_fatal_ischaemia,
+    "fatal_ischaemia": fatal_ischaemia,
     "features_index": features_index,
     "features_codes": features_codes,
     "features_attributes": features_attributes,
