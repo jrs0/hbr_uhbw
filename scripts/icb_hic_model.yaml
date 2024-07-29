@@ -1,9 +1,10 @@
 # Path to load data from and save data to.
 save_dir: "../save_data"
 
-# Base name of the data file to use in models. The most
-# recent file matching this base name will be selected.
-data_file_name: "icb_hic_data"
+# Base name for this analysis. The string "_data" is
+# appended to this name to create the file to load. This
+# base name is also used as the prefix for saved files.
+analysis_name: "icb_hic"
 
 # Test/train split
 test_proportion: 0.25

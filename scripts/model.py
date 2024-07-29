@@ -43,10 +43,10 @@ with open(args.config_file) as stream:
 
 # This is used to load a file, and is also used as the prefix for all
 # saved data files.
-data_file_name = config["data_file_name"]
+analysis_name = config["analysis_name"]
 
 # Load outcome and training data
-data, data_path = common.load_item(data_file_name, save_dir=config["save_dir"])
+data, data_path = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
 
 # For convenience
 outcomes = data["outcomes"]
@@ -124,4 +124,4 @@ model_data = {
     "y_test": y_test,
     "data_file": data_path.name,
 }
-common.save_item(model_data, f"{data_file_name}_{model_name}", save_dir=config["save_dir"])
+common.save_item(model_data, f"{analysis_name}_{model_name}", save_dir=config["save_dir"])
