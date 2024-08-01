@@ -10,6 +10,22 @@ save_dir: "../save_data"
 # base name is also used as the prefix for saved files.
 analysis_name: "icb_hic"
 
+# Test/train split
+test_proportion: 0.25
+
+# All randomness is derived from this seed.
+seed: 0
+
+# Using a larger number of bootstrap resamples will make
+# the stability analysis better, but will take longer to fit.
+num_bootstraps: 10
+
+# Choose the number of bins for the calibration calculation.
+# Using more bins will resolve the risk estimates more
+# precisely, but will reduce the sample size in each bin for
+# estimating the prevalence.
+num_bins: 5
+
 # References
 bib_file: "../risk_management_file/ref.bib"
 citation_style: "citation_style.csl"
@@ -28,6 +44,7 @@ models:
     text: "random forest"
     title: "Random Forest"
     abbr: "RF"
+    pipe_fn: "pyhbr.analysis.model.make_random_forest"
     description: >
       The risk estimate is an average over decision trees, each of which
       estimates the risk by recursively dividing the input predictors into
@@ -37,6 +54,7 @@ models:
     text: "logistic regression"
     title: "Logistic Regression"
     abbr: "LR"
+    pipe_fn: "pyhbr.analysis.model.make_logistic_regression"
     description: >
        The risk is obtained by fitting the logistic regression model to the events,
        using the input features are variables. A penalty term is added to handle
@@ -45,6 +63,7 @@ models:
     text: "XGBoost"
     title: "XGBoost"
     abbr: "XGB"
+    pipe_fn: "pyhbr.analysis.model.make_xgboost"
     description: >
       An alternative tree-based method, similar to random forest, that uses a
       different algorithm to obtained train the model.

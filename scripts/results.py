@@ -1,7 +1,7 @@
 import argparse
 
 # Keep this near the top otherwise help hangs
-parser = argparse.ArgumentParser("icb_basic_results")
+parser = argparse.ArgumentParser("make-results")
 parser.add_argument(
     "-f",
     "--config-file",
