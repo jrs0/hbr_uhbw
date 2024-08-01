@@ -1,6 +1,6 @@
 [project]
 name = "pyhbr"
-version = "0.0.5"
+version = "0.0.6"
 authors = [
   { name="John Scott", email="john.scott@uhbw.nhs.uk" },
 ]
@@ -22,6 +22,10 @@ dependencies = [
   "matplotlib",
   "pyqt6"
 ]
+
+[project.scripts]
+report-generator = "pyhbr.tools.generate_report:main"
+run-model = "pyhbr.tools.run_model:main"
 
 [project.gui-scripts]
 codes-editor = "pyhbr.clinical_codes.codes_editor.codes_editor:run_app"
