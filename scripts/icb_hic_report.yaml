@@ -1,5 +1,5 @@
 title: "Bleeding and Ischaemia Risk Estimation Models"
-subtitle: "Trained using hospital episode statistics and primary care data"
+subtitle: "Trained using hospital episode statistics, secondary care prescriptions and laboratory results, and primary care data"
 author: "John Scott"
 
 # Path to load data from and save data to.

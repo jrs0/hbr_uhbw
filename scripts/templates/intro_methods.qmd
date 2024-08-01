@@ -72,7 +72,7 @@ A summary of the total number of each outcome is shown in Table~\ref{tab:outcome
 pd.read_pickle("{{ outcome_prevalences_file }}")
 ```
 
-# Models
+## Models
 
 We randomly split the data into a training set ({{ 1 - test_proportion }}) and a testing set ({{ test_proportion }}). The testing set is not used in the model fitting process. We trained multiple models on each training set:
 
@@ -80,7 +80,7 @@ We randomly split the data into a training set ({{ 1 - test_proportion }}) and a
 * **{{ model["title"] }} ({{ model["abbr" ]}})**: {{ model["description"] }}
 {% endfor %}
 
-# Verification
+## Verification
 
 We apply classification machine learning models in this paper, which we train as if we are predicting whether a bleeding event or ischaemic event will occur. It is essential to understand that this is conceptually different from the way classification models are normally used.
 
@@ -92,7 +92,7 @@ The testing set, containing actual occurrences of bleeding and ischaemic events,
 
 Instead, the fundamental tools we employ to assess the accuracy of the model risk estimates are the model stability and calibration~[@riley2022stability] described below.
 
-## Stability: Are patient risk estimates consistent?
+### Stability: Are patient risk estimates consistent?
 
 We require the model to make consistent estimates of patient risk, not subject to large random fluctuations. The resilience of a model's risk estimates to the randomness involved in the input data and the training process is called stability.
 
@@ -100,7 +100,7 @@ A proxy to assess stability is to compare the estimates from the model with the 
 
 The risk estimates from the primary model are compared with the estimates from all the bootstrap models, for each patient. Large discrepancies are considered to indicate the expected variability in risk estimates from the primary model.
 
-## Calibration: Is the estimated risk accurate?
+### Calibration: Is the estimated risk accurate?
 
 If a table of "true risks" were available, it would be possible to assess the accuracy of the estimated risks using a simple measure such as mean-square-error, similarly to how a linear regression model is checked. Since the true risk is unknown, a method is required to estimate the true risk.
 
@@ -110,7 +110,7 @@ Good agreement between the estimated prevalence and the model risk estimate is e
 
 In order to estimate the prevalence, we collect patients into groups of equal size and similar risk. Estimates of the prevalence within these groups is subject to an uncertainty which is a function of the sample size, which is critical to the conclusions we draw in this paper.
 
-## Summary of Metric Interpretations
+### Summary of Metric Interpretations
 
 We conclude this section with a detailed interpretation of all the columns in Table~\ref{tab:summary}.
 
@@ -122,3 +122,5 @@ We conclude this section with a detailed interpretation of all the columns in Ta
 * $L\to H$: Similarly, this column is the proportion of low risk patients who have more than 50\% chance to be reclassified as high risk by a bootstrap model.
 * Estimated Risk Uncertainty: This column shows an estimate of the absolute error in the risk estimates, based on the assumption of a normally distributed estimate of prevalence in the calibration plot. For a patient with risk 3\%, an estimated risk uncertainty of 5\% indicates that the patient's true risk could be from 0\% to 8\%. The trustworthiness of this parameter is a strong function of the sample size of the testing set.
 * **ROC AUC**: The area under the receiver operating characteristic curve is based on the assumption that the model is predicting deterministic events. For two patients $A$ and $B$ in the testing set where $A$ has an event and $B$ does not, the AUC is the probability that $A$ will receive a higher risk estimate than $B$.
+
+# Model Results

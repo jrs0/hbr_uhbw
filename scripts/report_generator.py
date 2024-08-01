@@ -42,11 +42,6 @@ with open(args.config_file) as stream:
         print(f"Failed to load config file: {exc}")
         exit(1)
 
-# Set up the Jinja2 templates
-environment = Environment(loader=FileSystemLoader(config["templates_folder"]))
-template = environment.get_template(config["report_template"])
-
-# All outputs will be created inside the build folder
 # relative to the current working directory
 build_dir = Path(config["build_directory"])
 build_dir.mkdir(parents=True, exist_ok=True)
@@ -176,9 +171,18 @@ for name, model in variables["models"].items():
 shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))
 shutil.copy(config["citation_style"], report_dir / Path("style.csl"))
 
+# Set up the Jinja2 templates
+environment = Environment(loader=FileSystemLoader(config["templates_folder"]))
+
 # Render the report template and write it to the build directory
-doc = template.render(variables)
+report_template = environment.get_template(config["report_template"])
+doc = report_template.render(variables)
 (report_dir / Path("report.qmd")).write_text(doc)
+
+# Render the readme template
+readme_template = environment.get_template("README.md")
+doc = readme_template.render(variables)
+(report_dir / Path("README.md")).write_text(doc)
 
 # Optionally render the quarto
 if args.render:
