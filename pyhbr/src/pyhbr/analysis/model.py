@@ -12,6 +12,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn import tree
 
 from xgboost import XGBClassifier
@@ -350,7 +351,7 @@ def make_random_forest(random_state: RandomState, X_train: DataFrame) -> Pipelin
         X_train: The training dataset containing all features for modelling
 
     Returns:
-        The preprocessing and fitting pipeline
+        The preprocessing and fitting pipeline.
     """
 
     preprocessors = [
@@ -364,6 +365,41 @@ def make_random_forest(random_state: RandomState, X_train: DataFrame) -> Pipelin
     )
     return Pipeline([("preprocess", preprocess), ("model", mod)])
 
+def make_random_forest_cv(random_state: RandomState, X_train: DataFrame, config: dict[str, str]) -> Pipeline:
+    """
+
+    Args:
+        random_state: Source of randomness for creating the model
+        X_train: The training dataset containing all features for modelling
+        config: The dictionary of keyword arguments to configure the CV search.
+            The values in the dictionary should be python code that can be 
+            directly evaluated.
+
+    Returns:
+        The preprocessing and fitting pipeline.
+    """
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+    
+    config = {
+        "n_estimators": eval("scipy.stats.randint(50, 500)"),
+        "max_depth": eval("scipy.stats.randint(1, 20)")  
+    }   
+    
+    mod = RandomizedSearchCV(
+        RandomForestClassifier(random_state=random_state),
+        param_distributions=config,
+        random_state=random_state,
+        scoring="roc_auc",
+        cv=2,
+        verbose=3
+    )
+    return Pipeline([("preprocess", preprocess), ("model", mod)])
+    
 
 def plot_random_forest(ax: Axes, fit_results: Pipeline, outcome: str, tree_num: int):
 
@@ -403,3 +439,4 @@ def make_xgboost(random_state: RandomState, X_train: DataFrame) -> Pipeline:
     preprocess = make_columns_transformer(preprocessors)
     mod = XGBClassifier(tree_method="hist")
     return Pipeline([("preprocess", preprocess), ("model", mod)])
+

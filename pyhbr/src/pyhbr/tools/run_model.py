@@ -161,7 +161,7 @@ def main():
 
         model_config = config["models"][model_name]
         pipe_fn = get_pipe_fn(model_config)
-        pipe = pipe_fn(random_state, X_train)
+        pipe = pipe_fn(random_state, X_train, model_config["config"])
 
         # Fit the model, also fit bootstrapped models (using resamples
         # of the training set) to assess stability, and save the results
@@ -180,9 +180,10 @@ def main():
     else:
 
         for model_name in config["models"]:
+            
             model_config = config["models"][model_name]
             pipe_fn = get_pipe_fn(model_config)
-            pipe = pipe_fn(random_state, X_train)
+            pipe = pipe_fn(random_state, X_train, model_config["config"])
 
             # Fit the model, also fit bootstrapped models (using resamples
             # of the training set) to assess stability, and save the results
