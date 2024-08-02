@@ -67,7 +67,7 @@ A summary of the total number of each outcome is shown in Table~\ref{tab:outcome
 
 ```{python}
 #| label: tbl-outcome-prevalence
-#| tbl-cap: "Total number of outcomes that occurred within 1 year of the index ACS. The dataset contains {{ num_index_events }} ACS events between the dates {{ index_start }} and {{ index_end }}"
+#| tbl-cap: "Total number of outcomes that occurred within 1 year of the index ACS. The dataset contains {{ num_index_spells }} ACS events between the dates {{ index_start }} and {{ index_end }}"
 
 pd.read_pickle("{{ outcome_prevalences_file }}")
 ```

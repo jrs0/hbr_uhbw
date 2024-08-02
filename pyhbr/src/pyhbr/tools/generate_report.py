@@ -173,6 +173,7 @@ def main():
     # Copy static files to output folder
     shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))
     shutil.copy(config["citation_style"], report_dir / Path("style.csl"))
+    shutil.copy(args.config_file, report_dir / Path("config.yaml"))
 
     # Set up the Jinja2 templates
     environment = Environment(loader=FileSystemLoader(config["templates_folder"]))

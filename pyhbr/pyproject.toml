@@ -24,8 +24,9 @@ dependencies = [
 ]
 
 [project.scripts]
-report-generator = "pyhbr.tools.generate_report:main"
+generate-report = "pyhbr.tools.generate_report:main"
 run-model = "pyhbr.tools.run_model:main"
+make-results = "pyhbr.tools.make_results:main"
 
 [project.gui-scripts]
 codes-editor = "pyhbr.clinical_codes.codes_editor.codes_editor:run_app"
