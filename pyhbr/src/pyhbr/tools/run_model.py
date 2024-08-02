@@ -7,6 +7,8 @@ from pandas import DataFrame
 from pyhbr import common
 from pyhbr.analysis import fit
 
+import scipy
+
 def get_pipe_fn(model_config: dict[str, str]) -> Callable:
     """Get the pipe function based on the name in the config file
 
@@ -161,7 +163,8 @@ def main():
 
         model_config = config["models"][model_name]
         pipe_fn = get_pipe_fn(model_config)
-        pipe = pipe_fn(random_state, X_train, model_config["config"])
+        evaluated_config = { key: eval(value) for key, value in model_config["config"].items() }
+        pipe = pipe_fn(random_state, X_train, evaluated_config)
 
         # Fit the model, also fit bootstrapped models (using resamples
         # of the training set) to assess stability, and save the results
@@ -183,7 +186,8 @@ def main():
             
             model_config = config["models"][model_name]
             pipe_fn = get_pipe_fn(model_config)
-            pipe = pipe_fn(random_state, X_train, model_config["config"])
+            evaluated_config = { key: eval(value) for key, value in model_config["config"].items() }
+            pipe = pipe_fn(random_state, X_train, evaluated_config)
 
             # Fit the model, also fit bootstrapped models (using resamples
             # of the training set) to assess stability, and save the results

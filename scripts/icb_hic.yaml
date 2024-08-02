@@ -46,8 +46,8 @@ models:
     abbr: "RF"
     pipe_fn: "pyhbr.analysis.model.make_random_forest_cv"
     config:
-      n_estimates: scipy.stats.randint(50, 500)
-      max_depth: scipy.stats.randint(1, 20)
+      n_estimates: "scipy.stats.randint(50, 500)"
+      max_depth: "scipy.stats.randint(1, 20)"
     description: >
       The risk estimate is an average over decision trees, each of which
       estimates the risk by recursively dividing the input predictors into
@@ -70,6 +70,17 @@ models:
     description: >
       An alternative tree-based method, similar to random forest, that uses a
       different algorithm to obtained train the model.
+  nearest_neighbours:
+    text: "K-nearest neighbours"
+    title: "K-Nearest Neighbours"
+    abbr: "KNN"
+    pipe_fn: "pyhbr.analysis.model.make_nearest_neighbours_cv"
+    config:
+      n_neighbors: "scipy.stats.randint(1, 15)"
+      weights: "['uniform', 'distance']"
+    description: >
+      A model that predicts the value for an input based on the corresponding
+      values for known similar inputs (the nearest neighbours).
 
 # Outcome names
 outcomes:

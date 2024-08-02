@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.random import RandomState
-import scipy
 from pandas import DataFrame
 
 from sklearn.pipeline import Pipeline
@@ -11,6 +11,7 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn import tree
@@ -365,15 +366,13 @@ def make_random_forest(random_state: RandomState, X_train: DataFrame) -> Pipelin
     )
     return Pipeline([("preprocess", preprocess), ("model", mod)])
 
-def make_random_forest_cv(random_state: RandomState, X_train: DataFrame, config: dict[str, str]) -> Pipeline:
-    """
+def make_random_forest_cv(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
+    """Random forest model trained using cross validation
 
     Args:
         random_state: Source of randomness for creating the model
         X_train: The training dataset containing all features for modelling
         config: The dictionary of keyword arguments to configure the CV search.
-            The values in the dictionary should be python code that can be 
-            directly evaluated.
 
     Returns:
         The preprocessing and fitting pipeline.
@@ -384,12 +383,7 @@ def make_random_forest_cv(random_state: RandomState, X_train: DataFrame, config:
         make_float_preprocessor(X_train),
     ]
     preprocess = make_columns_transformer(preprocessors)
-    
-    config = {
-        "n_estimators": eval("scipy.stats.randint(50, 500)"),
-        "max_depth": eval("scipy.stats.randint(1, 20)")  
-    }   
-    
+
     mod = RandomizedSearchCV(
         RandomForestClassifier(random_state=random_state),
         param_distributions=config,
@@ -400,6 +394,34 @@ def make_random_forest_cv(random_state: RandomState, X_train: DataFrame, config:
     )
     return Pipeline([("preprocess", preprocess), ("model", mod)])
     
+
+def make_nearest_neighbours_cv(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
+    """Nearest neighbours classifier trained using cross validation
+
+    Args:
+        random_state: Source of randomness for creating the model
+        X_train: The training dataset containing all features for modelling
+        config: The dictionary of keyword arguments to configure the CV search.
+
+    Returns:
+        The preprocessing and fitting pipeline.
+    """
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+
+    mod = RandomizedSearchCV(
+        KNeighborsClassifier(),
+        param_distributions=config,
+        random_state=random_state,
+        scoring="roc_auc",
+        cv=2,
+        verbose=3
+    )
+    return Pipeline([("preprocess", preprocess), ("model", mod)])
 
 def plot_random_forest(ax: Axes, fit_results: Pipeline, outcome: str, tree_num: int):
 
