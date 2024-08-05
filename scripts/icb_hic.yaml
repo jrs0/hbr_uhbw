@@ -98,8 +98,8 @@ models:
     config:
       alpha: "1e-5"
       hidden_layer_sizes: "(20, 2)"
-      solver: "lbfgs"
-      max_iter: 1000
+      solver: "'lbfgs'"
+      max_iter: "1000"
     description: >
       A type of neural network with a fixed number of layers, which can learn non-linear
         relationships among the input data and the output classes.
