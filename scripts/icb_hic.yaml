@@ -103,6 +103,16 @@ models:
     description: >
       A type of neural network with a fixed number of layers, which can learn non-linear
         relationships among the input data and the output classes.
+  naive_bayes:
+    text: "Gaussian naive bayes"
+    title: "Gaussian Naive Bayes"
+    abbr: "GNB"
+    pipe_fn: "pyhbr.analysis.model.make_gnb"
+    config: {}
+    description: >
+      An algorithm that calculates the most likely class for each data point using Bayesian
+        methods, on the assumption that the features act independently (the "naive" assumption).
+
 
 # Outcome names
 outcomes:
