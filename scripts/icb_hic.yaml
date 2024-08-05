@@ -93,7 +93,7 @@ models:
   multilayer_perceptron:
     text: "multi-layer perceptron"
     title: "Multi-layer Perceptron"
-    abbr: "SVM"
+    abbr: "MLP"
     pipe_fn: "pyhbr.analysis.model.make_mlp"
     config:
       alpha: "1e-5"
