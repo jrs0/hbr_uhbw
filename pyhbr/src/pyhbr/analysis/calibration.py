@@ -254,7 +254,7 @@ def plot_calibration_curves(
     max_x = 100 * (curves[0]["bin_center"]).max()
 
     # Generate a dense straight line (smooth curve on log scale)
-    coords = np.geomspace(min_x, max_x, num=50)
+    coords = np.linspace(min_x, max_x, num=50)
     ax.plot(coords, coords, c="k")
 
     ax.legend(["Model-under-test", "Bootstrapped models"])
@@ -448,7 +448,7 @@ def draw_calibration_confidence(ax: Axes, calibration: DataFrame):
     max_x = 100 * (c["bin_center"]).max()
 
     # Generate a dense straight line (smooth curve on log scale)
-    coords = np.geomspace(min_x, max_x, num=50)
+    coords = np.linspace(min_x, max_x, num=50)
 
     ax.plot(coords, coords, c="k")
 
