@@ -5,8 +5,9 @@ import numpy as np
 from numpy.random import RandomState
 from pandas import DataFrame
 
+from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -23,6 +24,17 @@ from xgboost import XGBClassifier
 
 from matplotlib.axes import Axes
 
+
+class DenseTransformer(TransformerMixin):
+    """Useful when the model requires a dense matrix
+    but the preprocessing steps produce a sparse output
+    """
+
+    def fit(self, X, y=None, **fit_params):
+        return self
+
+    def transform(self, X, y=None, **fit_params):
+        return np.asarray(X.todense())
 
 @dataclass
 class Preprocessor:
@@ -495,5 +507,11 @@ def make_cnb(random_state: RandomState, X_train: DataFrame, config: dict[str, An
         make_float_preprocessor(X_train),
     ]
     preprocess = make_columns_transformer(preprocessors)
+    
     mod = ComplementNB(**config)
-    return Pipeline([("preprocess", preprocess), ("model", mod)])
+    return Pipeline([
+        ("preprocess", preprocess),
+        ("to_dense", DenseTransformer()), # Required because MinMaxScaler requires dense
+        ("make_positive", MinMaxScaler()), # Required to make features positive
+        ("model", mod)
+    ])
