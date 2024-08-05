@@ -11,6 +11,7 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RandomizedSearchCV
@@ -460,5 +461,16 @@ def make_xgboost(random_state: RandomState, X_train: DataFrame) -> Pipeline:
     ]
     preprocess = make_columns_transformer(preprocessors)
     mod = XGBClassifier(tree_method="hist")
+    return Pipeline([("preprocess", preprocess), ("model", mod)])
+
+def make_svm(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
+
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+    mod = SVC(probability=True, verbose=3)
     return Pipeline([("preprocess", preprocess), ("model", mod)])
 

@@ -81,6 +81,15 @@ models:
     description: >
       A model that predicts the value for an input based on the corresponding
       values for known similar inputs (the nearest neighbours).
+  support_vector_machine:
+    text: "support vector machine"
+    title: "Support Vector Machine"
+    abbr: "SVM"
+    pipe_fn: "pyhbr.analysis.model.make_svm"
+    config: {}
+    description: >
+      A model that attempts to collect the training data into groups based on the
+      maximum margin between the groups, and makes predictions based on these groups.
 
 # Outcome names
 outcomes:
