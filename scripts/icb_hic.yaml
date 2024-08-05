@@ -90,6 +90,19 @@ models:
     description: >
       A model that attempts to collect the training data into groups based on the
       maximum margin between the groups, and makes predictions based on these groups.
+  multilayer_perceptron:
+    text: "multi-layer perceptron"
+    title: "Multi-layer Perceptron"
+    abbr: "SVM"
+    pipe_fn: "pyhbr.analysis.model.make_mlp"
+    config:
+      alpha: "1e-5"
+      hidden_layer_sizes: "(20, 2)"
+      solver: "lbfgs"
+      max_iter: 1000
+    description: >
+      A type of neural network with a fixed number of layers, which can learn non-linear
+        relationships among the input data and the output classes.
 
 # Outcome names
 outcomes:

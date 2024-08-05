@@ -14,6 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn import tree
 
@@ -474,3 +475,13 @@ def make_svm(random_state: RandomState, X_train: DataFrame, config: dict[str, An
     mod = SVC(probability=True, verbose=3)
     return Pipeline([("preprocess", preprocess), ("model", mod)])
 
+def make_mlp(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
+
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+    mod = MLPClassifier(verbose=3, **config, random_state=random_state)
+    return Pipeline([("preprocess", preprocess), ("model", mod)])
