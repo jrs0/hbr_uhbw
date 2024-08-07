@@ -11,7 +11,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import ComplementNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -515,3 +515,16 @@ def make_cnb(random_state: RandomState, X_train: DataFrame, config: dict[str, An
         ("make_positive", MinMaxScaler()), # Required to make features positive
         ("model", mod)
     ])
+    
+def make_abc(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
+    """Make the AdaBoost classifier pipeline
+    """
+
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+    mod = AdaBoostClassifier(**config, random_state=random_state)
+    return Pipeline([("preprocess", preprocess), ("model", mod)])

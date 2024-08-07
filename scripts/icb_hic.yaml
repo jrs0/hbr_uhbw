@@ -53,6 +53,18 @@ models:
       estimates the risk by recursively dividing the input predictors into
       ranges and estimating the prevalence within each range of inputs. 100
       trees are used, and each tree is capped at a depth of 10 to avoid overfitting.
+  ada_boost:
+    text: "AdaBoost"
+    title: "AdaBoost"
+    abbr: "AB"
+    pipe_fn: "pyhbr.analysis.model.make_abc"
+    config:
+      "n_estimators": "50"
+      "learning_rate": "1.0"
+      "algorithm": "'SAMME.R'"
+    description: >
+      An ensemble method fitting simple trees to the data, where later iterations of the
+      fit focus on more difficult cases.
   logistic_regression:
     text: "logistic regression"
     title: "Logistic Regression"
