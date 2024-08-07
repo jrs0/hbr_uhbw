@@ -1,17 +1,42 @@
 ## {{ model["title"] }}
 
-This is a summary of the {{ model["text"] }} model ({{ model["abbr"] }})
+This is a summary of the {{ model["text"] }} model ({{ model["abbr"] }}).  {{ model["description"] }}
 
 ![ROC curves for the {{ model["text"] }} model]({{ model["roc_curves_image"] }}){{ '{#' }}fig-roc-{{ model["abbr"] }}}
+
+For the bleeding model (on the right), the area under the ROC curve (AUC) for the model-under-test (red curve; trained using all the training data) is VAR. The bootstrap models (blue curves) give an idea of the variability in this metric. The lower 2.5% quantile for the AUC is VAR and the upper 97.5% quantile is VAR.
+
+For the ischaemia model (on the left), the ROC AUC is VAR, the lower 2.5% quartile estimated using the bootstrap models is VAR, and the upper 97.5% quartile is VAR.
+
+{{ model["roc_conclusion"] }}
 
 {% raw %}
 {{< pagebreak >}}
 {% endraw %}
 
 ![Stability curves for the {{ model["text"] }} model for bleeding]({{ model["stability_bleeding_image"] }}){{ '{#' }}fig-stability-bleeding-{{ model["abbr"] }}}
+
+The stability analysis for the bleeding model, showing the consistency of model risk estimates, is shown in Figure @fig-stability-bleeding-{{ model["abbr"] }}. On the left, the absolute instability in risk estimates is shown as a function of estimated risk. The average absolute risk instability between the model-under-test and the bootstrap models (across all risk estimates) is VAR.
+
+On the right, the stability of the risk class (high-risk if \>4%, low risk otherwise) is plotted. This is the probability that the risk class produced by the bootstrap model will agree with the model-under-test. Of the VAR patients estimated to be low risk, VAR had a more-than-50% chance of being reclassified as high risk by a bootstrap model. Out of the VAR patients estimated to be high risk, VAR had a more-than-50% chance of being reclaassified as low risk.
+
 ![Calibration of the {{ model["text"] }} model for bleeding]({{ model["calibration_bleeding_image"] }}){{ '{#' }}fig-calibration-bleeding-{{ model["abbr"] }}}
+
+The calibration curves above show the estimated accuracy of the {{ model["text"]}} model. On the left, the calibration plot shows the model-calulcated risk on the x-axis compared to an estimate of the true patient risk, for the mode-under-test (red) and all the bootstrap models (blue). This plot shows how stable the calibration curve is among bootstrap models.
+
+On the right, a more detailed calibration curve is shown only for the model-under-test. The boxes show the uncertainty of each point used in the calibration curve (the center of the crosses). The horizontal width shows what range of model risk estimates defines the bin used to calculate the true prevalence. The vertical height shows the uncertainty in the estimated prevalence. The average uncertainty across the the whole risk range is VAR, with a 2.5% lower quantile of VAR and a 97.5% upper quantile of VAR.
+
 ![Stability curves for the {{ model["text"] }} model for ischaemia]({{ model["stability_ischaemia_image"] }}){{ '{#' }}fig-stability-ischaemia-{{ model["abbr"] }}}
+
+The stability analysis for the bleeding model, showing the consistency of model risk estimates, is shown in Figure @fig-stability-bleeding-{{ model["abbr"] }}. On the left, the absolute instability in risk estimates is shown as a function of estimated risk. The average absolute risk instability between the model-under-test and the bootstrap models (across all risk estimates) is VAR.
+
+On the right, the stability of the risk class (high-risk if \>4%, low risk otherwise) is plotted. This is the probability that the risk class produced by the bootstrap model will agree with the model-under-test. Of the VAR patients estimated to be low risk, VAR had a more-than-50% chance of being reclassified as high risk by a bootstrap model. Out of the VAR patients estimated to be high risk, VAR had a more-than-50% chance of being reclaassified as low risk.
+
 ![Calibration of the {{ model["text"] }} model for ischaemia]({{ model["calibration_ischaemia_image"] }}){{ '{#' }}fig-stability-calibration-{{ model["abbr"] }}}
+
+The calibration curves above show the estimated accuracy of the {{ model["text"]}} model. On the left, the calibration plot shows the model-calulcated risk on the x-axis compared to an estimate of the true patient risk, for the mode-under-test (red) and all the bootstrap models (blue). This plot shows how stable the calibration curve is among bootstrap models.
+
+On the right, a more detailed calibration curve is shown only for the model-under-test. The boxes show the uncertainty of each point used in the calibration curve (the center of the crosses). The horizontal width shows what range of model risk estimates defines the bin used to calculate the true prevalence. The vertical height shows the uncertainty in the estimated prevalence. The average uncertainty across the the whole risk range is VAR, with a 2.5% lower quantile of VAR and a 97.5% upper quantile of VAR.
 
 {% raw %}
 {{< pagebreak >}}

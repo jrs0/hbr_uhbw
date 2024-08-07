@@ -63,7 +63,7 @@ Bleeding and ischaemia endpoints are based on the presence of a primary diagnosi
 
 Fatal bleeding and ischaemia outcomes, based on a bleeding or ischaemia primary cause of death ICD-10 code in a Civil Registration Mortality database, are included in the outcome count.
 
-A summary of the total number of each outcome is shown in Table~\ref{tab:outcomes}.
+A summary of the total number of each outcome is shown in Table~\ref{tab:outcome-prevalence}.
 
 ```{python}
 #| label: tbl-outcome-prevalence

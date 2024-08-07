@@ -53,6 +53,8 @@ models:
       estimates the risk by recursively dividing the input predictors into
       ranges and estimating the prevalence within each range of inputs. 100
       trees are used, and each tree is capped at a depth of 10 to avoid overfitting.
+    roc_conclusion: >
+      Test
   ada_boost:
     text: "AdaBoost"
     title: "AdaBoost"
@@ -65,6 +67,8 @@ models:
     description: >
       An ensemble method fitting simple trees to the data, where later iterations of the
       fit focus on more difficult cases.
+    roc_conclusion: >
+      Test
   logistic_regression:
     text: "logistic regression"
     title: "Logistic Regression"
@@ -74,6 +78,8 @@ models:
        The risk is obtained by fitting the logistic regression model to the events,
        using the input features are variables. A penalty term is added to handle
        collinearity of the predictors and to penalize overfitting.
+    roc_conclusion: >
+      Test
   xgboost:
     text: "XGBoost"
     title: "XGBoost"
@@ -82,6 +88,8 @@ models:
     description: >
       An alternative tree-based method, similar to random forest, that uses a
       different algorithm to obtained train the model.
+    roc_conclusion: >
+      Test
   nearest_neighbours:
     text: "K-nearest neighbours"
     title: "K-Nearest Neighbours"
@@ -93,6 +101,8 @@ models:
     description: >
       A model that predicts the value for an input based on the corresponding
       values for known similar inputs (the nearest neighbours).
+    roc_conclusion: >
+      Test
   support_vector_machine:
     text: "support vector machine"
     title: "Support Vector Machine"
@@ -102,6 +112,8 @@ models:
     description: >
       A model that attempts to collect the training data into groups based on the
       maximum margin between the groups, and makes predictions based on these groups.
+    roc_conclusion: >
+      Test
   multilayer_perceptron:
     text: "multi-layer perceptron"
     title: "Multi-layer Perceptron"
@@ -114,7 +126,9 @@ models:
       max_iter: "1000"
     description: >
       A type of neural network with a fixed number of layers, which can learn non-linear
-        relationships among the input data and the output classes.
+      relationships among the input data and the output classes.
+    roc_conclusion: >
+      Test
   complement_naive_bayes:
     text: "Complement naive bayes"
     title: "Complement Naive Bayes"
@@ -123,8 +137,10 @@ models:
     config: {}
     description: >
       An algorithm that calculates the most likely class for each data point using Bayesian
-        methods, on the assumption that the features act independently (the "naive" assumption).
-        The "complement" version of the algorithm is better suited to unbalanced datasets.
+      methods, on the assumption that the features act independently (the "naive" assumption).
+      The "complement" version of the algorithm is better suited to unbalanced datasets.
+    roc_conclusion: >
+      Test
 
 
 # Outcome names
