@@ -240,7 +240,7 @@ def get_outcome_prevalence(outcomes: DataFrame) -> DataFrame:
     ).melt(value_name="Prevalence (%)").groupby("variable").sum() / len(outcomes)
     df = df.reset_index()
     df[["Outcome", "Type"]] = df["variable"].str.split(".", expand=True)
-    return df.set_index(["Outcome", "Type"])[["Prevalence (%)"]]
+    return df.set_index(["Outcome", "Type"])[["Prevalence (%)"]].apply(lambda x: round(x, 2))
 
 def pvalue_chi2_high_risk_vs_outcome(
     probs: DataFrame, y_test: Series, high_risk_threshold: float

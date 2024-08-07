@@ -150,7 +150,6 @@ def main():
     # Get prevalence of each outcome type
     models[f"{analysis_name}_data"]["outcomes"][["bleeding", "ischaemia"]].sum()
 
-
     model = "random_forest"
     fit_results = models["fit_results"][model]
     y_test = models["y_test"]
