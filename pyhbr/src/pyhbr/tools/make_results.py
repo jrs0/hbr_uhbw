@@ -120,6 +120,7 @@ def main():
                     f"{analysis_name}_{model_name}_stability_{outcome}", config["save_dir"], "png"
                 )
             )
+            plt.close() # to save memory
 
             # Plot the calibrations
             fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -135,6 +136,7 @@ def main():
                     f"{analysis_name}_{model_name}_calibration_{outcome}", config["save_dir"], "png"
                 )
             )
+            plt.close() # to save memory
 
     # Get the table of model summary metrics
     summary = describe.get_summary_table(models, high_risk_thresholds, config)
