@@ -141,8 +141,8 @@ def main():
     with open(save_dir / data[f"{analysis_name}_tmp_file"], "rb") as file:
         tmp = pickle.load(file)
 
-    variables["index_start"] = tmp["index_start"]
-    variables["index_end"] = tmp["index_end_date"]
+    variables["index_start"] = tmp["index_start"].strftime('%Y-%m-%d')
+    variables["index_end"] = tmp["index_end_date"].strftime('%Y-%m-%d')
     variables["num_index_spells"] = len(tmp["index_spells"])
 
     # Copy the most recent version of each figure into the
