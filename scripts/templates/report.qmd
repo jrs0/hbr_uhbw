@@ -40,10 +40,6 @@ format:
   docx: {}
 ---
 
-```{python}
-import pandas as pd
-```
-
 {% include "intro_methods.qmd" %}
 
 {% for model in models.values() %}
