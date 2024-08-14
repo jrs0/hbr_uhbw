@@ -37,6 +37,7 @@ format:
     documentclass: report
     margin-left: 30mm
     margin-right: 30mm
+  docx: {}
 ---
 
 ```{python}

@@ -119,10 +119,22 @@ def main():
         return dest_dir / src_path.name
 
 
-    # Copy the summary table into the report directory
+    # Load the summary table so that it the data is available for text
+    # in the report.
+    summary_table, summary_table_path = common.load_item(f"{analysis_name}_summary", save_dir=save_dir)
+
+    # Convert the summary table to markdown and insert it directly in the document
+    variables["summary_table"] = summary_table.to_markdown()
+    
+    # Copy the summary table to the folder for reference.
     variables["summary_table_file"] = copy_most_recent_file(
         f"{analysis_name}_summary", "pkl", save_dir, report_dir, Path("tables")
     )
+
+    outcome_prevalences, outcome_prevalences_path = common.load_item(f"{analysis_name}_outcome_prevalences", save_dir=save_dir)
+
+    # Convert the summary table to markdown and insert it directly in the document
+    variables["outcome_prevalences"] = outcome_prevalences.reset_index().to_markdown(index=False)
 
     # Get the table of outcome prevalences
     variables["outcome_prevalences_file"] = copy_most_recent_file(
@@ -170,6 +182,16 @@ def main():
                     f"{analysis_name}_{name}_{plot}_{outcome}"
                 )
 
+        # Extract data from the summary table
+        bleeding_row = f"{model['abbr']}-B"
+        ischaemia_row = f"{model['abbr']}-I"
+        model["roc_auc_bleeding"] = summary_table.loc[bleeding_row, "ROC AUC"]
+        model["roc_auc_ischaemia"] = summary_table.loc[ischaemia_row, "ROC AUC"]
+        model["instability_bleeding"] = summary_table.loc[bleeding_row, "Spread of Instability"]
+        model["instability_ischaemia"] = summary_table.loc[ischaemia_row, "Spread of Instability"]
+        model["risk_uncertainty_bleeding"] = summary_table.loc[bleeding_row, "Estimated Risk Uncertainty"]
+        model["risk_uncertainty_ischaemia"] = summary_table.loc[ischaemia_row, "Estimated Risk Uncertainty"]
+
     # Copy static files to output folder
     shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))
     shutil.copy(config["citation_style"], report_dir / Path("style.csl"))
@@ -181,12 +203,12 @@ def main():
     # Render the report template and write it to the build directory
     report_template = environment.get_template(config["report_template"])
     doc = report_template.render(variables)
-    (report_dir / Path("report.qmd")).write_text(doc)
+    (report_dir / Path("report.qmd")).write_text(doc, encoding="utf-8")
 
     # Render the readme template
     readme_template = environment.get_template("README.md")
     doc = readme_template.render(variables)
-    (report_dir / Path("README.md")).write_text(doc)
+    (report_dir / Path("README.md")).write_text(doc, encoding="utf-8")
 
     # Optionally render the quarto
     if args.render:
