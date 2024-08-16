@@ -1,0 +1,10 @@
+# Appendices {.appendix}
+
+## Diagnosis and Procedure Codes {.appendix}
+
+Hospital episode statistics data 
+
+ICD-10 diagnosis codes and OPCS-4 procedure codes are used to define ACS/PCI index events, bleeding and ischaemia follow-up events, and comorbidities and medical history from prior secondary care hospital activity.
+
+{{ diagnosis_codes_table }}
+: Diagnosis codes table {{ '{#' }}tbl-diagnosis-codes}

@@ -3,6 +3,7 @@
 
 import argparse
 
+
 def main():
 
     # Provide the option to render the quarto
@@ -71,7 +72,6 @@ def main():
     # Copy the config and adjust to create Jinja2 variables
     variables = copy.deepcopy(config)
 
-
     def copy_most_recent_image(image_name: str) -> Path:
         """Find the most recent image with the given name and copy it to the build directory.
 
@@ -88,7 +88,6 @@ def main():
         image_file_name = image_path.name
         shutil.copy(image_path, image_dest_dir / image_file_name)
         return Path("images") / image_file_name
-
 
     def copy_most_recent_file(
         name: str, extension: str, save_dir: str, report_dir: Path, dest_dir: Path
@@ -110,35 +109,44 @@ def main():
                 This can be used as a string in the report to locate the item.
         """
         src_path = common.pick_most_recent_saved_file(name, save_dir, extension)
-        
+
         # Create the destination directory if it does not exist
         (report_dir / dest_dir).mkdir(parents=True, exist_ok=True)
-        
+
         dest_path = report_dir / dest_dir / src_path.name
         shutil.copy(src_path, dest_path)
         return dest_dir / src_path.name
 
-
     # Load the summary table so that it the data is available for text
     # in the report.
-    summary_table, summary_table_path = common.load_item(f"{analysis_name}_summary", save_dir=save_dir)
+    summary_table, summary_table_path = common.load_item(
+        f"{analysis_name}_summary", save_dir=save_dir
+    )
 
     # Convert the summary table to markdown and insert it directly in the document
     variables["summary_table"] = summary_table.to_markdown()
-    
+
     # Copy the summary table to the folder for reference.
     variables["summary_table_file"] = copy_most_recent_file(
         f"{analysis_name}_summary", "pkl", save_dir, report_dir, Path("tables")
     )
 
-    outcome_prevalences, outcome_prevalences_path = common.load_item(f"{analysis_name}_outcome_prevalences", save_dir=save_dir)
+    outcome_prevalences, outcome_prevalences_path = common.load_item(
+        f"{analysis_name}_outcome_prevalences", save_dir=save_dir
+    )
 
     # Convert the summary table to markdown and insert it directly in the document
-    variables["outcome_prevalences"] = outcome_prevalences.reset_index().to_markdown(index=False)
+    variables["outcome_prevalences"] = outcome_prevalences.reset_index().to_markdown(
+        index=False
+    )
 
     # Get the table of outcome prevalences
     variables["outcome_prevalences_file"] = copy_most_recent_file(
-        f"{analysis_name}_outcome_prevalences", "pkl", save_dir, report_dir, Path("tables")
+        f"{analysis_name}_outcome_prevalences",
+        "pkl",
+        save_dir,
+        report_dir,
+        Path("tables"),
     )
 
     # For reference
@@ -153,9 +161,20 @@ def main():
     with open(save_dir / data[f"{analysis_name}_tmp_file"], "rb") as file:
         tmp = pickle.load(file)
 
-    variables["index_start"] = tmp["index_start"].strftime('%Y-%m-%d')
-    variables["index_end"] = tmp["index_end_date"].strftime('%Y-%m-%d')
+    variables["index_start"] = tmp["index_start"].strftime("%Y-%m-%d")
+    variables["index_end"] = tmp["index_end_date"].strftime("%Y-%m-%d")
     variables["num_index_spells"] = len(tmp["index_spells"])
+
+    # Get the list of code groups for the appendix
+    codes = tmp["code_groups"]
+    codes["group"] = codes["group"].map(variables["code_groups"])
+    codes["code"] = codes["code"].str.upper()
+    diagnosis_codes = codes[codes["type"] == "diagnosis"][
+        ["code", "docs", "group"]
+    ].rename(
+        columns={"code": "ICD-10 Code", "docs": "Description", "group": "Code Group"}
+    ).dropna()
+    variables["diagnosis_codes_table"] = diagnosis_codes.to_markdown(index=False)
 
     # Copy the most recent version of each figure into the
     # build directory
@@ -165,14 +184,18 @@ def main():
         model["file"] = copy_most_recent_file(
             f"{analysis_name}_{name}", "pkl", save_dir, report_dir, Path("models")
         )
-        
+
         # Save the test set proportion (every model is the same,
         # so overwriting is fine)
-        model_data, model_data_path = common.load_item(f"{analysis_name}_{name}", save_dir=save_dir)
+        model_data, model_data_path = common.load_item(
+            f"{analysis_name}_{name}", save_dir=save_dir
+        )
         variables["test_proportion"] = model_data["config"]["test_proportion"]
 
         # ROC curves
-        model["roc_curves_image"] = copy_most_recent_image(f"{analysis_name}_{name}_roc")
+        model["roc_curves_image"] = copy_most_recent_image(
+            f"{analysis_name}_{name}_roc"
+        )
 
         plots = ["stability", "calibration"]
         outcomes = ["bleeding", "ischaemia"]
@@ -187,10 +210,18 @@ def main():
         ischaemia_row = f"{model['abbr']}-I"
         model["roc_auc_bleeding"] = summary_table.loc[bleeding_row, "ROC AUC"]
         model["roc_auc_ischaemia"] = summary_table.loc[ischaemia_row, "ROC AUC"]
-        model["instability_bleeding"] = summary_table.loc[bleeding_row, "Spread of Instability"]
-        model["instability_ischaemia"] = summary_table.loc[ischaemia_row, "Spread of Instability"]
-        model["risk_uncertainty_bleeding"] = summary_table.loc[bleeding_row, "Estimated Risk Uncertainty"]
-        model["risk_uncertainty_ischaemia"] = summary_table.loc[ischaemia_row, "Estimated Risk Uncertainty"]
+        model["instability_bleeding"] = summary_table.loc[
+            bleeding_row, "Spread of Instability"
+        ]
+        model["instability_ischaemia"] = summary_table.loc[
+            ischaemia_row, "Spread of Instability"
+        ]
+        model["risk_uncertainty_bleeding"] = summary_table.loc[
+            bleeding_row, "Estimated Risk Uncertainty"
+        ]
+        model["risk_uncertainty_ischaemia"] = summary_table.loc[
+            ischaemia_row, "Estimated Risk Uncertainty"
+        ]
 
     # Copy static files to output folder
     shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))

@@ -10,19 +10,14 @@ toc: true
 number-sections: true
 bibliography: ref.bib
 csl: style.csl
-abstract: >
-  Patients presenting with acute coronary syndromes, such as those who undergo percutaneous coronary
-  intervention for myocardial infarction, are often placed on dual antiplatelet therapy to mitigate
-  the risk of further ischaemic events. However, care must be taken to avoid causing severe bleeding
-  complications in patients who are at high bleeding risk. Tools that estimate both the bleeding and
-  ischaemia risk would be valuable to cardiologists, especially given the rareness of bleeding complications,
-  and the complex mix of factors that influences risk.
-  We present the performance of several machine learning classification algorithms to estimate
-  bleeding and ischaemic risk, using input features from hospital episode statistics and primary care data.
-  Model stability is assessed by bootstrap resampling the training set, retraining the models, and assessing
-  how consistently the bootstrapped models agree on risk estimates. Accuracy is assessed by the model
-  calibration, which compares the model-estimated risk with an estimate of the outcome prevalence in model-defined
-  risk groups. 
+abstract: |
+  **Aim** To estimate the risks of severe bleeding and further ischaemic events within 12 months using routine electronic health data available at the time of hospital admission.
+
+  **Methods** Data is obtained for {{ num_index_spells }} ACS or PCI admissions between {{ index_start }} and {{ index_end}} from a major public hospital in South West England. Estimated risks are calculated through Machine Learning (ML) techniques: Random Forest, Naïve Bayes, etc. A total XXX possible explanatory variables are considered using data from Hospital Episode Statistics (HES), supplemented with local hospital laboratory test data and personal attribute data from primary care. Model accuracy is assessed through area under the receiver operating characteristic curve (AUC).
+
+  **Results** For predicting severe bleeding events, accuracy is in the range of 0.xx (worst model) to 0.xx (best model), with xx, xx and xx being the most important explanatory variables in the best model. For predicting further ischaemic events, accuracy is in the range of 0.xx (worst model) to 0.xx (best model), with xx, xx and xx being the most important explanatory variables in the best model. 
+
+  **Discussion** The xxx and yyy models appear to offer the best statistical power for predicting adverse events following ACS using routine electronic health data. While the hospital is sufficiently large in accommodating a diverse range of patient and condition, further research should consider the extent to which results hold in other external settings.
 
 execute:
   echo: false
@@ -35,8 +30,8 @@ format:
     html-math-method: katex
   pdf:
     documentclass: report
-    margin-left: 30mm
-    margin-right: 30mm
+    margin-left: 20mm
+    margin-right: 20mm
   docx: {}
 ---
 
@@ -47,3 +42,5 @@ format:
 {% include "model_page.qmd" %}
 {% endwith %}
 {% endfor %}
+
+{% include "appendices.qmd" %}

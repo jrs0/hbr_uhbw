@@ -1,5 +1,5 @@
-title: "Bleeding and Ischaemia Risk Estimation Models"
-subtitle: "Trained using hospital episode statistics, secondary care prescriptions and laboratory results, and primary care data"
+title: "Estimating bleeding and ischaemia risk following acute coronary syndrome"
+subtitle: "A machine learning modelling study using routine electronic health data"
 author: "John Scott"
 
 # Path to load data from and save data to.
@@ -149,9 +149,38 @@ outcomes:
     text: "bleeding"
     title: "Bleeding" 
     abbr: "B"
+    fatal_group: "bleeding_adaptt"
+    non_fatal_group: "bleeding_adaptt"
   ischaemia:
     text: "ischaemia"
     title: "Ischaemia"
     abbr: "I"
+    fatal_group: "cv_death_ohm"
+    non_fatal_group: "ami_stroke_ohm"
 
+
+# Names of code groups
+code_groups:
+  "bleeding_adaptt": "Bleeding (ADAPTT)"
+  "bavm": "bAVM"
+  "ich": "ICH"
+  "portal_hypertension": "Portal Hyp."
+  "packed_red_cells_transfusion": "Transfusion"
+  "liver_cirrhosis": "Liver cirrhosis"
+  "ischaemic_stroke": "Ischaemic stroke"
+  "diabetes_type1": "Diabetes (Type 1)"
+  "mi_stemi_schnier": "MI (STEMI)"
+  "bleeding_al_ani": "Bleeding (al Ani)"
+  "diabetes": "Diabetes (Any)"
+  "diabetes_type2": "Diabetes (Type 2)"
+  "mi_schnier": "MI (Any)"
+  "ihd_bezin": "IHD"
+  #"hussain_ami_stroke": "AMI/stroke"
+  "ami_stroke_ohm": "AMI/Stroke"
+  "ckd_before": "CKD"
+  "cancer": "Cancer (Any)"
+  "all_pci_pathak": "PCI"
+  "bleeding_cadth": "Bleeding (Cadth)"
+  "acs_bezin": "ACS"
+  "mi_nstemi_schnier": "MI (NSTEMI)"
 

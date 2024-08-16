@@ -49,7 +49,7 @@ Patients are considered for inclusion based on the primary and secondary diagnos
 * There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
 
 
-Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, {{ num_index_events }} index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
+Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, {{ num_index_spells }} index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
 
 The list of bleeding and ischaemia ICD-10 and OPCS-4 codes are included in supplementary information.
 

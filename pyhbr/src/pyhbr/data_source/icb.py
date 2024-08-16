@@ -12,6 +12,17 @@ from sqlalchemy import select, Select, Engine, String, DateTime
 from pyhbr.common import CheckedTable
 
 
+# GP practices that opted out of the study have their
+# data excluded from the SQL query below.
+gp_opt_outs = [
+    "L81087", # Beechwood Medical Practice
+    "L81632", # Emersons Green Medical Centre
+    "L81046", # Leap Valley Medical Centre
+    "", # Abbotswood Surgery
+    "L81120", # Birchwood Medical Practice
+    "L81055", # Orchard Medical Centre
+]
+
 def ordinal(n: int) -> str:
     """Make an an ordinal like "2nd" from a number n
 
@@ -371,7 +382,10 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
         table.col("vasc_dis"),
         table.col("veteran"),
         table.col("visual_impair"),
-    ).where(table.col("nhs_number").in_(patient_ids))
+    ).where(
+        table.col("nhs_number").in_(patient_ids),
+        table.col("practice_code").not_in(gp_opt_outs),
+    )
 
 
 def primary_care_prescriptions_query(
