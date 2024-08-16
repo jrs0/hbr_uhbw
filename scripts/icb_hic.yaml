@@ -2,6 +2,8 @@ title: "Estimating bleeding and ischaemia risk following acute coronary syndrome
 subtitle: "A machine learning modelling study using routine electronic health data"
 author: "John Scott"
 
+### GENERAL ###
+
 # Path to load data from and save data to.
 save_dir: "../save_data"
 
@@ -9,6 +11,42 @@ save_dir: "../save_data"
 # appended to this name to create the file to load. This
 # base name is also used as the prefix for saved files.
 analysis_name: "icb_hic"
+
+### DATASET GENERATION ###
+
+# Raw date ranges (yyyy-mm-dd) to restrict the
+# SQL data fetch. HIC data only goes back to
+# Nov 2019, so set window a bit before that to
+# catch everything. End date can be set in the
+# future to catch most recent data. Date ranges
+# will be automatically restricted to allow a
+# window on each side of the index events for
+# patient history and outcomes.
+start_date: "2019-1-1"
+end_date: "2025-1-1"
+
+# Set the name of the ICD-10 and OPCS-4 codes files
+# that will be used to define features and outcome
+# code groups. The file will be loaded from the
+# pyhbr package.
+icd10_codes_file: "icd10_arc_hbr.yaml"
+opcs4_codes_file: "opcs4_arc_hbr.yaml"
+
+# Set the ACS and PCI code group names that will define
+# index events. Events will be considered an ACS event
+# if an ACS ICD-10 code is found in the primary position
+# of the first episode of the spell. Secondary diagnoses
+# are ignored to remove the possibility of identifying
+# historical events. PCI index events allow a PCI code
+# in any primary or secondary position of the first
+# episode of the spell, on the assumption that a coded
+# secondary procedure in an episode implies that the
+# procedure was performed in that episode.
+acs_index_code_group: "acs_bezin"
+pci_index_code_group: "all_pci_pathak"
+
+### MODELLING ###
+
 
 # Test/train split
 test_proportion: 0.25
@@ -37,6 +75,15 @@ report_template: "report.qmd"
 # Build output locations. The report will be
 # placed in a folder called {analysis_name}_report
 build_directory: "build"
+
+# List of GP opt-out codes to exclude from the SWD
+# data fetch.
+gp_opt_outs:
+  - "L81087" # Beechwood Medical Practice
+  - "L81632" # Emersons Green Medical Centre
+  - "L81046" # Leap Valley Medical Centre, also covers Abbotswood Surgery
+  - "L81120" # Birchwood Medical Practice
+  - "L81055" # Orchard Medical Centre
 
 # Models to include
 models:

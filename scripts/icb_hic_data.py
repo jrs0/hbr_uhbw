@@ -3,6 +3,7 @@
 
 import importlib
 import datetime as dt
+from dateutil import parser
 
 import pandas as pd
 from pyhbr import common, clinical_codes
@@ -11,6 +12,7 @@ from pyhbr.clinical_codes import counting
 from pyhbr.data_source import icb, hic_icb, hic
 from pyhbr.middle import from_icb, from_hic
 from pyhbr.analysis import arc_hbr
+import yaml
 
 importlib.reload(common)
 importlib.reload(acs)
@@ -22,13 +24,21 @@ importlib.reload(hic_icb)
 importlib.reload(clinical_codes)
 importlib.reload(counting)
 
+# Read the configuration file
+with open("scripts/icb_hic.yaml") as stream:
+    try:
+        config = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(f"Failed to load config file: {exc}")
+        exit(1)
+
 # Set a date range for episode fetch. The primary
 # care data start in Oct 2019. Use an end date
 # in the future to ensure all recent data is fetched.
 # Index spell data is limited based on the min/max
 # dates seen in all the datasets below.
-start_date = dt.date(2019, 1, 1)
-end_date = dt.date(2025, 1, 1)
+start_date = parser.parse(config["start_date"])
+end_date = parser.parse(config["end_date"])
 
 # Get the raw HES data (this takes a long time ~ 20 minutes, up to 2 hours
 # at UHBW).
@@ -57,8 +67,8 @@ reduced_sus_data = raw_sus_data[raw_sus_data["patient_id"].isin(hic_patient_ids)
 # Read the code groups and reduce to a table. The remainder of the code
 # uses the code groups dataframe, which you can either get from the code
 # files (as is done here) or create them manually
-diagnosis_codes = clinical_codes.load_from_package("icd10_arc_hbr.yaml")
-procedure_codes = clinical_codes.load_from_package("opcs4_arc_hbr.yaml")
+diagnosis_codes = clinical_codes.load_from_package(config["icd10_codes_file"])
+procedure_codes = clinical_codes.load_from_package(config["opcs4_codes_file"])
 code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
 
 # HES data + patient demographics
@@ -66,7 +76,9 @@ episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)
 
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 # Modify the code groups used to define the index event here.
-index_spells = acs.get_index_spells(episodes, codes, "acs_bezin", "all_pci_pathak")
+index_spells = acs.get_index_spells(
+    episodes, codes, config["acs_index_code_group"], config["pci_index_code_group"]
+)
 
 # Get the list of patients to narrow subsequent SQL queries
 patient_ids = index_spells["patient_id"].unique()
@@ -78,19 +90,19 @@ date_of_death, cause_of_death = from_icb.get_mortality(
 
 # Primary care prescriptions (very slow)
 dfs = common.get_data_by_patient(
-    msa_engine, icb.primary_care_prescriptions_query, patient_ids
+    msa_engine, icb.primary_care_prescriptions_query, patient_ids, config["gp_opt_outs"]
 )
 primary_care_prescriptions = pd.concat(dfs).reset_index(drop=True)
 
 # Primary care measurements (slow)
 dfs = common.get_data_by_patient(
-    msa_engine, icb.primary_care_measurements_query, patient_ids
+    msa_engine, icb.primary_care_measurements_query, patient_ids, config["gp_opt_outs"]
 )
 primary_care_measurements = pd.concat(dfs).reset_index(drop=True)
 
 # Primary care attributes (slow)
 dfs = common.get_data_by_patient(
-    msa_engine, icb.primary_care_attributes_query, patient_ids
+    msa_engine, icb.primary_care_attributes_query, patient_ids, config["gp_opt_outs"]
 )
 with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
 primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
@@ -137,7 +149,7 @@ secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(
 )  # fast
 
 # Combine the datasets for saving
-icb_hic_tmp = {
+raw = {
     # Datasets
     "index_spells": index_spells,
     "episodes": episodes,
@@ -161,23 +173,25 @@ icb_hic_tmp = {
     "raw_sus_data_file": raw_sus_data_path.name,
 }
 
+raw_name = f"{config['analysis_name']}_raw"
+
 # Save point for the intermediate data
-common.save_item(icb_hic_tmp, "icb_hic_tmp")
+common.save_item(raw, raw_name)
 
 # Load the data from file
-icb_hic_tmp, icb_hic_tmp_path = common.load_item("icb_hic_tmp")
+raw, raw_path = common.load_item(raw_name)
 
 # Extract some datasets for convenience
-episodes = icb_hic_tmp["episodes"]
-codes = icb_hic_tmp["codes"]
-index_spells = icb_hic_tmp["index_spells"]
-date_of_death = icb_hic_tmp["date_of_death"]
-cause_of_death = icb_hic_tmp["cause_of_death"]
-primary_care_attributes = icb_hic_tmp["primary_care_attributes"]
-primary_care_prescriptions = icb_hic_tmp["primary_care_prescriptions"]
-secondary_care_prescriptions = icb_hic_tmp["secondary_care_prescriptions"]
-primary_care_measurements = icb_hic_tmp["primary_care_measurements"]
-lab_results = icb_hic_tmp["lab_results"]
+episodes = raw["episodes"]
+codes = raw["codes"]
+index_spells = raw["index_spells"]
+date_of_death = raw["date_of_death"]
+cause_of_death = raw["cause_of_death"]
+primary_care_attributes = raw["primary_care_attributes"]
+primary_care_prescriptions = raw["primary_care_prescriptions"]
+secondary_care_prescriptions = raw["secondary_care_prescriptions"]
+primary_care_measurements = raw["primary_care_measurements"]
+lab_results = raw["lab_results"]
 
 # Get features from the lab results
 features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)

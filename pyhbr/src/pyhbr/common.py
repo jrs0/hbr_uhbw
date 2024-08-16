@@ -120,7 +120,7 @@ def get_data(
     return df
 
 def get_data_by_patient(
-    engine: Engine, query: Callable[[Engine, ...], Select], patient_ids: list[str]
+    engine: Engine, query: Callable[[Engine, ...], Select], patient_ids: list[str], *args: ...
 ) -> list[DataFrame]:
     """Fetch data using a query restricted by patient ID
     
@@ -133,6 +133,8 @@ def get_data_by_patient(
         query: A function returning a sqlalchemy Select statement. Must
             take a list[str] as an argument after engine.
         patient_ids: A list of patient IDs to restrict the query.
+        *args: Further positional arguments that will be passed to the 
+            query function after the patient_ids positional argument.
 
     Returns:
         A list of dataframes, one corresponding to each chunk.
@@ -144,7 +146,7 @@ def get_data_by_patient(
     for chunk in patient_id_chunks:
         print(f"Fetching chunk {chunk_count}/{num_chunks}")
         dataframes.append(
-            get_data(engine, query, chunk)
+            get_data(engine, query, chunk, *args)
         )
         chunk_count += 1
     return dataframes

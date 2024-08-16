@@ -11,18 +11,6 @@ from datetime import date
 from sqlalchemy import select, Select, Engine, String, DateTime
 from pyhbr.common import CheckedTable
 
-
-# GP practices that opted out of the study have their
-# data excluded from the SQL query below.
-gp_opt_outs = [
-    "L81087", # Beechwood Medical Practice
-    "L81632", # Emersons Green Medical Centre
-    "L81046", # Leap Valley Medical Centre
-    "", # Abbotswood Surgery
-    "L81120", # Birchwood Medical Practice
-    "L81055", # Orchard Medical Centre
-]
-
 def ordinal(n: int) -> str:
     """Make an an ordinal like "2nd" from a number n
 
@@ -162,7 +150,7 @@ def mortality_query(engine: Engine, start_date: date, end_date: date) -> Select:
         table.col("Derived_Pseudo_NHS") != 9000219621,  # Invalid-patient marker    
     )
 
-def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Select:
+def primary_care_attributes_query(engine: Engine, patient_ids: list[str], gp_opt_outs: list[str]) -> Select:
     """Get primary care patient information
 
     This is translated into an IN clause, which has an item limit. 
@@ -177,6 +165,9 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
         engine: The connection to the database
         patient_ids: The list of patient identifiers to filter
             the nhs_number column.
+        gp_opt_outs: List of practice codes that are excluded
+            from the data fetch (corresponds to the "practice_code"
+            column in the table).
 
     Returns:
         SQL query to retrieve episodes table
@@ -389,7 +380,7 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str]) -> Sel
 
 
 def primary_care_prescriptions_query(
-    engine: Engine, patient_ids: list[str]
+    engine: Engine, patient_ids: list[str], gp_opt_outs: list[str]
 ) -> Select:
     """Get medications dispensed in primary care
 
@@ -397,6 +388,9 @@ def primary_care_prescriptions_query(
         engine: the connection to the database
         patient_ids: The list of patient identifiers to filter
             the nhs_number column.
+        gp_opt_outs: List of practice codes that are excluded
+            from the data fetch (corresponds to the "practice_code"
+            column in the table).
 
     Returns:
         SQL query to retrieve episodes table
@@ -410,12 +404,13 @@ def primary_care_prescriptions_query(
         table.col("prescription_quantity").label("quantity"),
         table.col("prescription_type").label("acute_or_repeat"),
     ).where(
-        table.col("nhs_number").in_(patient_ids)
+        table.col("nhs_number").in_(patient_ids),
+        table.col("practice_code").not_in(gp_opt_outs),
     )
 
 
 def primary_care_measurements_query(
-    engine: Engine, patient_ids: list[str]
+    engine: Engine, patient_ids: list[str], gp_opt_outs: list[str]
 ) -> Select:
     """Get physiological measurements performed in primary care
 
@@ -423,6 +418,9 @@ def primary_care_measurements_query(
         engine: the connection to the database
         patient_ids: The list of patient identifiers to filter
             the nhs_number column.
+        gp_opt_outs: List of practice codes that are excluded
+            from the data fetch (corresponds to the "practice_code"
+            column in the table).
 
     Returns:
         SQL query to retrieve episodes table
@@ -436,5 +434,6 @@ def primary_care_measurements_query(
         table.col("measurement_value").label("result"),
         table.col("measurement_group").label("group"),
     ).where(
-        table.col("nhs_number").in_(patient_ids)
+        table.col("nhs_number").in_(patient_ids),
+        table.col("practice_code").not_in(gp_opt_outs),
     )
