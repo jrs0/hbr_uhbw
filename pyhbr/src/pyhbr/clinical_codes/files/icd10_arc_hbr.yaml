@@ -3044,6 +3044,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - A00
     - B99
@@ -5929,6 +5930,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - C00
     - D48
@@ -6597,6 +6599,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - D50
     - D89
@@ -8007,6 +8010,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - E00
     - E90
@@ -8062,6 +8066,7 @@ categories:
       - bleeding_barc
       - ami_stroke_ohm
       - cv_death_ohm
+      - haemorrhagic_stroke
       index:
       - I00
       - I02
@@ -8182,6 +8187,7 @@ categories:
       - bleeding_barc
       - ami_stroke_ohm
       - cv_death_ohm
+      - haemorrhagic_stroke
       index:
       - I05
       - I09
@@ -8262,6 +8268,7 @@ categories:
       - bleeding_barc
       - ami_stroke_ohm
       - cv_death_ohm
+      - haemorrhagic_stroke
       index:
       - I10
       - I15
@@ -8504,6 +8511,7 @@ categories:
       - ich
       - ischaemic_stroke
       - bleeding_barc
+      - haemorrhagic_stroke
       index:
       - I20
       - I25
@@ -8571,6 +8579,7 @@ categories:
       - bleeding_barc
       - ami_stroke_ohm
       - cv_death_ohm
+      - haemorrhagic_stroke
       index:
       - I26
       - I28
@@ -9080,6 +9089,7 @@ categories:
       - ischaemic_stroke
       - bleeding_barc
       - ami_stroke_ohm
+      - haemorrhagic_stroke
       index:
       - I30
       - I52
@@ -9236,6 +9246,7 @@ categories:
         - bleeding_adaptt
         - ich
         - bleeding_barc
+        - haemorrhagic_stroke
         index: I63
         name: I63
       - docs: Stroke, not specified as haemorrhage or infarction
@@ -9248,6 +9259,7 @@ categories:
         - bleeding_barc
         - ami_stroke_ohm
         - cv_death_ohm
+        - haemorrhagic_stroke
         index: I64
         name: I64
       - categories:
@@ -9280,6 +9292,7 @@ categories:
         - bleeding_barc
         - ami_stroke_ohm
         - cv_death_ohm
+        - haemorrhagic_stroke
         index: I65
         name: I65
       - categories:
@@ -9315,6 +9328,7 @@ categories:
         - bleeding_barc
         - ami_stroke_ohm
         - cv_death_ohm
+        - haemorrhagic_stroke
         index: I66
         name: I66
       - categories:
@@ -9359,6 +9373,7 @@ categories:
         - bleeding_barc
         - ami_stroke_ohm
         - cv_death_ohm
+        - haemorrhagic_stroke
         index: I67
         name: I67
       - categories:
@@ -9385,6 +9400,7 @@ categories:
         - bleeding_barc
         - ami_stroke_ohm
         - cv_death_ohm
+        - haemorrhagic_stroke
         index: I68
         name: I68
       - categories:
@@ -9422,6 +9438,7 @@ categories:
         - bleeding_barc
         - ami_stroke_ohm
         - cv_death_ohm
+        - haemorrhagic_stroke
         index: I69
         name: I69
       docs: Cerebrovascular diseases
@@ -9642,6 +9659,7 @@ categories:
       - bleeding_barc
       - ami_stroke_ohm
       - cv_death_ohm
+      - haemorrhagic_stroke
       index:
       - I70
       - I79
@@ -9860,6 +9878,7 @@ categories:
       - ischaemic_stroke
       - ami_stroke_ohm
       - cv_death_ohm
+      - haemorrhagic_stroke
       index:
       - I80
       - I89
@@ -9942,6 +9961,7 @@ categories:
       - bleeding_barc
       - ami_stroke_ohm
       - cv_death_ohm
+      - haemorrhagic_stroke
       index:
       - I95
       - I99
@@ -11511,6 +11531,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - F00
     - F99
@@ -12831,6 +12852,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - G00
     - G99
@@ -13931,6 +13953,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - H00
     - H59
@@ -14411,6 +14434,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - H60
     - H95
@@ -15382,6 +15406,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - J00
     - J99
@@ -17489,6 +17514,7 @@ categories:
     - ischaemic_stroke
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - K00
     - K93
@@ -18824,6 +18850,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - L00
     - L99
@@ -20914,6 +20941,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - M00
     - M99
@@ -22687,6 +22715,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - N00
     - N99
@@ -27485,6 +27514,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - S00
     - T98
@@ -29132,6 +29162,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - O00
     - O99
@@ -30436,6 +30467,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - P00
     - P96
@@ -32777,6 +32809,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - Q00
     - Q99
@@ -34240,6 +34273,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - R00
     - R99
@@ -39215,6 +39249,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - V01
     - Y98
@@ -41504,6 +41539,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - Z00
     - Z99
@@ -41689,6 +41725,7 @@ categories:
     - bleeding_barc
     - ami_stroke_ohm
     - cv_death_ohm
+    - haemorrhagic_stroke
     index:
     - U00
     - U85
@@ -41720,4 +41757,5 @@ groups:
 - bavm
 - ich
 - ischaemic_stroke
+- haemorrhagic_stroke
 - cv_death_ohm

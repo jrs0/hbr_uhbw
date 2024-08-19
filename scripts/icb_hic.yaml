@@ -134,6 +134,7 @@ features:
   "bleeding_adaptt_before": "Prior bleeding (ADAPTT)"
   "diabetes_type1_before": "Type-1 diabetes (HES)"
   "ischaemic_stroke_before": "Prior ischaemic stroke"
+  "haemorrhagic_stroke_before": "Prior haemorrhagic stroke"
   "ich_before": "Prior ICH"
   "bleeding_barc_before": "Prior severe bleeding"
   "packed_red_cells_transfusion_before": "Prior transfusion" 
