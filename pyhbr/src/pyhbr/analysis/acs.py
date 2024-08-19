@@ -7,7 +7,12 @@ import pandas as pd
 
 
 def get_index_spells(
-    episodes: DataFrame, codes: DataFrame, acs_group: str, pci_group: str
+    episodes: DataFrame,
+    codes: DataFrame,
+    acs_group: str,
+    pci_group: str,
+    stemi_group: str,
+    nstemi_group: str,
 ) -> DataFrame:
     """Get the index spells for ACS/PCI patients
 
@@ -43,6 +48,8 @@ def get_index_spells(
             the value of the acs_group and pci_group arguments).
         acs_group: The name of the ICD-10 code group used to define ACS.
         pci_group: The name of the OPCS-4 code group used to define PCI
+        stemi_group: The name of the ICD-10 code group used to identify STEMI MI
+        nstemi_group: The name of the ICD-10 code group used to identify NSTEMI MI
 
     Returns:
         A table of index spells and associated information about the
@@ -84,6 +91,12 @@ def get_index_spells(
     )
     index_spells["pci_index"] = (
         matching_episodes["group"].eq(pci_group).groupby("episode_id").any()
+    )
+    index_spells["stemi_index"] = (
+        matching_episodes["group"].eq(stemi_group).groupby("episode_id").any()
+    )
+    index_spells["nstemi_index"] = (
+        matching_episodes["group"].eq(nstemi_group).groupby("episode_id").any()
     )
 
     # Join some useful information about the episode
@@ -315,7 +328,7 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
             in that group that appeared in the year before the index.
     """
     code_groups = all_other_codes["group"].unique()
-    max_position = 999 # Allow any primary/secondary position
+    max_position = 999  # Allow any primary/secondary position
     exclude_index_spell = False
     max_before = dt.timedelta(days=365)
     min_before = dt.timedelta(days=30)
@@ -498,11 +511,12 @@ def prescriptions_before_index(
 
     return all_counts
 
+
 def get_secondary_care_prescriptions_features(
     prescriptions: DataFrame, index_spells: DataFrame, episodes: DataFrame
 ) -> DataFrame:
     """Get dummy feature columns for OAC and NSAID medications on admission
-    
+
     Args:
         prescriptions: The table of secondary care prescriptions, containing
             a `group` column and `spell_id`.
@@ -525,9 +539,14 @@ def get_secondary_care_prescriptions_features(
     )
 
     # Filter and create dummy variables for on-admission medication
-    dummies = pd.get_dummies(
-        df[within_spell & df["on_admission"]].set_index("spell_id")["group"]
-    ).groupby("spell_id").max().astype(int)
+    dummies = (
+        pd.get_dummies(
+            df[within_spell & df["on_admission"]].set_index("spell_id")["group"]
+        )
+        .groupby("spell_id")
+        .max()
+        .astype(int)
+    )
 
     # Join back onto index events and set missing entries to zero
     return index_spells[[]].merge(dummies, how="left", on="spell_id").fillna(0)

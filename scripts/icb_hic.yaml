@@ -45,6 +45,111 @@ opcs4_codes_file: "opcs4_arc_hbr.yaml"
 acs_index_code_group: "acs_bezin"
 pci_index_code_group: "all_pci_pathak"
 
+# Set code groups to identify STEMI/NSTEMI index presentations
+stemi_index_code_group: "mi_nstemi_schnier"
+nstemi_index_code_group: "mi_nstemi_schnier"
+
+# When processing the primary care attributes, 
+# drop columns that exceed this level of missingness
+attributes_max_missingness: 0.75
+
+# When processing the primary care attributes,
+# drop columns if more than this proportion of 
+# the column is a constant value
+attributes_const_threshold: 0.95
+
+# Names of features
+features:
+  # Lab results
+  "egfr": "eGFR"
+  "hb": "Hb"
+  "platelets": "Platelets"
+  # Secondary care prescriptions
+  "prior_nsaid": "Prior NSAID"
+  "prior_oac": "Prior OAC"
+  # Primary care attributes
+  "af": "AF"
+  "alcohol_units": "Alcohol (units)"
+  "asthma": "Asthma"
+  "back_pain": "Back pain"
+  "bmi": "BMI"
+  "cardio_other": "Cardio (other)"
+  "cataracts": "Cataracts"
+  "ckd": "CKD"
+  "copd": "COPD"
+  "diabetes_2": "Type-2 diabetes (Attr.)"
+  "diabetes_retina": "Diabetes (retina)"
+  "efi_category": "EFI category"
+  "egfr": "eGFR"
+  "ethnicity": "Ethnicity"
+  "gout": "Gout"
+  "health_check": "Health check"
+  "hearing_impair": "Hearing impairment"
+  "hf": "HF"
+  "ibs": "IBS"
+  "ihd_mi": "IHD (MI)"
+  "ihd_nonmi": "IHD (non-MI)"
+  "lsoa": "LSOA"
+  "neuro_pain": "Neuropathic pain"
+  "neuro_various": "Neurological impairments"
+  "osteoarthritis": "Osteoarthritis"
+  "polypharmacy_acute": "Polypharmacy (acute)"
+  "polypharmacy_repeat": "Polypharmacy (repeat)"
+  "pre_diabetes": "Pre-diabetes"
+  "qof_af": "AF (QOF)"
+  "qof_asthma": "Asthma (QOF)"
+  "qof_chd": "CHD (QOF)"
+  "qof_ckd": "CKD (QOF)"
+  "qof_copd": "COPD (QOF)"
+  "qof_depression": "Depression (QOF)"
+  "qof_diabetes": "Diabetes (QOF)"
+  "qof_hf": "HF (QOF)"
+  "qof_ht": "HT (QOF)"
+  "qof_obesity": "Obesity (QOF)"
+  "qof_pad": "PAD (QOF)"
+  "qof_stroke": "Stroke (QOF)"
+  "sad": "Sad"
+  "screen_aaa": "AAA screen"
+  "screen_bowel": "Bowel cancer screen"
+  "screen_breast": "Breast screen"
+  "screen_cervical": "Cervical screen"
+  "screen_eye": "Diabetic eye screen"
+  "smi": "SMI"
+  "smoking": "Smoking"
+  "stroke": "Stroke"
+  "thyroid": "thyroid disease"
+  "vasc_dis": "PVD"
+  # HES features from code groups
+  "ihd_bezin_before": "IHD"
+  "all_pci_pathak_before": "Prior PCI"
+  "bleeding_al_ani_before": "Prior bleeding (al Ani)"
+  "diabetes_type2_before": "Type-2 diabetes (HES)"
+  "diabetes_before": "Diabetes (any)"
+  "mi_schnier_before": "Prior MI (any)"
+  "mi_nstemi_schnier_before": "Prior MI (NSTEMI)"
+  "acs_bezin_before": "Prior ACS (any)"
+  "ckd_before": "CKD (HES)"
+  "bleeding_cadth_before": "Prior bleeding (Cadth)"
+  "cancer_before": "Cancer (HES)"
+  "bleeding_adaptt_before": "Prior bleeding (ADAPTT)"
+  "diabetes_type1_before": "Type-1 diabetes (HES)"
+  "ischaemic_stroke_before": "Prior ischaemic stroke"
+  "ich_before": "Prior ICH"
+  "bleeding_barc_before": "Prior severe bleeding"
+  "packed_red_cells_transfusion_before": "Prior transfusion" 
+  "liver_cirrhosis_before": "Prior cirrhosis"
+  "portal_hypertension_before": "Prior portal HT"
+  "bavm_before": "bAVM"
+  # Primary care measurements
+  "bp_systolic": "Systolic BP"
+  "bp_diastolic": "Diastolic BP"
+  "hba1c": "HbAC1"
+  # Index features
+  "acs_index": "ACS index"
+  "pci_index": "PCI index"
+  "age": "Age"
+  "gender": "Gender"
+
 ### MODELLING ###
 
 

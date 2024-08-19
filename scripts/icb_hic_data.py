@@ -77,7 +77,12 @@ episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)
 # Get the index episodes (primary ACS or PCI anywhere in first episode)
 # Modify the code groups used to define the index event here.
 index_spells = acs.get_index_spells(
-    episodes, codes, config["acs_index_code_group"], config["pci_index_code_group"]
+    episodes,
+    codes,
+    config["acs_index_code_group"],
+    config["pci_index_code_group"],
+    config["stemi_index_code_group"],
+    config["nstemi_index_code_group"],
 )
 
 # Get the list of patients to narrow subsequent SQL queries
@@ -222,7 +227,9 @@ all_index_attributes = acs.get_index_attributes(
 # Remove attribute columns that have too much missingness or where
 # the column is nearly constant (low variance)
 features_attributes = acs.remove_features(
-    all_index_attributes, max_missingness=0.75, const_threshold=0.95
+    all_index_attributes,
+    max_missingness=config["attributes_max_missingness"],
+    const_threshold=config["attributes_const_threshold"],
 )
 
 # Get other episodes relative to the index episode (for counting code
@@ -249,7 +256,7 @@ following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 # where bleeding code is not historical/minor.
 max_position = 1
 exclude_index_spell = True
-non_fatal_bleeding_group = "bleeding_adaptt"
+non_fatal_bleeding_group = config["outcomes"]["bleeding"]["non_fatal_group"]
 non_fatal_bleeding = acs.filter_by_code_groups(
     following_year,
     non_fatal_bleeding_group,
@@ -263,7 +270,7 @@ non_fatal_bleeding = acs.filter_by_code_groups(
 # Bleeding codes typically show up in the primary
 # or first secondary
 max_position = 1
-fatal_bleeding_group = "bleeding_adaptt"
+fatal_bleeding_group = config["outcomes"]["bleeding"]["fatal_group"]
 fatal_bleeding = acs.identify_fatal_outcome(
     index_spells,
     date_of_death,
@@ -284,7 +291,7 @@ fatal_bleeding = acs.identify_fatal_outcome(
 # secondary codes somewhat increases the number of outcomes.
 max_position = 1
 exclude_index_spell = True
-non_fatal_ischaemia_group = "ami_stroke_ohm"
+non_fatal_ischaemia_group = config["outcomes"]["ischaemia"]["non_fatal_group"]
 non_fatal_ischaemia = acs.filter_by_code_groups(
     following_year,
     non_fatal_ischaemia_group,
@@ -306,7 +313,7 @@ spell.sort_values(["episode_start", "type", "position"])
 # Only the first secondary position is allowed,
 # in an attempt to restrict to cardiovascular death
 # which does not have another cause.
-fatal_ischaemia_group = "cv_death_ohm"
+fatal_ischaemia_group = config["outcomes"]["ischaemia"]["fatal_group"]
 max_position = 2
 fatal_ischaemia = acs.identify_fatal_outcome(
     index_spells,
@@ -342,6 +349,15 @@ bool_outcomes["ischaemia"] = (
 100 * bool_outcomes.sum() / len(bool_outcomes)
 
 features_codes = acs.get_code_features(index_spells, all_other_codes)
+
+# Remove the CV death code group (generalise this to remove
+# arbitrary code groups using the config file)
+to_drop = [
+    "cv_death_ohm_before",
+    "hussain_ami_stroke_before",  # Duplicates other AMI/stroke group
+    "ami_stroke_ohm_before",  # AMI and stroke are included separately
+]
+features_codes = features_codes.drop(columns=to_drop)
 
 # Get counts of relevant prescriptions in the year before the index
 features_prescriptions = acs.prescriptions_before_index(
