@@ -46,7 +46,7 @@ acs_index_code_group: "acs_bezin"
 pci_index_code_group: "all_pci_pathak"
 
 # Set code groups to identify STEMI/NSTEMI index presentations
-stemi_index_code_group: "mi_nstemi_schnier"
+stemi_index_code_group: "mi_stemi_schnier"
 nstemi_index_code_group: "mi_nstemi_schnier"
 
 # When processing the primary care attributes, 

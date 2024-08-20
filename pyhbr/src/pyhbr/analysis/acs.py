@@ -60,23 +60,31 @@ def get_index_spells(
     # spell (to capture the cause of admission to hospital).
     first_episodes = episodes.sort_values("episode_start").groupby("spell_id").head(1)
 
+    # In the codes dataframe, if one code is in multiple groups, it gets multiple
+    # (one per code group). Concatenate the code groups to reduce to one row per
+    # code, then use str.contains() later to identify code groups
+    reduced_codes = codes.copy()
+    non_group_cols = [c for c in codes.columns if c != "group"]
+    reduced_codes["group"] = codes.groupby(non_group_cols)["group"].transform(lambda x: ",".join(x))
+    reduced_codes = reduced_codes.drop_duplicates()
+
     # Join the diagnosis/procedure codes. The inner join reduces to episodes which
     # have codes in any group, which is a superset of the index episodes -- if an
     # episode has no codes in any code group, it cannot be an index event.
     first_episodes_with_codes = first_episodes.merge(
-        codes, how="inner", on="episode_id"
+        reduced_codes, how="inner", on="episode_id"
     )
 
     # ACS matches based on a primary diagnosis of ACS (this is to rule out
     # cases where patient history may contain ACS recorded as a secondary
     # diagnosis).
-    acs_match = (first_episodes_with_codes["group"] == acs_group) & (
+    acs_match = (first_episodes_with_codes["group"].str.contains(acs_group)) & (
         first_episodes_with_codes["position"] == 1
     )
 
     # A PCI match is allowed anywhere in the procedures list, but must still
     # be present in the first episode of the index spell.
-    pci_match = first_episodes_with_codes["group"] == pci_group
+    pci_match = first_episodes_with_codes["group"].str.contains(pci_group)
 
     # Get all the episodes matching the ACS or PCI condition (multiple rows
     # per episode)
@@ -87,16 +95,16 @@ def get_index_spells(
     # or PCI condition was present
     index_spells = DataFrame()
     index_spells["acs_index"] = (
-        matching_episodes["group"].eq(acs_group).groupby("episode_id").any()
+        matching_episodes["group"].str.contains(acs_group).groupby("episode_id").any()
     )
     index_spells["pci_index"] = (
-        matching_episodes["group"].eq(pci_group).groupby("episode_id").any()
+        matching_episodes["group"].str.contains(pci_group).groupby("episode_id").any()
     )
     index_spells["stemi_index"] = (
-        matching_episodes["group"].eq(stemi_group).groupby("episode_id").any()
+        matching_episodes["group"].str.contains(stemi_group).groupby("episode_id").any()
     )
     index_spells["nstemi_index"] = (
-        matching_episodes["group"].eq(nstemi_group).groupby("episode_id").any()
+        matching_episodes["group"].str.contains(nstemi_group).groupby("episode_id").any()
     )
 
     # Join some useful information about the episode
