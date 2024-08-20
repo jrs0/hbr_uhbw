@@ -65,7 +65,9 @@ def get_index_spells(
     # code, then use str.contains() later to identify code groups
     reduced_codes = codes.copy()
     non_group_cols = [c for c in codes.columns if c != "group"]
-    reduced_codes["group"] = codes.groupby(non_group_cols)["group"].transform(lambda x: ",".join(x))
+    reduced_codes["group"] = codes.groupby(non_group_cols)["group"].transform(
+        lambda x: ",".join(x)
+    )
     reduced_codes = reduced_codes.drop_duplicates()
 
     # Join the diagnosis/procedure codes. The inner join reduces to episodes which
@@ -104,7 +106,10 @@ def get_index_spells(
         matching_episodes["group"].str.contains(stemi_group).groupby("episode_id").any()
     )
     index_spells["nstemi_index"] = (
-        matching_episodes["group"].str.contains(nstemi_group).groupby("episode_id").any()
+        matching_episodes["group"]
+        .str.contains(nstemi_group)
+        .groupby("episode_id")
+        .any()
     )
 
     # Join some useful information about the episode
@@ -177,6 +182,61 @@ def identify_fatal_outcome(
     return df.rename(columns={"spell_id": "index_spell_id"})[
         ["index_spell_id", "survival_time", "code", "position", "docs", "group"]
     ]
+
+
+def get_survival_data(
+    index_spells: DataFrame,
+    fatal: DataFrame,
+    non_fatal: DataFrame,
+    max_after: dt.timedelta,
+) -> DataFrame:
+    """Get survival data from fatal and non-fatal outcomes
+
+    Args:
+        index_spells: The index spells, indexed by `spell_id`
+        fatal: The table of fatal outcomes, containing a `survival_time` column
+        non_fatal: The table of non-fatal outcomes, containing a `time_to_other_episode` column
+        max_after: The right censor time. This is the maximum time for data contained in the
+            fatal and non_fatal tables; any index spells with no events in either table
+            will be right-censored with this time.
+
+    Returns:
+        The survival data containing both fatal and non-fatal events. The survival time is the
+            `time_to_event` column, the `fatal` column contains a flag indicating whether the
+            event was fatal, and the `right_censor` column indicates whether the survival time
+            is censored. The `code` and `docs` column provide information about the type of
+            event for non-censored data (NA otherwise).
+    """
+    # Get bleeding survival analysis data (for both fatal
+    # and non-fatal bleeding). First, combine the fatal
+    # and non-fatal data
+    cols_to_keep = ["index_spell_id", "code", "docs", "time_to_event"]
+    non_fatal_survival = non_fatal.rename(
+        columns={"time_to_other_episode": "time_to_event"}
+    )[cols_to_keep]
+    non_fatal_survival["fatal"] = False
+    fatal_survival = fatal.rename(columns={"survival_time": "time_to_event"})[
+        cols_to_keep
+    ]
+    fatal_survival["fatal"] = True
+    survival = pd.concat([fatal_survival, non_fatal_survival])
+
+    # Take only the first event for each index spell
+    first_event = (
+        survival.sort_values("time_to_event")
+        .groupby("index_spell_id")
+        .head(1)
+        .set_index("index_spell_id")
+    )
+    first_event["right_censor"] = False
+    with pd.option_context("future.no_silent_downcasting", True):
+        with_censor = (
+            index_spells[[]]
+            .merge(first_event, left_index=True, right_index=True, how="left")
+            .fillna({"fatal": False, "time_to_event": max_after, "right_censor": True})
+            .infer_objects(copy=False)
+        )
+    return with_censor
 
 
 def filter_by_code_groups(

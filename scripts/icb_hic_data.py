@@ -335,38 +335,10 @@ outcomes["non_fatal_ischaemia"] = counting.count_code_groups(
 outcomes["fatal_bleeding"] = counting.count_code_groups(index_spells, fatal_bleeding)
 outcomes["fatal_ischaemia"] = counting.count_code_groups(index_spells, fatal_ischaemia)
 
-# Get bleeding survival analysis data (for both fatal
-# and non-fatal bleeding). First, combine the fatal
-# and non-fatal data
-cols_to_keep = ["index_spell_id", "code", "docs", "time_to_event"]
-non_fatal_survival = non_fatal_bleeding.rename(
-    columns={"time_to_other_episode": "time_to_event"}
-)[cols_to_keep]
-non_fatal_survival["fatal"] = False
-fatal_survival = fatal_bleeding.rename(columns={"survival_time": "time_to_event"})[
-    cols_to_keep
-]
-fatal_survival["fatal"] = True
-survival = pd.concat([fatal_survival, non_fatal_survival])
-
-# Take only the first event for each index spell
-first_event = (
-    survival.sort_values("time_to_event")
-    .groupby("index_spell_id")
-    .head(1)
-    .set_index("index_spell_id")
-)
-first_event["right_censor"] = False
-censors = index_spells[[]].copy()
-censors["time_to_event"] = max_after
-censors["right_censor"] = True
-censors["fatal"] = False
-with_censor = censors.merge(first_event, left_index=True, right_index=True, how="left")
-
-
-bleeding_survival = index_spells[[]].merge(
-    first_non_fatal_bleeding, left_index=True, right_on="index_spell_id", how="left"
-)
+# Get the survival time and right censoring data for bleeding and ischaemia (combines
+# both fatal/non-fatal outcomes with a flag to distinguish which is which)
+bleeding_survival = acs.get_survival_data(index_spells, fatal_bleeding, non_fatal_bleeding, max_after)
+ischaemia_survival = acs.get_survival_data(index_spells, fatal_ischaemia, non_fatal_ischaemia, max_after)
 
 # Reduce the outcomes to boolean, and make aggregate
 # (fatal/non-fatal) columns
@@ -379,7 +351,7 @@ bool_outcomes["ischaemia"] = (
 )
 
 # Quick check on prevalences
-100 * bool_outcomes.sum() / len(bool_outcomes)
+#100 * bool_outcomes.sum() / len(bool_outcomes)
 
 features_codes = acs.get_code_features(index_spells, all_other_codes)
 
@@ -419,6 +391,8 @@ icb_hic_data = {
     "fatal_bleeding": fatal_bleeding,
     "non_fatal_ischaemia": non_fatal_ischaemia,
     "fatal_ischaemia": fatal_ischaemia,
+    "bleeding_survival": bleeding_survival,
+    "ischaemia_survival": ischaemia_survival,
     # HES data
     "features_index": features_index,
     "features_codes": features_codes,
