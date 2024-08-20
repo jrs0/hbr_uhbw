@@ -383,7 +383,7 @@ features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_s
 
 # Combine all tables (features and outcomes) into a single table
 # for saving.
-icb_hic_data = {
+data = {
     "raw_file": raw_path.name,
     # Outcomes
     "outcomes": bool_outcomes,
@@ -405,4 +405,4 @@ icb_hic_data = {
     "features_lab": features_lab,
 }
 
-common.save_item(icb_hic_data, "icb_hic_data")
+common.save_item(data, f"{config['analysis_name']}_data")
