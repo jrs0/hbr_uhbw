@@ -148,6 +148,8 @@ features:
   # Index features
   "acs_index": "ACS index"
   "pci_index": "PCI index"
+  "index_stemi": "STEMI index"
+  "index_nstemi": "NSTEMI index"
   "age": "Age"
   "gender": "Gender"
 
