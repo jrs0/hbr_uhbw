@@ -184,7 +184,7 @@ raw_name = f"{config['analysis_name']}_raw"
 common.save_item(raw, raw_name)
 
 # Load the data from file
-raw, raw_path = common.load_item(raw_name)
+raw, raw_path = common.load_item(raw_name, )
 
 # Extract some datasets for convenience
 episodes = raw["episodes"]
