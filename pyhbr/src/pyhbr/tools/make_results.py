@@ -102,8 +102,11 @@ def main():
         y_test = model_data["y_test"]
 
         # Print the feature importances
+        pd.set_option('display.max_rows', 500)
+        print("Bleeding feature importance")
+        print(fit_results["feature_importances"]["bleeding"])
+        print("Ischaemia feature importance")
         print(fit_results["feature_importances"]["ischaemia"])
-        exit()
         
         model_abbr = config["models"][model_name]["abbr"]
         bleeding_abbr = config["outcomes"]["bleeding"]["abbr"]
