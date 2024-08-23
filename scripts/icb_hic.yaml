@@ -229,6 +229,8 @@ models:
     title: "Logistic Regression"
     abbr: "LR"
     pipe_fn: "pyhbr.analysis.model.make_logistic_regression"
+    config:
+      "max_iter": "1000"
     description: >
        The risk is obtained by fitting the logistic regression model to the events,
        using the input features are variables. A penalty term is added to handle
