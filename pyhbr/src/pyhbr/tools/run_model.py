@@ -92,10 +92,13 @@ def fit_and_save(
             common.save_item(
                 model_data, f"{analysis_name}_{model_name}", save_dir=config["save_dir"]
             )
+            # Getting here successfully means that the save worked; exit the loop
+            print("Saved model")
+            break
         except RuntimeError as e:
             print(e)
             print("You can commit now and then retry the save after committing.")
-            retry_save = common.query_yes_no("Do you want to retry the save? Commit, then select yes; no will exit the script.")
+            retry_save = common.query_yes_no("Do you want to retry the save? Commit, then select yes, or choose no to exit the script.")
         
 
 def main():
