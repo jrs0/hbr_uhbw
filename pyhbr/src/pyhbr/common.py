@@ -7,6 +7,7 @@ A collection of routines used by the data source or analysis functions.
 from dataclasses import dataclass
 
 import os
+import sys
 from pathlib import Path
 from typing import Callable, Any
 from time import time
@@ -493,3 +494,35 @@ def median_to_string(instability: DataFrame, unit="%") -> str:
     """
     return f"{instability.loc[0.5]:.2f}{unit} Q [{instability.loc[0.025]:.2f}{unit}, {instability.loc[0.975]:.2f}{unit}]"
 
+
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    From https://stackoverflow.com/a/3041990.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+            It must be "yes" (the default), "no" or None (meaning
+            an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == "":
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")

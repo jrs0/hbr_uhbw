@@ -81,10 +81,22 @@ def fit_and_save(
     
     analysis_name = config["analysis_name"]
     
-    common.save_item(
-        model_data, f"{analysis_name}_{model_name}", save_dir=config["save_dir"]
-    )
-
+    
+    # If the branch is not clean, prompt the user to commit to avoid losing
+    # long-running model results. Take care to only commit if the state of
+    # the repository truly reflects what was run (i.e. if no changes were made
+    # while the script was running).
+    retry_save = True
+    while retry_save:
+        try:
+            common.save_item(
+                model_data, f"{analysis_name}_{model_name}", save_dir=config["save_dir"]
+            )
+        except RuntimeError as e:
+            print(e)
+            print("You can commit now and then retry the save after committing.")
+            retry_save = common.query_yes_no("Do you want to retry the save? Commit, then select yes; no will exit the script.")
+        
 
 def main():
 
