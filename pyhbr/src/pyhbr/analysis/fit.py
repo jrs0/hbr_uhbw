@@ -41,6 +41,8 @@ def fit_model(
     fitted_models = {}
     for outcome in ["bleeding", "ischaemia"]:
 
+        print(f"Fitting {outcome} model")
+
         # Fit the bleeding and ischaemia models on the training set
         # and bootstrap resamples of the training set (to assess stability)
         fitted_models[outcome] = stability.fit_model(

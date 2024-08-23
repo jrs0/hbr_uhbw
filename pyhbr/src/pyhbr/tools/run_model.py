@@ -49,6 +49,8 @@ def fit_and_save(
         random_state: The source of randomness used by the model
     """
     
+    print("Starting fit")
+    
     # Using a larger number of bootstrap resamples will make
     # the stability analysis better, but will take longer to fit.
     num_bootstraps = config["num_bootstraps"]
