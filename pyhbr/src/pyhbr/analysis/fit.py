@@ -1,7 +1,8 @@
 from numpy.random import RandomState
 from pandas import DataFrame
 from sklearn.pipeline import Pipeline
-from pyhbr.analysis import stability, calibration, roc
+from pyhbr.analysis import stability, calibration, roc, model
+from sklearn.inspection import permutation_importance
 
 
 def fit_model(
@@ -12,7 +13,7 @@ def fit_model(
     y_test: DataFrame,
     num_bootstraps: int,
     num_bins: int,
-    random_state: RandomState
+    random_state: RandomState,
 ) -> dict[str, DataFrame | Pipeline]:
     """Fit the model and bootstrap models, and calculate model performance
 
@@ -39,6 +40,7 @@ def fit_model(
     roc_curves = {}
     roc_aucs = {}
     fitted_models = {}
+    feature_importances = {}
     for outcome in ["bleeding", "ischaemia"]:
 
         print(f"Fitting {outcome} model")
@@ -48,6 +50,24 @@ def fit_model(
         fitted_models[outcome] = stability.fit_model(
             pipe, X_train, y_train.loc[:, outcome], num_bootstraps, random_state
         )
+
+        print(f"Running permutation feature importance on {outcome} model M0")
+        M0 = fitted_models[outcome].M0
+        r = permutation_importance(
+            M0,
+            X_test,
+            y_test.loc[:, outcome],
+            n_repeats=20,
+            random_state=random_state,
+            scoring="roc_auc",
+        )
+        feature_importances[outcome] = DataFrame(
+            {
+                "feature": X_train.columns,
+                "importance_mean": r["importances_mean"],
+                "importances_std": r["importances_std"],
+            }
+        ).sort_values("importance_mean", ascending=False)
 
         # Get the predicted probabilities associated with all the resamples of
         # the bleeding and ischaemia models
@@ -67,5 +87,6 @@ def fit_model(
         "calibrations": calibrations,
         "roc_aucs": roc_aucs,
         "roc_curves": roc_curves,
-        "fitted_models": fitted_models
+        "fitted_models": fitted_models,
+        "feature_importances": feature_importances,
     }

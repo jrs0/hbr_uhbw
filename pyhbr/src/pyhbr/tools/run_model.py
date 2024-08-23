@@ -66,7 +66,7 @@ def fit_and_save(
     fit_results = fit.fit_model(
         pipe, X_train, y_train, X_test, y_test, num_bootstraps, num_bins, random_state
     )
-
+    
     # Save the fitted models
     model_data = {
         "name": model_name,

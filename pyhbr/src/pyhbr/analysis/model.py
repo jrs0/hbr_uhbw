@@ -24,6 +24,7 @@ from xgboost import XGBClassifier
 
 from matplotlib.axes import Axes
 
+import scipy
 
 class DenseTransformer(TransformerMixin):
     """Useful when the model requires a dense matrix
@@ -234,6 +235,31 @@ def get_num_feature_columns(fit: Pipeline) -> int:
 
     return total
 
+def get_feature_importances(fit: Pipeline) -> DataFrame:
+    """Get a table of the features used in the model along with feature importances
+
+    Args:
+        fit: The fitted Pipeline
+        
+    Returns:
+        Contains a column for feature names, a column for type, and a feature importance column.
+    """
+    
+    df = get_feature_names(fit)
+    
+    model = fit["model"]
+    
+    # Check if the Pipe is a raw model, or a CV search (either
+    # grid or randomised)
+    if hasattr(model, "best_estimator_"):
+        # CV model
+        importances = model.best_estimator_.feature_importances_
+    else:
+        importances = model.feature_importances_
+        
+    df["feature_importances"] = importances
+    return df.sort_values("feature_importances", ascending=False)
+        
 
 def get_feature_names(fit: Pipeline) -> DataFrame:
     """Get a table of feature names

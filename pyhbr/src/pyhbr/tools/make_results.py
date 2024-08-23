@@ -28,6 +28,7 @@ def main():
     from pyhbr.analysis import stability
     from pyhbr.analysis import calibration
     from pyhbr.analysis import describe
+    from pyhbr.analysis import model
 
     import importlib
 
@@ -75,6 +76,14 @@ def main():
 
     # Loop over all the models creating the output graphs
     for model_name, model_data in models.items():
+
+        # print(model_data.keys())
+        # print(model_data["X_train"].columns)
+        # bleeding_fitted_pipe = model_data["fit_results"]["fitted_models"]["bleeding"].M0
+        # fitted_features = model.get_feature_names(bleeding_fitted_pipe)
+        # print(model.get_feature_importances(bleeding_fitted_pipe))
+        
+        # exit()
 
         # These levels will define high risk for bleeding and ischaemia
         #
