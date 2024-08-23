@@ -201,7 +201,7 @@ models:
     abbr: "RF"
     pipe_fn: "pyhbr.analysis.model.make_random_forest_cv"
     config:
-      n_estimates: "scipy.stats.randint(50, 500)"
+      n_estimators: "scipy.stats.randint(50, 500)"
       max_depth: "scipy.stats.randint(1, 20)"
     description: >
       The risk estimate is an average over decision trees, each of which

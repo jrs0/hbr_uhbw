@@ -10,6 +10,11 @@ def main():
         required=True,
         help="Specify the config file describing the model files that exist",
     )
+    parser.add_argument(
+        "-m",
+        "--model",
+        help="Specify which model to plot results. The model is plotted, and no results or summary table is saved",
+    )
     args = parser.parse_args()
 
     from pathlib import Path
@@ -47,10 +52,25 @@ def main():
     # as the prefix for all saved data files.
     analysis_name = config["analysis_name"]
 
-    # Load all the models into memory
-    models = {}
-    for model in config["models"].keys():
-        models[model], model_path = common.load_item(f"{analysis_name}_{model}", save_dir=config["save_dir"])
+    # Load one model or all models
+    if args.model is not None:
+        model_name = args.model
+
+        if model_name not in config["models"]:
+            print(
+                f"Error: requested model {model_name} is not present in config file {args.config}"
+            )
+            exit(1)
+            
+        model_data, _ = common.load_item(f"{analysis_name}_{model_name}", save_dir=config["save_dir"])   
+        models = { model_name: model_data }
+        
+    else:
+        
+        # Load all the models into memory
+        models = {}
+        for model in config["models"].keys():
+            models[model], _ = common.load_item(f"{analysis_name}_{model}", save_dir=config["save_dir"])
 
 
     # Loop over all the models creating the output graphs
@@ -95,11 +115,17 @@ def main():
             f"ROC Curves for Models {model_abbr}-{bleeding_abbr} and {model_abbr}-{ischaemia_abbr}"
         )
         plt.tight_layout()
-        plt.savefig(
-            common.make_new_save_item_path(
-                f"{analysis_name}_{model_name}_roc", config["save_dir"], "png"
+        
+        if args.model is not None:
+            # Plot only
+            plt.show()
+        else:
+            plt.savefig(
+                common.make_new_save_item_path(
+                    f"{analysis_name}_{model_name}_roc", config["save_dir"], "png"
+                )
             )
-        )
+        plt.close()
 
         for outcome in ["bleeding", "ischaemia"]:
 
@@ -115,11 +141,16 @@ def main():
                 f"Stability of {outcome.title()} Model {model_abbr}-{outcome_abbr}"
             )
             plt.tight_layout()
-            plt.savefig(
-                common.make_new_save_item_path(
-                    f"{analysis_name}_{model_name}_stability_{outcome}", config["save_dir"], "png"
+            
+            if args.model is not None:
+                # Plot only
+                plt.show()
+            else:            
+                plt.savefig(
+                    common.make_new_save_item_path(
+                        f"{analysis_name}_{model_name}_stability_{outcome}", config["save_dir"], "png"
+                    )
                 )
-            )
             plt.close() # to save memory
 
             # Plot the calibrations
@@ -131,59 +162,26 @@ def main():
                 f"Calibration of {outcome.title()} Model {model_abbr}-{outcome_abbr}"
             )
             plt.tight_layout()
-            plt.savefig(
-                common.make_new_save_item_path(
-                    f"{analysis_name}_{model_name}_calibration_{outcome}", config["save_dir"], "png"
+            
+            if args.model is not None:
+                # Plot only
+                plt.show()
+            else:
+                plt.savefig(
+                    common.make_new_save_item_path(
+                        f"{analysis_name}_{model_name}_calibration_{outcome}", config["save_dir"], "png"
+                    )
                 )
-            )
             plt.close() # to save memory
 
-    # Get the table of model summary metrics
-    summary = describe.get_summary_table(models, high_risk_thresholds, config)
-    common.save_item(summary, f"{analysis_name}_summary", config["save_dir"])
+    # Only create the model summary table if not plotting a single model
+    if args.model is None:
 
-    # Get the table of outcome prevalences
-    data, data_path = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
-    outcome_prevalences = describe.get_outcome_prevalence(data["outcomes"])
-    common.save_item(outcome_prevalences, f"{analysis_name}_outcome_prevalences", save_dir=config["save_dir"])
+        # Get the table of model summary metrics
+        summary = describe.get_summary_table(models, high_risk_thresholds, config)
+        common.save_item(summary, f"{analysis_name}_summary", config["save_dir"])
 
-    exit()
-
-    # Get prevalence of each outcome type
-    models[f"{analysis_name}_data"]["outcomes"][["bleeding", "ischaemia"]].sum()
-
-    model = "random_forest"
-    fit_results = models["fit_results"][model]
-    y_test = models["y_test"]
-    probs = fit_results["probs"]
-
-    outcome = "ischaemia"
-    pvalue = describe.pvalue_chi2_high_risk_vs_outcome(
-        probs[outcome], y_test[outcome], high_risk_thresholds[outcome]
-    )
-    sig_level = 0.0001
-    print(f"Significant at {100*sig_level:.2f}% level: {pvalue < sig_level}")
-
-    # Want to create a contingency table between estimated bleeding/ischaemia
-    # risk quadrant and the observed outcomes
-
-    estimated_risk = pd.DataFrame(
-        {
-            "estimated_high_bleeding_risk": probs["bleeding"].iloc[:, 0]
-            > high_risk_thresholds["bleeding"],
-            "estimated_high_ischaemia_risk": probs["ischaemia"].iloc[:, 0]
-            > high_risk_thresholds["ischaemia"],
-        }
-    )
-
-    outcome = y_test[["bleeding", "ischaemia"]]
-
-    table = pd.crosstab(
-        [
-            estimated_risk["estimated_high_ischaemia_risk"],
-            estimated_risk["estimated_high_bleeding_risk"],
-        ],
-        [outcome["ischaemia"], outcome["bleeding"]],
-    )
-
-    scipy.stats.chi2_contingency(table.to_numpy())
+        # Get the table of outcome prevalences
+        data, data_path = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
+        outcome_prevalences = describe.get_outcome_prevalence(data["outcomes"])
+        common.save_item(outcome_prevalences, f"{analysis_name}_outcome_prevalences", save_dir=config["save_dir"])
