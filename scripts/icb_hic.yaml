@@ -49,112 +49,394 @@ pci_index_code_group: "all_pci_pathak"
 stemi_index_code_group: "mi_stemi_schnier"
 nstemi_index_code_group: "mi_nstemi_schnier"
 
-# When processing the primary care attributes, 
+# When processing the SWD attributes, 
 # drop columns that exceed this level of missingness
 attributes_max_missingness: 0.75
 
-# When processing the primary care attributes,
+# When processing the SWD attributes,
 # drop columns if more than this proportion of 
 # the column is a constant value
 attributes_const_threshold: 0.95
 
 # Names of features
 features:
-  # Lab results
-  "egfr": "eGFR"
-  "hb": "Hb"
-  "platelets": "Platelets"
-  # Secondary care prescriptions
-  "prior_nsaid": "Prior NSAID"
-  "prior_oac": "Prior OAC"
-  # Primary care attributes
-  "af": "AF"
-  "alcohol_units": "Alcohol (units)"
-  "asthma": "Asthma"
-  "back_pain": "Back pain"
-  "bmi": "BMI"
-  "cardio_other": "Cardio (other)"
-  "cataracts": "Cataracts"
-  "ckd": "CKD"
-  "copd": "COPD"
-  "diabetes_2": "Type-2 diabetes (Attr.)"
-  "diabetes_retina": "Diabetes (retina)"
-  "efi_category": "EFI category"
-  "egfr": "eGFR"
-  "ethnicity": "Ethnicity"
-  "gout": "Gout"
-  "health_check": "Health check"
-  "hearing_impair": "Hearing impairment"
-  "hf": "HF"
-  "ibs": "IBS"
-  "ihd_mi": "IHD (MI)"
-  "ihd_nonmi": "IHD (non-MI)"
-  "lsoa": "LSOA"
-  "neuro_pain": "Neuropathic pain"
-  "neuro_various": "Neurological impairments"
-  "osteoarthritis": "Osteoarthritis"
-  "polypharmacy_acute": "Polypharmacy (acute)"
-  "polypharmacy_repeat": "Polypharmacy (repeat)"
-  "pre_diabetes": "Pre-diabetes"
-  "qof_af": "AF (QOF)"
-  "qof_asthma": "Asthma (QOF)"
-  "qof_chd": "CHD (QOF)"
-  "qof_ckd": "CKD (QOF)"
-  "qof_copd": "COPD (QOF)"
-  "qof_depression": "Depression (QOF)"
-  "qof_diabetes": "Diabetes (QOF)"
-  "qof_hf": "HF (QOF)"
-  "qof_ht": "HT (QOF)"
-  "qof_obesity": "Obesity (QOF)"
-  "qof_pad": "PAD (QOF)"
-  "qof_stroke": "Stroke (QOF)"
-  "sad": "Sad"
-  "screen_aaa": "AAA screen"
-  "screen_bowel": "Bowel cancer screen"
-  "screen_breast": "Breast screen"
-  "screen_cervical": "Cervical screen"
-  "screen_eye": "Diabetic eye screen"
-  "smi": "SMI"
-  "smoking": "Smoking"
-  "stroke": "Stroke"
-  "thyroid": "thyroid disease"
-  "vasc_dis": "PVD"
+  # HIC lab results
+  "egfr_x": 
+    text: "eGFR (index)"
+    docs: "Index eGFR measurement"
+    category: "HIC lab results"
+  "hb":
+    text: "Hb"
+    docs: "index haemoglobin measurement"
+    category: "HIC lab results"
+  "platelets":
+    text: "platelets"
+    docs: "index platelet count"
+    category: "HIC lab results"
+  # HIC prescriptions
+  "prior_nsaid":
+    text: "prior NSAID"
+    docs: "prior non-steroidal anti-inflammatory prescription"
+    category: "HIC prescriptions"
+  "prior_oac":
+    text: "prior OAC"
+    docs: "prior oral anticoagulant prescription"
+    category: "HIC prescriptions"
+  # SWD attributes
+  "af":
+    text: "AF"
+    docs: "atrial fibrillation flag"
+    category: "SWD attributes"
+  "alcohol_units":
+    text: "alcohol (units)"
+    docs: "alcohol flag"
+    category: "SWD attributes"
+  "asthma":
+    text: "asthma"
+    docs: "asthma flag"
+    category: "SWD attributes"
+  "back_pain":
+    text: "Back pain"
+    docs: "lower back pain flag"
+    category: "SWD attributes"
+  "bmi":
+    text: "BMI"
+    docs: "BMI score"
+    category: "SWD attributes"
+  "cardio_other":
+    text: "cardio (other)"
+    docs: "Other significant cardiovascular conditions including grown up congenital heart conditions (GUCH)"
+    category: "SWD attributes"
+  "cataracts":
+    text: "cataracts"
+    docs: "cataracts flag"
+    category: "SWD attributes"
+  "ckd":
+    text: "CKD"
+    docs: "chronic kidney disease flag"
+    category: "SWD attributes"
+  "copd":
+    text: "COPD"
+    docs: "chronic obstructive pulmonary disease flag"
+    category: "SWD attributes"
+  "diabetes_2":
+    text: "type-2 diabetes (Attr.)"
+    docs: "type-2 diabetes flag"
+    category: "SWD attributes"
+  "diabetes_retina":
+    text: "diabetes (retina)"
+    docs: "diabetic retinopathy flag"
+    category: "SWD attributes"
+  "efi_category":
+    text: "EFI category"
+    docs: "electronic frailty index category"
+    category: "SWD attributes"
+  "egfr_y":
+    text: "eGFR (recent)"
+    docs: "recent eGFR score"
+    category: "SWD attributes"
+  "ethnicity":
+    text: "ethnicity"
+    docs: "ethnicity category"
+    category: "SWD attributes"
+  "gout":
+    text: "gout"
+    docs: "gout flag"
+    category: "SWD attributes"
+  "health_check":
+    text: "health check"
+    docs: "flag, ever had an NHS health check"
+    category: "SWD attributes"
+  "hearing_impair":
+    text: "hearing impairment"
+    docs: "hearing impairment flag"
+    category: "SWD attributes"
+  "hf":
+    text: "HF"
+    docs: "heart failure flag"
+    category: "SWD attributes"
+  "ibs":
+    text: "IBS"
+    docs: "irritable bowel disease flag"
+    category: "SWD attributes"
+  "ihd_mi":
+    text: "IHD (MI)"
+    docs: "myocardial infarction ischaemic heart disease flag"
+    category: "SWD attributes"
+  "ihd_nonmi":
+    text: "IHD (non-MI)"
+    docs: "non-myocardial infarction ischaemic heart disease flag"
+    category: "SWD attributes"
+  "lsoa":
+    text: "LSOA"
+    docs: "lower super output area"
+    category: "SWD attributes"
+  "neuro_pain":
+    text: "neuropathic pain"
+    docs: "chronic pain, fibromyalgia, or neuralgias flag"
+    category: "SWD attributes"
+  "neuro_various":
+    text: "neurological impairments"
+    docs: "neurological impairments flag - ataxias, amnesia, aphasia, cerebral palsy, brain injuries"
+    category: "SWD attributes"
+  "osteoarthritis":
+    text: "osteoarthritis"
+    docs: "osteoarthritis flag"
+    category: "SWD attributes"
+  "polypharmacy_acute":
+    text: "polypharmacy (acute)"
+    docs: "Polypharmacy (count of acute medication issued within the past month)"
+    category: "SWD attributes"
+  "polypharmacy_repeat":
+    text: "polypharmacy (repeat)"
+    docs: "polypharmacy (count of Current repeat Medications)"
+    category: "SWD attributes"
+  "pre_diabetes":
+    text: "pre-diabetes"
+    docs: "pre-diabetes and related codes, nd-hyperglycaemia, and risk of diabetes, impaired glucose tolerance"
+    category: "SWD attributes"
+  "qof_af":
+    text: "AF (QOF)"
+    docs: "atrial fibrillation, quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_asthma":
+    text: "asthma (QOF)"
+    docs: "asthma, quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_chd":
+    text: "CHD (QOF)"
+    docs: "coronary heart disease, quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_ckd":
+    text: "CKD (QOF)"
+    docs: "chronic kidney disease (18+), quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_copd":
+    text: "COPD (QOF)"
+    docs: "chronic obstructive pulmonary disease, quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_depression":
+    text: "depression (QOF)"
+    docs: "depression (18+) quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_diabetes":
+    text: "diabetes (QOF)"
+    docs: "diabetes mellitus (17+), quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_hf":
+    text: "HF (QOF)"
+    docs: "heart failure, quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_ht":
+    text: "HT (QOF)"
+    docs: "hypertension, quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_obesity":
+    text: "obesity (QOF)"
+    docs: "obesity (18+), quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_pad":
+    text: "PAD (QOF)"
+    docs: "peripheral artery disease, quality and outcomes framework"
+    category: "SWD attributes"
+  "qof_stroke":
+    text: "stroke (QOF)"
+    docs: "stroke and transient ischaemic attack, quality and outcomes framework"
+    category: "SWD attributes"
+  "sad":
+    text: "sad"
+    docs: "Stress, anxiety, mild-mod depression, mixed anxiety/depressive disorder"
+    category: "SWD attributes"
+  "screen_aaa":
+    text: "AAA screen"
+    docs: "NHS abdominal aortic aneurysm (AAA) programme flag"
+    category: "SWD attributes"
+  "screen_bowel":
+    text: "bowel cancer screen"
+    docs: "NHS bowel cancer screening (BCSP) programme flag"
+    category: "SWD attributes"
+  "screen_breast":
+    text: "breast cancer screen"
+    docs: "NHS breast screening (BSP) programme flag"
+    category: "SWD attributes"
+  "screen_cervical":
+    text: "cervical screen"
+    docs: "NHS cervical screening (CSP) programme flag"
+    category: "SWD attributes"
+  "screen_eye":
+    text: "diabetic eye screen"
+    docs: "NHS diabetic eye screening (DES) programme flag"
+    category: "SWD attributes"
+  "smi": 
+    text: "SMI"
+    docs: "serious Mental Health, including bipolar affective disorder flag"
+    category: "SWD attributes"
+  "smoking":
+    text: "smoking"
+    docs: "smoking status"
+    category: "SWD attributes"
+  "stroke":
+    text: "stroke"
+    docs: "cerebrovascular disease - stroke"
+    category: "SWD attributes"
+  "thyroid":
+    text: "thyroid disease"
+    docs: "thyroid disease flag"
+    category: "SWD attributes"
+  "vasc_dis":
+    text: "PVD"
+    docs: "peripheral vascular disease flag"
+    category: "SWD attributes"
+  
   # HES features from code groups
-  "ihd_bezin_before": "IHD"
-  "all_pci_pathak_before": "Prior PCI"
-  "bleeding_al_ani_before": "Prior bleeding (al Ani)"
-  "diabetes_type2_before": "Type-2 diabetes (HES)"
-  "diabetes_before": "Diabetes (any)"
-  "mi_schnier_before": "Prior MI (any)"
-  "mi_nstemi_schnier_before": "Prior MI (NSTEMI)"
-  "acs_bezin_before": "Prior ACS (any)"
-  "ckd_before": "CKD (HES)"
-  "bleeding_cadth_before": "Prior bleeding (Cadth)"
-  "cancer_before": "Cancer (HES)"
-  "bleeding_adaptt_before": "Prior bleeding (ADAPTT)"
-  "diabetes_type1_before": "Type-1 diabetes (HES)"
-  "ischaemic_stroke_before": "Prior ischaemic stroke"
-  "haemorrhagic_stroke_before": "Prior haemorrhagic stroke"
-  "ich_before": "Prior ICH"
-  "bleeding_barc_before": "Prior severe bleeding"
-  "packed_red_cells_transfusion_before": "Prior transfusion" 
-  "liver_cirrhosis_before": "Prior cirrhosis"
-  "portal_hypertension_before": "Prior portal HT"
-  "bavm_before": "bAVM"
-  # Primary care measurements
-  "bp_systolic": "Systolic BP"
-  "bp_diastolic": "Diastolic BP"
-  "hba1c": "HbAC1"
-  # Index features
-  "acs_index": "ACS index"
-  "pci_index": "PCI index"
-  "index_stemi": "STEMI index"
-  "index_nstemi": "NSTEMI index"
-  "age": "Age"
-  "gender": "Gender"
+  "acs_bezin_before":
+    text: "prior ACS (any)" 
+    docs: "count of previous year any ACS diagnosis codes"
+    category: "HES ICD-10 codes"
+  "ihd_bezin_before":
+    text: "prior IHD" 
+    docs: "count of previous year ischaemia heart disease diagnosis codes"
+    category: "HES ICD-10 codes"
+  
+  "mi_schnier_before":
+    text: "prior MI (any)" 
+    docs: "count of previous year any MI diagnosis codes"
+    category: "HES ICD-10 codes"
+  "mi_nstemi_schnier_before":
+    text: "prior NSTEMI" 
+    docs: "count of previous year NSTEMI diagnosis codes"
+    category: "HES ICD-10 codes"
+  "mi_stemi_schnier_before":
+    text: "prior STEMI" 
+    docs: "count of previous year STEMI diagnosis codes"
+    category: "HES ICD-10 codes"
+
+  "all_pci_pathak_before":
+    text: "prior PCI" 
+    docs: "count of previous year percutaneous coronary intervention procedure codes"
+    category: "HES OPCS-4 codes"
+
+  "bleeding_al_ani_before":
+    text: "prior bleeding A" 
+    docs: "count of previous year bleeding diagnosis codes (al Ani et al.)"
+    category: "HES ICD-10 codes"
+  "bleeding_cadth_before":
+    text: "prior bleeding B" 
+    docs: "count of previous year bleeding diagnosis codes (Cadth et al.)"
+    category: "HES ICD-10 codes"
+  "bleeding_adaptt_before":
+    text: "prior bleeding C" 
+    docs: "count of previous year bleeding diagnosis codes (ADAPTT study)"
+    category: "HES ICD-10 codes"
+  "bleeding_barc_before":
+    text: "prior bleeding D" 
+    docs: "count of previous year bleeding diagnosis codes likely to imply BARC 3 (severe)"
+    category: "HES ICD-10 codes"
+
+  "packed_red_cells_transfusion_before":
+    text: "prior transfusion" 
+    docs: "count of previous year transfusion of packed red blood cells procedure codes"
+    category: "HES OPCS-4 codes"
+
+  "diabetes_type1_before":
+    text: "prior type-1 diabetes" 
+    docs: "count of previous year type-1 diagnosis codes"
+    category: "HES ICD-10 codes"
+  "diabetes_type2_before":
+    text: "prior type-2 diabetes" 
+    docs: "count of previous year type-2 diabetes diagnosis codes"
+    category: "HES ICD-10 codes"
+  "diabetes_before":
+    text: "prior diabetes (any)" 
+    docs: "count of previous year diabetes diagnosis codes"
+    category: "HES ICD-10 codes"
+  
+  "ckd_before":
+    text: "prior CKD" 
+    docs: "count of previous year CKD diagnosis codes"
+    category: "HES ICD-10 codes"
+  
+  "cancer_before":
+    text: "prior cancer" 
+    docs: "count of previous year cancer diagnosis codes"
+    category: "HES ICD-10 codes"
+  
+  "ischaemic_stroke_before":
+    text: "prior ischaemic stroke" 
+    docs: "count of previous year ischaemic stroke diagnosis codes"
+    category: "HES ICD-10 codes"
+  "haemorrhagic_stroke_before":
+    text: "prior haemorrhagic stroke" 
+    docs: "count of previous year haemorrhagic stroke diagnosis codes"
+    category: "HES ICD-10 codes"
+  
+  "ich_before":
+    text: "prior ICH" 
+    docs: "count of previous year intracranial haemorrhage diagnosis codes"
+    category: "HES ICD-10 codes"
+
+  "liver_cirrhosis_before":
+    text: "prior cirrhosis" 
+    docs: "count of previous year liver cirrhosis diagnosis codes"
+    category: "HES ICD-10 codes"
+  "portal_hypertension_before":
+    text: "prior portal HT"
+    docs: "count of previous year portal hypertension diagnosis codes"
+    category: "HES ICD-10 codes"
+
+  "bavm_before":
+    text: "bAVM"
+    docs: "count of previous year brain arteriovenous malformation diagnosis codes"
+    category: "HES ICD-10 codes"
+
+  # SWD measurements
+  "bp_systolic":
+    text: "systolic BP"
+    docs: "recent systolic blood pressure measurement"
+    category: "SWD measurements"
+
+  "bp_diastolic":
+    text: "diastolic BP"
+    docs: "recent diastolic blood pressure measurement"
+    category: "SWD measurements"
+
+  "hba1c":
+    text: "HbA1c"
+    docs: "recent HbA1c measurement"
+    category: "SWD measurements"
+
+  # HES index features
+  "acs_index":
+    text: "ACS index"
+    docs: "index was an ACS admission (primary diagnosis of first episode was an ACS ICD-10 code)"
+    category: "HES index features"
+
+  "pci_index":
+    text: "PCI index"
+    docs: "index an PCI admission (PCI OPCS-4 code present at any position in first episode procedure codes)"
+    category: "HES index features"
+
+  "index_stemi":
+    text: "STEMI index"
+    docs: "index was a STEMI admission (primary diagnosis of first episode was a STEMI ICD-10 code)"
+    category: "HES index features"
+
+  "index_nstemi":
+    text: "NSTEMI index"
+    docs: "index was a NSTEMI admission (primary diagnosis of first episode was a NSTEMI ICD-10 code)"
+    category: "HES index features"
+
+  "age":
+    text: "age"
+    docs: "age at index"
+    category: "HES index features"
+
+  "gender":
+    text: "gender"
+    docs: "gender at index"
+    category: "HES index features"
 
 ### MODELLING ###
-
 
 # Test/train split
 test_proportion: 0.25

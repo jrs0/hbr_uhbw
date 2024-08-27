@@ -37,6 +37,7 @@ def main():
     import yaml
     import pickle
     from pyhbr import common
+    import pandas as pd
 
     # Read the configuration file
     with open(args.config_file) as stream:
@@ -140,6 +141,14 @@ def main():
         index=False
     )
 
+    # Read the features and store them as markdown
+    features_df = pd.DataFrame.from_dict(config["features"], orient="index")
+    features_df.rename(
+        columns={"text": "Feature", "docs": "Description", "category": "Data Source"},
+        inplace=True,
+    )
+    variables["features_table"] = features_df.to_markdown(index=False)
+
     # Get the table of outcome prevalences
     variables["outcome_prevalences_file"] = copy_most_recent_file(
         f"{analysis_name}_outcome_prevalences",
@@ -157,23 +166,30 @@ def main():
     # Load the data (this is the same file copied above)
     data, data_path = common.load_item(f"{analysis_name}_data", save_dir=save_dir)
 
-    # Find the name of the tmp data file and load it
-    with open(save_dir / data[f"{analysis_name}_tmp_file"], "rb") as file:
-        tmp = pickle.load(file)
+    # Find the name of the raw data file and load it
+    print(data.keys())
+    with open(save_dir / data[f"raw_file"], "rb") as file:
+        raw = pickle.load(file)
 
-    variables["index_start"] = tmp["index_start"].strftime("%Y-%m-%d")
-    variables["index_end"] = tmp["index_end_date"].strftime("%Y-%m-%d")
-    variables["num_index_spells"] = len(tmp["index_spells"])
+    variables["index_start"] = raw["index_start"].strftime("%Y-%m-%d")
+    variables["index_end"] = raw["index_end_date"].strftime("%Y-%m-%d")
+    variables["num_index_spells"] = len(raw["index_spells"])
 
     # Get the list of code groups for the appendix
-    codes = tmp["code_groups"]
+    codes = raw["code_groups"]
     codes["group"] = codes["group"].map(variables["code_groups"])
     codes["code"] = codes["code"].str.upper()
-    diagnosis_codes = codes[codes["type"] == "diagnosis"][
-        ["code", "docs", "group"]
-    ].rename(
-        columns={"code": "ICD-10 Code", "docs": "Description", "group": "Code Group"}
-    ).dropna()
+    diagnosis_codes = (
+        codes[codes["type"] == "diagnosis"][["code", "docs", "group"]]
+        .rename(
+            columns={
+                "code": "ICD-10 Code",
+                "docs": "Description",
+                "group": "Code Group",
+            }
+        )
+        .dropna()
+    )
     variables["diagnosis_codes_table"] = diagnosis_codes.to_markdown(index=False)
 
     # Copy the most recent version of each figure into the

@@ -1,5 +1,18 @@
 import argparse
 
+def plot_permutation_importance(ax, feature_importances):
+    result = feature_importances["result"]
+    names = feature_importances["names"]
+    perm_sorted_idx = result.importances_mean.argsort()
+
+    ax.boxplot(
+        result.importances[perm_sorted_idx].T,
+        vert=False,
+        labels=names[perm_sorted_idx],
+    )
+    ax.axvline(x=0, color="k", linestyle="--")
+    return ax
+
 def main():
 
     # Keep this near the top otherwise help hangs
@@ -107,6 +120,24 @@ def main():
         print(fit_results["feature_importances"]["bleeding"])
         print("Ischaemia feature importance")
         print(fit_results["feature_importances"]["ischaemia"])
+        
+        # Convert 
+        
+        # Make a plot of feature importances
+        fig, ax = plt.subplots(1, 2, figsize=figsize)
+        for n, outcome in enumerate(["bleeding", "ischaemia"]):
+            ax[n].
+           
+        if args.model is not None:
+            # Plot only
+            plt.show()
+        else:
+            plt.savefig(
+                common.make_new_save_item_path(
+                    f"{analysis_name}_{model_name}_feature_importance", config["save_dir"], "png"
+                )
+            )
+        plt.close()    
         
         model_abbr = config["models"][model_name]["abbr"]
         bleeding_abbr = config["outcomes"]["bleeding"]["abbr"]

@@ -61,13 +61,10 @@ def fit_model(
             random_state=random_state,
             scoring="roc_auc",
         )
-        feature_importances[outcome] = DataFrame(
-            {
-                "feature": X_train.columns,
-                "importance_mean": r["importances_mean"],
-                "importances_std": r["importances_std"],
-            }
-        ).sort_values("importance_mean", ascending=False)
+        feature_importances[outcome] = {
+            "names": X_train.columns,
+            "result": r,
+        }
 
         # Get the predicted probabilities associated with all the resamples of
         # the bleeding and ischaemia models

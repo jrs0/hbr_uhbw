@@ -35,6 +35,9 @@ We assess multiple different machine learning models, trained on multiple differ
 
 ## Input Data
 
+{{ features_table }}
+: Features used to train the models. The feature name and description are listed, along with the data source for the feature. Three data sources are used: HES data, containing ICD-10 and OPCS-4 codes, are used for prior clinical code history and patient index attributes; SWD data is used for primary care general patient attributes, primary care prescriptions, and primary care measurements; and HIC data is used for index secondary care lab results and prior prescriptions at index. {{ '{#' }}tbl-features}
+
 We obtain a cohort of ACS patients from Hospital Episode Statistics (HES), which is a national administrative dataset available across the UK. This dataset defines both the inclusion criteria and the outcomes.
 
 We also obtain features (input predictors to the machine learning algorithms) from HES data, by identifying patients with groups of diagnosis and procedure codes that corresponding to risk factors identified in other models and the wider literature.
