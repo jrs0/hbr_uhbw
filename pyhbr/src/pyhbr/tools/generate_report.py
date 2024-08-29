@@ -213,6 +213,11 @@ def main():
             f"{analysis_name}_{name}_roc"
         )
 
+        # Feature importances
+        model["feature_importance_image"] = copy_most_recent_image(
+            f"{analysis_name}_{name}_feature_importance"
+        )
+
         plots = ["stability", "calibration"]
         outcomes = ["bleeding", "ischaemia"]
         for outcome in outcomes:

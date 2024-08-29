@@ -1,25 +1,29 @@
 import argparse
 import numpy as np
 
+
 def plot_permutation_importance(ax, feature_importances, config, model_name):
     result = feature_importances["result"]
     names = feature_importances["names"]
     perm_sorted_idx = result.importances_mean.argsort()
 
     # Map feature names based on config file (default to column name)
-    real_names = np.array([config["features"].get(name, { "text": name })["text"] for name in names])
+    real_names = np.array(
+        [config["features"].get(name, {"text": name})["text"] for name in names]
+    )
 
     ax.boxplot(
-        result.importances[perm_sorted_idx][-10:,:].T,
+        result.importances[perm_sorted_idx][-10:, :].T,
         vert=False,
         labels=real_names[perm_sorted_idx][-10:],
     )
     ax.axvline(x=0, color="k", linestyle="--")
-    
+
     ax.set_xlabel("Decrease in ROC AUC by permuting feature")
     ax.set_ylabel("Feature name")
     ax.set_title(f"For {model_name}")
     return ax
+
 
 def main():
 
@@ -83,17 +87,20 @@ def main():
                 f"Error: requested model {model_name} is not present in config file {args.config}"
             )
             exit(1)
-            
-        model_data, _ = common.load_item(f"{analysis_name}_{model_name}", save_dir=config["save_dir"])   
-        models = { model_name: model_data }
-        
+
+        model_data, _ = common.load_item(
+            f"{analysis_name}_{model_name}", save_dir=config["save_dir"]
+        )
+        models = {model_name: model_data}
+
     else:
-        
+
         # Load all the models into memory
         models = {}
         for model in config["models"].keys():
-            models[model], _ = common.load_item(f"{analysis_name}_{model}", save_dir=config["save_dir"])
-
+            models[model], _ = common.load_item(
+                f"{analysis_name}_{model}", save_dir=config["save_dir"]
+            )
 
     # Loop over all the models creating the output graphs
     for model_name, model_data in models.items():
@@ -121,35 +128,41 @@ def main():
         # Get the model
         fit_results = model_data["fit_results"]
         y_test = model_data["y_test"]
-        
+
         model_abbr = config["models"][model_name]["abbr"]
         bleeding_abbr = config["outcomes"]["bleeding"]["abbr"]
         ischaemia_abbr = config["outcomes"]["ischaemia"]["abbr"]
 
         # Print the feature importances
-        pd.set_option('display.max_rows', 500)
+        pd.set_option("display.max_rows", 500)
         print("Bleeding feature importance")
         print(fit_results["feature_importances"]["bleeding"])
         print("Ischaemia feature importance")
         print(fit_results["feature_importances"]["ischaemia"])
-        
+
         # Make a plot of feature importances
         fig, ax = plt.subplots(1, 2, figsize=figsize)
         for n, outcome in enumerate(["bleeding", "ischaemia"]):
             outcome_abbr = config["outcomes"][outcome]["abbr"]
-            model_name = f"{model_abbr}-{outcome_abbr}"
-            plot_permutation_importance(ax[n], fit_results["feature_importances"][outcome], config, model_name)
-           
+            plot_permutation_importance(
+                ax[n],
+                fit_results["feature_importances"][outcome],
+                config,
+                f"{model_abbr}-{outcome_abbr}",
+            )
+
         fig.suptitle("Top ten most important features by permutation importance")
         plt.tight_layout()
-           
+
         if args.model is not None:
             # Plot only
             plt.show()
         else:
             plt.savefig(
                 common.make_new_save_item_path(
-                    f"{analysis_name}_{model_name}_feature_importance", config["save_dir"], "png"
+                    f"{analysis_name}_{model_name}_feature_importance",
+                    config["save_dir"],
+                    "png",
                 )
             )
         plt.close()
@@ -165,7 +178,7 @@ def main():
             f"ROC Curves for Models {model_abbr}-{bleeding_abbr} and {model_abbr}-{ischaemia_abbr}"
         )
         plt.tight_layout()
-        
+
         if args.model is not None:
             # Plot only
             plt.show()
@@ -191,17 +204,19 @@ def main():
                 f"Stability of {outcome.title()} Model {model_abbr}-{outcome_abbr}"
             )
             plt.tight_layout()
-            
+
             if args.model is not None:
                 # Plot only
                 plt.show()
-            else:            
+            else:
                 plt.savefig(
                     common.make_new_save_item_path(
-                        f"{analysis_name}_{model_name}_stability_{outcome}", config["save_dir"], "png"
+                        f"{analysis_name}_{model_name}_stability_{outcome}",
+                        config["save_dir"],
+                        "png",
                     )
                 )
-            plt.close() # to save memory
+            plt.close()  # to save memory
 
             # Plot the calibrations
             fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -212,17 +227,19 @@ def main():
                 f"Calibration of {outcome.title()} Model {model_abbr}-{outcome_abbr}"
             )
             plt.tight_layout()
-            
+
             if args.model is not None:
                 # Plot only
                 plt.show()
             else:
                 plt.savefig(
                     common.make_new_save_item_path(
-                        f"{analysis_name}_{model_name}_calibration_{outcome}", config["save_dir"], "png"
+                        f"{analysis_name}_{model_name}_calibration_{outcome}",
+                        config["save_dir"],
+                        "png",
                     )
                 )
-            plt.close() # to save memory
+            plt.close()  # to save memory
 
     # Only create the model summary table if not plotting a single model
     if args.model is None:
@@ -232,6 +249,12 @@ def main():
         common.save_item(summary, f"{analysis_name}_summary", config["save_dir"])
 
         # Get the table of outcome prevalences
-        data, data_path = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
+        data, data_path = common.load_item(
+            f"{analysis_name}_data", save_dir=config["save_dir"]
+        )
         outcome_prevalences = describe.get_outcome_prevalence(data["outcomes"])
-        common.save_item(outcome_prevalences, f"{analysis_name}_outcome_prevalences", save_dir=config["save_dir"])
+        common.save_item(
+            outcome_prevalences,
+            f"{analysis_name}_outcome_prevalences",
+            save_dir=config["save_dir"],
+        )
