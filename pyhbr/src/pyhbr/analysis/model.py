@@ -35,7 +35,11 @@ class DenseTransformer(TransformerMixin):
         return self
 
     def transform(self, X, y=None, **fit_params):
-        return np.asarray(X.todense())
+        if hasattr(X, "todense"):
+            return np.asarray(X.todense())
+        else:
+            return X
+        
 
 @dataclass
 class Preprocessor:
