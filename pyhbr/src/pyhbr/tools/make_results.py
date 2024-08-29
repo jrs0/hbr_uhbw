@@ -1,16 +1,24 @@
 import argparse
+import numpy as np
 
-def plot_permutation_importance(ax, feature_importances):
+def plot_permutation_importance(ax, feature_importances, config, model_name):
     result = feature_importances["result"]
     names = feature_importances["names"]
     perm_sorted_idx = result.importances_mean.argsort()
 
+    # Map feature names based on config file (default to column name)
+    real_names = np.array([config["features"].get(name, { "text": name })["text"] for name in names])
+
     ax.boxplot(
-        result.importances[perm_sorted_idx].T,
+        result.importances[perm_sorted_idx][-10:,:].T,
         vert=False,
-        labels=names[perm_sorted_idx],
+        labels=real_names[perm_sorted_idx][-10:],
     )
     ax.axvline(x=0, color="k", linestyle="--")
+    
+    ax.set_xlabel("Decrease in ROC AUC by permuting feature")
+    ax.set_ylabel("Feature name")
+    ax.set_title(f"For {model_name}")
     return ax
 
 def main():
@@ -113,6 +121,10 @@ def main():
         # Get the model
         fit_results = model_data["fit_results"]
         y_test = model_data["y_test"]
+        
+        model_abbr = config["models"][model_name]["abbr"]
+        bleeding_abbr = config["outcomes"]["bleeding"]["abbr"]
+        ischaemia_abbr = config["outcomes"]["ischaemia"]["abbr"]
 
         # Print the feature importances
         pd.set_option('display.max_rows', 500)
@@ -121,12 +133,15 @@ def main():
         print("Ischaemia feature importance")
         print(fit_results["feature_importances"]["ischaemia"])
         
-        # Convert 
-        
         # Make a plot of feature importances
         fig, ax = plt.subplots(1, 2, figsize=figsize)
         for n, outcome in enumerate(["bleeding", "ischaemia"]):
-            ax[n].
+            outcome_abbr = config["outcomes"][outcome]["abbr"]
+            model_name = f"{model_abbr}-{outcome_abbr}"
+            plot_permutation_importance(ax[n], fit_results["feature_importances"][outcome], config, model_name)
+           
+        fig.suptitle("Top ten most important features by permutation importance")
+        plt.tight_layout()
            
         if args.model is not None:
             # Plot only
@@ -137,11 +152,7 @@ def main():
                     f"{analysis_name}_{model_name}_feature_importance", config["save_dir"], "png"
                 )
             )
-        plt.close()    
-        
-        model_abbr = config["models"][model_name]["abbr"]
-        bleeding_abbr = config["outcomes"]["bleeding"]["abbr"]
-        ischaemia_abbr = config["outcomes"]["ischaemia"]["abbr"]
+        plt.close()
 
         # Plot the ROC curves for the models
         fig, ax = plt.subplots(1, 2, figsize=figsize)

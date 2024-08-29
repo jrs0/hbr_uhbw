@@ -416,12 +416,12 @@ features:
     docs: "index an PCI admission (PCI OPCS-4 code present at any position in first episode procedure codes)"
     category: "HES index features"
 
-  "index_stemi":
+  "stemi_index":
     text: "STEMI index"
     docs: "index was a STEMI admission (primary diagnosis of first episode was a STEMI ICD-10 code)"
     category: "HES index features"
 
-  "index_nstemi":
+  "nstemi_index":
     text: "NSTEMI index"
     docs: "index was a NSTEMI admission (primary diagnosis of first episode was a NSTEMI ICD-10 code)"
     category: "HES index features"
