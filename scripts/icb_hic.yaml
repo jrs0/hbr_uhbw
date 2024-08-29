@@ -524,6 +524,7 @@ models:
     title: "XGBoost"
     abbr: "XGB"
     pipe_fn: "pyhbr.analysis.model.make_xgboost"
+    config: {}
     description: >
       An alternative tree-based method, similar to random forest, that uses a
       different algorithm to obtained train the model.

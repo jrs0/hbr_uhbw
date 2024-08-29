@@ -492,7 +492,7 @@ def make_logistic_regression(random_state: RandomState, X_train: DataFrame, conf
     return Pipeline([("preprocess", preprocess), ("model", mod)])
 
 
-def make_xgboost(random_state: RandomState, X_train: DataFrame) -> Pipeline:
+def make_xgboost(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
 
     preprocessors = [
         make_category_preprocessor(X_train),
