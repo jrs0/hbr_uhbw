@@ -254,9 +254,9 @@ following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 # definition. Increasing maximum code position increases
 # the bleeding rate, but 1 is chosen to restrict to cases
 # where bleeding code is not historical/minor.
-max_position = 1
+max_position = config["outcomes"]["bleeding"]["non_fatal"]["max_position"]
 exclude_index_spell = True
-non_fatal_bleeding_group = config["outcomes"]["bleeding"]["non_fatal_group"]
+non_fatal_bleeding_group = config["outcomes"]["bleeding"]["non_fatal"]["group"]
 non_fatal_bleeding = acs.filter_by_code_groups(
     following_year,
     non_fatal_bleeding_group,
@@ -269,8 +269,8 @@ non_fatal_bleeding = acs.filter_by_code_groups(
 # to one to focus on bleeding-caused deaths.
 # Bleeding codes typically show up in the primary
 # or first secondary
-max_position = 1
-fatal_bleeding_group = config["outcomes"]["bleeding"]["fatal_group"]
+max_position =  config["outcomes"]["bleeding"]["fatal"]["max_position"]
+fatal_bleeding_group = config["outcomes"]["bleeding"]["fatal"]["group"]
 fatal_bleeding = acs.identify_fatal_outcome(
     index_spells,
     date_of_death,
@@ -289,9 +289,9 @@ fatal_bleeding = acs.identify_fatal_outcome(
 # the index event brings the prevalence down to around 6%,
 # more in line with published research. Allowing
 # secondary codes somewhat increases the number of outcomes.
-max_position = 1
+max_position = config["outcomes"]["ischaemia"]["non_fatal"]["max_position"]
 exclude_index_spell = True
-non_fatal_ischaemia_group = config["outcomes"]["ischaemia"]["non_fatal_group"]
+non_fatal_ischaemia_group = config["outcomes"]["ischaemia"]["non_fatal"]["group"]
 non_fatal_ischaemia = acs.filter_by_code_groups(
     following_year,
     non_fatal_ischaemia_group,
@@ -306,15 +306,9 @@ non_fatal_ischaemia = acs.filter_by_code_groups(
 # )
 # spell.sort_values(["episode_start", "type", "position"])
 
-# Get the fatal ischaemia outcomes. Restricting
-# to primary cause of death produces no events for
-# the group cv_death_ohm (cardiac arrest appears to
-# only ever be recorded in a secondary position).
-# Only the first secondary position is allowed,
-# in an attempt to restrict to cardiovascular death
-# which does not have another cause.
-fatal_ischaemia_group = config["outcomes"]["ischaemia"]["fatal_group"]
-max_position = 2
+# Get the fatal ischaemia outcomes. 
+fatal_ischaemia_group = config["outcomes"]["ischaemia"]["fatal"]["group"]
+max_position = config["outcomes"]["ischaemia"]["fatal"]["max_position"]
 fatal_ischaemia = acs.identify_fatal_outcome(
     index_spells,
     date_of_death,
@@ -351,7 +345,7 @@ bool_outcomes["ischaemia"] = (
 )
 
 # Quick check on prevalences
-#100 * bool_outcomes.sum() / len(bool_outcomes)
+100 * bool_outcomes.sum() / len(bool_outcomes)
 
 features_codes = acs.get_code_features(index_spells, all_other_codes)
 

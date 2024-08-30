@@ -589,15 +589,34 @@ outcomes:
     text: "bleeding"
     title: "Bleeding" 
     abbr: "B"
-    fatal_group: "bleeding_adaptt"
-    non_fatal_group: "bleeding_adaptt"
+    fatal:
+      group: "bleeding_adaptt"
+      max_position: 1
+    non_fatal:
+      group: "bleeding_adaptt"
+      # Including all secondary codes in order to catch
+      # all bleeds, irrespective of severity. This may
+      # include historical/minor bleeds, but this was 
+      # considered better than missing out of bleeding
+      # not coded in the primary or first secondary position.
+      max_position: 999
   ischaemia:
     text: "ischaemia"
     title: "Ischaemia"
     abbr: "I"
-    fatal_group: "cv_death_ohm"
-    non_fatal_group: "ami_stroke_ohm"
-
+    fatal:
+      group: "cv_death_ohm"
+      # Restricting to primary cause of death produces
+      # no events fof the group cv_death_ohm (cardiac 
+      # arrest appears to only ever be recorded in a
+      # secondary position). Only the first secondary
+      # position is allowed, in an attempt to restrict
+      # to cardiovascular death which does not have
+      # another cause.
+      max_position: 2
+    non_fatal:
+      group: "ami_stroke_ohm"
+      max_position: 1
 
 # Names of code groups
 code_groups:
