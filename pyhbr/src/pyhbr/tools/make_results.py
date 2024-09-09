@@ -54,6 +54,8 @@ def main():
     from pyhbr.analysis import calibration
     from pyhbr.analysis import describe
     from pyhbr.analysis import model
+    
+    import matplotlib.ticker as mtick
 
     import importlib
 
@@ -153,7 +155,7 @@ def main():
 
         fig.suptitle("Top ten most important features by permutation importance")
         plt.tight_layout()
-
+    
         if args.model is not None:
             # Plot only
             plt.show()
@@ -189,6 +191,37 @@ def main():
                 )
             )
         plt.close()
+
+        # Make the bleeding/ischaemia trade-off plot
+        fig, ax = plt.subplots()
+        probs = fit_results["probs"]
+        bleeding_probs = 100*probs["bleeding"].iloc[:,0]
+        ischaemia_probs = 100*probs["ischaemia"].iloc[:,0] 
+        ax.scatter(bleeding_probs, ischaemia_probs, marker=".", color="k")
+        ax.set_xlim(1, 100)
+        ax.set_ylim(1, 100)        
+        ax.set_yscale("log")
+        ax.set_xscale("log")
+        ax.set_xticks([1, 2, 5, 10, 20, 50, 100])
+        ax.set_yticks([1, 2, 5, 10, 20, 50, 100])
+        ax.xaxis.set_major_formatter(mtick.PercentFormatter())
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+        ax.grid(axis="y")
+        ax.set_title("Bleeding/ischaemia risk trade-off")
+        ax.set_xlabel("Estimated bleeding risk")
+        ax.set_ylabel("Estimated ischaemia risk")
+        plt.tight_layout()
+
+        if args.model is not None:
+            # Plot only
+            plt.show()
+        else:
+            plt.savefig(
+                common.make_new_save_item_path(
+                    f"{analysis_name}_{model_name}_trade_off", config["save_dir"], "png"
+                )
+            )
+        plt.close()        
 
         for outcome in ["bleeding", "ischaemia"]:
 
@@ -240,6 +273,9 @@ def main():
                     )
                 )
             plt.close()  # to save memory
+
+
+
 
     # Only create the model summary table if not plotting a single model
     if args.model is None:
