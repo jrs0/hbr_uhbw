@@ -131,6 +131,10 @@ class TradeOffModel(ClassifierMixin, BaseEstimator):
         bleeding and ischaemia
         """
         
+        # Get the outcome name to decide between bleeding and
+        # ischaemia model function
+        self.outcome = y.name
+        
         self.classes_ = unique_labels(y)
         
         self.X_ = X
@@ -144,7 +148,10 @@ class TradeOffModel(ClassifierMixin, BaseEstimator):
         return self.predict_proba(X)[:, 1]
 
     def predict_proba(self, X: DataFrame) -> DataFrame:
-        risk = trade_off_model_bleeding_risk(X)
+        if self.outcome == "bleeding":
+            risk = trade_off_model_bleeding_risk(X)
+        else:
+            risk = trade_off_model_ischaemia_risk(X)
         return np.column_stack((1-risk, risk))
     
     # def predict(self, X: DataFrame) -> DataFrame:
