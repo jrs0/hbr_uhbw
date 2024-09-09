@@ -3,10 +3,12 @@ from typing import Any
 
 import numpy as np
 from numpy.random import RandomState
-from pandas import DataFrame
+from pandas import DataFrame, Series
+import pandas as pd
 
-from sklearn.base import TransformerMixin
+from sklearn.base import TransformerMixin, ClassifierMixin, BaseEstimator
 from sklearn.pipeline import Pipeline
+from sklearn.utils.multiclass import unique_labels
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.compose import ColumnTransformer
@@ -25,6 +27,129 @@ from xgboost import XGBClassifier
 from matplotlib.axes import Axes
 
 import scipy
+
+def trade_off_model_bleeding_risk(features: DataFrame) -> Series:
+    """ARC-HBR bleeding part of the trade-off model
+
+    This function implements the bleeding model contained here
+    https://pubmed.ncbi.nlm.nih.gov/33404627/. The numbers used
+    below come from correspondence with the authors.
+
+
+    Args:
+        features: must contain age, smoking, copd, hb, egfr_x, oac.
+
+    Returns:
+        The bleeding risks as a Series.
+    """
+
+    # Age component, right=False for >= 65, setting upper limit == 1000 to catch all
+    age = pd.cut(features["age"], [0, 65, 1000], labels=[1, 1.5], right=False).astype("float")
+
+    smoking = np.where(features["smoking"] == "yes", 1.47, 1)
+    copd = np.where(features["copd"].fillna(0) == 1, 1.39, 1)
+
+    # Fill NA with a high Hb value (50) to treat missing as low risk
+    hb = pd.cut(
+        10 * features["hb"].fillna(50),
+        [0, 110, 130, 1000],
+        labels=[3.99, 1.69, 1],
+        right=False,
+    ).astype("float")
+
+    # Fill NA with a high eGFR value (500) to treat missing as low risk
+    egfr = pd.cut(
+        features["egfr_x"].fillna(500),
+        [0, 30, 60, 1000],
+        labels=[1.43, 0.99, 1],
+        right=False,
+    ).astype("float")
+
+    # TODO complex and liver cancer surgery
+    complex_score = 1.0
+    liver_cancer_surgery = 1.0
+
+    oac = np.where(features["oac"] == 1, 2.0, 1.0)
+
+    # Calculate bleeding risk
+    xb = age*smoking*copd*liver_cancer_surgery*hb*egfr*complex_score*oac
+    risk = 1 - 0.986**xb
+    
+    return risk
+
+def trade_off_model_ischaemia_risk(features: DataFrame) -> Series:
+    """ARC-HBR ischaemia part of the trade-off model
+
+    This function implements the bleeding model contained here
+    https://pubmed.ncbi.nlm.nih.gov/33404627/. The numbers used
+    below come from correspondence with the authors.
+
+    Args:
+        features: must contain diabetes_before, smoking, 
+
+    Returns:
+        The ischaemia risks as a Series.
+    """
+
+    diabetes = np.where(features["diabetes_before"] > 0, 1.56, 1)
+    smoking = np.where(features["smoking"] == "yes", 1.47, 1)
+    prior_mi = np.where(features["mi_schnier_before"] > 0, 1.89, 1)
+    
+    # Interpreting "presentation" as stemi vs. nstemi
+    presentation = np.where(features["stemi_index"], 1.82, 1)
+
+    # Fill NA with a high Hb value (50) to treat missing as low risk
+    hb = pd.cut(
+        10 * features["hb"].fillna(50),
+        [0, 110, 130, 1000],
+        labels=[1.5, 1.27, 1],
+        right=False,
+    ).astype("float")
+
+    # Fill NA with a high eGFR value (500) to treat missing as low risk
+    egfr = pd.cut(
+        features["egfr_x"].fillna(500),
+        [0, 30, 60, 1000],
+        labels=[1.69, 1.3, 1],
+        right=False,
+    ).astype("float")
+
+    # TODO complex and bare metal stent (missing from data)
+    complex_score = 1.0
+    bms = 1.0
+
+    # Calculate bleeding risk
+    xb = diabetes*smoking*prior_mi*presentation*hb*egfr*complex_score*bms
+    risk = 1 - 0.986**xb
+    
+    return risk
+
+class TradeOffModel(ClassifierMixin, BaseEstimator):
+    
+    def fit(self, X, y):
+        """Use the name of the Y variable to choose between
+        bleeding and ischaemia
+        """
+        
+        self.classes_ = unique_labels(y)
+        
+        self.X_ = X
+        self.y_ = y
+
+        # Return the classifier
+
+        return self
+
+    def decision_function(self, X: DataFrame) -> DataFrame:
+        return self.predict_proba(X)[:, 1]
+
+    def predict_proba(self, X: DataFrame) -> DataFrame:
+        risk = trade_off_model_bleeding_risk(X)
+        return np.column_stack((1-risk, risk))
+    
+    # def predict(self, X: DataFrame) -> DataFrame:
+    #     risk = predict_proba(X)[:, 1]
+    #     return risk > 0.01
 
 class DenseTransformer(TransformerMixin):
     """Useful when the model requires a dense matrix
@@ -388,6 +513,20 @@ def get_features(fit: Pipeline, X: DataFrame) -> DataFrame:
             index=X.index,
         )
 
+def make_trade_off(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
+    """Make the ARC HBR bleeding/ischaemia trade-off model
+
+    Args:
+        random_state: Source of randomness for creating the model
+        X_train: The training dataset containing all features for modelling
+
+    Returns:
+        The preprocessing and fitting pipeline.
+    """
+
+    #preprocess = make_columns_transformer(preprocessors)
+    mod = TradeOffModel()
+    return Pipeline([("model", mod)])
 
 def make_random_forest(random_state: RandomState, X_train: DataFrame) -> Pipeline:
     """Make the random forest model

@@ -477,6 +477,18 @@ gp_opt_outs:
 
 # Models to include
 models:
+  trade_off:
+    text: "ARC HBR bleeding/ischaemia trade-off"
+    title: "ARC HBR Trade-off Model"
+    abbr: "TM"
+    pipe_fn: "pyhbr.analysis.model.make_trade_off"
+    config: {}
+    description: >
+      The ARC HBR bleeding/ischaemia trade-off model is derived from two Cox proportional
+      hazards models trained on high-bleeding-risk patients. It is a baseline against 
+      which to compare other models.
+    roc_conclusion: >
+      Test
   random_forest:
     text: "random forest"
     title: "Random Forest"
