@@ -45,3 +45,9 @@ The stability analysis for the bleeding model, showing the consistency of model 
 {% raw %}
 {{< pagebreak >}}
 {% endraw %}
+
+![Bleeding/ischaemia trade-off for the {{ model["text"] }} model]({{ model["trade_off_image"] }}){{ '{#' }}fig-trade-off-{{ model["abbr"] }}}
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}

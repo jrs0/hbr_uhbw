@@ -218,6 +218,11 @@ def main():
             f"{analysis_name}_{name}_feature_importance"
         )
 
+        # Bleeding/ischaemia trade-off
+        model["trade_off_image"] = copy_most_recent_image(
+            f"{analysis_name}_{name}_trade_off"
+        )
+
         plots = ["stability", "calibration"]
         outcomes = ["bleeding", "ischaemia"]
         for outcome in outcomes:
