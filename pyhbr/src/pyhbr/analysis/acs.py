@@ -10,7 +10,7 @@ def get_index_spells(
     episodes: DataFrame,
     codes: DataFrame,
     acs_group: str,
-    pci_group: str,
+    pci_group: str | None,
     stemi_group: str,
     nstemi_group: str,
 ) -> DataFrame:
@@ -47,7 +47,10 @@ def get_index_spells(
             code, >1 are secondary codes), and `group` (expected to contain
             the value of the acs_group and pci_group arguments).
         acs_group: The name of the ICD-10 code group used to define ACS.
-        pci_group: The name of the OPCS-4 code group used to define PCI
+        pci_group: The name of the OPCS-4 code group used to define PCI. Pass None
+            to not use PCI as an inclusion criterion for index events. In this
+            case, the pci_index column is omitted, and only ACS primary diagnoses
+            are allowed.
         stemi_group: The name of the ICD-10 code group used to identify STEMI MI
         nstemi_group: The name of the ICD-10 code group used to identify NSTEMI MI
 
@@ -86,25 +89,34 @@ def get_index_spells(
 
     # A PCI match is allowed anywhere in the procedures list, but must still
     # be present in the first episode of the index spell.
-    pci_match = first_episodes_with_codes["group"].str.contains(pci_group)
+    if pci_group is not None:
+        pci_match = first_episodes_with_codes["group"].str.contains(pci_group)
+    else:
+        pci_match = False
 
     # Get all the episodes matching the ACS or PCI condition (multiple rows
     # per episode)
     matching_episodes = first_episodes_with_codes[acs_match | pci_match]
     matching_episodes.set_index("episode_id", drop=True, inplace=True)
 
-    # Reduce to one row per episode, and store a flag for whether the ACS
-    # or PCI condition was present
     index_spells = DataFrame()
-    index_spells["acs_index"] = (
-        matching_episodes["group"].str.contains(acs_group).groupby("episode_id").any()
-    )
-    index_spells["pci_index"] = (
-        matching_episodes["group"].str.contains(pci_group).groupby("episode_id").any()
-    )
+
+    # Reduce to one row per episode, and store a flag for whether the ACS
+    # or PCI condition was present. If PCI is none, there is no need for these
+    # columns because all rows are ACS index events
+    if pci_group is not None:
+        index_spells["pci_index"] = (
+            matching_episodes["group"].str.contains(pci_group).groupby("episode_id").any()
+        )
+        index_spells["acs_index"] = (
+            matching_episodes["group"].str.contains(acs_group).groupby("episode_id").any()
+        )
+        
+    # The stemi/nstemi columns are always needed to distinguish the type of ACS. If 
+    # both are false, the result is unstable angina
     index_spells["stemi_index"] = (
         matching_episodes["group"].str.contains(stemi_group).groupby("episode_id").any()
-    )
+    )   
     index_spells["nstemi_index"] = (
         matching_episodes["group"]
         .str.contains(nstemi_group)
