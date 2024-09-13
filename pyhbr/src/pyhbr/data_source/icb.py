@@ -378,6 +378,39 @@ def primary_care_attributes_query(engine: Engine, patient_ids: list[str], gp_opt
         table.col("practice_code").not_in(gp_opt_outs),
     )
 
+def score_seg_query(engine: Engine, patient_ids: list[str]) -> Select:
+    """Get score segment information from SWD (Charlson/Cambridge score, etc.)
+
+    This is translated into an IN clause, which has an item limit. 
+    If patient_ids is longer than 2000, an error is raised. If 
+    more patient IDs are needed, split patient_ids and call this
+    function multiple times.
+    
+    The values in patient_ids must be valid (they should come from
+    a query such as sus_query).
+
+    Args:
+        engine: The connection to the database
+        patient_ids: The list of patient identifiers to filter
+            the nhs_number column.
+
+    Returns:
+        SQL query to retrieve episodes table
+    """
+    if len(patient_ids) > 2000:
+        raise ValueError("The list patient_ids must be less than 2000 long.")
+    
+    table = CheckedTable("score_seg", engine, schema="swd")
+
+    return select(
+        table.col("nhs_number").cast(String).label("patient_id"),
+        table.col("attribute_period").cast(DateTime).label("date"),
+        table.col("cambridge_score"),
+        table.col("charlson_score"),
+    ).where(
+        table.col("nhs_number").in_(patient_ids),
+    )
+
 
 def primary_care_prescriptions_query(
     engine: Engine, patient_ids: list[str], gp_opt_outs: list[str]

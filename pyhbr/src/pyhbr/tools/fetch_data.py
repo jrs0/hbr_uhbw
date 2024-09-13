@@ -374,9 +374,6 @@ def main():
         bool_outcomes["fatal_ischaemia"] | bool_outcomes["non_fatal_ischaemia"]
     )
 
-    # Quick check on prevalences
-    100 * bool_outcomes.sum() / len(bool_outcomes)
-
     features_codes = acs.get_code_features(index_spells, all_other_codes)
 
     # Remove the CV death code group (generalise this to remove

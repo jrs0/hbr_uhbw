@@ -93,6 +93,12 @@ date_of_death, cause_of_death = from_icb.get_mortality(
     abi_engine, start_date, end_date, code_groups
 )
 
+# score seg query
+dfs = common.get_data_by_patient(
+    msa_engine, icb.score_seg_query, patient_ids,
+)
+score_seg = pd.concat(dfs).reset_index(drop=True)
+
 # Primary care prescriptions (very slow)
 dfs = common.get_data_by_patient(
     msa_engine, icb.primary_care_prescriptions_query, patient_ids, config["gp_opt_outs"]
@@ -114,7 +120,8 @@ primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
 
 # Find the most recent date that was seen in all the datasets. Note
 # that the date in the primary care attributes covers the month
-# beginning from that date.
+# beginning from that date. Note that score_seg is not included in
+# this calculation because it is not used as features.
 common_end = min(
     [
         primary_care_attributes["date"].max() + dt.timedelta(days=31),
@@ -166,6 +173,7 @@ raw = {
     "primary_care_measurements": primary_care_measurements,
     "primary_care_prescriptions": primary_care_prescriptions,
     "secondary_care_prescriptions": secondary_care_prescriptions,
+    "score_seg": score_seg,
     "lab_results": lab_results,
     # Metadata
     "start_date": start_date,
