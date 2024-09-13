@@ -425,12 +425,14 @@ def save_item(
             print("Branch now clean, proceeding to save")
         
         else:
-            # In this case, unconditionally throw an error
-            raise RuntimeError(abort_msg)
+            
+            if requires_commit():
+                # In this case, unconditionally throw an error
+                raise RuntimeError(abort_msg)
         
     if not Path(save_dir).exists():
         print(f"Creating missing folder '{save_dir}' for storing item")
-        Path(save_dir).mkdir(parents=true, exist_ok=True)
+        Path(save_dir).mkdir(parents=True, exist_ok=True)
 
     path = make_new_save_item_path(name, save_dir, "pkl")
     with open(path, "wb") as file:
