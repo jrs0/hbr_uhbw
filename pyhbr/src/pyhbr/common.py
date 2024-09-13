@@ -434,7 +434,7 @@ def save_item(
 
     path = make_new_save_item_path(name, save_dir, "pkl")
     with open(path, "wb") as file:
-        print(f"Saving {str(path)}...")
+        print(f"Saving {str(path)}")
         pickle.dump(item, file)
 
 
