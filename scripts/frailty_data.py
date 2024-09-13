@@ -72,7 +72,7 @@ index_spells = acs.get_index_spells(
     episodes,
     codes,
     config["acs_index_code_group"],
-    None,  # Not allowing any PCI
+    None,  # Do not include an episode based on PCI
     config["stemi_index_code_group"],
     config["nstemi_index_code_group"],
 )
@@ -116,7 +116,7 @@ same_spell_management_window = management_window[
 
 def has_management(window: DataFrame, group: str, name: str) -> DataFrame:
     return (
-        df.groupby("index_spell_id")[["group"]]
+        window.groupby("index_spell_id")[["group"]]
         .agg(lambda g: g.eq(group).any())
         .rename(columns={"group": name})
     )
@@ -128,7 +128,12 @@ has_pci = has_management(same_spell_management_window, "all_pci_pathak", "pci")
 index_spells = index_spells.merge(
     has_cabg, left_index=True, right_index=True, how="left"
 ).merge(has_pci, left_index=True, right_index=True, how="left")
-index_spells["conservative"] = ~index_spells["cabg"] & ~index_spells["pci"]
+
+# Check the proportions of different types of management
+pci_prop = index_spells["pci"].sum() / len(index_spells)
+cabg_prop = index_spells["cabg"].sum() / len(index_spells)
+conservative_prop = 1 - pci_prop - cabg_prop
+print(f"Of {len(index_spells)} ACS patients, {100*pci_prop:.2f}% had PCI, {100*cabg_prop:.2f}% had CABG, and {100*conservative_prop:.2f}% were conservatively managed")
 
 # Get date of death and cause of death from registry data
 date_of_death, cause_of_death = from_icb.get_mortality(
@@ -143,7 +148,7 @@ following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 # Get the non-fatal ischaemia outcomes. Allowing
 # outcomes from the index spell considerably
 # increases the ischaemia rate to about 25%, which
-# seems to high to be reasonable. This could be
+# seems too high to be reasonable. This could be
 # due to (e.g.) a majority of ACS patients having two
 # acute episodes to treat the index event. Excluding
 # the index event brings the prevalence down to around 6%,
@@ -159,13 +164,6 @@ non_fatal_ischaemia = acs.filter_by_code_groups(
     exclude_index_spell,
 )
 
-# This is how to look at patients with a particular spell
-# df = codes.merge(episodes, on="episode_id", how="left")
-# spell = df[df["spell_id"] == "1613481717937990639"].drop_duplicates(
-#     ["episode_id", "code", "type", "position"]
-# )
-# spell.sort_values(["episode_start", "type", "position"])
-
 # Get the fatal ischaemia outcomes. 
 fatal_ischaemia_group = config["outcomes"]["ischaemia"]["fatal"]["group"]
 max_position = config["outcomes"]["ischaemia"]["fatal"]["max_position"]
@@ -177,3 +175,41 @@ fatal_ischaemia = acs.identify_fatal_outcome(
     max_position,
     max_after,
 )
+
+# Count the non-fatal bleeding/ischaemia outcomes
+outcomes = pd.DataFrame()
+outcomes["non_fatal_ischaemia"] = counting.count_code_groups(
+    index_spells, non_fatal_ischaemia
+)
+outcomes["fatal_ischaemia"] = counting.count_code_groups(index_spells, fatal_ischaemia)
+
+# Get the survival time and right censoring data for bleeding and ischaemia (combines
+# both fatal/non-fatal outcomes with a flag to distinguish which is which)
+ischaemia_survival = acs.get_survival_data(index_spells, fatal_ischaemia, non_fatal_ischaemia, max_after)
+
+# Reduce the outcomes to boolean, and make aggregate
+# (fatal/non-fatal) columns
+bool_outcomes = outcomes > 0
+bool_outcomes["ischaemia"] = (
+    bool_outcomes["fatal_ischaemia"] | bool_outcomes["non_fatal_ischaemia"]
+)
+
+# Quick check on prevalences
+100 * bool_outcomes.sum() / len(bool_outcomes)
+
+# Get hic index features (drop instead of keep in case new
+# features are added)
+features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_start"])
+
+# Combine all tables (features and outcomes) into a single table
+# for saving.
+data = {
+    # Outcomes
+    "outcomes": bool_outcomes,
+    "non_fatal_ischaemia": non_fatal_ischaemia,
+    "fatal_ischaemia": fatal_ischaemia,
+    "ischaemia_survival": ischaemia_survival,
+    "features_index": features_index,
+}
+
+common.save_item(data, f"{config['analysis_name']}_data")
