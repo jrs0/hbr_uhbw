@@ -1,0 +1,63 @@
+---
+title: "Ischaemia outcomes based on age and frailty"
+jupyter: python3
+---
+
+```{python}
+from sksurv.nonparametric import kaplan_meier_estimator
+import yaml
+from pyhbr import common
+import matplotlib.pyplot as plt
+
+# Change up one level to access default location of `save_data/` directory
+import os
+os.chdir("../")
+```
+
+
+```{python}
+# Read the configuration file
+with open("scripts/frailty.yaml") as stream:
+    try:
+        config = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(f"Failed to load config file: {exc}")
+        exit(1)
+
+# This is used to load a file, and is also used
+# as the prefix for all saved data files.
+analysis_name = config["analysis_name"]
+
+print(f"Analysis name: {analysis_name}")
+
+# Load the data from file
+data, data_path = common.load_item(f"{analysis_name}_data", save_dir="save_data")
+
+# Calculate survival curves for bleeding
+survival = data["ischaemia_survival"]
+status = ~survival["right_censor"]
+survival_in_days = survival["time_to_event"].dt.days
+time, survival_prob, conf_int = kaplan_meier_estimator(
+    status, survival_in_days, conf_type="log-log"
+)
+
+# Get the input features
+features_index = data["features_index"]
+
+# Set the aspect ratio for the figures to roughly 2:1,
+# because each plot is two graphs side-by-side
+figsize = (11, 5)
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots()
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+ax.set_ylim(0.85, 1.00)
+ax.set_ylabel(r"Est. probability of no adverse event")
+ax.set_xlabel("Time (days)")
+ax.set_title("Ischaemia Kaplan-Meier Curve for MACE")
+
+plt.show()
+```
+

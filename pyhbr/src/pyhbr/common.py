@@ -3,7 +3,6 @@
 A collection of routines used by the data source or analysis functions.
 """
 
-
 from dataclasses import dataclass
 
 import os
@@ -20,6 +19,7 @@ from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
 from sqlalchemy.exc import NoSuchTableError
 from pandas import DataFrame, read_sql, to_datetime, read_pickle, concat
 from git import Repo, InvalidGitRepositoryError
+
 
 def make_engine(
     con_string: str = "mssql+pyodbc://dsn", database: str = "hic_cv_test"
@@ -51,7 +51,7 @@ def make_engine(
 class CheckedTable:
     """Wrapper for sqlalchemy table with checks for table/columns"""
 
-    def __init__(self, table_name: str, engine: Engine, schema = "dbo") -> None:
+    def __init__(self, table_name: str, engine: Engine, schema="dbo") -> None:
         """Get a CheckedTable by reading from the remote server
 
         This is a wrapper around the sqlalchemy Table for
@@ -111,20 +111,24 @@ def get_data(
     """
     stmt = query(engine, *args)
     df = read_sql(stmt, engine)
-    
+
     # Convert the column names to regular strings instead
     # of sqlalchemy.sql.elements.quoted_name. This avoids
     # an error down the line in sklearn, which cannot
     # process sqlalchemy column title tuples.
     df.columns = [str(col) for col in df.columns]
-    
+
     return df
 
+
 def get_data_by_patient(
-    engine: Engine, query: Callable[[Engine, ...], Select], patient_ids: list[str], *args: ...
+    engine: Engine,
+    query: Callable[[Engine, ...], Select],
+    patient_ids: list[str],
+    *args: ...,
 ) -> list[DataFrame]:
     """Fetch data using a query restricted by patient ID
-    
+
     The patient_id list is chunked into 2000 long batches to fit
     within an SQL IN clause, and each chunk is run as a separate
     query. The results are assembled into a single DataFrame.
@@ -134,7 +138,7 @@ def get_data_by_patient(
         query: A function returning a sqlalchemy Select statement. Must
             take a list[str] as an argument after engine.
         patient_ids: A list of patient IDs to restrict the query.
-        *args: Further positional arguments that will be passed to the 
+        *args: Further positional arguments that will be passed to the
             query function after the patient_ids positional argument.
 
     Returns:
@@ -146,11 +150,10 @@ def get_data_by_patient(
     chunk_count = 1
     for chunk in patient_id_chunks:
         print(f"Fetching chunk {chunk_count}/{num_chunks}")
-        dataframes.append(
-            get_data(engine, query, chunk, *args)
-        )
+        dataframes.append(get_data(engine, query, chunk, *args))
         chunk_count += 1
     return dataframes
+
 
 def current_commit() -> str:
     """Get current commit.
@@ -217,7 +220,7 @@ def get_saved_files_by_name(name: str, save_dir: str, extension: str) -> DataFra
     # (including underscores and letters and numbers), so splitting on
     # _ would not work. The name can then be removed.
     files["name"] = files["path"].str.replace(
-        fr"_([0-9]|[a-zA-Z])*_\d*\.{extension}", "", regex=True
+        rf"_([0-9]|[a-zA-Z])*_\d*\.{extension}", "", regex=True
     )
 
     # Remove all the files whose name does not match, and drop
@@ -251,7 +254,9 @@ def get_saved_files_by_name(name: str, save_dir: str, extension: str) -> DataFra
     return recent_first
 
 
-def pick_saved_file_interactive(name: str, save_dir: str, extension: str = "pkl") -> str | None:
+def pick_saved_file_interactive(
+    name: str, save_dir: str, extension: str = "pkl"
+) -> str | None:
     """Select a file matching name interactively
 
     Print a list of the saved items in the save_dir folder, along
@@ -294,7 +299,9 @@ def pick_saved_file_interactive(name: str, save_dir: str, extension: str = "pkl"
     return full_path
 
 
-def pick_most_recent_saved_file(name: str, save_dir: str, extension: str = "pkl") -> Path:
+def pick_most_recent_saved_file(
+    name: str, save_dir: str, extension: str = "pkl"
+) -> Path:
     """Get the path to the most recent file matching name.
 
     Like pick_saved_file_interactive, but automatically selects the most
@@ -332,6 +339,7 @@ def requires_commit() -> bool:
         # No need to commit if not repository
         return False
 
+
 def make_new_save_item_path(name: str, save_dir: str, extension: str) -> Path:
     """Make the path to save a new item to the save_dir
 
@@ -345,14 +353,19 @@ def make_new_save_item_path(name: str, save_dir: str, extension: str) -> Path:
     Returns:
         The relative path to the new object to be saved
     """
-    
+
     # Make the file suffix out of the current git
     # commit hash and the current time
     filename = f"{name}_{current_commit()}_{current_timestamp()}.{extension}"
     return Path(save_dir) / Path(filename)
 
+
 def save_item(
-    item: Any, name: str, save_dir: str = "save_data/", enforce_clean_branch=True
+    item: Any,
+    name: str,
+    save_dir: str = "save_data/",
+    enforce_clean_branch=True,
+    prompt_commit=False,
 ) -> None:
     """Save an item to a pickle file
 
@@ -379,12 +392,37 @@ def save_item(
             The directory will be created if it does not exist.
         enforce_clean_branch: If True, the function will raise an exception if an attempt
             is made to save an item when the repository has uncommitted changes.
+        prompt_commit: if enforce_clean_branch is true, choose whether the prompt the
+            user to commit on an unclean branch. This can help avoiding losing
+            the results of a long-running script. Prefer to use false if the script
+            is cheap to run.
     """
 
-    if enforce_clean_branch and requires_commit():
-        raise RuntimeError(
-            "Aborting save_item() because branch is not clean. Commit your changes before saving item to increase the chance of reproducing the item based on the filename commit hash."
-        )
+    if enforce_clean_branch:
+
+        abort_msg = "Aborting save_item() because branch is not clean. Commit your changes before saving item to increase the chance of reproducing the item based on the filename commit hash."
+
+        if prompt_commit:
+            # If the branch is not clean, prompt the user to commit to avoid losing
+            # long-running model results. Take care to only commit if the state of
+            # the repository truly reflects what was run (i.e. if no changes were made
+            # while the script was running).
+            retry_save = True
+            while retry_save:
+                if requires_commit():
+                    print(abort_msg)
+                    print(
+                        "You can commit now and then retry the save after committing."
+                    )
+                    retry_save = query_yes_no(
+                        "Do you want to retry the save? Commit, then select yes, or choose no to exit the script."
+                    )
+                    
+            # Getting here means the branch is no clean. Continue to save
+
+        else:
+            # In this case, unconditionally throw an error
+            raise RuntimeError(abort_msg)
 
     if not Path(save_dir).exists():
         print(f"Creating missing folder '{save_dir}' for storing item")
@@ -395,7 +433,9 @@ def save_item(
         pickle.dump(item, file)
 
 
-def load_item(name: str, interactive: bool = False, save_dir: str = "save_data") -> (Any, Path):
+def load_item(
+    name: str, interactive: bool = False, save_dir: str = "save_data"
+) -> (Any, Path):
     """Load a previously saved item (pickle) from file
 
     Use this function to load a file that was previously saved using
@@ -439,9 +479,10 @@ def load_item(name: str, interactive: bool = False, save_dir: str = "save_data")
     with open(item_path, "rb") as file:
         return pickle.load(file), item_path
 
+
 def chunks(patient_ids: list[str], n: int) -> list[list[str]]:
     """Divide a list of patient ids into n-sized chunks
-    
+
     The last chunk may be shorter.
 
     Args:
@@ -451,10 +492,12 @@ def chunks(patient_ids: list[str], n: int) -> list[list[str]]:
     Returns:
         A list containing chunks (list) of patient IDs
     """
-    return [patient_ids[i:i+n] for i in range(0, len(patient_ids), n)]
+    return [patient_ids[i : i + n] for i in range(0, len(patient_ids), n)]
 
 
-def mean_confidence_interval(data: Series, confidence: float = 0.95) -> dict[str, float]:
+def mean_confidence_interval(
+    data: Series, confidence: float = 0.95
+) -> dict[str, float]:
     """Compute the confidence interval around the mean
 
     Args:
@@ -469,16 +512,17 @@ def mean_confidence_interval(data: Series, confidence: float = 0.95) -> dict[str
     n = len(a)
     mean = np.mean(a)
     standard_error = scipy.stats.sem(a)
-    
+
     # Check this
-    half_width = standard_error * scipy.stats.t.ppf((1 + confidence) / 2.0, n-1)
+    half_width = standard_error * scipy.stats.t.ppf((1 + confidence) / 2.0, n - 1)
     return {
         "mean": mean,
         "confidence": confidence,
         "lower": mean - half_width,
-        "upper": mean + half_width
+        "upper": mean + half_width,
     }
-    
+
+
 def median_to_string(instability: DataFrame, unit="%") -> str:
     """Convert the median-quartile DataFrame to a String
 

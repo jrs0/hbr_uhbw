@@ -41,6 +41,15 @@ acs_index_code_group: "acs_bezin"
 stemi_index_code_group: "mi_stemi_schnier"
 nstemi_index_code_group: "mi_nstemi_schnier"
 
+# List of GP opt-out codes to exclude from the SWD
+# data fetch.
+gp_opt_outs:
+  - "L81087" # Beechwood Medical Practice
+  - "L81632" # Emersons Green Medical Centre
+  - "L81046" # Leap Valley Medical Centre, also covers Abbotswood Surgery
+  - "L81120" # Birchwood Medical Practice
+  - "L81055" # Orchard Medical Centre
+
 # Outcome names
 outcomes:
   ischaemia:

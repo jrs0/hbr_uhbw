@@ -77,6 +77,97 @@ index_spells = acs.get_index_spells(
     config["nstemi_index_code_group"],
 )
 
+# Get the list of patients to narrow subsequent SQL queries
+patient_ids = index_spells["patient_id"].unique()
+
+
+# Get SWD data
+msa_engine = common.make_engine(database="modelling_sql_area")
+
+# Get patient attributes for the EFI
+dfs = common.get_data_by_patient(
+    msa_engine, icb.primary_care_attributes_query, patient_ids, config["gp_opt_outs"]
+)
+with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
+primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
+
+# Find the most recent date that was seen in all the datasets. Note
+# that the date in the primary care attributes covers the month
+# beginning from that date.
+common_end = min(
+    [
+        primary_care_attributes["date"].max() + dt.timedelta(days=31),
+        primary_care_prescriptions["date"].max(),
+        primary_care_measurements["date"].max(),
+        raw_sus_data["episode_start"].max(),
+    ]
+)
+
+# Find earliest date seen in all the datasets.
+common_start = max(
+    [
+        primary_care_attributes["date"].min(),
+        primary_care_prescriptions["date"].min(),
+        primary_care_measurements["date"].min(),
+        raw_sus_data["episode_start"].min(),
+    ]
+)
+
+# Add a margin of one year on either side of the earliest/latest
+# dates to ensure outcomes and features will be valid at the edges
+index_start = common_start + dt.timedelta(days=365)
+index_end = common_end - dt.timedelta(days=365)
+
+# Reduce the index spells to only those within the valid window
+index_spells = index_spells[
+    (index_spells["spell_start"] < index_end)
+    & (index_spells["spell_start"] > index_start)
+]
+
+# Fetch the raw lab results data
+lab_results = from_icb.get_unlinked_lab_results(msa_engine)  # really slow
+
+# Fetch raw secondary-care prescriptions data
+secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(
+    msa_engine, "HIC_Pharmacy"
+)  # fast
+
+# Combine the datasets for saving
+raw = {
+    # Datasets
+    "index_spells": index_spells,
+    "episodes": episodes,
+    "code_groups": code_groups,
+    "codes": codes,
+    "date_of_death": date_of_death,
+    "cause_of_death": cause_of_death,
+    "primary_care_attributes": primary_care_attributes,
+    "primary_care_measurements": primary_care_measurements,
+    "primary_care_prescriptions": primary_care_prescriptions,
+    "secondary_care_prescriptions": secondary_care_prescriptions,
+    "lab_results": lab_results,
+    # Metadata
+    "start_date": start_date,
+    "end_date": end_date,
+    "common_start": common_start,
+    "common_end": common_end,
+    "index_start": index_start,
+    "index_end_date": index_end,
+    # Other items
+    "raw_sus_data_file": raw_sus_data_path.name,
+}
+
+raw_name = f"{config['analysis_name']}_raw"
+
+# Save point for the intermediate data
+common.save_item(raw, raw_name)
+
+# Load the data from file
+raw, raw_path = common.load_item(raw_name, )
+
+
+#### AFTER saving raw data
+
 # Count the amount of STEMI/NSTEMI
 stemi_count = index_spells["stemi_index"].sum()
 nstemi_count = index_spells["nstemi_index"].sum()
