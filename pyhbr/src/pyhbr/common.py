@@ -407,19 +407,22 @@ def save_item(
             # long-running model results. Take care to only commit if the state of
             # the repository truly reflects what was run (i.e. if no changes were made
             # while the script was running).
-            retry_save = True
-            while retry_save:
-                if requires_commit():
-                    print(abort_msg)
-                    print(
-                        "You can commit now and then retry the save after committing."
-                    )
-                    retry_save = query_yes_no(
-                        "Do you want to retry the save? Commit, then select yes, or choose no to exit the script."
-                    )
-                    
-            # Getting here means the branch is no clean. Continue to save
+            while requires_commit():
+                print(abort_msg)
+                print(
+                    "You can commit now and then retry the save after committing."
+                )
+                retry_save = query_yes_no(
+                    "Do you want to retry the save? Commit, then select yes, or choose no to abort the save."
+                )
 
+                if not retry_save:
+                    print(f"Aborting save of {name}")
+                    return
+       
+            # If we get out the loop without returning, then the branch
+            # is not clean and the save can proceed.
+        
         else:
             # In this case, unconditionally throw an error
             raise RuntimeError(abort_msg)
