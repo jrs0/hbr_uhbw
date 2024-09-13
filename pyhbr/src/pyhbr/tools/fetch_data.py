@@ -122,6 +122,12 @@ def main():
         date_of_death, cause_of_death = from_icb.get_mortality(
             abi_engine, start_date, end_date, code_groups
         )
+        
+        # score seg query
+        dfs = common.get_data_by_patient(
+            msa_engine, icb.score_seg_query, patient_ids,
+        )
+        score_seg = pd.concat(dfs).reset_index(drop=True)
 
         # Primary care prescriptions (very slow)
         dfs = common.get_data_by_patient(
@@ -195,6 +201,7 @@ def main():
             "primary_care_attributes": primary_care_attributes,
             "primary_care_measurements": primary_care_measurements,
             "primary_care_prescriptions": primary_care_prescriptions,
+            "score_seg": score_seg,
             "secondary_care_prescriptions": secondary_care_prescriptions,
             "lab_results": lab_results,
             # Metadata
@@ -226,7 +233,9 @@ def main():
     primary_care_prescriptions = raw["primary_care_prescriptions"]
     secondary_care_prescriptions = raw["secondary_care_prescriptions"]
     primary_care_measurements = raw["primary_care_measurements"]
+    score_seg = raw["score_seg"]
     lab_results = raw["lab_results"]
+    exit()
 
     # Get features from the lab results
     features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
