@@ -210,6 +210,8 @@ data = {
     "fatal_ischaemia": fatal_ischaemia,
     "ischaemia_survival": ischaemia_survival,
     "features_index": features_index,
+    # Other files
+    "raw_sus_data_file": raw_sus_data_path.name,
 }
 
 common.save_item(data, f"{config['analysis_name']}_data")
