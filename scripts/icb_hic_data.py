@@ -95,7 +95,9 @@ date_of_death, cause_of_death = from_icb.get_mortality(
 
 # score seg query
 dfs = common.get_data_by_patient(
-    msa_engine, icb.score_seg_query, patient_ids,
+    msa_engine,
+    icb.score_seg_query,
+    patient_ids,
 )
 score_seg = pd.concat(dfs).reset_index(drop=True)
 
@@ -243,18 +245,24 @@ features_attributes = acs.remove_features(
 
 # Do the same process to link the seg scores to the index
 # events.
-index_spells_scores_link = acs.link_attribute_period_to_index(
-    index_spells, score_seg
-)
+index_spells_scores_link = acs.link_attribute_period_to_index(index_spells, score_seg)
 
 # Get the scores (not used as features, for descriptive purposes)
-info_index_scores = acs.get_index_attributes(
-    index_spells_attributes_link, score_seg
-)
+info_index_scores = acs.get_index_attributes(index_spells_attributes_link, score_seg)
 
 # Get other episodes relative to the index episode (for counting code
 # groups before/after the index).
 all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
+
+# Choose a window for identifying management
+min_after = dt.timedelta(hours=0)
+max_after = dt.timedelta(days=7)
+pci_group = "all_pci_pathak"
+cabg_group = "cabg_bortolussi"
+info_management = acs.get_management(
+    index_spells, all_other_codes, min_after, max_after, pci_group, cabg_group
+)
+info_management.value_counts()
 
 # Get follow-up window for defining non-fatal outcomes
 min_after = dt.timedelta(hours=48)
@@ -289,7 +297,7 @@ non_fatal_bleeding = acs.filter_by_code_groups(
 # to one to focus on bleeding-caused deaths.
 # Bleeding codes typically show up in the primary
 # or first secondary
-max_position =  config["outcomes"]["bleeding"]["fatal"]["max_position"]
+max_position = config["outcomes"]["bleeding"]["fatal"]["max_position"]
 fatal_bleeding_group = config["outcomes"]["bleeding"]["fatal"]["group"]
 fatal_bleeding = acs.identify_fatal_outcome(
     index_spells,
@@ -326,7 +334,7 @@ non_fatal_ischaemia = acs.filter_by_code_groups(
 # )
 # spell.sort_values(["episode_start", "type", "position"])
 
-# Get the fatal ischaemia outcomes. 
+# Get the fatal ischaemia outcomes.
 fatal_ischaemia_group = config["outcomes"]["ischaemia"]["fatal"]["group"]
 max_position = config["outcomes"]["ischaemia"]["fatal"]["max_position"]
 fatal_ischaemia = acs.identify_fatal_outcome(
@@ -351,8 +359,12 @@ outcomes["fatal_ischaemia"] = counting.count_code_groups(index_spells, fatal_isc
 
 # Get the survival time and right censoring data for bleeding and ischaemia (combines
 # both fatal/non-fatal outcomes with a flag to distinguish which is which)
-bleeding_survival = acs.get_survival_data(index_spells, fatal_bleeding, non_fatal_bleeding, max_after)
-ischaemia_survival = acs.get_survival_data(index_spells, fatal_ischaemia, non_fatal_ischaemia, max_after)
+bleeding_survival = acs.get_survival_data(
+    index_spells, fatal_bleeding, non_fatal_bleeding, max_after
+)
+ischaemia_survival = acs.get_survival_data(
+    index_spells, fatal_ischaemia, non_fatal_ischaemia, max_after
+)
 
 # Reduce the outcomes to boolean, and make aggregate
 # (fatal/non-fatal) columns
@@ -418,7 +430,7 @@ data = {
     "features_secondary_prescriptions": features_secondary_prescriptions,
     "features_lab": features_lab,
     # Info (for descriptive purposes)
-    "info_index_scores": info_index_scores
+    "info_index_scores": info_index_scores,
 }
 
 common.save_item(data, f"{config['analysis_name']}_data")

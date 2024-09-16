@@ -386,6 +386,54 @@ def get_outcomes(
     return DataFrame({"all": non_fatal + fatal, "fatal": fatal})
 
 
+def get_management(
+    index_spells: DataFrame,
+    all_other_codes: DataFrame,
+    min_after: dt.timedelta,
+    max_after: dt.timedelta,
+    pci_group: str,
+    cabg_group: str,
+) -> Series:
+    """Get the management type for each index event
+
+    The result is a category series containing "PCI" if a PCI was performed, "CABG"
+    if CABG was performed, or "Conservative" if neither were performed.
+
+    Args:
+        index_spells:
+        all_other_codes (DataFrame): _description_
+        min_after: The start of the window after the index to look for management
+        max_after: The end of the window after the index which defines management
+        pci_group: The name of the code group defining PCI management
+        cabg_management: The name of the code group defining CABG management
+
+    Returns:
+        A category series containing "PCI", "CABG", or "Conservative"
+    """
+
+    management_window = counting.get_time_window(all_other_codes, min_after, max_after)
+
+    # Ensure that rows are only kept if they are from the same spell (management
+    # must occur before a hospital discharge and readmission)
+    same_spell_management_window = management_window[
+        management_window["index_spell_id"].eq(management_window["other_spell_id"])
+    ]
+
+    def check_management_type(g):
+        if g.eq(cabg_group).any():
+            return "CABG"
+        elif g.eq(pci_group).any():
+            return "PCI"
+        else:
+            return "Conservative"
+
+    return (
+        same_spell_management_window.groupby("index_spell_id")[["group"]]
+        .agg(check_management_type)
+        .astype("category")
+    )
+
+
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
     """Get counts of previous clinical codes in code groups before the index.
 

@@ -285,6 +285,17 @@ def main():
     # groups before/after the index).
     all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
 
+    # Choose a window for identifying management
+    min_after = dt.timedelta(hours=0)
+    max_after = dt.timedelta(days=7)
+    pci_group = "all_pci_pathak"
+    cabg_group = "cabg_bortolussi"
+    info_management = acs.get_management(
+        index_spells, all_other_codes, min_after, max_after, pci_group, cabg_group
+    )
+    print("Breakdown of management:")
+    info_management.value_counts()
+
     # Get follow-up window for defining non-fatal outcomes
     min_after = dt.timedelta(hours=48)
     max_after = dt.timedelta(days=365)
@@ -447,7 +458,8 @@ def main():
         "features_secondary_prescriptions": features_secondary_prescriptions,
         "features_lab": features_lab,
         # Info (for descriptive purposes)
-        "info_index_scores": info_index_scores
+        "info_index_scores": info_index_scores,
+        "info_management": info_management
     }
 
     common.save_item(data, f"{config['analysis_name']}_data", save_dir=config["save_dir"], prompt_commit=True)
