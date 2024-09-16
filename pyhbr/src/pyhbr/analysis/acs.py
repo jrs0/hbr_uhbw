@@ -431,7 +431,7 @@ def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> Da
     return DataFrame(code_features)
 
 
-def get_index_attribute_link(
+def link_attribute_period_to_index(
     index_spells: DataFrame, primary_care_attributes: DataFrame
 ) -> DataFrame:
     """Link primary care attributes to index spells by attribute date
@@ -454,9 +454,9 @@ def get_index_attribute_link(
             `date` and `patient_id`
 
     Returns:
-        A filtered version of index_spells containing only index spells
-            with a valid set of patient attributes. The `date`
-            column is added to link the attributes (along with `patient_id`).
+        The index_spells table with a `date` column added to link the
+            attributes (along with `patient_id`). This may be NaT if 
+            there is no valid attribute for this index event.
     """
 
     # Define a window before the index event where SWD attributes will be considered valid.

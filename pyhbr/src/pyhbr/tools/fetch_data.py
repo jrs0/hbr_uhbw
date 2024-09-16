@@ -233,9 +233,8 @@ def main():
     primary_care_prescriptions = raw["primary_care_prescriptions"]
     secondary_care_prescriptions = raw["secondary_care_prescriptions"]
     primary_care_measurements = raw["primary_care_measurements"]
-    score_seg = raw["score_seg"]
     lab_results = raw["lab_results"]
-    exit()
+    score_seg = raw["score_seg"]
 
     # Get features from the lab results
     features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
@@ -254,13 +253,13 @@ def main():
     )
 
     # Join the attribute date to the index spells for linking
-    index_spells_with_link = acs.get_index_attribute_link(
+    index_spells_attributes_link = acs.link_attribute_period_to_index(
         index_spells, primary_care_attributes
     )
 
     # Get the patient index-spell attributes (before reducing based on missingness/low-variance)
     all_index_attributes = acs.get_index_attributes(
-        index_spells_with_link, primary_care_attributes
+        index_spells_attributes_link, primary_care_attributes
     )
 
     # Remove attribute columns that have too much missingness or where
@@ -269,6 +268,17 @@ def main():
         all_index_attributes,
         max_missingness=config["attributes_max_missingness"],
         const_threshold=config["attributes_const_threshold"],
+    )
+
+    # Do the same process to link the seg scores to the index
+    # events.
+    index_spells_scores_link = acs.link_attribute_period_to_index(
+        index_spells, score_seg
+    )
+
+    # Get the scores (not used as features, for descriptive purposes)
+    info_index_scores = acs.get_index_attributes(
+        index_spells_attributes_link, score_seg
     )
 
     # Get other episodes relative to the index episode (for counting code
@@ -383,6 +393,9 @@ def main():
         bool_outcomes["fatal_ischaemia"] | bool_outcomes["non_fatal_ischaemia"]
     )
 
+    # Quick check on prevalences
+    100 * bool_outcomes.sum() / len(bool_outcomes)
+
     features_codes = acs.get_code_features(index_spells, all_other_codes)
 
     # Remove the CV death code group (generalise this to remove
@@ -433,6 +446,8 @@ def main():
         # HIC (UHBW) data
         "features_secondary_prescriptions": features_secondary_prescriptions,
         "features_lab": features_lab,
+        # Info (for descriptive purposes)
+        "info_index_scores": info_index_scores
     }
 
     common.save_item(data, f"{config['analysis_name']}_data", save_dir=config["save_dir"], prompt_commit=True)

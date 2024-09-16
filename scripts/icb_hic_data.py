@@ -192,7 +192,7 @@ raw_name = f"{config['analysis_name']}_raw"
 common.save_item(raw, raw_name)
 
 # Load the data from file
-raw, raw_path = common.load_item(raw_name, )
+raw, raw_path = common.load_item(raw_name)
 
 # Extract some datasets for convenience
 episodes = raw["episodes"]
@@ -205,6 +205,7 @@ primary_care_prescriptions = raw["primary_care_prescriptions"]
 secondary_care_prescriptions = raw["secondary_care_prescriptions"]
 primary_care_measurements = raw["primary_care_measurements"]
 lab_results = raw["lab_results"]
+score_seg = raw["score_seg"]
 
 # Get features from the lab results
 features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
@@ -223,13 +224,13 @@ primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
 )
 
 # Join the attribute date to the index spells for linking
-index_spells_with_link = acs.get_index_attribute_link(
+index_spells_attributes_link = acs.link_attribute_period_to_index(
     index_spells, primary_care_attributes
 )
 
 # Get the patient index-spell attributes (before reducing based on missingness/low-variance)
 all_index_attributes = acs.get_index_attributes(
-    index_spells_with_link, primary_care_attributes
+    index_spells_attributes_link, primary_care_attributes
 )
 
 # Remove attribute columns that have too much missingness or where
@@ -238,6 +239,17 @@ features_attributes = acs.remove_features(
     all_index_attributes,
     max_missingness=config["attributes_max_missingness"],
     const_threshold=config["attributes_const_threshold"],
+)
+
+# Do the same process to link the seg scores to the index
+# events.
+index_spells_scores_link = acs.link_attribute_period_to_index(
+    index_spells, score_seg
+)
+
+# Get the scores (not used as features, for descriptive purposes)
+info_index_scores = acs.get_index_attributes(
+    index_spells_attributes_link, score_seg
 )
 
 # Get other episodes relative to the index episode (for counting code
@@ -405,6 +417,8 @@ data = {
     # HIC (UHBW) data
     "features_secondary_prescriptions": features_secondary_prescriptions,
     "features_lab": features_lab,
+    # Info (for descriptive purposes)
+    "info_index_scores": info_index_scores
 }
 
 common.save_item(data, f"{config['analysis_name']}_data")
