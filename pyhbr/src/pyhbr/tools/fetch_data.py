@@ -294,7 +294,7 @@ def main():
         index_spells, all_other_codes, min_after, max_after, pci_group, cabg_group
     )
     print("Breakdown of management:")
-    info_management.value_counts()
+    print(info_management.value_counts())
 
     # Get follow-up window for defining non-fatal outcomes
     min_after = dt.timedelta(hours=48)
