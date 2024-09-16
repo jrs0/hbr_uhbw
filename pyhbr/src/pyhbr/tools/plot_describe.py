@@ -23,6 +23,7 @@ def main():
     import matplotlib.pyplot as plt
     import scipy
     import yaml
+    import pickle
 
     from pyhbr import common
     from pyhbr.analysis import roc
@@ -31,6 +32,7 @@ def main():
     from pyhbr.analysis import describe
     from sksurv.nonparametric import kaplan_meier_estimator
     import seaborn as sns
+    import matplotlib.transforms as transforms
 
     import importlib
 
@@ -60,7 +62,56 @@ def main():
     # Load the data from file
     data, data_path = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
     
-    print(data.keys())
+    # Get the raw data file and load the raw data
+    raw_file = data["raw_file"]
+    raw_data = common.load_exact_item(raw_file, save_dir=config["save_dir"])
+    
+    print(f"Items in the data file {data.keys()}")
+    print(f"Items in the raw data file {raw_file}: {raw_data.keys()}")
+    
+    # Plot the distribution of code positions for bleeding/ischaemia codes
+    fig, ax = plt.subplots(1, 2, figsize=figsize)
+        
+    bleeding_group = config["outcomes"]["bleeding"]["non_fatal"]["group"]
+    ischaemia_group = config["outcomes"]["ischaemia"]["non_fatal"]["group"]
+    
+    # Set the quantile level to find a cut-off that includes most codes
+    level = 0.95
+    
+    codes = raw_data["codes"]
+    bleeding_codes = codes[codes["group"].eq(bleeding_group)]["position"]
+    bleeding_codes.hist(ax=ax[0], rwidth=0.9)
+    ax[0].set_title("Bleeding Codes")
+    ax[0].set_xlabel("Code position (1 is primary, > 1 is secondary)")
+    ax[0].set_ylabel("Total Code Count")
+    
+    q = bleeding_codes.quantile(level)
+    ax[0].axvline(q)
+    ax[0].text(q + 0.5, 0.5, f"{100*level:.0f}% quantile", rotation=90, transform=ax[0].get_xaxis_transform())
+    
+    ischaemia_codes = codes[codes["group"].eq(ischaemia_group)]["position"]
+    ischaemia_codes.hist(ax=ax[1], rwidth=0.9)
+    ax[1].set_title("Ischaemia Codes")
+    ax[1].set_xlabel("Code position")
+    ax[1].set_ylabel("Total Code Count")
+
+    q = ischaemia_codes.quantile(level)
+    ax[1].axvline(q)
+    ax[1].text(q + 0.5, 0.5, f"{100*level:.0f}% quantile", rotation=90, transform=ax[1].get_xaxis_transform())
+
+    plt.suptitle("Distribution of Bleeding/Ischaemia ICD-10 Primary/Secondary Codes")
+    plt.tight_layout()
+
+    if args.plot:
+        plt.show()
+    else:
+        plt.savefig(
+            common.make_new_save_item_path(
+                f"{analysis_name}_codes_hist", config["save_dir"], "png"
+            )
+        )
+    
+    exit()    
     
     # Plot the ROC curves for the models
     fig, ax = plt.subplots(1, 2, figsize=figsize)

@@ -439,7 +439,6 @@ def save_item(
         print(f"Saving {str(path)}")
         pickle.dump(item, file)
 
-
 def load_item(
     name: str, interactive: bool = False, save_dir: str = "save_data"
 ) -> (Any, Path):
@@ -486,6 +485,45 @@ def load_item(
     with open(item_path, "rb") as file:
         return pickle.load(file), item_path
 
+
+def load_exact_item(
+    name: str, save_dir: str = "save_data"
+) -> Any:
+    """Load a previously saved item (pickle) from file by exact filename
+
+    This is similar to load_item, but loads the exact filename given by name
+    instead of looking for the most recent file. name must contain the
+    commit, timestamp, and file extension.
+    
+    A RuntimeError is raised if the file does not exist.
+
+    To load an item that is an object from a library (e.g. a pandas DataFrame),
+    the library must be installed (otherwise you will get a ModuleNotFound
+    exception). However, you do not have to import the library before calling this
+    function.
+
+    Args:
+        name: The name of the item to load
+        save_fir: Which folder to load the item from.
+
+    Returns:
+        The data item loaded. 
+
+    """
+
+    # Make the path to the file
+    file_path = Path(save_dir) / Path(name)
+
+    # If the file does not exist, raise an error
+    if not file_path.exists():
+        raise RuntimeError(f"The file {name} does not exist in the directory {save_dir}")
+
+    # Load a generic pickle. Note that if this is a pandas dataframe,
+    # pandas must be installed (otherwise you will get module not found).
+    # The same goes for a pickle storing an object from any other library.
+    with open(file_path, "rb") as file:
+        return pickle.load(file)
+    
 
 def chunks(patient_ids: list[str], n: int) -> list[list[str]]:
     """Divide a list of patient ids into n-sized chunks
