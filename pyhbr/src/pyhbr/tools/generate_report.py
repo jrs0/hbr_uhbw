@@ -126,7 +126,29 @@ def main():
 
     print(summary_table)
    
-    #
+    without_trade_off = summary_table[~summary_table["model_key"].eq("trade_off")]
+   
+    outcome = "bleeding"
+    df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
+    m = df[df["median_auc"].eq(df["median_auc"].max())]
+    variables[f"best_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
+    variables[f"best_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]
+
+    df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
+    m = df[df["median_auc"].eq(df["median_auc"].min())]
+    variables[f"worst_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
+    variables[f"worst_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]
+
+    outcome = "ischaemia"
+    df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
+    m = df[df["median_auc"].eq(df["median_auc"].max())]
+    variables[f"best_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
+    variables[f"best_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]
+
+    df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
+    m = df[df["median_auc"].eq(df["median_auc"].min())]
+    variables[f"worst_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
+    variables[f"worst_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]    
 
     # Convert the summary table to markdown and insert it directly in the document
     variables["summary_table"] = summary_table.drop(columns=["model_key", "outcome_key", "median_auc"]).to_markdown()
