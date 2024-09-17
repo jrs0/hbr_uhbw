@@ -274,15 +274,13 @@ def main():
                 )
             plt.close()  # to save memory
 
-
-
-
     # Only create the model summary table if not plotting a single model
     if args.model is None:
 
-        # Get the table of model summary metrics
-        summary, summary_raw = describe.get_summary_table(models, high_risk_thresholds, config)
-        common.save_item(summary_raw, f"{analysis_name}_summary_raw", config["save_dir"])
+        # Get the table of model summary metrics (note this includes three
+        # columns at the end that contain raw data, for identifying which model
+        # is best).
+        summary = describe.get_summary_table(models, high_risk_thresholds, config)
         common.save_item(summary, f"{analysis_name}_summary", config["save_dir"])
 
         # Get the table of outcome prevalences

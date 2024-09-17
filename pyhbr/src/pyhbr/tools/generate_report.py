@@ -125,10 +125,11 @@ def main():
     )
 
     print(summary_table)
-    exit()
+   
+    #
 
     # Convert the summary table to markdown and insert it directly in the document
-    variables["summary_table"] = summary_table.to_markdown()
+    variables["summary_table"] = summary_table.drop(columns=["model_key", "outcome_key", "median_auc"]).to_markdown()
 
     # Copy the summary table to the folder for reference.
     variables["summary_table_file"] = copy_most_recent_file(
