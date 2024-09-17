@@ -125,31 +125,62 @@ def main():
     # Plot the ROC curves for the models
     fig, ax = plt.subplots(1, 2, figsize=figsize)
     
-    # Calculate survival curves for bleeding
-    survival = data["bleeding_survival"]
-    status = ~survival["right_censor"]
-    survival_in_days = survival["time_to_event"].dt.days
+    # Mask the dataset by age to get different survival plots
+    features_index = data["features_index"]
+    print(features_index)
+    age_over_75 = features_index["age"] > 75
+    
+    # Get bleeding survival data
+    survival = data["bleeding_survival"].merge(features_index, on="spell_id", how="left")
+    
+    # Calculate survival curves for bleeding (over 75)
+    masked = survival[survival["age"] > 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
     time, survival_prob, conf_int = kaplan_meier_estimator(
         status, survival_in_days, conf_type="log-log"
-    )
-    
+    )  
     ax[0].step(time, survival_prob, where="post")
     ax[0].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+    
+    # Now for under 75
+    masked = survival[survival["age"] < 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
+    time, survival_prob, conf_int = kaplan_meier_estimator(
+        status, survival_in_days, conf_type="log-log"
+    )  
+    ax[0].step(time, survival_prob, where="post")
+    ax[0].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")    
+    
     ax[0].set_ylim(0.85, 1.00)
     ax[0].set_ylabel(r"Est. probability of no adverse event")
     ax[0].set_xlabel("Time (days)")
     ax[0].set_title("Bleeding Outcome")
     
-    # Calculate survival curves for ischaemia
-    survival = data["ischaemia_survival"]
-    status = ~survival["right_censor"]
-    survival_in_days = survival["time_to_event"].dt.days
+    # Get ischaemia survival data
+    survival = data["ischaemia_survival"].merge(features_index, on="spell_id", how="left")
+    
+    # Calculate survival curves for ischaemia (over 75)
+    masked = survival[survival["age"] > 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
     time, survival_prob, conf_int = kaplan_meier_estimator(
         status, survival_in_days, conf_type="log-log"
     )
-    
     ax[1].step(time, survival_prob, where="post")
     ax[1].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+    
+    # Now for under 75
+    masked = survival[survival["age"] < 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
+    time, survival_prob, conf_int = kaplan_meier_estimator(
+        status, survival_in_days, conf_type="log-log"
+    )
+    ax[1].step(time, survival_prob, where="post")
+    ax[1].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+    
     ax[1].set_ylim(0.85, 1.00)
     ax[1].set_ylabel(r"Est. probability of no adverse event")
     ax[1].set_xlabel("Time (days)")
