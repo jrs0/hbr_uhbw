@@ -61,14 +61,16 @@ Bleeding and ischaemia endpoints are based on the presence of an ICD-10 diagnosi
 
 ![Distribution of primary/secondary code positions]({{ codes_hist_image }}){{ '{#' }}fig-code-dist}
 
-The distribution of primary/secondary ICD-10 code positions for the bleeding and ischaemia outcome groups is shown in Figure @fig-code-dist, where the primary position is shown on the x-axis. We chose a cut-off for the purposes of defining outcomes so that 95% of instances of codes in the relevant code group are included in the outcomes. This represents a trade-off between the desire to include as many relevant bleeding and ischaemia events as possible, while not introducing noise into the outcome definition.
+The distribution of primary/secondary ICD-10 code positions for non-fatal bleeding and ischaemia outcome groups is shown in @fig-code-dist, where the primary position is shown on the x-axis. We chose a cut-off for the purposes of defining outcomes so that 95% of instances of codes in the relevant code group are included in the outcomes. This represents a trade-off between the desire to include as many relevant bleeding and ischaemia events as possible, while not introducing noise into the outcome definition.
+
+For non-fatal bleeding, the primary code and codes up to secondary {{ bleeding_secondary_cutoff }} are included. For non-fatal ischaemia, up to secondary {{ ischaemia_secondary_cutoff }} is included.
 
 Fatal bleeding and ischaemia outcomes, based on a bleeding or ischaemia primary cause of death ICD-10 code in a Civil Registration Mortality database, are included in the outcome count.
 
-A summary of the total number of each outcome is shown in Table~\ref{tab:outcome-prevalence}.
-
 {{ outcome_prevalences }}
 : Total number of outcomes that occurred within 1 year of the index ACS. The dataset contains {{ num_index_spells }} ACS events between the dates {{ index_start }} and {{ index_end }} {{ '{#' }}tbl-outcome-prevalence}
+
+A summary of the total number of each outcome is shown in Table~\ref{tab:outcome-prevalence}.
 
 ## Models
 

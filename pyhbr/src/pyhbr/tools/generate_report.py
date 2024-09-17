@@ -192,6 +192,10 @@ def main():
     )
     variables["diagnosis_codes_table"] = diagnosis_codes.to_markdown(index=False)
 
+    # General variables 
+    variables["bleeding_secondary_cutoff"] = config["outcomes"]["bleeding"]["non_fatal"]["max_position"] - 1
+    variables["ischaemia_secondary_cutoff"] = config["outcomes"]["ischaemia"]["non_fatal"]["max_position"] - 1
+
     # Copy plots from the descriptive script
     variables["codes_hist_image"] = copy_most_recent_image(f"{analysis_name}_codes_hist")
 

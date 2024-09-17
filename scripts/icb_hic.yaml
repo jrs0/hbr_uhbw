@@ -611,7 +611,7 @@ outcomes:
       # include historical/minor bleeds, but this was 
       # considered better than missing out of bleeding
       # not coded in the primary or first secondary position.
-      max_position: 999
+      max_position: 10
   ischaemia:
     text: "ischaemia"
     title: "Ischaemia"
@@ -628,7 +628,7 @@ outcomes:
       max_position: 2
     non_fatal:
       group: "ami_stroke_ohm"
-      max_position: 1
+      max_position: 5
 
 # Names of code groups
 code_groups:
