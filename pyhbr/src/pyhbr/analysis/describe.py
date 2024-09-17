@@ -125,9 +125,15 @@ def get_summary_table(
     risk_accuracy = []
     low_risk_reclass = []
     high_risk_reclass = []
+    model_key = [] # For identifying the model later
+    outcome_key = [] # For identifying the outcome later
+    median_auc = [] # Numerical AUC for finding the best model
 
     for model, model_data in models.items():
         for outcome in ["bleeding", "ischaemia"]:
+            
+            model_key.append(model)
+            outcome_key.append(outcome)
             
             fit_results = model_data["fit_results"]
             
@@ -196,6 +202,8 @@ def get_summary_table(
                 auc_data.resample_auc + [auc_data.model_under_test_auc]
             ).quantile([0.025, 0.5, 0.975])
             aucs.append(common.median_to_string(auc_spread, unit=""))
+            median_auc.append(auc_spread[0.5])
+            
 
     return DataFrame(
         {
@@ -205,6 +213,9 @@ def get_summary_table(
             "L→H": low_risk_reclass,
             "Estimated Risk Uncertainty": risk_accuracy,
             "ROC AUC": aucs,
+            "model_key": model_key,
+            "outcome_key": outcome_key,
+            "median_auc": median_auc,
         }
     ).set_index("Model", drop=True)
 

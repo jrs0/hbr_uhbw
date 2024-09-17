@@ -124,6 +124,9 @@ def main():
         f"{analysis_name}_summary", save_dir=save_dir
     )
 
+    print(summary_table)
+    exit()
+
     # Convert the summary table to markdown and insert it directly in the document
     variables["summary_table"] = summary_table.to_markdown()
 
@@ -195,6 +198,7 @@ def main():
     # General variables 
     variables["bleeding_secondary_cutoff"] = config["outcomes"]["bleeding"]["non_fatal"]["max_position"] - 1
     variables["ischaemia_secondary_cutoff"] = config["outcomes"]["ischaemia"]["non_fatal"]["max_position"] - 1
+    variables["num_features"] = len(features_df)
 
     # Copy plots from the descriptive script
     variables["codes_hist_image"] = copy_most_recent_image(f"{analysis_name}_codes_hist")
