@@ -69,6 +69,17 @@ def main():
     print(f"Items in the data file {data.keys()}")
     print(f"Items in the raw data file {raw_file}: {raw_data.keys()}")
     
+    # Print a snapshot of the non-fatal results
+    df = data["non_fatal_bleeding"]
+    print("Snapshot of non-fatal bleeding outcomes")
+    print(df)
+    print(f"The maximum secondary seen was {df['position'].max()}")
+    
+    df = data["non_fatal_ischaemia"]
+    print("Snapshot of non-fatal ischaemia outcomes")
+    print(df)
+    print(f"The maximum secondary seen was {df['position'].max()}")
+    
     # Plot the distribution of code positions for bleeding/ischaemia codes
     fig, ax = plt.subplots(1, 2, figsize=figsize)
         
