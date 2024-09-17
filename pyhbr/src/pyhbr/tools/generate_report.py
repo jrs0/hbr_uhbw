@@ -192,6 +192,9 @@ def main():
     )
     variables["diagnosis_codes_table"] = diagnosis_codes.to_markdown(index=False)
 
+    # Copy plots from the descriptive script
+    variables["codes_hist_image"] = copy_most_recent_image(f"{analysis_name}_codes_hist")
+
     # Copy the most recent version of each figure into the
     # build directory
     for name, model in variables["models"].items():

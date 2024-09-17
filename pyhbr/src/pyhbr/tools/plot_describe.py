@@ -111,8 +111,6 @@ def main():
             )
         )
     
-    exit()    
-    
     # Plot the ROC curves for the models
     fig, ax = plt.subplots(1, 2, figsize=figsize)
     

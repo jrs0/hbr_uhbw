@@ -51,14 +51,17 @@ Patients are considered for inclusion based on the primary and secondary diagnos
 * The primary diagnosis of the first episode must contain an ACS ICD-10 code; or
 * There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
 
-
 Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, {{ num_index_spells }} index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
 
 The list of bleeding and ischaemia ICD-10 and OPCS-4 codes are included in supplementary information.
 
 ## Endpoints
 
-Bleeding and ischaemia endpoints are based on the presence of a primary diagnosis code in a subsequent spell occurring up to one year after the index spell. The index spell was excluded because multiple episodes in the index spell often encode the same ACS, which would contribute false-positive outcomes. A disadvantage of this approach is that further ischaemia that occurs soon after the index event is excluded in our analysis.
+Bleeding and ischaemia endpoints are based on the presence of an ICD-10 diagnosis code in a subsequent spell occurring up to one year after the index spell. The index spell was excluded because multiple episodes in the index spell often encode the same ACS, which would contribute false-positive outcomes. A disadvantage of this approach is that further ischaemia that occurs soon after the index event is excluded in our analysis.
+
+![Distribution of primary/secondary code positions]({{ codes_hist_image }}){{ '{#' }}fig-code-dist}
+
+The distribution of primary/secondary ICD-10 code positions for the bleeding and ischaemia outcome groups is shown in Figure @fig-code-dist, where the primary position is shown on the x-axis. We chose a cut-off for the purposes of defining outcomes so that 95% of instances of codes in the relevant code group are included in the outcomes. This represents a trade-off between the desire to include as many relevant bleeding and ischaemia events as possible, while not introducing noise into the outcome definition.
 
 Fatal bleeding and ischaemia outcomes, based on a bleeding or ischaemia primary cause of death ICD-10 code in a Civil Registration Mortality database, are included in the outcome count.
 
