@@ -233,7 +233,7 @@ def arc_hbr_ckd(has_index_egfr: DataFrame) -> Series:
     """
 
     # Replace NaN values for now with 100 (meaning score 0.0)
-    df = has_index_egfr["index_egfr"].fillna(90)
+    df = has_index_egfr["egfr"].fillna(90)
 
     # Using a high upper limit to catch any high eGFR values. In practice,
     # the highest value is 90 (which comes from the string ">90" in the database).
@@ -261,10 +261,10 @@ def arc_hbr_anaemia(has_index_hb_and_gender: DataFrame) -> Series:
 
     # Evaluated in order
     arc_score_conditions = [
-        df["index_hb"] < 11.0,  # Major for any gender
-        df["index_hb"] < 11.9,  # Minor for any gender
-        (df["index_hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
-        df["index_hb"] >= 12.9,  # None for any gender
+        df["hb"] < 11.0,  # Major for any gender
+        df["hb"] < 11.9,  # Minor for any gender
+        (df["hb"] < 12.9) & (df["gender"] == "male"),  # Minor for male
+        df["hb"] >= 12.9,  # None for any gender
     ]
     arc_scores = [1.0, 0.5, 0.5, 0.0]
 
@@ -289,7 +289,7 @@ def arc_hbr_tcp(has_index_platelets: DataFrame) -> Series:
         Series containing the ARC score
     """
     return Series(
-        np.where(has_index_platelets["index_platelets"] < 100, 1.0, 0),
+        np.where(has_index_platelets["platelets"] < 100, 1.0, 0),
         index=has_index_platelets.index,
     )
 
@@ -313,7 +313,7 @@ def arc_hbr_prior_bleeding(has_prior_bleeding: DataFrame) -> Series:
         The ARC HBR bleeding/transfusion criterion (0.0, 0.5, or 1.0)
     """
     return Series(
-        np.where(has_prior_bleeding["prior_bleeding_12"] > 0, 0.5, 0),
+        np.where(has_prior_bleeding["bleeding_adaptt_before"] > 0, 0.5, 0),
         index=has_prior_bleeding.index,
     )
 
@@ -333,7 +333,7 @@ def arc_hbr_cancer(has_prior_cancer: DataFrame) -> Series:
         The ARC HBR cancer criterion (0.0, 1.0)
     """
     return Series(
-        np.where(has_prior_cancer["prior_cancer"] > 0, 1.0, 0),
+        np.where(has_prior_cancer["cancer_before"] > 0, 1.0, 0),
         index=has_prior_cancer.index,
     )
 
@@ -353,8 +353,8 @@ def arc_hbr_cirrhosis_ptl_hyp(has_prior_cirrhosis: DataFrame) -> Series:
     Returns:
         The ARC HBR criterion (0.0, 1.0)
     """
-    cirrhosis = has_prior_cirrhosis["prior_cirrhosis"] > 0
-    portal_hyp = has_prior_cirrhosis["prior_portal_hyp"] > 0
+    cirrhosis = has_prior_cirrhosis["liver_cirrhosis_before"] > 0
+    portal_hyp = has_prior_cirrhosis["portal_hypertension_before"] > 0
 
     return Series(
         np.where(cirrhosis & portal_hyp, 1.0, 0),
@@ -384,8 +384,8 @@ def arc_hbr_ischaemic_stroke_ich(has_prior_ischaemic_stroke: DataFrame) -> Serie
     Returns:
         The ARC HBR criterion (0.0, 1.0)
     """
-    ischaemic_stroke = has_prior_ischaemic_stroke["prior_ischaemic_stroke"] > 0
-    bavm_ich = has_prior_ischaemic_stroke["prior_bavm_ich"] > 0
+    ischaemic_stroke = has_prior_ischaemic_stroke["ischaemic_stroke_before"] > 0
+    bavm_ich = (has_prior_ischaemic_stroke["bavm_before"] + has_prior_ischaemic_stroke["ich_before"]) > 0
 
     score_one = np.where(bavm_ich, 1, 0)
     score_half = np.where(ischaemic_stroke, 0.5, 0)

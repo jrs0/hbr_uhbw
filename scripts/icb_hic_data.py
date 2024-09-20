@@ -23,6 +23,7 @@ importlib.reload(hic)
 importlib.reload(hic_icb)
 importlib.reload(clinical_codes)
 importlib.reload(counting)
+importlib.reload(arc_hbr)
 
 # Read the configuration file
 with open("scripts/icb_hic.yaml") as stream:
@@ -407,6 +408,42 @@ features_measurements = prior_blood_pressure.merge(
 # features are added)
 features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_start"])
 
+# Create the ARC HBR score
+arc_hbr_score = pd.DataFrame(index=features.index)
+arc_hbr_score["arc_hbr_age"] = arc_hbr.arc_hbr_age(features_index)
+arc_hbr_score["arc_hbr_oac"] = arc_hbr.arc_hbr_medicine(
+    index_spells,
+    episodes,
+    secondary_care_prescriptions,
+    "oac",
+    1.0,
+)
+arc_hbr_score["arc_hbr_oac"].sum()
+arc_hbr_score["arc_hbr_nsaid"] = arc_hbr.arc_hbr_medicine(
+    index_spells,
+    episodes,
+    secondary_care_prescriptions,
+    "nsaid",
+    1.0,
+)
+arc_hbr_score["arc_hbr_nsaid"].sum()
+arc_hbr_score["arc_hbr_ckd"] = arc_hbr.arc_hbr_ckd(features_lab)
+arc_hbr_score["arc_hbr_anaemia"] = arc_hbr.arc_hbr_anaemia(
+    features_index.merge(features_lab, how="left", on="spell_id")
+)
+arc_hbr_score["arc_hbr_tcp"] = arc_hbr.arc_hbr_tcp(features_lab)
+arc_hbr_score["arc_hbr_prior_bleeding"] = arc_hbr.arc_hbr_prior_bleeding(features_codes)
+arc_hbr_score["arc_hbr_cirrhosis_portal_hyp"] = arc_hbr.arc_hbr_cirrhosis_ptl_hyp(
+    features_codes
+)
+arc_hbr_score["arc_hbr_stroke_ich"] = arc_hbr.arc_hbr_ischaemic_stroke_ich(features_codes)
+arc_hbr_score["arc_hbr_cancer"] = arc_hbr.arc_hbr_cancer(features_codes)
+arc_hbr_score["total_score"] = arc_hbr_score.sum(axis=1)
+
+#arc_hbr.plot_arc_score_distribution(arc_hbr_score)
+#plt.tight_layout()
+#plt.show()
+
 # Combine all tables (features and outcomes) into a single table
 # for saving.
 data = {
@@ -431,6 +468,8 @@ data = {
     "features_lab": features_lab,
     # Info (for descriptive purposes)
     "info_index_scores": info_index_scores,
+    # ARC HBR score
+    "arc_hbr_score": arc_hbr_score
 }
 
 common.save_item(data, f"{config['analysis_name']}_data")
