@@ -436,7 +436,7 @@ def main():
     features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_start"])
 
     # Create the ARC HBR score
-    arc_hbr_score = pd.DataFrame(index=features.index)
+    arc_hbr_score = pd.DataFrame(index=features_index.index)
     arc_hbr_score["arc_hbr_age"] = arc_hbr.arc_hbr_age(features_index)
     arc_hbr_score["arc_hbr_oac"] = arc_hbr.arc_hbr_medicine(
         index_spells,
