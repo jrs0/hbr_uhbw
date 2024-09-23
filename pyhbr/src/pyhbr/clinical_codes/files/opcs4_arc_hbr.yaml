@@ -1807,6 +1807,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - A01
     - A84
@@ -2637,6 +2638,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - B01
     - B45
@@ -4583,6 +4585,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - C01
     - C91
@@ -5119,6 +5122,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - D01
     - D28
@@ -6807,6 +6811,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - E01
     - E98
@@ -8045,6 +8050,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - F01
     - F67
@@ -9877,6 +9883,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - G01
     - G82
@@ -11454,6 +11461,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - H01
     - H73
@@ -13091,6 +13099,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - J01
     - J77
@@ -13114,6 +13123,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K011
       - K019
@@ -13148,6 +13158,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K021
       - K029
@@ -13182,6 +13193,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K041
       - K049
@@ -13204,6 +13216,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K051
       - K059
@@ -13232,6 +13245,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K061
       - K069
@@ -13257,6 +13271,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K071
       - K079
@@ -13285,6 +13300,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K081
       - K089
@@ -13319,6 +13335,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K091
       - K099
@@ -13350,6 +13367,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K101
       - K109
@@ -13387,6 +13405,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K111
       - K119
@@ -13418,6 +13437,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K121
       - K129
@@ -13449,6 +13469,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K131
       - K139
@@ -13480,6 +13501,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K141
       - K149
@@ -13502,6 +13524,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K151
       - K159
@@ -13536,6 +13559,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K161
       - K169
@@ -13573,6 +13597,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K171
       - K179
@@ -13610,6 +13635,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K181
       - K189
@@ -13644,6 +13670,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K191
       - K199
@@ -13672,6 +13699,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K201
       - K209
@@ -13697,6 +13725,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K221
       - K229
@@ -13731,6 +13760,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K231
       - K239
@@ -13768,6 +13798,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K241
       - K249
@@ -13799,6 +13830,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K251
       - K259
@@ -13830,6 +13862,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K261
       - K269
@@ -13864,6 +13897,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K271
       - K279
@@ -13895,6 +13929,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K281
       - K289
@@ -13932,6 +13967,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K291
       - K299
@@ -13963,6 +13999,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K301
       - K309
@@ -13994,6 +14031,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K311
       - K319
@@ -14022,6 +14060,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K321
       - K329
@@ -14056,6 +14095,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K331
       - K339
@@ -14090,6 +14130,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K341
       - K349
@@ -14127,6 +14168,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K351
       - K359
@@ -14149,6 +14191,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K361
       - K369
@@ -14183,6 +14226,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K371
       - K379
@@ -14217,6 +14261,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K381
       - K389
@@ -14244,6 +14289,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K401
       - K409
@@ -14271,6 +14317,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K411
       - K419
@@ -14298,6 +14345,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K421
       - K429
@@ -14325,6 +14373,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K431
       - K439
@@ -14346,6 +14395,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K441
       - K449
@@ -14379,6 +14429,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K451
       - K459
@@ -14409,6 +14460,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K461
       - K469
@@ -14439,6 +14491,7 @@ categories:
       exclude:
       - pci
       - all_pci_pathak
+      - pci_complex
       index:
       - K471
       - K479
@@ -14467,6 +14520,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K481
       - K489
@@ -14493,6 +14547,7 @@ categories:
       docs: Transluminal balloon angioplasty of coronary artery
       exclude:
       - cabg_bortolussi
+      - pci_complex
       index:
       - K491
       - K499
@@ -14519,6 +14574,7 @@ categories:
       docs: Other therapeutic transluminal operations on coronary artery
       exclude:
       - cabg_bortolussi
+      - pci_complex
       index:
       - K501
       - K509
@@ -14541,6 +14597,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K511
       - K519
@@ -14575,6 +14632,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K521
       - K529
@@ -14597,6 +14655,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K531
       - K539
@@ -14619,6 +14678,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K541
       - K549
@@ -14653,6 +14713,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K551
       - K559
@@ -14681,6 +14742,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K561
       - K569
@@ -14718,6 +14780,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K571
       - K579
@@ -14752,6 +14815,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K581
       - K589
@@ -14789,6 +14853,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K591
       - K599
@@ -14826,6 +14891,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K601
       - K609
@@ -14863,6 +14929,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K611
       - K619
@@ -14897,6 +14964,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K621
       - K629
@@ -14931,6 +14999,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K631
       - K639
@@ -14950,6 +15019,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K641
       - K649
@@ -14978,6 +15048,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K651
       - K659
@@ -14997,6 +15068,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K661
       - K669
@@ -15016,6 +15088,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K671
       - K679
@@ -15038,6 +15111,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K681
       - K689
@@ -15060,6 +15134,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K691
       - K699
@@ -15088,6 +15163,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K711
       - K719
@@ -15116,6 +15192,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K721
       - K729
@@ -15141,6 +15218,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K731
       - K739
@@ -15166,27 +15244,36 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K741
       - K749
       name: K74
     - categories:
       - docs: Percutaneous transluminal balloon angioplasty and insertion of 1-2 drug-eluting stents into coronary artery
+        exclude:
+        - pci_complex
         index: K751
         name: K75.1
       - docs: Percutaneous transluminal balloon angioplasty and insertion of 3 or more drug-eluting stents into coronary artery
         index: K752
         name: K75.2
       - docs: Percutaneous transluminal balloon angioplasty and insertion of 1-2 stents into coronary artery
+        exclude:
+        - pci_complex
         index: K753
         name: K75.3
       - docs: Percutaneous transluminal balloon angioplasty and insertion of 3 or more stents into coronary artery NEC
         index: K754
         name: K75.4
       - docs: Other specified percutaneous transluminal balloon angioplasty and insertion of stent into coronary artery
+        exclude:
+        - pci_complex
         index: K758
         name: K75.8
       - docs: Unspecified percutaneous transluminal balloon angioplasty and insertion of stent into coronary artery
+        exclude:
+        - pci_complex
         index: K759
         name: K75.9
       docs: Percutaneous transluminal balloon angioplasty and insertion of stent into coronary artery
@@ -15211,6 +15298,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K761
       - K769
@@ -15230,6 +15318,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K771
       - K779
@@ -15249,6 +15338,7 @@ categories:
       - pci
       - all_pci_pathak
       - cabg_bortolussi
+      - pci_complex
       index:
       - K781
       - K789
@@ -17544,6 +17634,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - L01
     - L99
@@ -19433,6 +19524,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - M01
     - M86
@@ -20062,6 +20154,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - N01
     - N35
@@ -20742,6 +20835,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - P01
     - P32
@@ -21926,6 +22020,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - Q01
     - Q58
@@ -22625,6 +22720,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - R01
     - R43
@@ -24202,6 +24298,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - S01
     - S70
@@ -26235,6 +26332,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - T01
     - T98
@@ -27311,6 +27409,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - U01
     - U54
@@ -28990,6 +29089,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - V01
     - V70
@@ -31653,6 +31753,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - W01
     - W99
@@ -33790,6 +33891,7 @@ categories:
     - pci
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - X01
     - X98
@@ -36033,6 +36135,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - Y01
     - Y99
@@ -38927,6 +39030,7 @@ categories:
     - packed_red_cells_transfusion
     - all_pci_pathak
     - cabg_bortolussi
+    - pci_complex
     index:
     - Z01
     - Z99
@@ -38938,6 +39042,7 @@ categories:
   name: OPCS-4
 groups:
 - pci
+- pci_complex
 - cabg_bortolussi
 - all_pci_pathak
 - packed_red_cells_transfusion

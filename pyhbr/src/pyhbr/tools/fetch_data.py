@@ -2,7 +2,8 @@
 """
 
 import argparse
-
+from loguru import logger as log
+import sys
 
 def main():
 
@@ -14,13 +15,7 @@ def main():
         required=True,
         help="Specify the config file with settings",
     )
-    parser.add_argument(
-        "-s",
-        "--stage",
-        choices = ["fetch-sus", "fetch-others", "process"],
-        default = "process",
-        help="Stages happen in order (as shown), but script can be started from a later stage. Default is 'process' (using already-fetched data).",
-    )
+
     args = parser.parse_args()
     
     import datetime as dt
@@ -34,6 +29,7 @@ def main():
     from pyhbr.middle import from_icb, from_hic
     from pyhbr.analysis import arc_hbr
     import yaml
+    from pathlib import Path
     
     # Read the configuration file
     with open(args.config_file) as stream:
@@ -43,13 +39,22 @@ def main():
             print(f"Failed to load config file: {exc}")
             exit(1)
         
+    analysis_name = config["analysis_name"]
+    save_dir = config["save_dir"]
+    now = common.current_timestamp()
+    
+    # Set up the logger for standard out and a log file
+    log_file = (Path(save_dir) / Path(analysis_name + "_fetch_data")).with_suffix(".log")
+    log_format = "{time} {level} {message}"
+    log.add(log_file, format=log_format)
+        
+    log.info("Starting data fetch script")
+        
     # Check if the user has started from the SUS fetch
     # step. If so, run the SQL query to fetch the SUS
     # data (this takes a long time), and save the result
     # to a file. 
-    if args.stage == "fetch-sus":
-        
-        print("Fetching SUS data")
+    if "fetch" in config["fetch_stages"]:
         
         # Set a date range for episode fetch. The primary
         # care data start in Oct 2019. Use an end date
@@ -59,9 +64,13 @@ def main():
         start_date = parser.parse(config["start_date"])
         end_date = parser.parse(config["end_date"])
 
+        log.info("Connecting to databases.")
+        abi_engine = common.make_engine(database="abi")
+        msa_engine = common.make_engine(database="modelling_sql_area")
+
         # Get the raw HES data (this takes a long time ~ 20 minutes, up to 2 hours
         # at UHBW).
-        abi_engine = common.make_engine(database="abi")
+        log.info(f"Fetching SUS data between {start_date} and {end_date}.")
         raw_sus_data = from_icb.get_raw_sus_data(abi_engine, start_date, end_date)
 
         # Note that the SUS data is limited to in-area patients only, so that
@@ -69,84 +78,56 @@ def main():
         # the notes on valid commissioner code in icb.py). This restriction
         # can be lifted if the primary care data is not used in the analysis.
 
-        # The full dataset is large, so using a save point
-        # to speed up script development
-        common.save_item(raw_sus_data, "raw_sus_data", save_dir=config["save_dir"])
-
-    # Load the raw SUS data (previously saved)
-    raw_sus_data, raw_sus_data_path = common.load_item("raw_sus_data", save_dir=config["save_dir"])
-
-    # This is the base name of the raw data file containing the SQL
-    # query results (with minimal processing)
-    raw_name = f"{config['analysis_name']}_raw"
-
-    # If the user has requested a SUS data fetch or a fetch of
-    # all the other tables (SWD, etc.), run the corresponding SQL
-    # queries and save the results
-    if args.stage == "fetch-sus" or args.stage == "fetch-others":
-
-        # Fetch the list of episodes from the HIC table -- this will
-        # speed up subsequent queries
-        msa_engine = common.make_engine(database="modelling_sql_area")
+        log.info("Fetching HIC episodes to narrow subsequent queries by patient")
         hic_episodes = common.get_data(msa_engine, hic_icb.episode_id_query)
         hic_patient_ids = hic_episodes.patient_id.unique()
-
+        
         # Reduce the sus data to only the patients in the HIC data
         reduced_sus_data = raw_sus_data[raw_sus_data["patient_id"].isin(hic_patient_ids)]
-
-        # Read the code groups and reduce to a table. The remainder of the code
-        # uses the code groups dataframe, which you can either get from the code
-        # files (as is done here) or create them manually
+ 
+        log.info("Read code groups into tables")
         diagnosis_codes = clinical_codes.load_from_package(config["icd10_codes_file"])
         procedure_codes = clinical_codes.load_from_package(config["opcs4_codes_file"])
         code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
-
-        # HES data + patient demographics
-        episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)
-
-        # Get the index episodes (primary ACS or PCI anywhere in first episode)
-        # Modify the code groups used to define the index event here.
-        index_spells = acs.get_index_spells(
-            episodes,
-            codes,
-            config["acs_index_code_group"],
-            config["pci_index_code_group"],
-            config["stemi_index_code_group"],
-            config["nstemi_index_code_group"],
-        )
-
-        # Get the list of patients to narrow subsequent SQL queries
-        patient_ids = index_spells["patient_id"].unique()
-
-        # Get date of death and cause of death from registry data
+ 
+        log.info("Fetching mortality data")
         date_of_death, cause_of_death = from_icb.get_mortality(
             abi_engine, start_date, end_date, code_groups
         )
-        
-        # score seg query
+
+        log.info("Fetching score segments (for info, not features).")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.score_seg_query, patient_ids,
+            msa_engine, icb.score_seg_query, hic_patient_ids,
         )
         score_seg = pd.concat(dfs).reset_index(drop=True)
 
-        # Primary care prescriptions (very slow)
+        log.info("Fetching SWD prescriptions data (very slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_prescriptions_query, patient_ids, config["gp_opt_outs"]
+            msa_engine, icb.primary_care_prescriptions_query, hic_patient_ids, config["gp_opt_outs"]
         )
         primary_care_prescriptions = pd.concat(dfs).reset_index(drop=True)
 
-        # Primary care measurements (slow)
+        log.info("Fetching SWD measurements data (slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_measurements_query, patient_ids, config["gp_opt_outs"]
+            msa_engine, icb.primary_care_measurements_query, hic_patient_ids, config["gp_opt_outs"]
         )
         primary_care_measurements = pd.concat(dfs).reset_index(drop=True)
 
         # Primary care attributes (slow)
+        log.info("Fetching SWD attributes data (slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_attributes_query, patient_ids, config["gp_opt_outs"]
+            msa_engine, icb.primary_care_attributes_query, hic_patient_ids, config["gp_opt_outs"]
         )
         with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
         primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
+
+        log.info("Fetching HIC laboratory results (very slow)")
+        lab_results = from_icb.get_unlinked_lab_results(msa_engine)
+        
+        log.info("Fetching HIC secondary care prescriptions (fast)")
+        secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(
+            msa_engine, "HIC_Pharmacy"
+        )
 
         # Find the most recent date that was seen in all the datasets. Note
         # that the date in the primary care attributes covers the month
@@ -175,19 +156,79 @@ def main():
         index_start = common_start + dt.timedelta(days=365)
         index_end = common_end - dt.timedelta(days=365)
 
+        raw = {
+            # General date data
+            "start_date": start_date,
+            "end_date": end_date,
+            "common_start": common_start,
+            "common_end": common_end,
+            "index_start": index_start,
+            "index_end": index_end,
+            
+            "code_groups": code_groups,
+            
+            # HES episodes/codes data
+            "raw_sus_data": raw_sus_data,
+            "reduced_sus_data": reduced_sus_data,
+            
+            # SWD data
+            "score_seg": score_seg,
+            "primary_care_prescriptions": primary_care_prescriptions,
+            "primary_care_measurements": primary_care_measurements,
+            "primary_care_attributes": primary_care_attributes,
+            
+            # HIC data
+            "lab_results": lab_results,
+            "secondary_care_prescriptions": secondary_care_prescriptions,   
+        }
+        
+        log.info("Saving raw data")
+        common.save_item(raw, f"{analysis_name}_raw", save_dir=save_dir, prompt_commit=True)
+        
+    else:
+        log.info(f"Skipping SQL data fetch. Loading most recent data from {save_dir} instead.")
+        
+    exit()
+
+
+    # Load the raw SUS data (previously saved)
+    raw_sus_data, raw_sus_data_path = common.load_item("raw_sus_data", save_dir=config["save_dir"])
+
+    # This is the base name of the raw data file containing the SQL
+    # query results (with minimal processing)
+    raw_name = f"{config['analysis_name']}_raw"
+
+    # If the user has requested a SUS data fetch or a fetch of
+    # all the other tables (SWD, etc.), run the corresponding SQL
+    # queries and save the results
+    if "process" in config["fetch_stages"]:
+
+        # HES data + patient demographics
+        episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)
+
+        # Get the index episodes (primary ACS or PCI anywhere in first episode)
+        # Modify the code groups used to define the index event here.
+        index_spells = acs.get_index_spells(
+            episodes,
+            codes,
+            config["acs_index_code_group"],
+            config["pci_index_code_group"],
+            config["stemi_index_code_group"],
+            config["nstemi_index_code_group"],
+        )
+
+        # Get the list of patients to narrow subsequent SQL queries
+        patient_ids = index_spells["patient_id"].unique()
+
+
+        
+        
+
         # Reduce the index spells to only those within the valid window
         index_spells = index_spells[
             (index_spells["spell_start"] < index_end)
             & (index_spells["spell_start"] > index_start)
         ]
-
-        # Fetch the raw lab results data
-        lab_results = from_icb.get_unlinked_lab_results(msa_engine)  # really slow
-
-        # Fetch raw secondary-care prescriptions data
-        secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(
-            msa_engine, "HIC_Pharmacy"
-        )  # fast
 
         # Combine the datasets for saving
         raw = {
@@ -405,7 +446,7 @@ def main():
     )
 
     # Quick check on prevalences
-    100 * bool_outcomes.sum() / len(bool_outcomes)
+    #100 * bool_outcomes.sum() / len(bool_outcomes)
 
     features_codes = acs.get_code_features(index_spells, all_other_codes)
 
