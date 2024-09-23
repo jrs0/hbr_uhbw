@@ -90,6 +90,20 @@ def main():
         procedure_codes = clinical_codes.load_from_package(config["opcs4_codes_file"])
         code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
  
+        log.info("Identifying patients with index episodes to narrow subsequent queries")
+        episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)        
+        index_spells = acs.get_index_spells(
+            episodes,
+            codes,
+            config["acs_index_code_group"],
+            config["pci_index_code_group"],
+            config["stemi_index_code_group"],
+            config["nstemi_index_code_group"],
+        )
+
+        # Get the list of patients to narrow subsequent SQL queries
+        patient_ids = index_spells["patient_id"].unique()
+ 
         log.info("Fetching mortality data")
         date_of_death, cause_of_death = from_icb.get_mortality(
             abi_engine, start_date, end_date, code_groups
@@ -97,26 +111,26 @@ def main():
 
         log.info("Fetching score segments (for info, not features).")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.score_seg_query, hic_patient_ids,
+            msa_engine, icb.score_seg_query, patient_ids,
         )
         score_seg = pd.concat(dfs).reset_index(drop=True)
 
         log.info("Fetching SWD prescriptions data (very slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_prescriptions_query, hic_patient_ids, config["gp_opt_outs"]
+            msa_engine, icb.primary_care_prescriptions_query, patient_ids, config["gp_opt_outs"]
         )
         primary_care_prescriptions = pd.concat(dfs).reset_index(drop=True)
 
         log.info("Fetching SWD measurements data (slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_measurements_query, hic_patient_ids, config["gp_opt_outs"]
+            msa_engine, icb.primary_care_measurements_query, patient_ids, config["gp_opt_outs"]
         )
         primary_care_measurements = pd.concat(dfs).reset_index(drop=True)
 
         # Primary care attributes (slow)
         log.info("Fetching SWD attributes data (slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_attributes_query, hic_patient_ids, config["gp_opt_outs"]
+            msa_engine, icb.primary_care_attributes_query, patient_ids, config["gp_opt_outs"]
         )
         with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
         primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
