@@ -44,7 +44,7 @@ def main():
     now = common.current_timestamp()
     
     # Set up the logger for standard out and a log file
-    log_file = (Path(save_dir) / Path(analysis_name + "_fetch_data")).with_suffix(".log")
+    log_file = (Path(save_dir) / Path(analysis_name + f"_fetch_data_{now}")).with_suffix(".log")
     log_format = "{time} {level} {message}"
     log.add(log_file, format=log_format)
         
