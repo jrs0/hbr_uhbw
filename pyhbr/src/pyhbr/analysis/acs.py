@@ -13,6 +13,7 @@ def get_index_spells(
     pci_group: str | None,
     stemi_group: str,
     nstemi_group: str,
+    complex_pci_group: str | None,
 ) -> DataFrame:
     """Get the index spells for ACS/PCI patients
 
@@ -53,6 +54,8 @@ def get_index_spells(
             are allowed.
         stemi_group: The name of the ICD-10 code group used to identify STEMI MI
         nstemi_group: The name of the ICD-10 code group used to identify NSTEMI MI
+        complex_pci_group: The name of the OPCS-4 code group used to define complex
+            PCI (in any primary/secondary position)
 
     Returns:
         A table of index spells and associated information about the
@@ -123,6 +126,15 @@ def get_index_spells(
         .groupby("episode_id")
         .any()
     )
+    
+    # Check if the PCI is complex
+    if complex_pci_group is not None:
+        index_spells["complex_pci_index"] = (
+            matching_episodes["group"]
+            .str.contains(complex_pci_group)
+            .groupby("episode_id")
+            .any()
+        )    
 
     # Join some useful information about the episode
     index_spells = (

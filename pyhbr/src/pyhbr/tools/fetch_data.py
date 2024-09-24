@@ -48,8 +48,6 @@ def main():
     log_format = "{time} {level} {message}"
     log.add(log_file, format=log_format)
         
-    log.info("Starting data fetch script")
-        
     # Check if the user has started from the SUS fetch
     # step. If so, run the SQL query to fetch the SUS
     # data (this takes a long time), and save the result
@@ -99,6 +97,7 @@ def main():
             config["pci_index_code_group"],
             config["stemi_index_code_group"],
             config["nstemi_index_code_group"],
+            None,
         )
 
         # Get the list of patients to narrow subsequent SQL queries
@@ -201,21 +200,48 @@ def main():
         
     else:
         log.info(f"Skipping SQL data fetch. Loading most recent data from {save_dir} instead.")
-        
-    exit()
-
-
-    # Load the raw SUS data (previously saved)
-    raw_sus_data, raw_sus_data_path = common.load_item("raw_sus_data", save_dir=config["save_dir"])
-
-    # This is the base name of the raw data file containing the SQL
-    # query results (with minimal processing)
-    raw_name = f"{config['analysis_name']}_raw"
+        raw, raw_path = common.load_item(f"{analysis_name}_raw", save_dir=save_dir)    
+    
+    # Read the items in the raw data file into variables
+    start_date = raw["start_date"]
+    end_date = raw["end_date"]
+    common_start = raw["common_start"]
+    common_end = raw["common_end"]
+    index_start = raw["index_start"]
+    index_end = raw["index_end"]
+    code_groups = raw["code_groups"]
+    raw_sus_data = raw["raw_sus_data"]
+    reduced_sus_data = raw["reduced_sus_data"]
+    score_seg = raw["score_seg"]
+    primary_care_attributes = raw["primary_care_attributes"]
+    primary_care_measurements = raw["primary_care_measurements"]
+    primary_care_prescriptions = raw["primary_care_prescriptions"]
+    lab_results = raw["lab_results"]
+    secondary_care_prescriptions = raw["secondary_care_prescriptions"]
 
     # If the user has requested a SUS data fetch or a fetch of
     # all the other tables (SWD, etc.), run the corresponding SQL
     # queries and save the results
     if "process" in config["fetch_stages"]:
+
+        log.info("Read code groups into tables")
+        diagnosis_codes = clinical_codes.load_from_package(config["icd10_codes_file"])
+        procedure_codes = clinical_codes.load_from_package(config["opcs4_codes_file"])
+        code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
+ 
+        log.info("Identifying patients with index episodes to narrow subsequent queries")
+        episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)        
+        index_spells = acs.get_index_spells(
+            episodes,
+            codes,
+            config["acs_index_code_group"],
+            config["pci_index_code_group"],
+            config["stemi_index_code_group"],
+            config["nstemi_index_code_group"],
+            config["complex_pci_index_code_group"],
+        )
+
+        exit()
 
         # HES data + patient demographics
         episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)

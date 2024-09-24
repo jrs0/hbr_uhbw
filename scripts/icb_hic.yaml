@@ -45,6 +45,8 @@ opcs4_codes_file: "opcs4_arc_hbr.yaml"
 acs_index_code_group: "acs_bezin"
 pci_index_code_group: "all_pci_pathak"
 
+complex_pci_index_code_group: "pci_complex"
+
 # Set code groups to identify STEMI/NSTEMI index presentations
 stemi_index_code_group: "mi_stemi_schnier"
 nstemi_index_code_group: "mi_nstemi_schnier"
@@ -60,7 +62,7 @@ attributes_const_threshold: 0.95
 
 # Which stages should run in the fetch_data script
 fetch_stages:
-  - fetch
+  #- fetch
   - process
 
 # Names of features
