@@ -38,6 +38,14 @@ def get_column_rates(data: DataFrame) -> Series:
     ).sort_values()
 
 
+def column_prop(bool_col):
+    """Return a string with the number of non-zero items in the columns
+    and a percentage
+    """
+    count = bool_col.sum()
+    percent = 100*count/len(bool_col)
+    return f"{count} ({percent:.2f}%)"
+
 def proportion_missingness(data: DataFrame) -> Series:
     """Get the proportion of missing values in each column
 

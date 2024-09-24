@@ -62,7 +62,7 @@ attributes_const_threshold: 0.95
 
 # Which stages should run in the fetch_data script
 fetch_stages:
-  #- fetch
+  - fetch
   - process
 
 # Names of features
