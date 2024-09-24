@@ -203,8 +203,8 @@ def main():
         common.save_item(raw, f"{analysis_name}_raw", save_dir=save_dir, prompt_commit=True)
         
     else:
-        log.info(f"Skipping SQL data fetch. Loading most recent data from {save_dir} instead.")
-        raw, raw_path = common.load_item(f"{analysis_name}_raw", save_dir=save_dir)    
+        log.info(f"Skipping SQL data fetch.")
+        
     
     # Stop logging to the SQL query log file
     log.remove(sql_log_id)
@@ -213,6 +213,9 @@ def main():
     log_file = (Path(save_dir) / Path(analysis_name + f"_fetch_data_process_{now}")).with_suffix(".log")
     log_format = "{time} {level} {message}"
     process_log_id = log.add(log_file, format=log_format)    
+    
+    log.info("Loading most recent data from {save_dir}.")
+    raw, raw_path = common.load_item(f"{analysis_name}_raw", save_dir=save_dir)
     
     # Read the items in the raw data file into variables
     start_date = raw["start_date"]
