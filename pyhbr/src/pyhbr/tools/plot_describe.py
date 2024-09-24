@@ -1,4 +1,5 @@
 import argparse
+from loguru import logger as log
 
 def main():
 
@@ -34,13 +35,6 @@ def main():
     import seaborn as sns
     import matplotlib.transforms as transforms
 
-    import importlib
-
-    importlib.reload(stability)
-    importlib.reload(common)
-    importlib.reload(roc)
-    importlib.reload(describe)
-
     # Read the configuration file
     with open(args.config_file) as stream:
         try:
@@ -53,18 +47,24 @@ def main():
     # because each plot is two graphs side-by-side
     figsize = (11, 5)
 
-    # This is used to load a file, and is also used
-    # as the prefix for all saved data files.
     analysis_name = config["analysis_name"]
+    save_dir = config["save_dir"]
+    now = common.current_timestamp()
     
-    print(f"Analysis name: {analysis_name}")
+    # Set up the log file output for plot/describe script
+    log_file = (Path(save_dir) / Path(analysis_name + f"_plot_describe_{now}")).with_suffix(".log")
+    log_format = "{time} {level} {message}"
+    log_id = log.add(log_file, format=log_format)
     
-    # Load the data from file
-    data, data_path = common.load_item(f"{analysis_name}_data", save_dir=config["save_dir"])
+    log.info(f"Starting plot/describe script")
     
-    # Get the raw data file and load the raw data
+    item_name = f"{analysis_name}_data"
+    log.info(f"Loading most recent data file '{item_name}'")
+    data, data_path = common.load_item(item_name, save_dir=save_dir)
+    
     raw_file = data["raw_file"]
-    raw_data = common.load_exact_item(raw_file, save_dir=config["save_dir"])
+    log.info(f"Loading the underlying raw data file '{raw_file}'")
+    raw_data = common.load_exact_item(raw_file, save_dir=save_dir)
     
     print(f"Items in the data file {data.keys()}")
     print(f"Items in the raw data file {raw_file}: {raw_data.keys()}")

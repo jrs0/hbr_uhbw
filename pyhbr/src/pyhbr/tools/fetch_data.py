@@ -3,7 +3,6 @@
 
 import argparse
 from loguru import logger as log
-import sys
 
 def main():
 
@@ -209,7 +208,7 @@ def main():
     # Stop logging to the SQL query log file
     log.remove(sql_log_id)
     
-    # Set up the log file output for the SQL queries
+    # Set up the log file output for processing
     log_file = (Path(save_dir) / Path(analysis_name + f"_fetch_data_process_{now}")).with_suffix(".log")
     log_format = "{time} {level} {message}"
     process_log_id = log.add(log_file, format=log_format)    
@@ -265,7 +264,7 @@ def main():
             & (index_spells["spell_start"] > index_start)
         ]
         log.info(f"Total number of index events is {len(index_spells)}")
-            
+        
         # Record some basic information in the log file
         log.info(f"The number of ACS index events is {describe.column_prop(index_spells['acs_index'])}")
         log.info(f"The number of PCI index events is {describe.column_prop(index_spells['pci_index'])}")
@@ -498,6 +497,12 @@ def main():
     # for saving.
     data = {
         "raw_file": raw_path.name,
+        
+        # Codes data
+        "code_groups": code_groups,
+        "codes": codes,
+        "episodes": episodes,
+        
         # Outcomes
         "outcomes": bool_outcomes,
         "non_fatal_bleeding": non_fatal_bleeding,
@@ -506,18 +511,23 @@ def main():
         "fatal_ischaemia": fatal_ischaemia,
         "bleeding_survival": bleeding_survival,
         "ischaemia_survival": ischaemia_survival,
+        
         # HES data
         "features_index": features_index,
         "features_codes": features_codes,
+        
         # SWD data
         "features_attributes": features_attributes,
         "features_prescriptions": features_prescriptions,
         "features_measurements": features_measurements,
+        
         # HIC (UHBW) data
         "features_secondary_prescriptions": features_secondary_prescriptions,
         "features_lab": features_lab,
+        
         # Info (for descriptive purposes)
         "info_index_scores": info_index_scores,
+        
         # ARC HBR score
         "arc_hbr_score": arc_hbr_score
     }
