@@ -246,7 +246,7 @@ def main():
         procedure_codes = clinical_codes.load_from_package(config["opcs4_codes_file"])
         code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
  
-        log.info("Identifying patients with index episodes to narrow subsequent queries")
+        log.info("Recreating episodes, codes and index spells tables")
         episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)        
         index_spells = acs.get_index_spells(
             episodes,
@@ -257,9 +257,6 @@ def main():
             config["nstemi_index_code_group"],
             config["complex_pci_index_code_group"],
         )
-        
-        # Get the list of patients to narrow subsequent SQL queries
-        #patient_ids = index_spells["patient_id"].unique()
         
         # Reduce the index spells to only those within the valid window
         log.info(f"Reducing index events to those within {index_start} and {index_end}")
