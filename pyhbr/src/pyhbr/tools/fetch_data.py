@@ -213,7 +213,7 @@ def main():
     log_format = "{time} {level} {message}"
     process_log_id = log.add(log_file, format=log_format)    
     
-    log.info("Loading most recent data from {save_dir}.")
+    log.info(f"Loading most recent data from {save_dir}.")
     raw, raw_path = common.load_item(f"{analysis_name}_raw", save_dir=save_dir)
     
     # Read the items in the raw data file into variables

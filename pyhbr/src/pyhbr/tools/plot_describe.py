@@ -89,7 +89,7 @@ def main():
     # Set the quantile level to find a cut-off that includes most codes
     level = 0.95
     
-    codes = raw_data["codes"]
+    codes = data["codes"]
     bleeding_codes = codes[codes["group"].eq(bleeding_group)]["position"]
     bleeding_codes.hist(ax=ax[0], rwidth=0.9)
     ax[0].set_title("Bleeding Codes")
