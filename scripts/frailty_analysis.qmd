@@ -1,37 +1,65 @@
 ---
 title: "Ischaemia outcomes based on age and frailty"
 jupyter: python3
+bibliography: ../risk_management_file/ref.bib
 ---
 
+Elderly patients with ACS may not receive guideline-recommended therapy [@kotanidis2024invasive]. This report contains Cox proportional hazards models for elderly patients (> 70 years old) MI/cardiac death, depending on the type of ACS managemenent:
+
+* *Invasive* meaning PCI/CABG, or
+* *Conservative*, meaning only DAPT (no PCI/CABG)
+
 ```{python}
+#| echo: false
+
 from sksurv.nonparametric import kaplan_meier_estimator
 import yaml
 from pyhbr import common
 import matplotlib.pyplot as plt
 
-# Change up one level to access default location of `save_data/` directory
-import os
-os.chdir("../")
-```
-
-
-```{python}
 # Read the configuration file
-with open("scripts/frailty.yaml") as stream:
+with open("icb_hic.yaml") as stream:
     try:
         config = yaml.safe_load(stream)
     except yaml.YAMLError as exc:
         print(f"Failed to load config file: {exc}")
         exit(1)
+```
+
+```{python}
+#| echo: false
 
 # This is used to load a file, and is also used
 # as the prefix for all saved data files.
 analysis_name = config["analysis_name"]
+save_dir = config["save_dir"]
 
 print(f"Analysis name: {analysis_name}")
 
 # Load the data from file
-data, data_path = common.load_item(f"{analysis_name}_data", save_dir="save_data")
+data, data_path = common.load_item(f"{analysis_name}_data", save_dir=save_dir)
+
+# Load the raw data file
+raw_file = data["raw_file"]
+raw_data = common.load_exact_item(raw_file, save_dir=save_dir)
+```
+
+```{python}
+# Get counts
+num_index = len(data["features_index"])
+index_start = raw_data["index_start"].strftime("%Y-%m-%d")
+index_end = raw_data["index_end"].strftime("%Y-%m-%d")
+
+mask = features_index["age"] >= 70
+ischaemia_survival = data["ischaemia_survival"][mask]
+```
+
+The total number of index ACS events is `{python} num_index` between the dates `{python} index_start` and `{python} index_end`. Of these, 
+
+```{python}
+
+
+
 
 # Calculate survival curves for bleeding
 survival = data["ischaemia_survival"]

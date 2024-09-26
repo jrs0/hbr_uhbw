@@ -527,6 +527,7 @@ def main():
         
         # Info (for descriptive purposes)
         "info_index_scores": info_index_scores,
+        "info_management": info_management,
         
         # ARC HBR score
         "arc_hbr_score": arc_hbr_score
