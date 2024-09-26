@@ -2,20 +2,33 @@
 title: "Ischaemia outcomes based on age and frailty"
 jupyter: python3
 bibliography: ../risk_management_file/ref.bib
+format:
+  html:
+    css: styles.css
+    html-math-method: katex
+  pdf:
+    documentclass: article
+    #margin-left: 20mm
+    #margin-right: 20mm
+  docx: {}
 ---
 
-Elderly patients with ACS may not receive guideline-recommended therapy [@kotanidis2024invasive]. This report contains Cox proportional hazards models for elderly patients (> 70 years old) MI/cardiac death, depending on the type of ACS managemenent:
+Elderly patients with ACS may not receive guideline-recommended therapy [@kotanidis2024invasive]. This report contains survival models for elderly patients (> 70 years old) MI/cardiac death, depending on the type of ACS managemenent:
 
-* *Invasive* meaning PCI/CABG, or
-* *Conservative*, meaning only DAPT (no PCI/CABG)
+* Invasive, meaning PCI/CABG, or
+* Conservative, meaning only DAPT (no PCI/CABG)
 
 ```{python}
 #| echo: false
+#| output: false
 
 from sksurv.nonparametric import kaplan_meier_estimator
+from sksurv.linear_model import CoxPHSurvivalAnalysis
 import yaml
 from pyhbr import common
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 # Read the configuration file
 with open("icb_hic.yaml") as stream:
@@ -28,6 +41,7 @@ with open("icb_hic.yaml") as stream:
 
 ```{python}
 #| echo: false
+#| output: false
 
 # This is used to load a file, and is also used
 # as the prefix for all saved data files.
@@ -45,32 +59,34 @@ raw_data = common.load_exact_item(raw_file, save_dir=save_dir)
 ```
 
 ```{python}
+#| echo: false
+#| output: false
+
 # Get counts
 num_index = len(data["features_index"])
 index_start = raw_data["index_start"].strftime("%Y-%m-%d")
 index_end = raw_data["index_end"].strftime("%Y-%m-%d")
 
-mask = features_index["age"] >= 70
-ischaemia_survival = data["ischaemia_survival"][mask]
+mask = data["features_index"]["age"] >= 70
+survival = data["ischaemia_survival"][mask]
+features_index = data["features_index"][mask]
+info_management = data["info_management"][mask]
+
+num_over_70 = len(survival)
+
+num_conservative = int((info_management == "Conservative").sum())
+num_invasive = num_over_70 - num_conservative
 ```
 
-The total number of index ACS events is `{python} num_index` between the dates `{python} index_start` and `{python} index_end`. Of these, 
+The total number of index ACS events is `{python} num_index` between the dates `{python} index_start` and `{python} index_end`. Of these, `{python} num_over_70` are patients over 70. Of these, `{python} num_invasive` are managed invasively (PCI/CABG), and `{python} num_conservative` are managed conservatively.
+
+The plot below shows the survival curve for the over-70 group (ignoring management type).
 
 ```{python}
+#| echo: false
+#| warning: false
 
-
-
-
-# Calculate survival curves for bleeding
-survival = data["ischaemia_survival"]
-status = ~survival["right_censor"]
-survival_in_days = survival["time_to_event"].dt.days
-time, survival_prob, conf_int = kaplan_meier_estimator(
-    status, survival_in_days, conf_type="log-log"
-)
-
-# Get the input features
-features_index = data["features_index"]
+# Calculate survival curves for outcomes
 
 # Set the aspect ratio for the figures to roughly 2:1,
 # because each plot is two graphs side-by-side
@@ -79,13 +95,153 @@ figsize = (11, 5)
 # Plot the ROC curves for the models
 fig, ax = plt.subplots()
 
+def masked_survival(survival, mask):
+    masked_survival = survival[mask]
+    status = ~masked_survival["right_censor"]
+    survival_in_days = masked_survival["time_to_event"].dt.days
+    return kaplan_meier_estimator(
+        status, survival_in_days, conf_type="log-log"
+    )
+
+# Non-fatal MACE outcomes (remove fatal outcomes)
+remove = survival["fatal"] & ~survival["right_censor"]
+time, survival_prob, conf_int = masked_survival(survival,~remove)
+
 ax.step(time, survival_prob, where="post")
-ax.fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
-ax.set_ylim(0.85, 1.00)
+ax.fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="MACE (non-fatal)")
+
+# Cardiac death (remove non-fatal outcomes)
+remove = ~survival["fatal"] & ~survival["right_censor"]
+time, survival_prob, conf_int = masked_survival(survival,~remove)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CV death")
+
+ax.set_ylim(0.80, 1.00)
 ax.set_ylabel(r"Est. probability of no adverse event")
 ax.set_xlabel("Time (days)")
 ax.set_title("Ischaemia Kaplan-Meier Curve for MACE")
-
+plt.legend()
 plt.show()
 ```
 
+The plot below shows the difference in survival curves between the invasive and conservative management groups (still for age > 70), for non-fatal MACE outcomes:
+
+```{python}
+#| echo: false
+#| warning: false
+
+# Set the aspect ratio for the figures to roughly 2:1,
+# because each plot is two graphs side-by-side
+figsize = (11, 5)
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots()
+
+# Fatal outcomes (to remove)
+fatal = survival["fatal"] & ~survival["right_censor"]
+
+# Restrict to invasive group
+invasive = info_management["group"] != "Conservative"
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & invasive
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Invasive"
+)
+
+# Restrict to conservative
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & ~invasive
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Conservative"
+)
+
+ax.set_ylim(0.70, 1.00)
+ax.set_ylabel(r"Est. probability of no adverse event")
+ax.set_xlabel("Time (days)")
+ax.set_title("Non-fatal MACE outcome probability by management")
+plt.legend()
+plt.show()
+```
+
+The graph below shows the same plot (by management type) for fatal outcomes:
+
+```{python}
+#| echo: false
+#| warning: false
+
+# Set the aspect ratio for the figures to roughly 2:1,
+# because each plot is two graphs side-by-side
+figsize = (11, 5)
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots()
+
+# Non-fatal outcomes (to remove)
+non_fatal = ~survival["fatal"] & ~survival["right_censor"]
+
+# Restrict to invasive group
+invasive = info_management["group"] != "Conservative"
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~non_fatal & invasive
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Invasive"
+)
+
+# Restrict to conservative
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~non_fatal & ~invasive
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Conservative"
+)
+
+ax.set_ylim(0.70, 1.00)
+ax.set_ylabel(r"Est. probability of no adverse event")
+ax.set_xlabel("Time (days)")
+ax.set_title("CV mortality outcome probability by management")
+plt.legend()
+plt.show()
+```
+
+
+```{python}
+#| echo: false
+#| output: false
+
+# Cox proportional hazards model for outcomes in 
+# elderly group based on features
+#X = features_index[["age", "gender"]].merge(info_management, left_index=True, right_index=True, how="left").rename(columns={"age": "Age", "gender": "Gender", "group": "Management"})
+#X["Management"] = X["Management"].map({"PCI": "Invasive", "CABG": "Invasive", "Conservative": "Conservative"})
+
+# Non-fatal MACE outcomes (remove fatal outcomes)
+remove = survival["fatal"] & ~survival["right_censor"]
+masked_survival = survival[~remove]
+status = ~masked_survival["right_censor"]
+survival_in_days = masked_survival["time_to_event"].dt.days
+y = pd.concat([status, survival_in_days], axis=1).to_records(index=False)
+
+# Make features
+X = pd.DataFrame()
+X["Invasive"] = info_management[~remove]["group"] != "Conservative"
+
+estimator = CoxPHSurvivalAnalysis()
+estimator.fit(X, y)
+
+pd.Series(np.exp(estimator.coef_), index=X.columns)
+```
