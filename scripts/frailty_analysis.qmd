@@ -75,10 +75,15 @@ info_management = data["info_management"][mask]
 num_over_70 = len(survival)
 
 num_conservative = int((info_management == "Conservative").sum())
-num_invasive = num_over_70 - num_conservative
+num_cabg = int((info_management == "CABG").sum())
+num_pci = int((info_management == "PCI").sum())
 ```
 
-The total number of index ACS events is `{python} num_index` between the dates `{python} index_start` and `{python} index_end`. Of these, `{python} num_over_70` are patients over 70. Of these, `{python} num_invasive` are managed invasively (PCI/CABG), and `{python} num_conservative` are managed conservatively.
+Index events are identified by looking at the first episode of the hospital admission. Both ACS events (primary ICD-10 diagnosis code in an ACS group) and PCI admissions (an OPCS-4 procedure code of PCI anywhere in the index episode) are included.
+
+The total number of index ACS events is `{python} num_index` between the dates `{python} index_start` and `{python} index_end`. Of these, `{python} num_over_70` are patients over 70. Of these, `{python} num_pci` are managed invasively with PCI, `{python} num_cabg` are managed invasively using CABG, and `{python} num_conservative` are managed conservatively (DAPT-medication only).
+
+The type of management is identified by looking at whether any PCI or CABG procedures were performed inthe 7 days following the start of the index admission. If no PCI or CABG is present, the admission is recorded as conservatively managed. If both PCI and CABG are present, the management type is recorded as CABG (CABG takes priority over PCI).
 
 The plot below shows the survival curve for the over-70 group (ignoring management type).
 
@@ -141,22 +146,35 @@ fig, ax = plt.subplots()
 # Fatal outcomes (to remove)
 fatal = survival["fatal"] & ~survival["right_censor"]
 
-# Restrict to invasive group
-invasive = info_management["group"] != "Conservative"
+# Restrict to PCI
+pci = info_management["group"] == "PCI"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~fatal & invasive
+    ~fatal & pci
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Invasive"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI"
 )
 
-# Restrict to conservative
+# Restrict to CABG
+cabg = info_management["group"] == "CABG"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~fatal & ~invasive
+    ~fatal & cabg
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CABG"
+)
+
+# Restrict to Conservative
+conservative = info_management["group"] == "Conservative"
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & conservative
 )
 
 ax.step(time, survival_prob, where="post")
@@ -164,7 +182,7 @@ ax.fill_between(
     time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Conservative"
 )
 
-ax.set_ylim(0.70, 1.00)
+ax.set_ylim(0.20, 1.00)
 ax.set_ylabel(r"Est. probability of no adverse event")
 ax.set_xlabel("Time (days)")
 ax.set_title("Non-fatal MACE outcome probability by management")
@@ -188,22 +206,35 @@ fig, ax = plt.subplots()
 # Non-fatal outcomes (to remove)
 non_fatal = ~survival["fatal"] & ~survival["right_censor"]
 
-# Restrict to invasive group
-invasive = info_management["group"] != "Conservative"
+# Restrict to PCI
+pci = info_management["group"] == "PCI"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~non_fatal & invasive
+    ~non_fatal & pci
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Invasive"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI"
 )
 
-# Restrict to conservative
+# Restrict to CABG
+cabg = info_management["group"] == "CABG"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~non_fatal & ~invasive
+    ~non_fatal & cabg
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CABG"
+)
+
+# Restrict to Conservative
+conservative = info_management["group"] == "Conservative"
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~non_fatal & conservative
 )
 
 ax.step(time, survival_prob, where="post")
