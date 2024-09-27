@@ -11,6 +11,9 @@ from pyhbr.analysis import stability
 from pyhbr.analysis import calibration
 from pyhbr import common
 
+from sksurv.nonparametric import kaplan_meier_estimator
+import matplotlib.pyplot as plt
+
 
 def proportion_nonzero(column: Series) -> float:
     """Get the proportion of non-zero values in a column"""
@@ -300,3 +303,174 @@ def pvalue_chi2_high_risk_vs_outcome(
     # is related to the outcome (null hypothesis is that there
     # is no relation).
     return scipy.stats.chi2_contingency(table.to_numpy()).pvalue
+
+def plot_clinical_code_distribution(ax, data, config):
+    """Plot histograms of the distribution of bleeding/ischaemia codes
+
+    Args:
+        ax: A list of two axes objects
+        data: A loaded data file
+        config: The analysis config (from yaml)
+    """
+
+    bleeding_group = config["outcomes"]["bleeding"]["non_fatal"]["group"]
+    ischaemia_group = config["outcomes"]["ischaemia"]["non_fatal"]["group"]
+
+    # Set the quantile level to find a cut-off that includes most codes
+    level = 0.95
+
+    codes = data["codes"]
+    bleeding_codes = codes[codes["group"].eq(bleeding_group)]["position"]
+    bleeding_codes.hist(ax=ax[0], rwidth=0.9)
+    ax[0].set_title("Bleeding Codes")
+    ax[0].set_xlabel("Code position (1 is primary, > 1 is secondary)")
+    ax[0].set_ylabel("Total Code Count")
+
+    q = bleeding_codes.quantile(level)
+    ax[0].axvline(q)
+    ax[0].text(
+        q + 0.5,
+        0.5,
+        f"{100*level:.0f}% quantile",
+        rotation=90,
+        transform=ax[0].get_xaxis_transform(),
+    )
+
+    ischaemia_codes = codes[codes["group"].eq(ischaemia_group)]["position"]
+    ischaemia_codes.hist(ax=ax[1], rwidth=0.9)
+    ax[1].set_title("Ischaemia Codes")
+    ax[1].set_xlabel("Code position")
+    ax[1].set_ylabel("Total Code Count")
+
+    q = ischaemia_codes.quantile(level)
+    ax[1].axvline(q)
+    ax[1].text(
+        q + 0.5,
+        0.5,
+        f"{100*level:.0f}% quantile",
+        rotation=90,
+        transform=ax[1].get_xaxis_transform(),
+    )
+
+    plt.suptitle("Distribution of Bleeding/Ischaemia ICD-10 Primary/Secondary Codes")
+    plt.tight_layout()
+    
+def plot_survival_curves(ax, data, config):
+    """Plot survival curves for bleeding/ischaemia broken down by age
+
+    Args:
+        ax: A list of two axes objects
+        data: A loaded data file
+        config: The analysis config (from yaml)
+    """    
+    
+    # Mask the dataset by age to get different survival plots
+    features_index = data["features_index"]
+    print(features_index)
+    age_over_75 = features_index["age"] > 75
+
+    # Get bleeding survival data
+    survival = data["bleeding_survival"].merge(
+        features_index, on="spell_id", how="left"
+    )
+
+    # Calculate survival curves for bleeding (over 75)
+    masked = survival[survival["age"] >= 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
+    time, survival_prob, conf_int = kaplan_meier_estimator(
+        status, survival_in_days, conf_type="log-log"
+    )
+    ax[0].step(time, survival_prob, where="post", label="Age >= 75")
+    ax[0].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+
+    # Now for under 75
+    masked = survival[survival["age"] < 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
+    time, survival_prob, conf_int = kaplan_meier_estimator(
+        status, survival_in_days, conf_type="log-log"
+    )
+    ax[0].step(time, survival_prob, where="post", label="Age < 75")
+    ax[0].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+
+    ax[0].set_ylim(0.75, 1.00)
+    ax[0].set_ylabel(r"Est. probability of no adverse event")
+    ax[0].set_xlabel("Time (days)")
+    ax[0].set_title("Bleeding Outcome")
+    ax[0].legend()
+
+    # Get ischaemia survival data
+    survival = data["ischaemia_survival"].merge(
+        features_index, on="spell_id", how="left"
+    )
+
+    # Calculate survival curves for ischaemia (over 75)
+    masked = survival[survival["age"] >= 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
+    time, survival_prob, conf_int = kaplan_meier_estimator(
+        status, survival_in_days, conf_type="log-log"
+    )
+    ax[1].step(time, survival_prob, where="post", label="Age >= 75")
+    ax[1].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+
+    # Now for under 75
+    masked = survival[survival["age"] < 75]
+    status = ~masked["right_censor"]
+    survival_in_days = masked["time_to_event"].dt.days
+    time, survival_prob, conf_int = kaplan_meier_estimator(
+        status, survival_in_days, conf_type="log-log"
+    )
+    ax[1].step(time, survival_prob, where="post", label="Age < 75")
+    ax[1].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
+
+    ax[1].set_ylim(0.75, 1.00)
+    ax[1].set_ylabel(r"Est. probability of no adverse event")
+    ax[1].set_xlabel("Time (days)")
+    ax[1].set_title("Ischaemia Outcome")
+    ax[1].legend()
+
+    plt.tight_layout()
+
+def plot_arc_hbr_survival(ax, data, config):
+    """Plot survival curves for bleeding by ARC HBR score
+
+    Args:
+        ax: One axis object
+        data: A loaded data file
+        config: The analysis config (from yaml)
+    """        
+    
+    # Get bleeding survival data
+    survival = data["bleeding_survival"]
+    
+    def masked_survival(survival, mask):
+        masked_survival = survival[mask]
+        status = ~masked_survival["right_censor"]
+        survival_in_days = masked_survival["time_to_event"].dt.days
+        return kaplan_meier_estimator(status, survival_in_days, conf_type="log-log")
+
+    def add_arc_survival(ax, arc_mask, label):
+        time, survival_prob, conf_int = masked_survival(survival, arc_mask)
+
+        ax.step(time, survival_prob, where="post")
+        ax.fill_between(
+            time, conf_int[0], conf_int[1], alpha=0.25, step="post", label=label
+        )
+
+    # Plot survival curves by ARC score
+    arc_mask = data["arc_hbr_score"]["total_score"] == 0
+    add_arc_survival(ax, arc_mask, "Score = 0.0")
+    arc_mask = data["arc_hbr_score"]["total_score"] == 1
+    add_arc_survival(ax, arc_mask, "Score = 1.0")
+    arc_mask = data["arc_hbr_score"]["total_score"] == 2
+    add_arc_survival(ax, arc_mask, "Score = 2.0")
+    arc_mask = data["arc_hbr_score"]["total_score"] >= 3
+    add_arc_survival(ax, arc_mask, "Score >= 3.0")
+
+    ax.set_ylim(0.90, 1.00)
+    ax.set_ylabel(r"Est. probability of no adverse event")
+    ax.set_xlabel("Time (days)")
+    ax.set_title("Bleeding outcome survival curves by ARC HBR score")
+    plt.legend()

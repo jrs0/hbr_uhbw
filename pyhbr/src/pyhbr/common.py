@@ -14,6 +14,7 @@ import pickle
 from pandas import Series
 import numpy as np
 import scipy
+import yaml
 
 from sqlalchemy import create_engine, Engine, MetaData, Table, Select, Column
 from sqlalchemy.exc import NoSuchTableError
@@ -615,3 +616,17 @@ def query_yes_no(question, default="yes"):
             return valid[choice]
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' " "(or 'y' or 'n').\n")
+
+def read_config_file(yaml_path: str):
+    """Read the configuration file from
+
+    Args:
+        yaml_path: The path to the experiment config file
+    """
+    # Read the configuration file
+    with open(yaml_path) as stream:
+        try:
+            return yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(f"Failed to load config file: {exc}")
+            exit(1)

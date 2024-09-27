@@ -1,5 +1,23 @@
 import argparse
 from loguru import logger as log
+import matplotlib.pyplot as plt
+from pyhbr import common
+
+
+def plot_or_save(plot: bool, name: str, save_dir: str):
+    """Plot the graph interactively or save the figure
+
+    Args:
+        plot: If true, plot interactively and don't save. Otherwise, save
+        name: The filename (without the .png) to save the figure has
+        save_dir: The directory in which to save the figure
+    """
+    if plot:
+        log.info(f"Plotting {name}, not saving")
+        plt.show()
+    else:
+        log.info(f"Saving figure {name} in {save_dir}")
+        plt.savefig(common.make_new_save_item_path(name, save_dir, "png"))
 
 
 def main():
@@ -24,7 +42,6 @@ def main():
     import pandas as pd
     import matplotlib.pyplot as plt
     import scipy
-    import yaml
     import pickle
 
     from pyhbr import common
@@ -36,21 +53,16 @@ def main():
     import seaborn as sns
     import matplotlib.transforms as transforms
 
-    # Read the configuration file
-    with open(args.config_file) as stream:
-        try:
-            config = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(f"Failed to load config file: {exc}")
-            exit(1)
 
-    # Set the aspect ratio for the figures to roughly 2:1,
-    # because each plot is two graphs side-by-side
-    figsize = (11, 5)
-
+    # Load the config file
+    config = common.read_config_file(args.config_file)
     analysis_name = config["analysis_name"]
     save_dir = config["save_dir"]
     now = common.current_timestamp()
+    
+    # Set the aspect ratio for the figures to roughly 2:1,
+    # because each plot is two graphs side-by-side
+    figsize = (11, 5)
 
     # Set up the log file output for plot/describe script
     log_file = (
@@ -69,198 +81,29 @@ def main():
     log.info(f"Loading the underlying raw data file '{raw_file}'")
     raw_data = common.load_exact_item(raw_file, save_dir=save_dir)
 
-    print(f"Items in the data file {data.keys()}")
-    print(f"Items in the raw data file {raw_file}: {raw_data.keys()}")
+    log.info(f"Items in the data file {data.keys()}")
+    log.info(f"Items in the raw data file {raw_file}: {raw_data.keys()}")
 
-    # Print a snapshot of the non-fatal results
     df = data["non_fatal_bleeding"]
-    print("Snapshot of non-fatal bleeding outcomes")
-    print(df)
-    print(f"The maximum secondary seen was {df['position'].max()}")
+    log.info(f"The maximum ischaemia secondary seen was {df['position'].max()}")
 
     df = data["non_fatal_ischaemia"]
-    print("Snapshot of non-fatal ischaemia outcomes")
-    print(df)
-    print(f"The maximum secondary seen was {df['position'].max()}")
+    log.info(f"The maximum ischaemia secondary seen was {df['position'].max()}")
 
     # Plot the distribution of code positions for bleeding/ischaemia codes
     fig, ax = plt.subplots(1, 2, figsize=figsize)
+    describe.plot_clinical_code_distribution(ax, data, config)
+    plot_or_save(args.plot, f"{analysis_name}_codes_hist", save_dir)
 
-    bleeding_group = config["outcomes"]["bleeding"]["non_fatal"]["group"]
-    ischaemia_group = config["outcomes"]["ischaemia"]["non_fatal"]["group"]
-
-    # Set the quantile level to find a cut-off that includes most codes
-    level = 0.95
-
-    codes = data["codes"]
-    bleeding_codes = codes[codes["group"].eq(bleeding_group)]["position"]
-    bleeding_codes.hist(ax=ax[0], rwidth=0.9)
-    ax[0].set_title("Bleeding Codes")
-    ax[0].set_xlabel("Code position (1 is primary, > 1 is secondary)")
-    ax[0].set_ylabel("Total Code Count")
-
-    q = bleeding_codes.quantile(level)
-    ax[0].axvline(q)
-    ax[0].text(
-        q + 0.5,
-        0.5,
-        f"{100*level:.0f}% quantile",
-        rotation=90,
-        transform=ax[0].get_xaxis_transform(),
-    )
-
-    ischaemia_codes = codes[codes["group"].eq(ischaemia_group)]["position"]
-    ischaemia_codes.hist(ax=ax[1], rwidth=0.9)
-    ax[1].set_title("Ischaemia Codes")
-    ax[1].set_xlabel("Code position")
-    ax[1].set_ylabel("Total Code Count")
-
-    q = ischaemia_codes.quantile(level)
-    ax[1].axvline(q)
-    ax[1].text(
-        q + 0.5,
-        0.5,
-        f"{100*level:.0f}% quantile",
-        rotation=90,
-        transform=ax[1].get_xaxis_transform(),
-    )
-
-    plt.suptitle("Distribution of Bleeding/Ischaemia ICD-10 Primary/Secondary Codes")
-    plt.tight_layout()
-
-    if args.plot:
-        plt.show()
-    else:
-        plt.savefig(
-            common.make_new_save_item_path(
-                f"{analysis_name}_codes_hist", config["save_dir"], "png"
-            )
-        )
-
-    # Plot the ROC curves for the models
+    # Plot the bleeding/ischaemia survival curves broken down by age
     fig, ax = plt.subplots(1, 2, figsize=figsize)
+    describe.plot_survival_curves(ax, data, config)
+    plot_or_save(args.plot, f"{analysis_name}_survival", save_dir)
 
-    # Mask the dataset by age to get different survival plots
-    features_index = data["features_index"]
-    print(features_index)
-    age_over_75 = features_index["age"] > 75
-
-    # Get bleeding survival data
-    survival = (
-        data["bleeding_survival"]
-        .merge(features_index, on="spell_id", how="left")
-    )
-
-    # Calculate survival curves for bleeding (over 75)
-    masked = survival[survival["age"] >= 75]
-    status = ~masked["right_censor"]
-    survival_in_days = masked["time_to_event"].dt.days
-    time, survival_prob, conf_int = kaplan_meier_estimator(
-        status, survival_in_days, conf_type="log-log"
-    )
-    ax[0].step(time, survival_prob, where="post", label="Age >= 75")
-    ax[0].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
-
-    # Now for under 75
-    masked = survival[survival["age"] < 75]
-    status = ~masked["right_censor"]
-    survival_in_days = masked["time_to_event"].dt.days
-    time, survival_prob, conf_int = kaplan_meier_estimator(
-        status, survival_in_days, conf_type="log-log"
-    )
-    ax[0].step(time, survival_prob, where="post", label="Age < 75")
-    ax[0].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
-
-    ax[0].set_ylim(0.75, 1.00)
-    ax[0].set_ylabel(r"Est. probability of no adverse event")
-    ax[0].set_xlabel("Time (days)")
-    ax[0].set_title("Bleeding Outcome")
-    ax[0].legend()
-
-    # Get ischaemia survival data
-    survival = data["ischaemia_survival"].merge(
-        features_index, on="spell_id", how="left"
-    )
-
-    # Calculate survival curves for ischaemia (over 75)
-    masked = survival[survival["age"] >= 75]
-    status = ~masked["right_censor"]
-    survival_in_days = masked["time_to_event"].dt.days
-    time, survival_prob, conf_int = kaplan_meier_estimator(
-        status, survival_in_days, conf_type="log-log"
-    )
-    ax[1].step(time, survival_prob, where="post", label="Age >= 75")
-    ax[1].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
-
-    # Now for under 75
-    masked = survival[survival["age"] < 75]
-    status = ~masked["right_censor"]
-    survival_in_days = masked["time_to_event"].dt.days
-    time, survival_prob, conf_int = kaplan_meier_estimator(
-        status, survival_in_days, conf_type="log-log"
-    )
-    ax[1].step(time, survival_prob, where="post", label="Age < 75")
-    ax[1].fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post")
-
-    ax[1].set_ylim(0.75, 1.00)
-    ax[1].set_ylabel(r"Est. probability of no adverse event")
-    ax[1].set_xlabel("Time (days)")
-    ax[1].set_title("Ischaemia Outcome")
-    ax[1].legend()
-
-    plt.tight_layout()
-
-    if args.plot:
-        plt.show()
-    else:
-        plt.savefig(
-            common.make_new_save_item_path(
-                f"{analysis_name}_survival", config["save_dir"], "png"
-            )
-        )
-
-    def masked_survival(survival, mask):
-        masked_survival = survival[mask]
-        status = ~masked_survival["right_censor"]
-        survival_in_days = masked_survival["time_to_event"].dt.days
-        return kaplan_meier_estimator(
-            status, survival_in_days, conf_type="log-log"
-        )
-
-    def add_arc_survival(ax, arc_mask, label):
-        time, survival_prob, conf_int = masked_survival(survival, arc_mask)
-
-        ax.step(time, survival_prob, where="post")
-        ax.fill_between(
-            time, conf_int[0], conf_int[1], alpha=0.25, step="post", label=label
-        )
-    
-    # Plot survival curves by ARC score
+    # Plot the bleeding survival curves by ARC HBR score
     fig, ax = plt.subplots()
-    arc_mask = data["arc_hbr_score"]["total_score"] == 0
-    add_arc_survival(ax, arc_mask, "Score = 0.0")
-    arc_mask = data["arc_hbr_score"]["total_score"] == 1
-    add_arc_survival(ax, arc_mask, "Score = 1.0")
-    arc_mask = data["arc_hbr_score"]["total_score"] == 2
-    add_arc_survival(ax, arc_mask, "Score = 2.0")
-    arc_mask = data["arc_hbr_score"]["total_score"] >= 3
-    add_arc_survival(ax, arc_mask, "Score >= 3.0")
-    
-    ax.set_ylim(0.70, 1.00)
-    ax.set_ylabel(r"Est. probability of no adverse event")
-    ax.set_xlabel("Time (days)")
-    ax.set_title("Bleeding outcome survival curves by ARC HBR score")
-    plt.legend()
-    
-    if args.plot:
-        plt.show()
-    else:
-        plt.savefig(
-            common.make_new_save_item_path(
-                f"{analysis_name}_arc_survival", config["save_dir"], "png"
-            )
-        )
-    exit()
+    describe.plot_arc_hbr_survival(ax, data, config)
+    plot_or_save(args.plot, f"{analysis_name}_arc_survival", save_dir)
 
     # Plot measurement distribution
     features_measurements = data["features_measurements"]
@@ -276,14 +119,7 @@ def main():
     plt.title("Non-missing primary-care measurements (up to 2 months before index)")
     plt.tight_layout()
 
-    if args.plot:
-        plt.show()
-    else:
-        plt.savefig(
-            common.make_new_save_item_path(
-                f"{analysis_name}_primary_care_measurements", config["save_dir"], "png"
-            )
-        )
+    plot_or_save(args.plot, f"{analysis_name}_primary_care_measurements", save_dir)
 
     # Plot some of these individually
     fig, ax = plt.subplots(1, 2, figsize=figsize)
@@ -317,11 +153,4 @@ def main():
     ax[1].tick_params(axis="x", rotation=45)
 
     plt.tight_layout()
-    if args.plot:
-        plt.show()
-    else:
-        plt.savefig(
-            common.make_new_save_item_path(
-                f"{analysis_name}_attributes", config["save_dir"], "png"
-            )
-        )
+    plot_or_save(args.plot, f"{analysis_name}_attributes", save_dir)
