@@ -361,48 +361,48 @@ features:
     text: "prior ACS (any)" 
     docs: "count of previous year any ACS diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   "ihd_bezin_before":
     text: "prior IHD" 
     docs: "count of previous year ischaemia heart disease diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
 
   "mi_schnier_before":
     text: "prior MI (any)" 
     docs: "count of previous year any MI diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   "mi_nstemi_schnier_before":
     text: "prior NSTEMI" 
     docs: "count of previous year NSTEMI diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   "mi_stemi_schnier_before":
     text: "prior STEMI" 
     docs: "count of previous year STEMI diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
 
   "all_pci_pathak_before":
     text: "prior PCI" 
     docs: "count of previous year percutaneous coronary intervention procedure codes"
     category: "HES OPCS-4 codes"
-    exclude: True
+    exclude: False
 
-  "bleeding_al_ani_before":
+  "bleeding_adaptt_before":
     text: "prior bleeding A" 
+    docs: "count of previous year bleeding diagnosis codes (ADAPTT study)"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "bleeding_al_ani_before":
+    text: "prior bleeding B" 
     docs: "count of previous year bleeding diagnosis codes (al Ani et al.)"
     category: "HES ICD-10 codes"
     exclude: True
   "bleeding_cadth_before":
-    text: "prior bleeding B" 
-    docs: "count of previous year bleeding diagnosis codes (Cadth et al.)"
-    category: "HES ICD-10 codes"
-    exclude: True
-  "bleeding_adaptt_before":
     text: "prior bleeding C" 
-    docs: "count of previous year bleeding diagnosis codes (ADAPTT study)"
+    docs: "count of previous year bleeding diagnosis codes (Cadth et al.)"
     category: "HES ICD-10 codes"
     exclude: True
   "bleeding_barc_before":
@@ -415,18 +415,18 @@ features:
     text: "prior transfusion" 
     docs: "count of previous year transfusion of packed red blood cells procedure codes"
     category: "HES OPCS-4 codes"
-    exclude: True
+    exclude: False
 
   "diabetes_type1_before":
     text: "prior type-1 diabetes" 
     docs: "count of previous year type-1 diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   "diabetes_type2_before":
     text: "prior type-2 diabetes" 
     docs: "count of previous year type-2 diabetes diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   "diabetes_before":
     text: "prior diabetes (any)" 
     docs: "count of previous year diabetes diagnosis codes"
@@ -437,41 +437,41 @@ features:
     text: "prior CKD" 
     docs: "count of previous year CKD diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   
   "cancer_before":
     text: "prior cancer" 
     docs: "count of previous year cancer diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   
   "ischaemic_stroke_before":
     text: "prior ischaemic stroke" 
     docs: "count of previous year ischaemic stroke diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   "haemorrhagic_stroke_before":
     text: "prior haemorrhagic stroke" 
     docs: "count of previous year haemorrhagic stroke diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   
   "ich_before":
     text: "prior ICH" 
     docs: "count of previous year intracranial haemorrhage diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
 
   "liver_cirrhosis_before":
     text: "prior cirrhosis" 
     docs: "count of previous year liver cirrhosis diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   "portal_hypertension_before":
     text: "prior portal HT"
     docs: "count of previous year portal hypertension diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
 
   "bavm_before":
     text: "bAVM"
@@ -483,19 +483,19 @@ features:
     text: "PCI"
     docs: "count of previous year PCI procedures"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
 
   "pci_complex_before":
     text: "PCI (Complex)"
     docs: "count of previous year complex PCI procedures (>3 stents)"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
 
   "cabg_bortolussi_before":
     text: "CABG"
     docs: "count of previous year CABG procedures"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
 
   # SWD measurements
   "bp_systolic":
