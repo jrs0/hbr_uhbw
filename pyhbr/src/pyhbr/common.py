@@ -21,6 +21,8 @@ from sqlalchemy.exc import NoSuchTableError
 from pandas import DataFrame, read_sql, to_datetime, read_pickle, concat
 from git import Repo, InvalidGitRepositoryError
 
+from loguru import logger as log
+
 
 def make_engine(
     con_string: str = "mssql+pyodbc://dsn", database: str = "hic_cv_test"
@@ -630,3 +632,37 @@ def read_config_file(yaml_path: str):
         except yaml.YAMLError as exc:
             print(f"Failed to load config file: {exc}")
             exit(1)
+            
+            
+def load_most_recent_data_files(analysis_name: str, save_dir: str) -> (dict[str, Any], dict[str, Any], str):
+    """Load the most recent timestamp data file matching the analysis name
+    
+    The data file is a pickle of a dictionary, containing pandas DataFrames and
+    other metadata. It is expected to contain a "raw_file" key, which contains
+    the path to the associated raw data file.
+    
+    Both files are loaded, and a tuple of all the data is returned
+
+    Args:
+        analysis_name: The "analysis_name" key from the config file, which is the filename prefix
+        save_dir: The folder to load the data from
+        
+    Returns:
+        (data, raw_data, data_path). data and raw_data are dictionaries containing
+            (mainly) Pandas DataFrames, and data_path is the path to the data
+            file (this can be stored in any output products from this script to
+            record which data file was used to generate the data.
+    """
+
+    item_name = f"{analysis_name}_data"
+    log.info(f"Loading most recent data file '{item_name}'")
+    data, data_path = load_item(item_name, save_dir=save_dir)
+
+    raw_file = data["raw_file"]
+    log.info(f"Loading the underlying raw data file '{raw_file}'")
+    raw_data = load_exact_item(raw_file, save_dir=save_dir)
+    
+    log.info(f"Items in the data file {data.keys()}")
+    log.info(f"Items in the raw data file: {raw_data.keys()}")
+    
+    return data, raw_data, data_path

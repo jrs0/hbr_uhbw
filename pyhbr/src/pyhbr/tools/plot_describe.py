@@ -53,16 +53,11 @@ def main():
     import seaborn as sns
     import matplotlib.transforms as transforms
 
-
     # Load the config file
     config = common.read_config_file(args.config_file)
     analysis_name = config["analysis_name"]
     save_dir = config["save_dir"]
     now = common.current_timestamp()
-    
-    # Set the aspect ratio for the figures to roughly 2:1,
-    # because each plot is two graphs side-by-side
-    figsize = (11, 5)
 
     # Set up the log file output for plot/describe script
     log_file = (
@@ -71,18 +66,14 @@ def main():
     log_format = "{time} {level} {message}"
     log_id = log.add(log_file, format=log_format)
 
+    # Set the aspect ratio for the figures to roughly 2:1,
+    # because each plot is two graphs side-by-side
+    figsize = (11, 5)
+
     log.info(f"Starting plot/describe script")
-
-    item_name = f"{analysis_name}_data"
-    log.info(f"Loading most recent data file '{item_name}'")
-    data, data_path = common.load_item(item_name, save_dir=save_dir)
-
-    raw_file = data["raw_file"]
-    log.info(f"Loading the underlying raw data file '{raw_file}'")
-    raw_data = common.load_exact_item(raw_file, save_dir=save_dir)
-
-    log.info(f"Items in the data file {data.keys()}")
-    log.info(f"Items in the raw data file {raw_file}: {raw_data.keys()}")
+    data, raw_data, data_path = common.load_most_recent_data_files(
+        analysis_name, save_dir
+    )
 
     df = data["non_fatal_bleeding"]
     log.info(f"The maximum ischaemia secondary seen was {df['position'].max()}")

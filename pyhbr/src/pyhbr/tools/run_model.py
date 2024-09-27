@@ -6,8 +6,11 @@ from numpy.random import RandomState
 from pandas import DataFrame
 from pyhbr import common
 from pyhbr.analysis import fit
+from loguru import logger as log
+from pathlib import Path
 
 import scipy
+
 
 def get_pipe_fn(model_config: dict[str, str]) -> Callable:
     """Get the pipe function based on the name in the config file
@@ -33,10 +36,10 @@ def fit_and_save(
     X_test: DataFrame,
     y_test: DataFrame,
     data_file: str,
-    random_state: RandomState
+    random_state: RandomState,
 ) -> None:
     """Fit the model and save the results
-    
+
     Args:
         model_name: The name of the model, a key under the "models" top-level
             key in the config file
@@ -48,9 +51,9 @@ def fit_and_save(
         data_file: The name of the raw data file used for the modelling
         random_state: The source of randomness used by the model
     """
-    
+
     print("Starting fit")
-    
+
     # Using a larger number of bootstrap resamples will make
     # the stability analysis better, but will take longer to fit.
     num_bootstraps = config["num_bootstraps"]
@@ -60,13 +63,13 @@ def fit_and_save(
     # precisely, but will reduce the sample size in each bin for
     # estimating the prevalence.
     num_bins = config["num_bins"]
-    
+
     # Fit the model, and also fit bootstrapped models (using resamples
     # of the training set) to assess stability.
     fit_results = fit.fit_model(
         pipe, X_train, y_train, X_test, y_test, num_bootstraps, num_bins, random_state
     )
-    
+
     # Save the fitted models
     model_data = {
         "name": model_name,
@@ -78,10 +81,9 @@ def fit_and_save(
         "y_test": y_test,
         "data_file": data_file,
     }
-    
+
     analysis_name = config["analysis_name"]
-    
-    
+
     # If the branch is not clean, prompt the user to commit to avoid losing
     # long-running model results. Take care to only commit if the state of
     # the repository truly reflects what was run (i.e. if no changes were made
@@ -93,13 +95,15 @@ def fit_and_save(
                 model_data, f"{analysis_name}_{model_name}", save_dir=config["save_dir"]
             )
             # Getting here successfully means that the save worked; exit the loop
-            print("Saved model")
+            log.info("Saved model")
             break
         except RuntimeError as e:
             print(e)
             print("You can commit now and then retry the save after committing.")
-            retry_save = common.query_yes_no("Do you want to retry the save? Commit, then select yes, or choose no to exit the script.")
-        
+            retry_save = common.query_yes_no(
+                "Do you want to retry the save? Commit, then select yes, or choose no to exit the script."
+            )
+
 
 def main():
 
@@ -126,22 +130,22 @@ def main():
     from pyhbr.analysis import stability
     from pyhbr.analysis import calibration
 
-
-    # Read the configuration file
-    with open(args.config_file) as stream:
-        try:
-            config = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(f"Failed to load config file: {exc}")
-            exit(1)
-
-    # This is used to load a file, and is also used
-    # as the prefix for all saved data files.
+    # Load the config file
+    config = common.read_config_file(args.config_file)
     analysis_name = config["analysis_name"]
+    save_dir = config["save_dir"]
+    now = common.current_timestamp()
 
-    # Load outcome and training data
-    data, data_path = common.load_item(
-        f"{analysis_name}_data", save_dir=config["save_dir"]
+    # Set up the log file output for plot/describe script
+    log_file = (
+        Path(save_dir) / Path(analysis_name + f"_run_model_{now}")
+    ).with_suffix(".log")
+    log_format = "{time} {level} {message}"
+    log_id = log.add(log_file, format=log_format)
+
+    # Load the data files
+    data, raw_data, data_path = common.load_most_recent_data_files(
+        analysis_name, save_dir
     )
 
     # For convenience
@@ -154,15 +158,17 @@ def main():
     # have a key that starts with "features_"
     for key in data.keys():
         if "features_" in key:
-            print(f"Joining {key} into features dataframe")
+            log.info(f"Joining {key} into features dataframe")
             features = features.merge(data[key], how="left", on="spell_id")
 
     # Create a random state from a seed
     seed = config["seed"]
+    log.info(f"Making random state based on config file seed {seed}")
     random_state = RandomState(seed)
 
     # Create the train/test split
     test_proportion = config["test_proportion"]
+    log.info(f"Creating the test/train split with proportion {100*test_proportion:.1f}% in the test set")
     X_train, X_test, y_train, y_test = train_test_split(
         features, outcomes, test_size=test_proportion, random_state=random_state
     )
@@ -171,16 +177,19 @@ def main():
     # a model, or all of the models present in the config file)
     if args.model is not None:
         model_name = args.model
+        log.info(f"Fitting only requested model {model_name}")
 
         if model_name not in config["models"]:
-            print(
+            log.info(
                 f"Error: requested model {model_name} is not present in config file {args.config}"
             )
             exit(1)
 
         model_config = config["models"][model_name]
         pipe_fn = get_pipe_fn(model_config)
-        evaluated_config = { key: eval(value) for key, value in model_config["config"].items() }
+        evaluated_config = {
+            key: eval(value) for key, value in model_config["config"].items()
+        }
         pipe = pipe_fn(random_state, X_train, evaluated_config)
 
         # Fit the model, also fit bootstrapped models (using resamples
@@ -198,12 +207,14 @@ def main():
         )
 
     else:
-
+        log.info("Fitting all models in config file")
         for model_name in config["models"]:
-            
+
             model_config = config["models"][model_name]
             pipe_fn = get_pipe_fn(model_config)
-            evaluated_config = { key: eval(value) for key, value in model_config["config"].items() }
+            evaluated_config = {
+                key: eval(value) for key, value in model_config["config"].items()
+            }
             pipe = pipe_fn(random_state, X_train, evaluated_config)
 
             # Fit the model, also fit bootstrapped models (using resamples
