@@ -158,8 +158,27 @@ def main():
     # have a key that starts with "features_"
     for key in data.keys():
         if "features_" in key:
-            log.info(f"Joining {key} into features dataframe")
+            log.info(f"Joining features {list(data[key].columns)} from {key} into features dataframe")
             features = features.merge(data[key], how="left", on="spell_id")
+
+    # Check agreement between columns in features dataframe and config file
+    df_list = list(features.columns)
+    config_list = list(config["features"].keys())
+    df_but_not_config = list(set(df_list).difference(config_list))
+    config_but_not_df = list(set(config_list).difference(df_list))
+    if len(df_but_not_config) != 0:
+        log.warning(f"Features {df_but_not_config} are present in the features dataframe but missing from the config file")
+    if len(config_but_not_df) != 0:
+        log.warning(f"Features {config_but_not_df} are present in the config file but not in the features dataframe")
+
+    # Exclude features based on config file
+    columns_to_drop = []
+    for column, metadata in config["features"].items():
+        if "exclude" in metadata and metadata["exclude"]:
+            columns_to_drop.append(column)
+    log.info(f"Excluding features by exclude flag in config file: {columns_to_drop}")
+    features.drop(columns=columns_to_drop, inplace=True)
+    log.info(f"Remaining features: {list(features.columns)}")
 
     # Create a random state from a seed
     seed = config["seed"]
