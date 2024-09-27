@@ -72,28 +72,28 @@ features:
     text: "eGFR (index)"
     docs: "Index eGFR measurement"
     category: "HIC lab results"
-    exclude: True
+    exclude: False
   "hb":
     text: "Hb"
     docs: "index haemoglobin measurement"
     category: "HIC lab results"
-    exclude: True
+    exclude: False
   "platelets":
     text: "platelets"
     docs: "index platelet count"
     category: "HIC lab results"
-    exclude: True
+    exclude: False
   # HIC prescriptions
   "nsaid":
     text: "prior NSAID"
     docs: "prior non-steroidal anti-inflammatory prescription"
     category: "HIC prescriptions"
-    exclude: True
+    exclude: False
   "oac":
     text: "prior OAC"
     docs: "prior oral anticoagulant prescription"
     category: "HIC prescriptions"
-    exclude: True
+    exclude: False
   # SWD attributes
   "ht":
     text: "HT"
