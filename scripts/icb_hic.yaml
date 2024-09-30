@@ -29,8 +29,8 @@ end_date: "2025-1-1"
 # that will be used to define features and outcome
 # code groups. The file will be loaded from the 
 # current working directory.
-icd10_codes_file: "icd10_arc_hbr.yaml"
-opcs4_codes_file: "opcs4_arc_hbr.yaml"
+icd10_codes_file: "icd10.yaml"
+opcs4_codes_file: "opcs4.yaml"
 
 # Set the ACS and PCI code group names that will define
 # index events. Events will be considered an ACS event
