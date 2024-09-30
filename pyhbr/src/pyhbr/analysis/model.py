@@ -65,9 +65,9 @@ def trade_off_model_bleeding_risk(features: DataFrame) -> Series:
         right=False,
     ).astype("float")
 
-    # TODO complex and liver cancer surgery
-    complex_score = 1.0
-    liver_cancer_surgery = 1.0
+    # Complex PCI and liver/cancer composite
+    complex_score = np.where(features["complex_pci_index"], 1.32, 1.0)
+    liver_cancer_surgery = np.where((features["cancer_before"] + features["ckd_before"]) > 0, 1.63, 1.0)
 
     oac = np.where(features["oac"] == 1, 2.0, 1.0)
 
@@ -114,8 +114,8 @@ def trade_off_model_ischaemia_risk(features: DataFrame) -> Series:
         right=False,
     ).astype("float")
 
-    # TODO complex and bare metal stent (missing from data)
-    complex_score = 1.0
+    # TODO bare metal stent (missing from data)
+    complex_score = np.where(features["complex_pci_index"], 1.5, 1.0)
     bms = 1.0
 
     # Calculate bleeding risk
