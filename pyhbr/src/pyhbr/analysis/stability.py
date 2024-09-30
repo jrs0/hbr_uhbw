@@ -75,6 +75,8 @@ import matplotlib.ticker as mtick
 
 from pyhbr import common
 
+from loguru import logger as log
+
 @dataclass
 class Resamples:
     """Store a training set along with M resamples of it
@@ -179,16 +181,16 @@ def fit_model(
     # using any method (e.g. including cross validation and hyperparameter
     # tuning) using training set data. This is referred to as D in
     # stability.py.
-    print("Fitting model-under-test")
+    log.info("Fitting model-under-test")
     pipe = clone(model)
     M0 = pipe.fit(X0, y0)
 
     # Resample the training set to obtain the new datasets (Xm, ym)
-    print(f"Creating {M} bootstrap resamples of training set")
+    log.info(f"Creating {M} bootstrap resamples of training set")
     resamples = make_bootstrapped_resamples(X0, y0, M, random_state)
 
     # Develop all the bootstrap models to compare with the model-under-test M0
-    print("Fitting bootstrapped models")
+    log.info("Fitting bootstrapped models")
     Mm = []
     for m in range(M):
         pipe = clone(model)
@@ -225,7 +227,7 @@ def predict_probabilities(fitted_model: FittedModel, X_test: DataFrame) -> DataF
     """
     columns = []
     for m, M in enumerate(fitted_model.flatten()):
-        print(f"Predicting test-set probabilities {m}")
+        log.info(f"Predicting test-set probabilities {m}")
         columns.append(M.predict_proba(X_test)[:, 1])
 
     raw_probs = np.column_stack(columns)
