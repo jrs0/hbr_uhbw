@@ -1,0 +1,792 @@
+title: "Estimating bleeding and ischaemia risk following acute coronary syndrome"
+subtitle: "A machine learning modelling study using routine electronic health data"
+author: "John Scott"
+
+### GENERAL ###
+
+# Path to load data from and save data to.
+save_dir: "save_data"
+
+# Base name for this analysis. The string "_data" is
+# appended to this name to create the file to load. This
+# base name is also used as the prefix for saved files.
+analysis_name: "icb_hic"
+
+### DATASET GENERATION ###
+
+# Raw date ranges (yyyy-mm-dd) to restrict the
+# SQL data fetch. HIC data only goes back to
+# Nov 2019, so set window a bit before that to
+# catch everything. End date can be set in the
+# future to catch most recent data. Date ranges
+# will be automatically restricted to allow a
+# window on each side of the index events for
+# patient history and outcomes.
+start_date: "2019-1-1"
+end_date: "2025-1-1"
+
+# Set the name of the ICD-10 and OPCS-4 codes files
+# that will be used to define features and outcome
+# code groups. The file will be loaded from the 
+# current working directory.
+icd10_codes_file: "icd10.yaml"
+opcs4_codes_file: "opcs4.yaml"
+
+# Set the ACS and PCI code group names that will define
+# index events. Events will be considered an ACS event
+# if an ACS ICD-10 code is found in the primary position
+# of the first episode of the spell. Secondary diagnoses
+# are ignored to remove the possibility of identifying
+# historical events. PCI index events allow a PCI code
+# in any primary or secondary position of the first
+# episode of the spell, on the assumption that a coded
+# secondary procedure in an episode implies that the
+# procedure was performed in that episode.
+acs_index_code_group: "acs_bezin"
+pci_index_code_group: "all_pci_pathak"
+
+complex_pci_index_code_group: "pci_complex"
+
+# Set code groups to identify STEMI/NSTEMI index presentations
+stemi_index_code_group: "mi_stemi_schnier"
+nstemi_index_code_group: "mi_nstemi_schnier"
+
+# When processing the SWD attributes, 
+# drop columns that exceed this level of missingness
+attributes_max_missingness: 0.75
+
+# When processing the SWD attributes,
+# drop columns if more than this proportion of 
+# the column is a constant value
+attributes_const_threshold: 0.95
+
+# Which stages should run in the fetch_data script
+fetch_stages:
+  #- fetch
+  - process
+
+# Names of features
+features:
+  # HIC lab results
+  "egfr_x": 
+    text: "eGFR (index)"
+    docs: "Index eGFR measurement"
+    category: "HIC lab results"
+    exclude: False
+  "hb":
+    text: "Hb"
+    docs: "index haemoglobin measurement"
+    category: "HIC lab results"
+    exclude: False
+  "platelets":
+    text: "platelets"
+    docs: "index platelet count"
+    category: "HIC lab results"
+    exclude: False
+  # HIC prescriptions
+  "nsaid":
+    text: "prior NSAID"
+    docs: "prior non-steroidal anti-inflammatory prescription"
+    category: "HIC prescriptions"
+    exclude: False
+  "oac":
+    text: "prior OAC"
+    docs: "prior oral anticoagulant prescription"
+    category: "HIC prescriptions"
+    exclude: False
+  # SWD attributes
+  "ht":
+    text: "HT"
+    docs: "hypertension"
+    category: "SWD attributes"
+    exclude: True 
+  "af":
+    text: "AF"
+    docs: "atrial fibrillation flag"
+    category: "SWD attributes"
+    exclude: True
+  "alcohol_units":
+    text: "alcohol (units)"
+    docs: "alcohol flag"
+    category: "SWD attributes"
+    exclude: True
+  "asthma":
+    text: "asthma"
+    docs: "asthma flag"
+    category: "SWD attributes"
+    exclude: True
+  "back_pain":
+    text: "Back pain"
+    docs: "lower back pain flag"
+    category: "SWD attributes"
+    exclude: True
+  "bmi":
+    text: "BMI"
+    docs: "BMI score"
+    category: "SWD attributes"
+    exclude: True
+  "cardio_other":
+    text: "cardio (other)"
+    docs: "Other significant cardiovascular conditions including grown up congenital heart conditions (GUCH)"
+    category: "SWD attributes"
+    exclude: True
+  "cataracts":
+    text: "cataracts"
+    docs: "cataracts flag"
+    category: "SWD attributes"
+    exclude: True
+  "ckd":
+    text: "CKD"
+    docs: "chronic kidney disease flag"
+    category: "SWD attributes"
+    exclude: True
+  "copd":
+    text: "COPD"
+    docs: "chronic obstructive pulmonary disease flag"
+    category: "SWD attributes"
+    exclude: True
+  "diabetes_2":
+    text: "type-2 diabetes (Attr.)"
+    docs: "type-2 diabetes flag"
+    category: "SWD attributes"
+    exclude: True
+  "diabetes_retina":
+    text: "diabetes (retina)"
+    docs: "diabetic retinopathy flag"
+    category: "SWD attributes"
+    exclude: True
+  "efi_category":
+    text: "EFI category"
+    docs: "electronic frailty index category"
+    category: "SWD attributes"
+    exclude: True
+  "egfr_y":
+    text: "eGFR (recent)"
+    docs: "recent eGFR score"
+    category: "SWD attributes"
+    exclude: True
+  "ethnicity":
+    text: "ethnicity"
+    docs: "ethnicity category"
+    category: "SWD attributes"
+    exclude: True
+  "gout":
+    text: "gout"
+    docs: "gout flag"
+    category: "SWD attributes"
+    exclude: True
+  "health_check":
+    text: "health check"
+    docs: "flag, ever had an NHS health check"
+    category: "SWD attributes"
+    exclude: True
+  "hearing_impair":
+    text: "hearing impairment"
+    docs: "hearing impairment flag"
+    category: "SWD attributes"
+    exclude: True
+  "hf":
+    text: "HF"
+    docs: "heart failure flag"
+    category: "SWD attributes"
+    exclude: True
+  "ibs":
+    text: "IBS"
+    docs: "irritable bowel disease flag"
+    category: "SWD attributes"
+    exclude: True
+  "ihd_mi":
+    text: "IHD (MI)"
+    docs: "myocardial infarction ischaemic heart disease flag"
+    category: "SWD attributes"
+    exclude: True
+  "ihd_nonmi":
+    text: "IHD (non-MI)"
+    docs: "non-myocardial infarction ischaemic heart disease flag"
+    category: "SWD attributes"
+    exclude: True
+  "lsoa":
+    text: "LSOA"
+    docs: "lower super output area"
+    category: "SWD attributes"
+    exclude: True
+  "neuro_pain":
+    text: "neuropathic pain"
+    docs: "chronic pain, fibromyalgia, or neuralgias flag"
+    category: "SWD attributes"
+    exclude: True
+  "neuro_various":
+    text: "neurological impairments"
+    docs: "neurological impairments flag - ataxias, amnesia, aphasia, cerebral palsy, brain injuries"
+    category: "SWD attributes"
+    exclude: True
+  "osteoarthritis":
+    text: "osteoarthritis"
+    docs: "osteoarthritis flag"
+    category: "SWD attributes"
+    exclude: True
+  "polypharmacy_acute":
+    text: "polypharmacy (acute)"
+    docs: "Polypharmacy (count of acute medication issued within the past month)"
+    category: "SWD attributes"
+    exclude: True
+  "polypharmacy_repeat":
+    text: "polypharmacy (repeat)"
+    docs: "polypharmacy (count of Current repeat Medications)"
+    category: "SWD attributes"
+    exclude: True
+  "pre_diabetes":
+    text: "pre-diabetes"
+    docs: "pre-diabetes and related codes, nd-hyperglycaemia, and risk of diabetes, impaired glucose tolerance"
+    category: "SWD attributes"
+    exclude: True
+  "qof_af":
+    text: "AF (QOF)"
+    docs: "atrial fibrillation, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_asthma":
+    text: "asthma (QOF)"
+    docs: "asthma, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_chd":
+    text: "CHD (QOF)"
+    docs: "coronary heart disease, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_ckd":
+    text: "CKD (QOF)"
+    docs: "chronic kidney disease (18+), quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_copd":
+    text: "COPD (QOF)"
+    docs: "chronic obstructive pulmonary disease, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_depression":
+    text: "depression (QOF)"
+    docs: "depression (18+) quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_diabetes":
+    text: "diabetes (QOF)"
+    docs: "diabetes mellitus (17+), quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_hf":
+    text: "HF (QOF)"
+    docs: "heart failure, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_ht":
+    text: "HT (QOF)"
+    docs: "hypertension, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_obesity":
+    text: "obesity (QOF)"
+    docs: "obesity (18+), quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_pad":
+    text: "PAD (QOF)"
+    docs: "peripheral artery disease, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "qof_stroke":
+    text: "stroke (QOF)"
+    docs: "stroke and transient ischaemic attack, quality and outcomes framework"
+    category: "SWD attributes"
+    exclude: True
+  "sad":
+    text: "sad"
+    docs: "Stress, anxiety, mild-mod depression, mixed anxiety/depressive disorder"
+    category: "SWD attributes"
+    exclude: True
+  "screen_aaa":
+    text: "AAA screen"
+    docs: "NHS abdominal aortic aneurysm (AAA) programme flag"
+    category: "SWD attributes"
+    exclude: True
+  "screen_bowel":
+    text: "bowel cancer screen"
+    docs: "NHS bowel cancer screening (BCSP) programme flag"
+    category: "SWD attributes"
+    exclude: True
+  "screen_breast":
+    text: "breast cancer screen"
+    docs: "NHS breast screening (BSP) programme flag"
+    category: "SWD attributes"
+    exclude: True
+  "screen_cervical":
+    text: "cervical screen"
+    docs: "NHS cervical screening (CSP) programme flag"
+    category: "SWD attributes"
+    exclude: True
+  "screen_eye":
+    text: "diabetic eye screen"
+    docs: "NHS diabetic eye screening (DES) programme flag"
+    category: "SWD attributes"
+    exclude: True
+  "smi": 
+    text: "SMI"
+    docs: "serious Mental Health, including bipolar affective disorder flag"
+    category: "SWD attributes"
+    exclude: True
+  "smoking":
+    text: "smoking"
+    docs: "smoking status"
+    category: "SWD attributes"
+    exclude: True
+  "stroke":
+    text: "stroke"
+    docs: "cerebrovascular disease - stroke"
+    category: "SWD attributes"
+    exclude: True
+  "thyroid":
+    text: "thyroid disease"
+    docs: "thyroid disease flag"
+    category: "SWD attributes"
+    exclude: True
+  "vasc_dis":
+    text: "PVD"
+    docs: "peripheral vascular disease flag"
+    category: "SWD attributes"
+    exclude: True
+  
+  # HES features from code groups
+  "acs_bezin_before":
+    text: "prior ACS (any)" 
+    docs: "count of previous year any ACS diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "ihd_bezin_before":
+    text: "prior IHD" 
+    docs: "count of previous year ischaemia heart disease diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+
+  "mi_schnier_before":
+    text: "prior MI (any)" 
+    docs: "count of previous year any MI diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "mi_nstemi_schnier_before":
+    text: "prior NSTEMI" 
+    docs: "count of previous year NSTEMI diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "mi_stemi_schnier_before":
+    text: "prior STEMI" 
+    docs: "count of previous year STEMI diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+
+  "all_pci_pathak_before":
+    text: "prior PCI" 
+    docs: "count of previous year percutaneous coronary intervention procedure codes"
+    category: "HES OPCS-4 codes"
+    exclude: False
+
+  "bleeding_adaptt_before":
+    text: "prior bleeding A" 
+    docs: "count of previous year bleeding diagnosis codes (ADAPTT study)"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "bleeding_al_ani_before":
+    text: "prior bleeding B" 
+    docs: "count of previous year bleeding diagnosis codes (al Ani et al.)"
+    category: "HES ICD-10 codes"
+    exclude: True
+  "bleeding_cadth_before":
+    text: "prior bleeding C" 
+    docs: "count of previous year bleeding diagnosis codes (Cadth et al.)"
+    category: "HES ICD-10 codes"
+    exclude: True
+  "bleeding_barc_before":
+    text: "prior bleeding D" 
+    docs: "count of previous year bleeding diagnosis codes likely to imply BARC 3 (severe)"
+    category: "HES ICD-10 codes"
+    exclude: True
+
+  "packed_red_cells_transfusion_before":
+    text: "prior transfusion" 
+    docs: "count of previous year transfusion of packed red blood cells procedure codes"
+    category: "HES OPCS-4 codes"
+    exclude: False
+
+  "diabetes_type1_before":
+    text: "prior type-1 diabetes" 
+    docs: "count of previous year type-1 diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "diabetes_type2_before":
+    text: "prior type-2 diabetes" 
+    docs: "count of previous year type-2 diabetes diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "diabetes_before":
+    text: "prior diabetes (any)" 
+    docs: "count of previous year diabetes diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: True
+  
+  "ckd_before":
+    text: "prior CKD" 
+    docs: "count of previous year CKD diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  
+  "cancer_before":
+    text: "prior cancer" 
+    docs: "count of previous year cancer diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  
+  "ischaemic_stroke_before":
+    text: "prior ischaemic stroke" 
+    docs: "count of previous year ischaemic stroke diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "haemorrhagic_stroke_before":
+    text: "prior haemorrhagic stroke" 
+    docs: "count of previous year haemorrhagic stroke diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  
+  "ich_before":
+    text: "prior ICH" 
+    docs: "count of previous year intracranial haemorrhage diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+
+  "liver_cirrhosis_before":
+    text: "prior cirrhosis" 
+    docs: "count of previous year liver cirrhosis diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+  "portal_hypertension_before":
+    text: "prior portal HT"
+    docs: "count of previous year portal hypertension diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: False
+
+  "bavm_before":
+    text: "bAVM"
+    docs: "count of previous year brain arteriovenous malformation diagnosis codes"
+    category: "HES ICD-10 codes"
+    exclude: True
+
+  "pci_before":
+    text: "PCI"
+    docs: "count of previous year PCI procedures"
+    category: "HES ICD-10 codes"
+    exclude: False
+
+  "pci_complex_before":
+    text: "PCI (Complex)"
+    docs: "count of previous year complex PCI procedures (>3 stents)"
+    category: "HES ICD-10 codes"
+    exclude: False
+
+  "cabg_bortolussi_before":
+    text: "CABG"
+    docs: "count of previous year CABG procedures"
+    category: "HES ICD-10 codes"
+    exclude: False
+
+  # SWD measurements
+  "bp_systolic":
+    text: "systolic BP"
+    docs: "recent systolic blood pressure measurement"
+    category: "SWD measurements"
+    exclude: True
+
+  "bp_diastolic":
+    text: "diastolic BP"
+    docs: "recent diastolic blood pressure measurement"
+    category: "SWD measurements"
+    exclude: True
+
+  "hba1c":
+    text: "HbA1c"
+    docs: "recent HbA1c measurement"
+    category: "SWD measurements"
+    exclude: True
+
+  # SWD prescriptions
+  "prior_nsaid":
+    text: "prior NSAID"
+    docs: "prior non-steroidal anti-inflammatory prescription"
+    category: "SWD prescriptions"
+    exclude: True
+  "prior_oac":
+    text: "prior OAC"
+    docs: "prior oral anticoagulant prescription"
+    category: "SWD prescriptions"
+    exclude: True
+
+  # HES index features
+  "acs_index":
+    text: "ACS index"
+    docs: "index was an ACS admission (primary diagnosis of first episode was an ACS ICD-10 code)"
+    category: "HES index features"
+    exclude: True
+
+  "pci_index":
+    text: "PCI index"
+    docs: "index an PCI admission (PCI OPCS-4 code present at any position in first episode procedure codes)"
+    category: "HES index features"
+    exclude: True
+
+  "stemi_index":
+    text: "STEMI index"
+    docs: "index was a STEMI admission (primary diagnosis of first episode was a STEMI ICD-10 code)"
+    category: "HES index features"
+    exclude: False
+
+  "nstemi_index":
+    text: "NSTEMI index"
+    docs: "index was a NSTEMI admission (primary diagnosis of first episode was a NSTEMI ICD-10 code)"
+    category: "HES index features"
+    exclude: False
+
+  "complex_pci_index":
+    text: "Complex PCI index"
+    docs: "Did the index PCI include insertion of >3 stents"
+    category: "HES index features"
+    exclude: False
+
+  "age":
+    text: "age"
+    docs: "age at index"
+    category: "HES index features"
+    exclude: False
+
+  "gender":
+    text: "gender"
+    docs: "gender at index"
+    category: "HES index features"
+    exclude: False
+
+### MODELLING ###
+
+# Test/train split
+test_proportion: 0.25
+
+# All randomness is derived from this seed.
+seed: 0
+
+# Using a larger number of bootstrap resamples will make
+# the stability analysis better, but will take longer to fit.
+num_bootstraps: 10
+
+# Choose the number of bins for the calibration calculation.
+# Using more bins will resolve the risk estimates more
+# precisely, but will reduce the sample size in each bin for
+# estimating the prevalence.
+num_bins: 5
+
+# References
+bib_file: "../risk_management_file/ref.bib"
+citation_style: "citation_style.csl"
+
+# Jinja2 templates
+templates_folder: "templates"
+report_template: "report.qmd"
+
+# Build output locations. The report will be
+# placed in a folder called {analysis_name}_report
+build_directory: "build"
+
+# List of GP opt-out codes to exclude from the SWD
+# data fetch.
+gp_opt_outs:
+  - "L81087" # Beechwood Medical Practice
+  - "L81632" # Emersons Green Medical Centre
+  - "L81046" # Leap Valley Medical Centre, also covers Abbotswood Surgery
+  - "L81120" # Birchwood Medical Practice
+  - "L81055" # Orchard Medical Centre
+
+# Models to include
+models:
+  trade_off:
+    text: "ARC HBR bleeding/ischaemia trade-off"
+    title: "ARC HBR Trade-off Model"
+    abbr: "TM"
+    pipe_fn: "pyhbr.analysis.model.make_trade_off"
+    config: {}
+    description: >
+      The ARC HBR bleeding/ischaemia trade-off model is derived from two Cox proportional
+      hazards models trained on high-bleeding-risk patients. It is a baseline against 
+      which to compare other models.
+    roc_conclusion: >
+      Test
+  random_forest:
+    text: "random forest"
+    title: "Random Forest"
+    abbr: "RF"
+    pipe_fn: "pyhbr.analysis.model.make_random_forest_cv"
+    config:
+      n_estimators: "scipy.stats.randint(50, 500)"
+      max_depth: "scipy.stats.randint(1, 20)"
+    description: >
+      The risk estimate is an average over decision trees, each of which
+      estimates the risk by recursively dividing the input predictors into
+      ranges and estimating the prevalence within each range of inputs. 100
+      trees are used, and each tree is capped at a depth of 10 to avoid overfitting.
+    roc_conclusion: >
+      Test
+  ada_boost:
+    text: "AdaBoost"
+    title: "AdaBoost"
+    abbr: "AB"
+    pipe_fn: "pyhbr.analysis.model.make_abc"
+    config:
+      "n_estimators": "50"
+      "learning_rate": "1.0"
+      "algorithm": "'SAMME.R'"
+    description: >
+      An ensemble method fitting simple trees to the data, where later iterations of the
+      fit focus on more difficult cases.
+    roc_conclusion: >
+      Test
+  logistic_regression:
+    text: "logistic regression"
+    title: "Logistic Regression"
+    abbr: "LR"
+    pipe_fn: "pyhbr.analysis.model.make_logistic_regression"
+    config:
+      "max_iter": "1000"
+    description: >
+       The risk is obtained by fitting the logistic regression model to the events,
+       using the input features are variables. A penalty term is added to handle
+       collinearity of the predictors and to penalize overfitting.
+    roc_conclusion: >
+      Test
+  xgboost:
+    text: "XGBoost"
+    title: "XGBoost"
+    abbr: "XGB"
+    pipe_fn: "pyhbr.analysis.model.make_xgboost"
+    config: {}
+    description: >
+      An alternative tree-based method, similar to random forest, that uses a
+      different algorithm to obtained train the model.
+    roc_conclusion: >
+      Test
+  nearest_neighbours:
+    text: "K-nearest neighbours"
+    title: "K-Nearest Neighbours"
+    abbr: "KNN"
+    pipe_fn: "pyhbr.analysis.model.make_nearest_neighbours_cv"
+    config:
+      n_neighbors: "scipy.stats.randint(1, 15)"
+      weights: "['uniform', 'distance']"
+    description: >
+      A model that predicts the value for an input based on the corresponding
+      values for known similar inputs (the nearest neighbours).
+    roc_conclusion: >
+      Test
+  support_vector_machine:
+    text: "support vector machine"
+    title: "Support Vector Machine"
+    abbr: "SVM"
+    pipe_fn: "pyhbr.analysis.model.make_svm"
+    config: {}
+    description: >
+      A model that attempts to collect the training data into groups based on the
+      maximum margin between the groups, and makes predictions based on these groups.
+    roc_conclusion: >
+      Test
+  multilayer_perceptron:
+    text: "multi-layer perceptron"
+    title: "Multi-layer Perceptron"
+    abbr: "MLP"
+    pipe_fn: "pyhbr.analysis.model.make_mlp"
+    config:
+      alpha: "1e-5"
+      hidden_layer_sizes: "(20, 2)"
+      solver: "'lbfgs'"
+      max_iter: "1000"
+    description: >
+      A type of neural network with a fixed number of layers, which can learn non-linear
+      relationships among the input data and the output classes.
+    roc_conclusion: >
+      Test
+  complement_naive_bayes:
+    text: "Complement naive bayes"
+    title: "Complement Naive Bayes"
+    abbr: "CNB"
+    pipe_fn: "pyhbr.analysis.model.make_cnb"
+    config: {}
+    description: >
+      An algorithm that calculates the most likely class for each data point using Bayesian
+      methods, on the assumption that the features act independently (the "naive" assumption).
+      The "complement" version of the algorithm is better suited to unbalanced datasets.
+    roc_conclusion: >
+      Test
+
+
+# Outcome names
+outcomes:
+  bleeding:
+    text: "bleeding"
+    title: "Bleeding" 
+    abbr: "B"
+    fatal:
+      group: "bleeding_adaptt"
+      max_position: 1
+    non_fatal:
+      group: "bleeding_adaptt"
+      # Including all secondary codes in order to catch
+      # all bleeds, irrespective of severity. This may
+      # include historical/minor bleeds, but this was 
+      # considered better than missing out of bleeding
+      # not coded in the primary or first secondary position.
+      max_position: 10
+  ischaemia:
+    text: "ischaemia"
+    title: "Ischaemia"
+    abbr: "I"
+    fatal:
+      group: "cv_death_ohm"
+      # Restricting to primary cause of death produces
+      # no events fof the group cv_death_ohm (cardiac 
+      # arrest appears to only ever be recorded in a
+      # secondary position). Only the first secondary
+      # position is allowed, in an attempt to restrict
+      # to cardiovascular death which does not have
+      # another cause.
+      max_position: 2
+    non_fatal:
+      group: "ami_stroke_ohm"
+      max_position: 5
+
+# Names of code groups
+code_groups:
+  "bleeding_adaptt": "Bleeding (ADAPTT)"
+  "bavm": "bAVM"
+  "ich": "ICH"
+  "portal_hypertension": "Portal Hyp."
+  "packed_red_cells_transfusion": "Transfusion"
+  "liver_cirrhosis": "Liver cirrhosis"
+  "ischaemic_stroke": "Ischaemic stroke"
+  "diabetes_type1": "Diabetes (Type 1)"
+  "mi_stemi_schnier": "MI (STEMI)"
+  "bleeding_al_ani": "Bleeding (al Ani)"
+  "diabetes": "Diabetes (Any)"
+  "diabetes_type2": "Diabetes (Type 2)"
+  "mi_schnier": "MI (Any)"
+  "ihd_bezin": "IHD"
+  #"hussain_ami_stroke": "AMI/stroke"
+  "ami_stroke_ohm": "AMI/Stroke"
+  "ckd_before": "CKD"
+  "cancer": "Cancer (Any)"
+  "all_pci_pathak": "PCI"
+  "bleeding_cadth": "Bleeding (Cadth)"
+  "acs_bezin": "ACS"
+  "mi_nstemi_schnier": "MI (NSTEMI)"
+
