@@ -763,7 +763,7 @@ outcomes:
       max_position: 2
     non_fatal:
       group: "ami_ohm"
-      max_position: 5
+      max_position: 4
 
 # Names of code groups
 code_groups:
