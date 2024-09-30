@@ -762,7 +762,7 @@ outcomes:
       # another cause.
       max_position: 2
     non_fatal:
-      group: "ami_stroke_ohm"
+      group: "ami_ohm"
       max_position: 5
 
 # Names of code groups
