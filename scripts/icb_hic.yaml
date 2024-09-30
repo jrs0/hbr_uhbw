@@ -27,8 +27,8 @@ end_date: "2025-1-1"
 
 # Set the name of the ICD-10 and OPCS-4 codes files
 # that will be used to define features and outcome
-# code groups. The file will be loaded from the
-# pyhbr package.
+# code groups. The file will be loaded from the 
+# current working directory.
 icd10_codes_file: "icd10_arc_hbr.yaml"
 opcs4_codes_file: "opcs4_arc_hbr.yaml"
 

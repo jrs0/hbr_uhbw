@@ -83,8 +83,8 @@ def main():
         reduced_sus_data = raw_sus_data[raw_sus_data["patient_id"].isin(hic_patient_ids)]
  
         log.info("Read code groups into tables")
-        diagnosis_codes = clinical_codes.load_from_package(config["icd10_codes_file"])
-        procedure_codes = clinical_codes.load_from_package(config["opcs4_codes_file"])
+        diagnosis_codes = clinical_codes.load_from_file(config["icd10_codes_file"])
+        procedure_codes = clinical_codes.load_from_file(config["opcs4_codes_file"])
         code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
  
         log.info("Identifying patients with index episodes to narrow subsequent queries")
@@ -241,8 +241,8 @@ def main():
     if "process" in config["fetch_stages"]:
 
         log.info("Read code groups into tables")
-        diagnosis_codes = clinical_codes.load_from_package(config["icd10_codes_file"])
-        procedure_codes = clinical_codes.load_from_package(config["opcs4_codes_file"])
+        diagnosis_codes = clinical_codes.load_from_file(config["icd10_codes_file"])
+        procedure_codes = clinical_codes.load_from_file(config["opcs4_codes_file"])
         code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
  
         log.info("Recreating episodes, codes and index spells tables")
