@@ -54,8 +54,9 @@ def main():
     from pyhbr.analysis import calibration
     from pyhbr.analysis import describe
     from pyhbr.analysis import model
-    
+
     import matplotlib.ticker as mtick
+    import seaborn as sns
 
     import importlib
 
@@ -155,7 +156,7 @@ def main():
 
         fig.suptitle("Top ten most important features by permutation importance")
         plt.tight_layout()
-    
+
         if args.model is not None:
             # Plot only
             plt.show()
@@ -195,11 +196,34 @@ def main():
         # Make the bleeding/ischaemia trade-off plot
         fig, ax = plt.subplots()
         probs = fit_results["probs"]
-        bleeding_probs = 100*probs["bleeding"].iloc[:,0]
-        ischaemia_probs = 100*probs["ischaemia"].iloc[:,0] 
-        ax.scatter(bleeding_probs, ischaemia_probs, marker=".", color="k")
+
+        def map_outcome(row):
+            if row["bleeding"] and row["ischaemia"]:
+                return "Both"
+            elif row["bleeding"]:
+                return "Bleeding"
+            elif row["ischaemia"]:
+                return "Ischaemia"
+            else:
+                return "Neither"
+
+        outcomes = y_test.apply(map_outcome, axis=1)
+        bleeding_probs = 100 * probs["bleeding"].iloc[:, 0]
+        ischaemia_probs = 100 * probs["ischaemia"].iloc[:, 0]
+
+        sns.scatterplot(
+            ax=ax,
+            x=bleeding_probs,
+            y=ischaemia_probs,
+            hue=outcomes,
+            hue_order=["Neither", "Ischaemia", "Bleeding", "Both"],
+            palette={"Neither": "g", "Ischaemia": "b", "Bleeding": "r", "Both": "k"},
+            marker="."
+        )
+        # ax.scatter(bleeding_probs, ischaemia_probs, marker=".", color="k")
+
         ax.set_xlim(1, 100)
-        ax.set_ylim(1, 100)        
+        ax.set_ylim(1, 100)
         ax.set_yscale("log")
         ax.set_xscale("log")
         ax.set_xticks([1, 2, 5, 10, 20, 50, 100])
@@ -221,7 +245,7 @@ def main():
                     f"{analysis_name}_{model_name}_trade_off", config["save_dir"], "png"
                 )
             )
-        plt.close()        
+        plt.close()
 
         for outcome in ["bleeding", "ischaemia"]:
 
