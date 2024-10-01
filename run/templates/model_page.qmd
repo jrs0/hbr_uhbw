@@ -1,0 +1,53 @@
+## {{ model["title"] }}
+
+This is a summary of the {{ model["text"] }} model ({{ model["abbr"] }}).  {{ model["description"] }}
+
+![ROC curves for the {{ model["text"] }} model]({{ model["roc_curves_image"] }}){{ '{#' }}fig-roc-{{ model["abbr"] }}}
+
+For the bleeding model (on the right), the area under the ROC curve (AUC) for the model-under-test (red curve; trained using all the training data) is {{ model["roc_auc_bleeding"]}}. The bootstrap models (blue curves) give an idea of the variability in this metric.
+
+For the ischaemia model (on the left), the ROC AUC is {{ model["roc_auc_ischaemia"] }}
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+
+![Stability curves for the {{ model["text"] }} model for bleeding]({{ model["stability_bleeding_image"] }}){{ '{#' }}fig-stability-bleeding-{{ model["abbr"] }}}
+
+The stability analysis for the bleeding model, showing the consistency of model risk estimates, is shown in Figure @fig-stability-bleeding-{{ model["abbr"] }}. On the left, the absolute instability in risk estimates is shown as a function of estimated risk. The average absolute risk instability between the model-under-test and the bootstrap models (across all risk estimates) is {{ model["instability_bleeding"] }}. On the right, the chance of reclassifying patients as low or high risk is shown as a function of model-under-test- risk estimate.
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+
+![Calibration of the {{ model["text"] }} model for bleeding]({{ model["calibration_bleeding_image"] }}){{ '{#' }}fig-calibration-bleeding-{{ model["abbr"] }}}
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+
+![Stability curves for the {{ model["text"] }} model for ischaemia]({{ model["stability_ischaemia_image"] }}){{ '{#' }}fig-stability-ischaemia-{{ model["abbr"] }}}
+
+The stability analysis for the bleeding model, showing the consistency of model risk estimates, is shown in Figure @fig-stability-ischaemia-{{ model["abbr"] }}. On the left, the absolute instability in risk estimates is shown as a function of estimated risk. The average absolute risk instability between the model-under-test and the bootstrap models (across all risk estimates) is {{ model["instability_bleeding"] }}. On the right, the chance of reclassifying patients as low or high risk is shown as a function of model-under-test- risk estimate.
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+
+![Calibration of the {{ model["text"] }} model for ischaemia]({{ model["calibration_ischaemia_image"] }}){{ '{#' }}fig-stability-calibration-{{ model["abbr"] }}}
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+
+![Feature importance for the {{ model["text"] }} model]({{ model["feature_importance_image"] }}){{ '{#' }}fig-feature-importance-{{ model["abbr"] }}}
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}
+
+![Bleeding/ischaemia trade-off for the {{ model["text"] }} model]({{ model["trade_off_image"] }}){{ '{#' }}fig-trade-off-{{ model["abbr"] }}}
+
+{% raw %}
+{{< pagebreak >}}
+{% endraw %}

@@ -590,7 +590,7 @@ num_bootstraps: 10
 num_bins: 5
 
 # References
-bib_file: "../risk_management_file/ref.bib"
+bib_file: "ref.bib"
 citation_style: "citation_style.csl"
 
 # Jinja2 templates

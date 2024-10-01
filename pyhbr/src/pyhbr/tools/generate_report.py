@@ -206,7 +206,7 @@ def main():
 
     variables["index_start"] = raw_data["index_start"].strftime("%Y-%m-%d")
     variables["index_end"] = raw_data["index_end"].strftime("%Y-%m-%d")
-    variables["num_index_spells"] = len(raw_data["index_spells"])
+    variables["num_index_spells"] = len(data["index_spells"])
 
     # Get the list of code groups for the appendix
     codes = raw_data["code_groups"]
