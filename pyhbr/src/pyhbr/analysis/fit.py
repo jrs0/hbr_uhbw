@@ -43,7 +43,7 @@ def fit_model(
     feature_importances = {}
     for outcome in ["bleeding", "ischaemia"]:
 
-        print(f"Fitting {outcome} model")
+        log.info(f"Fitting {outcome} model")
 
         # Fit the bleeding and ischaemia models on the training set
         # and bootstrap resamples of the training set (to assess stability)
@@ -51,7 +51,7 @@ def fit_model(
             pipe, X_train, y_train.loc[:, outcome], num_bootstraps, random_state
         )
 
-        print(f"Running permutation feature importance on {outcome} model M0")
+        log.info(f"Running permutation feature importance on {outcome} model M0")
         M0 = fitted_models[outcome].M0
         r = permutation_importance(
             M0,
