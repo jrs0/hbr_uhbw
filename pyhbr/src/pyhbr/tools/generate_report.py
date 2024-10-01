@@ -38,6 +38,7 @@ def main():
     import pickle
     from pyhbr import common
     import pandas as pd
+    from loguru import logger as log
 
     # Read the configuration file
     with open(args.config_file) as stream:
@@ -47,13 +48,27 @@ def main():
             print(f"Failed to load config file: {exc}")
             exit(1)
 
+    # Load the config file
+    config = common.read_config_file(args.config_file)
+    analysis_name = config["analysis_name"]
+    save_dir = config["save_dir"]
+    now = common.current_timestamp()
+
+    # Set up the log file output for plot/describe script
+    log_file = (
+        Path(save_dir) / Path(analysis_name + f"_generate_report_{now}")
+    ).with_suffix(".log")
+    log_format = "{time} {level} {message}"
+    log_id = log.add(log_file, format=log_format)
+
+    # Load the data files
+    data, raw_data, data_path = common.load_most_recent_data_files(
+        analysis_name, save_dir
+    )
+
     # relative to the current working directory
     build_dir = Path(config["build_directory"])
     build_dir.mkdir(parents=True, exist_ok=True)
-
-    # This is used to load a file, and is also used
-    # as the prefix for all saved data files.
-    analysis_name = config["analysis_name"]
 
     # Make a subdirectory for this report
     report_dir = build_dir / Path(f"{analysis_name}_report")
@@ -66,9 +81,6 @@ def main():
     # Make the output folder for images in the build directory
     image_dest_dir = report_dir / Path("images")
     image_dest_dir.mkdir(parents=True, exist_ok=True)
-
-    # Get the path to saved data files
-    save_dir = Path(config["save_dir"])
 
     # Copy the config and adjust to create Jinja2 variables
     variables = copy.deepcopy(config)
@@ -190,19 +202,14 @@ def main():
     )
 
     # Load the data (this is the same file copied above)
-    data, data_path = common.load_item(f"{analysis_name}_data", save_dir=save_dir)
+    #data, data_path = common.load_item(f"{analysis_name}_data", save_dir=save_dir)
 
-    # Find the name of the raw data file and load it
-    print(data.keys())
-    with open(save_dir / data[f"raw_file"], "rb") as file:
-        raw = pickle.load(file)
-
-    variables["index_start"] = raw["index_start"].strftime("%Y-%m-%d")
-    variables["index_end"] = raw["index_end_date"].strftime("%Y-%m-%d")
-    variables["num_index_spells"] = len(raw["index_spells"])
+    variables["index_start"] = raw_data["index_start"].strftime("%Y-%m-%d")
+    variables["index_end"] = raw_data["index_end"].strftime("%Y-%m-%d")
+    variables["num_index_spells"] = len(raw_data["index_spells"])
 
     # Get the list of code groups for the appendix
-    codes = raw["code_groups"]
+    codes = raw_data["code_groups"]
     codes["group"] = codes["group"].map(variables["code_groups"])
     codes["code"] = codes["code"].str.upper()
     diagnosis_codes = (

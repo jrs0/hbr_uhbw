@@ -497,6 +497,7 @@ def main():
     # for saving.
     data = {
         "raw_file": raw_path.name,
+        "index_spells": index_spells,
         
         # Codes data
         "code_groups": code_groups,
