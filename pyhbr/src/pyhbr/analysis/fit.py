@@ -3,7 +3,7 @@ from pandas import DataFrame
 from sklearn.pipeline import Pipeline
 from pyhbr.analysis import stability, calibration, roc, model
 from sklearn.inspection import permutation_importance
-
+from loguru import logger as log
 
 def fit_model(
     pipe: Pipeline,

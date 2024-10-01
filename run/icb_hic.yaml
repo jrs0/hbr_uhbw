@@ -708,7 +708,7 @@ models:
     pipe_fn: "pyhbr.analysis.model.make_mlp"
     config:
       alpha: "1e-5"
-      hidden_layer_sizes: "(20,)"
+      hidden_layer_sizes: "(100,)"
       solver: "'lbfgs'"
       max_iter: "1000"
     description: >
