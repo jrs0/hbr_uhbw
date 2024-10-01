@@ -65,12 +65,18 @@ The distribution of primary/secondary ICD-10 code positions for non-fatal bleedi
 
 For non-fatal bleeding, the primary code and codes up to secondary {{ bleeding_secondary_cutoff }} are included. For non-fatal ischaemia, up to secondary {{ ischaemia_secondary_cutoff }} is included.
 
-Fatal bleeding and ischaemia outcomes, based on a bleeding or ischaemia primary cause of death ICD-10 code in a Civil Registration Mortality database, are included in the outcome count.
+Fatal bleeding and ischaemia outcomes, based on a bleeding or ischaemia primary cause of death ICD-10 code in a Civil Registration Mortality database, are included in the outcome count. A summary of the total number of each outcome is shown in @tbl-outcome-prevalence.
 
 {{ outcome_prevalences }}
 : Total number of outcomes that occurred within 1 year of the index ACS. The dataset contains {{ num_index_spells }} ACS events between the dates {{ index_start }} and {{ index_end }} {{ '{#' }}tbl-outcome-prevalence}
 
-A summary of the total number of each outcome is shown in Table~\ref{tab:outcome-prevalence}.
+![Kaplan-Meier curves for bleeding and ischaemia outcomes over one year]({{ outcome_survival_image }}){{ '{#' }}fig-outcome-survival-curves}
+
+@fig-outcome-survival-curves shows Kaplan-Meier curves for the bleeding and ischaemia outcomes over the course of one year, broken down by age. Both outcomes have low prevalence, with adverse bleeding outcomes occurring more infrequently than ischaemia outcomes.
+
+![Kaplan-Meier curves for bleeding outcome by ARC HBR score]({{ arc_survival_image }}){{ '{#' }}fig-arc-survival-curves}
+
+@fig-arc-survival-curves shows Kaplan-Meier curves for bleeding over the course of one year, broken down by ARC HBR score.
 
 ## Models
 

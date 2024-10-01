@@ -233,6 +233,12 @@ def main():
     # Copy plots from the descriptive script
     variables["codes_hist_image"] = copy_most_recent_image(f"{analysis_name}_codes_hist")
 
+    # Copy plots from the descriptive script
+    variables["outcome_survival_image"] = copy_most_recent_image(f"{analysis_name}_survival")
+
+    # Copy plots from the descriptive script
+    variables["arc_survival_image"] = copy_most_recent_image(f"{analysis_name}_arc_survival")    
+
     # Copy the most recent version of each figure into the
     # build directory
     for name, model in variables["models"].items():

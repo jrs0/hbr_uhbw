@@ -494,7 +494,7 @@ def plot_reclass_instability(
     # high_risk_rect = Rectangle((100*threshold, min_unstable_prob), 100*(1 - threshold), 100, facecolor="r", alpha=0.3)
     # ax[1].add_patch(high_risk_rect)
 
-    text_str = f"High-risk threshold ({100*threshold}%)"
+    text_str = f"High-risk threshold ({100*threshold:.2f}%)"
     ax.text(
         100 * threshold,
         min_unstable_prob * 1.1,
