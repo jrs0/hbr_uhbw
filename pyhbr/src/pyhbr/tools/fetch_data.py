@@ -457,6 +457,10 @@ def main():
     log.info("Making index features")
     features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_start"])
 
+    log.info("Getting therapy from primary care prescriptions")
+    therapy = acs.get_therapy(index_spells, primary_care_prescriptions)
+    features_index = features_index.merge(therapy, how="left", on="spell_id")
+
     log.info("calculate ARC HBR score")
     arc_hbr_score = pd.DataFrame(index=features_index.index)
     arc_hbr_score["arc_hbr_age"] = arc_hbr.arc_hbr_age(features_index)

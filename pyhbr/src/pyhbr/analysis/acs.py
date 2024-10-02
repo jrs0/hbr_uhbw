@@ -4,6 +4,7 @@ from pyhbr.clinical_codes import counting
 from pyhbr.analysis import describe
 from pyhbr.middle import from_hic  # Need to move the function
 import pandas as pd
+import numpy as np
 
 
 def get_index_spells(
@@ -690,3 +691,69 @@ def get_secondary_care_prescriptions_features(
 
     # Join back onto index events and set missing entries to zero
     return index_spells[[]].merge(dummies, how="left", on="spell_id").fillna(0)
+
+def get_therapy(index_spells: DataFrame, primary_care_prescriptions: DataFrame) -> DataFrame:
+    """Get therapy (DAPT, etc.) recorded in primary care prescriptions in 60 days after index
+
+    Args:
+        index_spells: Index spells, containing `spell_id`
+        primary_care_prescriptions: Contains a column `name` with the prescription
+            and `date` when the prescription was recorded.
+
+    Returns:
+        DataFrame with a column `therapy` indexed by `spell_id`
+    """
+
+    # Fetch a particular table or item from raw_data
+    df = primary_care_prescriptions.copy()
+
+
+    def map_medicine(x):
+        if x is None:
+            return np.nan
+        medicines = ["warfarin", "ticagrelor", "prasugrel", "clopidogrel", "aspirin"]
+        for m in medicines:
+            if m in x.lower():
+                return m
+        return np.nan
+
+
+    df["medicine"] = df["name"].apply(map_medicine)
+
+    # Join primary care prescriptions onto index spells
+    df = index_spells.reset_index().merge(
+        df, on="patient_id", how="left"
+    )
+
+    # Filter to only prescriptions seen in the following month
+    df = df[
+        (df["spell_start"] - df["date"] < dt.timedelta(days=0))
+        & (df["date"] - df["spell_start"] < dt.timedelta(days=60))
+        & ~df["medicine"].isna()
+    ]
+
+    def map_therapy(x):
+        
+        aspirin = x["medicine"].eq("aspirin").any()
+        oac = x["medicine"].eq("warfarin").any()
+        p2y12 = x["medicine"].isin(["ticagrelor", "prasugrel", "clopidogrel"]).any()
+        
+        if aspirin & p2y12 & oac:
+            return "Triple"
+        elif aspirin & x["medicine"].eq("ticagrelor").any():
+            return "DAPT-AT"
+        elif aspirin & x["medicine"].eq("prasugrel").any():
+            return "DAPT-AP"
+        elif aspirin & x["medicine"].eq("clopidogrel").any():
+            return "DAPT-AC"
+        elif aspirin:
+            return "Single"
+        else:
+            return np.nan
+
+    # Get the type of therapy seen after the index spell
+    therapy = df.groupby("spell_id")[["medicine"]].apply(map_therapy).rename("therapy")
+
+    # Join back onto the index spells to include cases where no
+    # therapy was seen
+    return index_spells[[]].merge(therapy, on="spell_id", how="left")
