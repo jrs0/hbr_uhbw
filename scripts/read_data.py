@@ -22,6 +22,7 @@ data.keys()
 
 # Access data files as follows
 index_spells = data["index_spells"]
+features_index = data["features_index"]
 
 # The data file saved by fetch_data contains a "raw_data"
 # key, which is a path to the raw data used to build the

@@ -13,6 +13,7 @@ from pyhbr import common
 
 from sksurv.nonparametric import kaplan_meier_estimator
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def proportion_nonzero(column: Series) -> float:
@@ -46,8 +47,9 @@ def column_prop(bool_col):
     and a percentage
     """
     count = bool_col.sum()
-    percent = 100*count/len(bool_col)
+    percent = 100 * count / len(bool_col)
     return f"{count} ({percent:.2f}%)"
+
 
 def proportion_missingness(data: DataFrame) -> Series:
     """Get the proportion of missing values in each column
@@ -110,10 +112,11 @@ def nearly_constant(data: DataFrame, threshold: float) -> Series:
 
     return data.apply(low_variance).rename("nearly_constant")
 
+
 def get_summary_table(
     models: dict[str, Any],
     high_risk_thresholds: dict[str, float],
-    config: dict[str, Any]
+    config: dict[str, Any],
 ):
     """Get a table of model metric comparison across different models
 
@@ -136,18 +139,18 @@ def get_summary_table(
     risk_accuracy = []
     low_risk_reclass = []
     high_risk_reclass = []
-    model_key = [] # For identifying the model later
-    outcome_key = [] # For identifying the outcome later
-    median_auc = [] # Numerical AUC for finding the best model
+    model_key = []  # For identifying the model later
+    outcome_key = []  # For identifying the outcome later
+    median_auc = []  # Numerical AUC for finding the best model
 
     for model, model_data in models.items():
         for outcome in ["bleeding", "ischaemia"]:
-            
+
             model_key.append(model)
             outcome_key.append(outcome)
-            
+
             fit_results = model_data["fit_results"]
-            
+
             # Abbreviated model name
             model_abbr = config["models"][model]["abbr"]
             outcome_abbr = config["outcomes"][outcome]["abbr"]
@@ -173,25 +176,30 @@ def get_summary_table(
             count = 0
             for n in range(len(all_calibrations)):
                 if all_calibrations["est_prev"].iloc[n] > 0:
-                    
+
                     # This assumes that all risk predictions in the bin are at the bin center, with no
                     # distribution (i.e. the result is normal with a distribution based on the sample
                     # mean of the prevalence. For more accuracy, consider using the empirical distribution
                     # of the risk predictions in the bin as the basis for this calculation.
-                    accuracy_mean += np.abs(all_calibrations["bin_center"].iloc[n] - all_calibrations["est_prev"].iloc[n])
-                    
+                    accuracy_mean += np.abs(
+                        all_calibrations["bin_center"].iloc[n]
+                        - all_calibrations["est_prev"].iloc[n]
+                    )
+
                     # When adding normal distributions together, the variances sum.
                     accuracy_variance += all_calibrations["est_prev_variance"].iloc[n]
-                    
+
                     count += 1
             accuracy_mean /= count
             accuracy_variance /= count
-            
+
             # Calculate a 95% confidence interval for the resulting mean of the accuracies,
             # assuming all the distributions are normal.
-            ci_upper = accuracy_mean + 1.96*np.sqrt(accuracy_variance)
-            ci_lower = accuracy_mean - 1.96*np.sqrt(accuracy_variance)
-            risk_accuracy.append(f"{100*accuracy_mean:.2f}%, CI [{100*ci_lower:.2f}%, {100*ci_upper:.2f}%]")
+            ci_upper = accuracy_mean + 1.96 * np.sqrt(accuracy_variance)
+            ci_lower = accuracy_mean - 1.96 * np.sqrt(accuracy_variance)
+            risk_accuracy.append(
+                f"{100*accuracy_mean:.2f}%, CI [{100*ci_lower:.2f}%, {100*ci_upper:.2f}%]"
+            )
 
             threshold = high_risk_thresholds[outcome]
             y_test = model_data["y_test"][outcome]
@@ -214,7 +222,6 @@ def get_summary_table(
             ).quantile([0.025, 0.5, 0.975])
             aucs.append(common.median_to_string(auc_spread, unit=""))
             median_auc.append(auc_spread[0.5])
-            
 
     return DataFrame(
         {
@@ -230,9 +237,10 @@ def get_summary_table(
         }
     ).set_index("Model", drop=True)
 
+
 def get_outcome_prevalence(outcomes: DataFrame) -> DataFrame:
     """Get the prevalence of each outcome as a percentage.
-    
+
     This function takes the outcomes dataframe used to define
     the y vector of the training/testing set and calculates the
     prevalence of each outcome in a form suitable for inclusion
@@ -250,28 +258,38 @@ def get_outcome_prevalence(outcomes: DataFrame) -> DataFrame:
             containing the "Outcome" ("Bleeding" or "Ischaemia"), and
             the outcome "Type" (fatal, total, etc.)
     """
-    df = 100*outcomes.rename(
-        columns={
-            "bleeding": "Bleeding.Total",
-            "non_fatal_bleeding": "Bleeding.Non-Fatal (BARC 2-4)",
-            "fatal_bleeding": "Bleeding.Fatal (BARC 5)",
-            "ischaemia": "Ischaemia.Total",
-            "non_fatal_ischaemia": "Ischaemia.Non-Fatal (MI/Stroke)",
-            "fatal_ischaemia": "Ischaemia.Fatal (CV Death)"
-        }
-    ).melt(value_name="Prevalence (%)").groupby("variable").sum() / len(outcomes)
+    df = (
+        100
+        * outcomes.rename(
+            columns={
+                "bleeding": "Bleeding.Total",
+                "non_fatal_bleeding": "Bleeding.Non-Fatal (BARC 2-4)",
+                "fatal_bleeding": "Bleeding.Fatal (BARC 5)",
+                "ischaemia": "Ischaemia.Total",
+                "non_fatal_ischaemia": "Ischaemia.Non-Fatal (MI/Stroke)",
+                "fatal_ischaemia": "Ischaemia.Fatal (CV Death)",
+            }
+        )
+        .melt(value_name="Prevalence (%)")
+        .groupby("variable")
+        .sum()
+        / len(outcomes)
+    )
     df = df.reset_index()
     df[["Outcome", "Type"]] = df["variable"].str.split(".", expand=True)
-    return df.set_index(["Outcome", "Type"])[["Prevalence (%)"]].apply(lambda x: round(x, 2))
+    return df.set_index(["Outcome", "Type"])[["Prevalence (%)"]].apply(
+        lambda x: round(x, 2)
+    )
+
 
 def pvalue_chi2_high_risk_vs_outcome(
     probs: DataFrame, y_test: Series, high_risk_threshold: float
 ) -> float:
     """Perform a Chi-2 hypothesis test on the contingency between estimated high risk and outcome
-    
+
     Get the p-value from the hypothesis test that there is no association
     between the estimated high-risk category, and the outcome. The p-value
-    is interpreted as the probability of getting obtaining the outcomes 
+    is interpreted as the probability of getting obtaining the outcomes
     corresponding to the model's estimated high-risk category under the
     assumption that there is no association between the two.
 
@@ -303,6 +321,7 @@ def pvalue_chi2_high_risk_vs_outcome(
     # is related to the outcome (null hypothesis is that there
     # is no relation).
     return scipy.stats.chi2_contingency(table.to_numpy()).pvalue
+
 
 def plot_clinical_code_distribution(ax, data, config):
     """Plot histograms of the distribution of bleeding/ischaemia codes
@@ -354,7 +373,8 @@ def plot_clinical_code_distribution(ax, data, config):
 
     plt.suptitle("Distribution of Bleeding/Ischaemia ICD-10 Primary/Secondary Codes")
     plt.tight_layout()
-    
+
+
 def plot_survival_curves(ax, data, config):
     """Plot survival curves for bleeding/ischaemia broken down by age
 
@@ -362,8 +382,8 @@ def plot_survival_curves(ax, data, config):
         ax: A list of two axes objects
         data: A loaded data file
         config: The analysis config (from yaml)
-    """    
-    
+    """
+
     # Mask the dataset by age to get different survival plots
     features_index = data["features_index"]
     print(features_index)
@@ -433,6 +453,7 @@ def plot_survival_curves(ax, data, config):
 
     plt.tight_layout()
 
+
 def plot_arc_hbr_survival(ax, data, config):
     """Plot survival curves for bleeding by ARC HBR score
 
@@ -440,37 +461,84 @@ def plot_arc_hbr_survival(ax, data, config):
         ax: One axis object
         data: A loaded data file
         config: The analysis config (from yaml)
-    """        
-    
+    """
+
     # Get bleeding survival data
     survival = data["bleeding_survival"]
-    
+    features_index = data["features_index"]
+    arc_hbr_score = data["arc_hbr_score"]
+    arc_hbr_score["score"] = pd.cut(
+        data["arc_hbr_score"]["total_score"],
+        [0, 1, 2, 100],
+        labels=["Score = 0", "0 < Score <= 1", "Score > 1"],
+        right=False,
+    )
+
     def masked_survival(survival, mask):
         masked_survival = survival[mask]
         status = ~masked_survival["right_censor"]
         survival_in_days = masked_survival["time_to_event"].dt.days
         return kaplan_meier_estimator(status, survival_in_days, conf_type="log-log")
 
-    def add_arc_survival(ax, arc_mask, label):
+    def add_arc_survival(ax, arc_mask, label, color):
         time, survival_prob, conf_int = masked_survival(survival, arc_mask)
 
-        ax.step(time, survival_prob, where="post")
-        ax.fill_between(
-            time, conf_int[0], conf_int[1], alpha=0.25, step="post", label=label
+        ax[0].step(time, survival_prob, where="post", color=color)
+        ax[0].fill_between(
+            time,
+            conf_int[0],
+            conf_int[1],
+            alpha=0.25,
+            step="post",
+            label=label,
+            color=color,
         )
 
-    # Plot survival curves by ARC score
-    arc_mask = data["arc_hbr_score"]["total_score"] == 0
-    add_arc_survival(ax, arc_mask, "Score = 0.0")
-    arc_mask = data["arc_hbr_score"]["total_score"] == 1
-    add_arc_survival(ax, arc_mask, "Score = 1.0")
-    arc_mask = data["arc_hbr_score"]["total_score"] == 2
-    add_arc_survival(ax, arc_mask, "Score = 2.0")
-    arc_mask = data["arc_hbr_score"]["total_score"] >= 3
-    add_arc_survival(ax, arc_mask, "Score >= 3.0")
+    df = (
+        features_index[["therapy"]]
+        .fillna("Missing")
+        .merge(arc_hbr_score[["score"]], how="left", on="spell_id")
+        .groupby(["therapy", "score"], as_index=False)
+        .size()
+    )
+    df["score_sum"] = df.groupby("score")["size"].transform(sum)
+    df["percent"] = 100 * df["size"] / df["score_sum"]
+    print(df.sort_values(["score", "therapy"]))
+    df = df.rename(
+        columns={"therapy": "Therapy", "percent": "Percent", "score": "Score"}
+    ).drop(columns=["size", "score_sum"])
+    print(df)
 
-    ax.set_ylim(0.90, 1.00)
-    ax.set_ylabel(r"Est. probability of no adverse event")
-    ax.set_xlabel("Time (days)")
-    ax.set_title("Bleeding outcome survival curves by ARC HBR score")
-    plt.legend()
+    # Set custom order of therapy (least to most aggressive)
+    df["Therapy"] = pd.Categorical(df["Therapy"], ["Single", "DAPT-AC", "DAPT-AP", "DAPT-AT", "Triple", "Missing"])
+    df = df.sort_values("Therapy")
+
+    # Plot the distribution of therapies
+    sns.barplot(
+        data=df,
+        x="Therapy",
+        y="Percent",
+        hue="Score",
+        ax=ax[1],
+        palette={
+            "Score = 0": "tab:green",
+            "0 < Score <= 1": "tab:orange",
+            "Score > 1": "tab:red",
+        },
+    )
+
+    # Plot survival curves by ARC score
+    arc_mask = arc_hbr_score["score"] == "Score = 0"
+    add_arc_survival(ax, arc_mask, "Score = 0", "tab:green")
+    arc_mask = arc_hbr_score["score"] == "0 < Score <= 1"
+    add_arc_survival(ax, arc_mask, "0 < Score <= 1", "tab:orange")
+    arc_mask = arc_hbr_score["score"] == "Score > 1"
+    add_arc_survival(ax, arc_mask, "Score > 1", "tab:red")
+
+    ax[0].set_ylim(0.90, 1.00)
+    ax[0].set_ylabel(r"Est. probability of no adverse event")
+    ax[0].set_xlabel("Time (days since index ACS admission)")
+    ax[0].set_title("Bleeding outcome survival curves by ARC HBR score")
+    ax[0].legend()
+    
+    #plt.legend()

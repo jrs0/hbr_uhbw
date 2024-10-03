@@ -92,7 +92,7 @@ def main():
     plot_or_save(args.plot, f"{analysis_name}_survival", save_dir)
 
     # Plot the bleeding survival curves by ARC HBR score
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(1, 2, figsize=figsize)
     describe.plot_arc_hbr_survival(ax, data, config)
     plot_or_save(args.plot, f"{analysis_name}_arc_survival", save_dir)
 
