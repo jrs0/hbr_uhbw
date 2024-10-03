@@ -454,11 +454,11 @@ def plot_survival_curves(ax, data, config):
     plt.tight_layout()
 
 
-def plot_arc_hbr_survival(ax, data, config):
-    """Plot survival curves for bleeding by ARC HBR score
+def plot_arc_hbr_survival(ax, data, ):
+    """Plot survival curves for bleeding by ARC HBR score.
 
     Args:
-        ax: One axis object
+        ax: List of two axes objects
         data: A loaded data file
         config: The analysis config (from yaml)
     """
