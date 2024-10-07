@@ -478,7 +478,7 @@ def load_item(
 
     if item_path is None:
         print("Aborted (interactive) load item")
-        return None
+        return None, None
 
     print(f"Loading {item_path}")
 

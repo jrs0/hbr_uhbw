@@ -43,4 +43,10 @@ Passing `-q` will not stop the script processing the data into index events and 
 
 On subsequent runs, to speed things up, you can run `fetch-data -f icb_hic.yaml` (without `-q`). This will load the latest raw data from the `save_data` folder instead of getting it from the SQL server.
 
-The 
+!!! note "Extract CSV files from data"
+
+    You can get CSV file versions of the DataFrames saved by `fetch-data` using the `get-csv` script (run `get-csv -h` for help). For example, to get tables from the `icb_hic_data_{commit}_{timestamp}.pkl` files, run `get-csv -f icb_hic.yaml -n data`. The `-n data` argument is important, and specifies what file you want to load. You only need to specify the `name` part of the file. To get this, strip off the `analysis_name` from the front (`icb_hic_` in this case, see `icb_hic.yaml`), and the commit/timestamp information (`_{commit}_{timestamp}.pkl`) from the end.
+    
+    If you have multiple files with different timestamps (e.g. because you ran `fetch-data` multiple times), you will be prompted interactively for which file you want to load.
+
+    The `get-csv` script can be used to access DataFrames from any data file containing a dictionary mapping strings to DataFrames (this is most files).
