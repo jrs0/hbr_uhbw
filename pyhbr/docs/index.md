@@ -50,3 +50,36 @@ On subsequent runs, to speed things up, you can run `fetch-data -f icb_hic.yaml`
     If you have multiple files with different timestamps (e.g. because you ran `fetch-data` multiple times), you will be prompted interactively for which file you want to load.
 
     The `get-csv` script can be used to access DataFrames from any data file containing a dictionary mapping strings to DataFrames (this is most files).
+
+The tables contained in the output data from the `fetch-data` script are:
+
+* `index_spells`: The list of index ACS/PCI spells .
+* `code_groups`: The table of diagnosis/procedure code groups defined by the `icd10.yaml` and `opcs4.yaml` files.
+* `codes`: Which diagnosis/procedure codes occurred in patient episodes.
+* `episodes`: Patient episodes, including age on admission and gender.
+* `outcomes`: Bleeding/ischaemia fatal and non-fatal outcomes within one year (boolean).
+* `non_fatal_bleeding`/`fatal_bleeding`/`non_fatal_ischaemia`/`fatal_ischaemia`: Details of the outcomes.
+* `bleeding_survival`/`ischaemia_survival`: Data about when the outcomes occurred within one year
+* `features_index`/`features_codes`/`features_attributes`/`features_prescriptions`/`features_measurements`/`features_secondary_prescriptions`/`features_lab`: Features derived from each dataset.
+* `arc_hbr_score`: The ARC HBR score for each patient, including components.
+
+### `plot-describe`
+
+This script is run after the `fetch-data` script as follows:
+
+```bash
+# Plots are saved in the save_data folder
+plot-describe -f icb_hic.yaml
+```
+
+A log of this script is saved to `icb_hic_plot_decsribe_{timestamp}.log`. To view the plots instead of saving them, add the `-p` flag to the line above. Each plot will be draw one after the other -- to move onto the next plot, mouse-over the plot and press `q`.
+
+### `run-model`
+
+The list of models to run are described under the `models` key in the `icb_hic.yaml` file. Although it is possible to run all the models at once, it is easier and quicker to run them one-at-a-time by passing the `-m` argument as follows:
+
+```bash
+run-model -f icb_hic.yaml -m logistic_regression
+```
+
+Each run of the script saves results in the `save_data` directory
