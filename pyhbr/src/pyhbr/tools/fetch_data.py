@@ -46,7 +46,7 @@ def main():
         
     analysis_name = config["analysis_name"]
     save_dir = config["save_dir"]
-    now = common.current_timestamp()   
+    now = common.current_timestamp()
                 
     # Set up the log file output for the SQL queries
     log_file = (Path(save_dir) / Path(analysis_name + f"_fetch_data_sql_{now}")).with_suffix(".log")
