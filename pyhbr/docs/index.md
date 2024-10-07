@@ -82,4 +82,15 @@ The list of models to run are described under the `models` key in the `icb_hic.y
 run-model -f icb_hic.yaml -m logistic_regression
 ```
 
-Each run of the script saves results in the `save_data` directory
+Each run of the script saves results in the `save_data` directory. The script writes to a log called `icb_hic_run_model_{timestamp}.log`. 
+
+The model results are saved to a file called `icb_hic_{model_name}_{commit}_{timestamp}.pkl`, which stores the training and test sets (features and outcomes), and the model predictions.
+
+Before fitting the models, the training set is resampled to create a number of bootstrap datasets (the number is configured in `icb_hic.yaml`). The model is fitted on each of these bootstrap models to assess model stability. The probabilities for bleeding and ischaemia predicted by each bootstrap model is accessible in CSV format by running:
+
+```bash
+get_csv -f icb_hic.yaml -n logistic_regression
+```
+
+The relevant DataFrames have names like `fit_results_probs_{outcome_name}`, and have one column for each bootstrap model. The first column (`prob_M0`) is the primary model, and is fitted using the original training set (not a resample of it).
+

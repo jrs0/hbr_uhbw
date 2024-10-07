@@ -40,18 +40,47 @@ def main():
     if data is None:
         return
     
+    def get_all_dataframes(data) -> (list[str], list[pd.DataFrame]):
+        """Recursively fetch all dataframes from a dictionary
+        
+        Returns:
+            A tuple, where the first item is a list of DataFrame names
+                and the second item is the list of DataFrames. The names
+                list is formed by concatenating the keys in the dictionary
+                with underscore as a separator.
+        
+        """
+        name_list = []
+        df_list = []
+        
+        # Convert a list into a dict with index keys
+        if isinstance(data, list):
+            data = { n: value for n, value in enumerate(data) }
+        
+        for key, value in data.items():
+            if isinstance(value, pd.DataFrame):
+                name_list.append(key)
+                df_list.append(value)
+            elif isinstance(value, dict) or isinstance(value, list):
+                # Recursively descend into the next dictionary data
+                sub_name_list, sub_df_list = get_all_dataframes(value)
+
+                # Prepend the current key to the name list
+                name_list += [f"{key}_{sub_name}" for sub_name in sub_name_list]
+
+                # Append the dataframes
+                df_list += sub_df_list
+        
+        return name_list, df_list
+    
+    name_list, df_list = get_all_dataframes(data)  
+
     print("\nFound the following DataFrame items in the loaded item")
-    name_list = []
-    load_list = []
-    count = 0
-    for key, value in data.items():
-        if isinstance(value, pd.DataFrame):
-            print(f" {count}: {key}")
-            name_list.append(key)
-            load_list.append(value)
-            count += 1
+
+    for n, name in enumerate(name_list):
+            print(f" {n}: {name}")
             
-    num_dataframes = len(load_list)
+    num_dataframes = len(name_list)
     while True:
         try:
             raw_choice = input(
@@ -70,7 +99,7 @@ def main():
     
     # Write the item to CSV
     print("\nWriting the following DataFrame to CSV:\n")
-    df = load_list[choice]
+    df = df_list[choice]
     print(df)
     df_path = (Path(save_dir) / Path(name_list[choice])).with_suffix(".csv")
     df.to_csv(df_path)
