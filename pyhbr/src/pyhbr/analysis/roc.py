@@ -83,7 +83,7 @@ def plot_roc_curves(ax, curves, auc, title = "ROC-stability Curves"):
     stability). This argument is the output from get_bootstrapped_auc.
     """
     mut_curve = curves[0]  # model-under-test
-    ax.plot(mut_curve[0], mut_curve[1], color="r")
+    ax.plot(mut_curve["fpr"], mut_curve["tpr"], color="r")
     for curve in curves[1:]:
         ax.plot(curve["fpr"], curve["tpr"], color="b", linewidth=0.3, alpha=0.4)
     ax.axline([0, 0], [1, 1], color="k", linestyle="--")

@@ -580,7 +580,7 @@ def make_random_forest_cv(random_state: RandomState, X_train: DataFrame, config:
         param_distributions=config,
         random_state=random_state,
         scoring="roc_auc",
-        cv=2,
+        cv=5,
         verbose=3
     )
     return Pipeline([("preprocess", preprocess), ("model", mod)])
@@ -609,7 +609,7 @@ def make_nearest_neighbours_cv(random_state: RandomState, X_train: DataFrame, co
         param_distributions=config,
         random_state=random_state,
         scoring="roc_auc",
-        cv=2,
+        cv=5,
         verbose=3
     )
     return Pipeline([("preprocess", preprocess), ("model", mod)])

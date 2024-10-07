@@ -94,3 +94,17 @@ get_csv -f icb_hic.yaml -n logistic_regression
 
 The relevant DataFrames have names like `fit_results_probs_{outcome_name}`, and have one column for each bootstrap model. The first column (`prob_M0`) is the primary model, and is fitted using the original training set (not a resample of it).
 
+The calibration and ROC curves are also available as CSV files; these are indexed by the bootstrap model (0 for the primary model, >0 for bootstraps).
+
+### `make_results`
+
+This script takes the output from the fitted model and plots the graphs. You can run it as follows, on a per-model basis:
+
+```bash
+# Plot the results for logistic_regression interactively
+make-results -f icb_hic.yaml -m logistic_regression
+```
+
+Passing the `-m` parameter means the plots are shown interactively (cancel by pressing `q`), and not saved. It is useful to be able to switch between `run-model` and `make-results` to test the models, without having to wait for all models to run.
+
+To save the model plots, remove the `-m` parameter. This will cause the script to loop through all the models in the `icb_hic.yaml` file, plot all the figures, and save them all in the `save_data` directory. It is necessary to have run all the models first before doing this (otherwise errors will occur due to missing model files).
