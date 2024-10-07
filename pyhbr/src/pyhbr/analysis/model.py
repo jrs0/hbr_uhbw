@@ -653,6 +653,34 @@ def make_xgboost(random_state: RandomState, X_train: DataFrame, config: dict[str
     mod = XGBClassifier(tree_method="hist")
     return Pipeline([("preprocess", preprocess), ("model", mod)])
 
+def make_xgboost_cv(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
+    """XGBoost model trained using cross validation
+
+    Args:
+        random_state: Source of randomness for creating the model
+        X_train: The training dataset containing all features for modelling
+        config: The dictionary of keyword arguments to configure the CV search.
+
+    Returns:
+        The preprocessing and fitting pipeline.
+    """
+    preprocessors = [
+        make_category_preprocessor(X_train),
+        make_flag_preprocessor(X_train),
+        make_float_preprocessor(X_train),
+    ]
+    preprocess = make_columns_transformer(preprocessors)
+
+    mod = RandomizedSearchCV(
+        XGBClassifier(random_state=random_state),
+        param_distributions=config,
+        random_state=random_state,
+        scoring="roc_auc",
+        cv=5,
+        verbose=3
+    )
+    return Pipeline([("preprocess", preprocess), ("model", mod)])
+
 def make_svm(random_state: RandomState, X_train: DataFrame, config: dict[str, Any]) -> Pipeline:
 
     preprocessors = [
