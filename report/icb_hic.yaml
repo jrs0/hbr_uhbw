@@ -60,11 +60,6 @@ attributes_max_missingness: 0.75
 # the column is a constant value
 attributes_const_threshold: 0.95
 
-# Which stages should run in the fetch_data script
-fetch_stages:
-  #- fetch
-  - process
-
 # Names of features
 features:
   # HIC lab results

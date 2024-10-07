@@ -29,6 +29,7 @@ plot-describe = "pyhbr.tools.plot_describe:main"
 generate-report = "pyhbr.tools.generate_report:main"
 run-model = "pyhbr.tools.run_model:main"
 make-results = "pyhbr.tools.make_results:main"
+get-csv = "pyhbr.tools.get_csv:main"
 
 [project.gui-scripts]
 codes-editor = "pyhbr.clinical_codes.codes_editor.codes_editor:run_app"

@@ -14,6 +14,12 @@ def main():
         required=True,
         help="Specify the config file with settings",
     )
+    parser.add_argument(
+        "-q",
+        "--queries",
+        help="Do the SQL queries (instead of loading the data from save_dir)",
+        action="store_true",
+    )
 
     args = parser.parse_args()
     
@@ -51,7 +57,7 @@ def main():
     # step. If so, run the SQL query to fetch the SUS
     # data (this takes a long time), and save the result
     # to a file. 
-    if "fetch" in config["fetch_stages"]:
+    if args.queries:
         
         # Set a date range for episode fetch. The primary
         # care data start in Oct 2019. Use an end date
@@ -234,124 +240,121 @@ def main():
     secondary_care_prescriptions = raw["secondary_care_prescriptions"]
     date_of_death = raw["date_of_death"]
     cause_of_death = raw["cause_of_death"]
+    
+    # Start the data processing
 
-    # If the user has requested a SUS data fetch or a fetch of
-    # all the other tables (SWD, etc.), run the corresponding SQL
-    # queries and save the results
-    if "process" in config["fetch_stages"]:
+    log.info("Read code groups into tables")
+    diagnosis_codes = clinical_codes.load_from_file(config["icd10_codes_file"])
+    procedure_codes = clinical_codes.load_from_file(config["opcs4_codes_file"])
+    code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
 
-        log.info("Read code groups into tables")
-        diagnosis_codes = clinical_codes.load_from_file(config["icd10_codes_file"])
-        procedure_codes = clinical_codes.load_from_file(config["opcs4_codes_file"])
-        code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
- 
-        log.info("Recreating episodes, codes and index spells tables")
-        episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)        
-        index_spells = acs.get_index_spells(
-            episodes,
-            codes,
-            config["acs_index_code_group"],
-            config["pci_index_code_group"],
-            config["stemi_index_code_group"],
-            config["nstemi_index_code_group"],
-            config["complex_pci_index_code_group"],
-        )
-        
-        # Reduce the index spells to only those within the valid window
-        log.info(f"Reducing index events to those within {index_start} and {index_end}")
-        index_spells = index_spells[
-            (index_spells["spell_start"] < index_end)
-            & (index_spells["spell_start"] > index_start)
-        ]
-        log.info(f"Total number of index events is {len(index_spells)}")
-        
-        # Record some basic information in the log file
-        log.info(f"The number of ACS index events is {describe.column_prop(index_spells['acs_index'])}")
-        log.info(f"The number of PCI index events is {describe.column_prop(index_spells['pci_index'])}")
-        log.info(f"The number of complex PCI index events is {describe.column_prop(index_spells['complex_pci_index'])}")
-        log.info(f"The number of NSTEMI index events {describe.column_prop(index_spells['nstemi_index'])}")
-        log.info(f"The number of STEMI index events {describe.column_prop(index_spells['stemi_index'])}")
-        
-        log.info("Making features from HIC laboratory results")
-        features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
+    log.info("Recreating episodes, codes and index spells tables")
+    episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)        
+    index_spells = acs.get_index_spells(
+        episodes,
+        codes,
+        config["acs_index_code_group"],
+        config["pci_index_code_group"],
+        config["stemi_index_code_group"],
+        config["nstemi_index_code_group"],
+        config["complex_pci_index_code_group"],
+    )
+    
+    # Reduce the index spells to only those within the valid window
+    log.info(f"Reducing index events to those within {index_start} and {index_end}")
+    index_spells = index_spells[
+        (index_spells["spell_start"] < index_end)
+        & (index_spells["spell_start"] > index_start)
+    ]
+    log.info(f"Total number of index events is {len(index_spells)}")
+    
+    # Record some basic information in the log file
+    log.info(f"The number of ACS index events is {describe.column_prop(index_spells['acs_index'])}")
+    log.info(f"The number of PCI index events is {describe.column_prop(index_spells['pci_index'])}")
+    log.info(f"The number of complex PCI index events is {describe.column_prop(index_spells['complex_pci_index'])}")
+    log.info(f"The number of NSTEMI index events {describe.column_prop(index_spells['nstemi_index'])}")
+    log.info(f"The number of STEMI index events {describe.column_prop(index_spells['stemi_index'])}")
+    
+    log.info("Making features from HIC laboratory results")
+    features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
 
-        log.info("Making features from HIC secondary care prescriptions")
-        features_secondary_prescriptions = acs.get_secondary_care_prescriptions_features(
-            secondary_care_prescriptions, index_spells, episodes
-        )
+    log.info("Making features from HIC secondary care prescriptions")
+    features_secondary_prescriptions = acs.get_secondary_care_prescriptions_features(
+        secondary_care_prescriptions, index_spells, episodes
+    )
 
-        log.info("Processing SWD columns")
-        primary_care_attributes["smoking"] = from_icb.preprocess_smoking(
-            primary_care_attributes["smoking"]
-        )
-        primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
-            primary_care_attributes["ethnicity"]
-        )
+    log.info("Processing SWD columns")
+    primary_care_attributes["smoking"] = from_icb.preprocess_smoking(
+        primary_care_attributes["smoking"]
+    )
+    primary_care_attributes["ethnicity"] = from_icb.preprocess_ethnicity(
+        primary_care_attributes["ethnicity"]
+    )
 
-        log.info("Identify most recent attribute periods before index date")
-        index_spells_attributes_link = acs.link_attribute_period_to_index(
-            index_spells, primary_care_attributes
-        )
+    log.info("Identify most recent attribute periods before index date")
+    index_spells_attributes_link = acs.link_attribute_period_to_index(
+        index_spells, primary_care_attributes
+    )
 
-        log.info("Link all SWD attributes to index spells")
-        all_index_attributes = acs.get_index_attributes(
-            index_spells_attributes_link, primary_care_attributes
-        )
+    log.info("Link all SWD attributes to index spells")
+    all_index_attributes = acs.get_index_attributes(
+        index_spells_attributes_link, primary_care_attributes
+    )
 
-        max_missingness = config["attributes_max_missingness"]
-        const_threshold = config["attributes_const_threshold"]
-        log.info(f"Remove SWD attributes with more than {100*max_missingness:.2f}% missingness or where more than {100*const_threshold:.2f}% of the column is constant")
-        features_attributes = acs.remove_features(
-            all_index_attributes,
-            max_missingness=max_missingness,
-            const_threshold=const_threshold,
-        )
+    max_missingness = config["attributes_max_missingness"]
+    const_threshold = config["attributes_const_threshold"]
+    log.info(f"Remove SWD attributes with more than {100*max_missingness:.2f}% missingness or where more than {100*const_threshold:.2f}% of the column is constant")
+    features_attributes = acs.remove_features(
+        all_index_attributes,
+        max_missingness=max_missingness,
+        const_threshold=const_threshold,
+    )
 
-        log.info("Identify most recent attribute periods before index date for score segments")
-        index_spells_scores_link = acs.link_attribute_period_to_index(
-            index_spells, score_seg
-        )
+    log.info("Identify most recent attribute periods before index date for score segments")
+    index_spells_scores_link = acs.link_attribute_period_to_index(
+        index_spells, score_seg
+    )
 
-        log.info("Link score segments to index events for descriptive purposes")
-        info_index_scores = acs.get_index_attributes(
-            index_spells_attributes_link, score_seg
-        )
+    log.info("Link score segments to index events for descriptive purposes")
+    info_index_scores = acs.get_index_attributes(
+        index_spells_attributes_link, score_seg
+    )
 
-        log.info("Identifying all other diagnosis/procedure codes before and after the index event")
-        all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
+    log.info("Identifying all other diagnosis/procedure codes before and after the index event")
+    all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
 
-        log.info("Defining 7-day window after index for management type")
-        min_after = dt.timedelta(hours=0)
-        max_after = dt.timedelta(days=7)
-        pci_group = "all_pci_pathak"
-        cabg_group = "cabg_bortolussi"
-        info_management = acs.get_management(
-            index_spells, all_other_codes, min_after, max_after, pci_group, cabg_group
-        )
-        log.info(f"Breakdown of management: {info_management.value_counts()}")
+    log.info("Defining 7-day window after index for management type")
+    min_after = dt.timedelta(hours=0)
+    max_after = dt.timedelta(days=7)
+    pci_group = "all_pci_pathak"
+    cabg_group = "cabg_bortolussi"
+    info_management = acs.get_management(
+        index_spells, all_other_codes, min_after, max_after, pci_group, cabg_group
+    )
+    log.info(f"Breakdown of management: {info_management.value_counts()}")
 
-        log.info("Creating window for identifying outcomes")
-        min_after = dt.timedelta(hours=48)
-        max_after = dt.timedelta(days=365)
-        following_year = counting.get_time_window(all_other_codes, min_after, max_after)
+    log.info("Creating window for identifying outcomes")
+    min_after = dt.timedelta(hours=48)
+    max_after = dt.timedelta(days=365)
+    following_year = counting.get_time_window(all_other_codes, min_after, max_after)
 
-        # Get the non-fatal bleeding outcomes
-        # Excluding the index spells appears to have very
-        # little effect on the prevalence, so the index spell
-        # is excluded to be consistent with ischaemia outcome
-        # definition. Increasing maximum code position increases
-        # the bleeding rate, but 1 is chosen to restrict to cases
-        # where bleeding code is not historical/minor.
-        log.info("Identifying non-fatal bleeding outcomes")
-        max_position = config["outcomes"]["bleeding"]["non_fatal"]["max_position"]
-        exclude_index_spell = True
-        non_fatal_bleeding_group = config["outcomes"]["bleeding"]["non_fatal"]["group"]
-        non_fatal_bleeding = acs.filter_by_code_groups(
-            following_year,
-            non_fatal_bleeding_group,
-            max_position,
-            exclude_index_spell,
-        )
+    # Get the non-fatal bleeding outcomes
+    # Excluding the index spells appears to have very
+    # little effect on the prevalence, so the index spell
+    # is excluded to be consistent with ischaemia outcome
+    # definition. Increasing maximum code position increases
+    # the bleeding rate, but 1 is chosen to restrict to cases
+    # where bleeding code is not historical/minor.
+    log.info("Identifying non-fatal bleeding outcomes")
+    max_position = config["outcomes"]["bleeding"]["non_fatal"]["max_position"]
+    exclude_index_spell = True
+    non_fatal_bleeding_group = config["outcomes"]["bleeding"]["non_fatal"]["group"]
+    non_fatal_bleeding = acs.filter_by_code_groups(
+        following_year,
+        non_fatal_bleeding_group,
+        max_position,
+        exclude_index_spell,
+    )
 
     # Get fatal bleeding outcomes. Maximum code
     # position increases count, but is restricted

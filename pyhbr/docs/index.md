@@ -25,3 +25,22 @@ The models are run using five scripts:
 All scripts take a flag `-h` for help, which shows other flags, and all scripts require a YAML config file passed using `-f`. In the `report` folder, this file is called `icb_hic.yaml` and contains all the settings required to generate the models/report.
 
 All data and results are saved into a folder referred to as `save_dir`, which is set to `save_data`. All datasets, models, figures and other results will be stored in this folder, which should be gitignored. Items are saved with a timestamp and a git commit if the scripts are run from inside a git repository.
+
+### `fetch-data`
+
+The two purposes of this script are to fetch the data from the database, and process it into index events and features. The first time it is run, use:
+
+```bash
+# The -q flag runs the queries. The raw data are saved into the save_data
+fetch-data -f icb_hic.yaml -q
+```
+
+The script will log to a file `icb_hic_fetch_data_sql_{timestamp}.log` for the SQL-query part, and log to `icb_hic_fetch_data_process_{timestamp}.log` for the index, features, etc.
+
+The raw data (fetched from the SQL queries) is saved to a file `icb_hic_raw_{commit}_{timestamp}.pkl`
+
+Passing `-q` will not stop the script processing the data into index events and features. This part is logged to the file `icb_hic_fetch_data_process_{timestamp}.log`. The main data output from the script is saved to the file `icb_hic_data_{commit}_{timestamp}.pkl`. 
+
+On subsequent runs, to speed things up, you can run `fetch-data -f icb_hic.yaml` (without `-q`). This will load the latest raw data from the `save_data` folder instead of getting it from the SQL server.
+
+The 
