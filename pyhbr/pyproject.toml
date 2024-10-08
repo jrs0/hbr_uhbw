@@ -24,6 +24,7 @@ dependencies = [
   "loguru",
   "scikit-survival",
   "seaborn",
+  "xgboost",
 ]
 
 [project.scripts]
