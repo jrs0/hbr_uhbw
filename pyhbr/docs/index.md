@@ -108,3 +108,20 @@ make-results -f icb_hic.yaml -m logistic_regression
 Passing the `-m` parameter means the plots are shown interactively (cancel by pressing `q`), and not saved. It is useful to be able to switch between `run-model` and `make-results` to test the models, without having to wait for all models to run.
 
 To save the model plots, remove the `-m` parameter. This will cause the script to loop through all the models in the `icb_hic.yaml` file, plot all the figures, and save them all in the `save_data` directory. It is necessary to have run all the models first before doing this (otherwise errors will occur due to missing model files).
+
+### `generate-report`
+
+This script generates the source code for a Quarto report in the `build` folder. To generate and also render the report, run:
+
+```bash
+# Use -r to render the report
+generate-report -f icb_hic.yaml -r
+```
+
+To make the script faster, omit the `-r` to skip the render step. This will produce just the source code for the report, which is easier to use while modifying the report.
+
+The report text is generated using the files inside the `template` folder. These are Jinja2 templates, which contain markup like `{{ variable }}` to replace part of the text with a variable. You can edit these files to change the text of the report.
+
+All files used by the report are copied from the `save_data` folder to the `build` folder, so that the Quarto report is self-contained. There is no Python code inside the Quarto report, meaning it can be rendered using just Quarto without needing Python to be installed.
+
+The rationale for generating report source code is to allow flexibility in editing the document without needing to rerun Python code. In addition, figures are referred to by file name, which contains the timestamp and commit hash when the file was generated.
