@@ -200,6 +200,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Welcome to the PyHBR Docs
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="." class="md-nav__link md-nav__link--active">
         
   
@@ -209,6 +220,94 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#obtaining-the-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obtaining the code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running the code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running the code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fetch-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      fetch-data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plot-describe" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot-describe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      run-model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#make_results" class="md-nav__link">
+    <span class="md-ellipsis">
+      make_results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate-report
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -334,6 +433,83 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#obtaining-the-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Obtaining the code
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running the code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running the code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fetch-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      fetch-data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plot-describe" class="md-nav__link">
+    <span class="md-ellipsis">
+      plot-describe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      run-model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#make_results" class="md-nav__link">
+    <span class="md-ellipsis">
+      make_results
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate-report
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -348,7 +524,83 @@
 
 
 <h1 id="welcome-to-the-pyhbr-docs">Welcome to the PyHBR Docs</h1>
-<p>This python package contains tools relating to estimating the risk of bleeding/ischaemia risk in cardiology patients.</p>
+<p>This python package contains tools relating to estimating the risk of bleeding/ischaemia risk in cardiology patients. The main content of the package is a set of scripts for generating a report containing models of bleeding and ischaemia risk.</p>
+<h2 id="obtaining-the-code">Obtaining the code</h2>
+<p>The code for the python package <code>pyhbr</code> is available at <a href="https://github.com/jrs0/hbr_uhbw">this GitHub repository</a>, and the repository also contains the folder required for generating the report (not part of the Python package). The folder containing the report template is called <code>report</code>.</p>
+<p>After setting up a python environment (on Windows, install Python <a href="from https://www.python.org/downloads/">here</a> -- you do not need admin rights), you can download <code>pyhbr</code> either from Pip using <code>pip install pyhbr</code>, or from the git repository directly if you want to make changes to the package. In that case, read the instructions in the <a href="https://github.com/jrs0/hbr_uhbw/tree/main/pyhbr">README</a>.</p>
+<p>To test that <code>pyhbr</code> is installed, open a console (i.e. a terminal, not an interactive Python prompt), and run <code>fetch-data -h</code>. If this produces a help message (instead of something like <code>command not found</code>) then <code>pyhbr</code> is installed correctly.</p>
+<p>A separate program is used to create files of ICD-10 and OPCS-4 code groups (with names like <code>icd10.yaml</code> and <code>opcs4.yaml</code>). This program is contained in a <a href="https://github.com/jrs0/hbr_models">GitHub repository</a> under the <code>codes_editor</code> folder, and the program is available to download from the <a href="https://github.com/jrs0/hbr_models/releases/tag/codes-editor-v0.1.0">releases</a> page.</p>
+<h2 id="running-the-code">Running the code</h2>
+<p>The models are run using five scripts: </p>
+<ul>
+<li><code>fetch-data</code>, which fetches tables from the database and extracts index events, outcomes, and features.</li>
+<li><code>plot-describe</code>, which creates descriptive plots of the data (including features and outcomes).</li>
+<li><code>run-model</code>, which fits a primary model for bleeding and ischaemia and other bootstrap models for stability.</li>
+<li><code>make-results</code>, which takes the fitted models and creates plots of model fit, stability and calibration</li>
+<li><code>generate-report</code>, which creates a Quarto report in source code form containing the figures and results generated from the other scripts. If you have Quarto installed, this script can also render the report into PDF and Word format.</li>
+</ul>
+<p>All scripts take a flag <code>-h</code> for help, which shows other flags, and all scripts require a YAML config file passed using <code>-f</code>. In the <code>report</code> folder, this file is called <code>icb_hic.yaml</code> and contains all the settings required to generate the models/report.</p>
+<p>All data and results are saved into a folder referred to as <code>save_dir</code>, which is set to <code>save_data</code>. All datasets, models, figures and other results will be stored in this folder, which should be gitignored. Items are saved with a timestamp and a git commit if the scripts are run from inside a git repository.</p>
+<h3 id="fetch-data"><code>fetch-data</code></h3>
+<p>The two purposes of this script are to fetch the data from the database, and process it into index events and features. The first time it is run, use:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># The -q flag runs the queries. The raw data are saved into the save_data</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>fetch-data<span class="w"> </span>-f<span class="w"> </span>icb_hic.yaml<span class="w"> </span>-q
+</span></code></pre></div>
+<p>The script will log to a file <code>icb_hic_fetch_data_sql_{timestamp}.log</code> for the SQL-query part, and log to <code>icb_hic_fetch_data_process_{timestamp}.log</code> for the index, features, etc.</p>
+<p>The raw data (fetched from the SQL queries) is saved to a file <code>icb_hic_raw_{commit}_{timestamp}.pkl</code></p>
+<p>Passing <code>-q</code> will not stop the script processing the data into index events and features. This part is logged to the file <code>icb_hic_fetch_data_process_{timestamp}.log</code>. The main data output from the script is saved to the file <code>icb_hic_data_{commit}_{timestamp}.pkl</code>. </p>
+<p>On subsequent runs, to speed things up, you can run <code>fetch-data -f icb_hic.yaml</code> (without <code>-q</code>). This will load the latest raw data from the <code>save_data</code> folder instead of getting it from the SQL server.</p>
+<div class="admonition note">
+<p class="admonition-title">Extract CSV files from data</p>
+<p>You can get CSV file versions of the DataFrames saved by <code>fetch-data</code> using the <code>get-csv</code> script (run <code>get-csv -h</code> for help). For example, to get tables from the <code>icb_hic_data_{commit}_{timestamp}.pkl</code> files, run <code>get-csv -f icb_hic.yaml -n data</code>. The <code>-n data</code> argument is important, and specifies what file you want to load. You only need to specify the <code>name</code> part of the file. To get this, strip off the <code>analysis_name</code> from the front (<code>icb_hic_</code> in this case, see <code>icb_hic.yaml</code>), and the commit/timestamp information (<code>_{commit}_{timestamp}.pkl</code>) from the end.</p>
+<p>If you have multiple files with different timestamps (e.g. because you ran <code>fetch-data</code> multiple times), you will be prompted interactively for which file you want to load.</p>
+<p>The <code>get-csv</code> script can be used to access DataFrames from any data file containing a dictionary mapping strings to DataFrames (this is most files).</p>
+</div>
+<p>The tables contained in the output data from the <code>fetch-data</code> script are:</p>
+<ul>
+<li><code>index_spells</code>: The list of index ACS/PCI spells .</li>
+<li><code>code_groups</code>: The table of diagnosis/procedure code groups defined by the <code>icd10.yaml</code> and <code>opcs4.yaml</code> files.</li>
+<li><code>codes</code>: Which diagnosis/procedure codes occurred in patient episodes.</li>
+<li><code>episodes</code>: Patient episodes, including age on admission and gender.</li>
+<li><code>outcomes</code>: Bleeding/ischaemia fatal and non-fatal outcomes within one year (boolean).</li>
+<li><code>non_fatal_bleeding</code>/<code>fatal_bleeding</code>/<code>non_fatal_ischaemia</code>/<code>fatal_ischaemia</code>: Details of the outcomes.</li>
+<li><code>bleeding_survival</code>/<code>ischaemia_survival</code>: Data about when the outcomes occurred within one year</li>
+<li><code>features_index</code>/<code>features_codes</code>/<code>features_attributes</code>/<code>features_prescriptions</code>/<code>features_measurements</code>/<code>features_secondary_prescriptions</code>/<code>features_lab</code>: Features derived from each dataset.</li>
+<li><code>arc_hbr_score</code>: The ARC HBR score for each patient, including components.</li>
+</ul>
+<h3 id="plot-describe"><code>plot-describe</code></h3>
+<p>This script is run after the <code>fetch-data</code> script as follows:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Plots are saved in the save_data folder</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>plot-describe<span class="w"> </span>-f<span class="w"> </span>icb_hic.yaml
+</span></code></pre></div>
+<p>A log of this script is saved to <code>icb_hic_plot_decsribe_{timestamp}.log</code>. To view the plots instead of saving them, add the <code>-p</code> flag to the line above. Each plot will be draw one after the other -- to move onto the next plot, mouse-over the plot and press <code>q</code>.</p>
+<h3 id="run-model"><code>run-model</code></h3>
+<p>The list of models to run are described under the <code>models</code> key in the <code>icb_hic.yaml</code> file. Although it is possible to run all the models at once, it is easier and quicker to run them one-at-a-time by passing the <code>-m</code> argument as follows:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>run-model<span class="w"> </span>-f<span class="w"> </span>icb_hic.yaml<span class="w"> </span>-m<span class="w"> </span>logistic_regression
+</span></code></pre></div>
+<p>Each run of the script saves results in the <code>save_data</code> directory. The script writes to a log called <code>icb_hic_run_model_{timestamp}.log</code>. </p>
+<p>The model results are saved to a file called <code>icb_hic_{model_name}_{commit}_{timestamp}.pkl</code>, which stores the training and test sets (features and outcomes), and the model predictions.</p>
+<p>Before fitting the models, the training set is resampled to create a number of bootstrap datasets (the number is configured in <code>icb_hic.yaml</code>). The model is fitted on each of these bootstrap models to assess model stability. The probabilities for bleeding and ischaemia predicted by each bootstrap model is accessible in CSV format by running:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>get_csv<span class="w"> </span>-f<span class="w"> </span>icb_hic.yaml<span class="w"> </span>-n<span class="w"> </span>logistic_regression
+</span></code></pre></div>
+<p>The relevant DataFrames have names like <code>fit_results_probs_{outcome_name}</code>, and have one column for each bootstrap model. The first column (<code>prob_M0</code>) is the primary model, and is fitted using the original training set (not a resample of it).</p>
+<p>The calibration and ROC curves are also available as CSV files; these are indexed by the bootstrap model (0 for the primary model, &gt;0 for bootstraps).</p>
+<h3 id="make_results"><code>make_results</code></h3>
+<p>This script takes the output from the fitted model and plots the graphs. You can run it as follows, on a per-model basis:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Plot the results for logistic_regression interactively</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>make-results<span class="w"> </span>-f<span class="w"> </span>icb_hic.yaml<span class="w"> </span>-m<span class="w"> </span>logistic_regression
+</span></code></pre></div>
+<p>Passing the <code>-m</code> parameter means the plots are shown interactively (cancel by pressing <code>q</code>), and not saved. It is useful to be able to switch between <code>run-model</code> and <code>make-results</code> to test the models, without having to wait for all models to run.</p>
+<p>To save the model plots, remove the <code>-m</code> parameter. This will cause the script to loop through all the models in the <code>icb_hic.yaml</code> file, plot all the figures, and save them all in the <code>save_data</code> directory. It is necessary to have run all the models first before doing this (otherwise errors will occur due to missing model files).</p>
+<h3 id="generate-report"><code>generate-report</code></h3>
+<p>This script generates the source code for a Quarto report in the <code>build</code> folder. To generate and also render the report, run:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Use -r to render the report</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>generate-report<span class="w"> </span>-f<span class="w"> </span>icb_hic.yaml<span class="w"> </span>-r
+</span></code></pre></div>
+<p>To make the script faster, omit the <code>-r</code> to skip the render step. This will produce just the source code for the report, which is easier to use while modifying the report.</p>
+<p>The report text is generated using the files inside the <code>template</code> folder. These are Jinja2 templates, which contain markup like <code>{{ variable }}</code> to replace part of the text with a variable. You can edit these files to change the text of the report.</p>
+<p>All files used by the report are copied from the <code>save_data</code> folder to the <code>build</code> folder, so that the Quarto report is self-contained. There is no Python code inside the Quarto report, meaning it can be rendered using just Quarto without needing Python to be installed.</p>
+<p>The rationale for generating report source code is to allow flexibility in editing the document without needing to rerun Python code. In addition, figures are referred to by file name, which contains the timestamp and commit hash when the file was generated.</p>
 
 
 
