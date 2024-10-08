@@ -20,7 +20,10 @@ dependencies = [
   "gitpython",
   "scikit-learn",
   "matplotlib",
-  "pyqt6"
+  "pyqt6",
+  "loguru",
+  "scikit-survival",
+  "seaborn",
 ]
 
 [project.scripts]

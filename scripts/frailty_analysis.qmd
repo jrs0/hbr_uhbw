@@ -13,6 +13,19 @@ format:
   docx: {}
 ---
 
+What we want to do is split the cohort along these lines:
+
+* Everyone is ACS/PCI index -- first stop NSTEMI/STEMI code
+* Next, does the patient have coronary angiography YES/NO
+* If YES - PCI vs CABG vs no PCI/CABG (medically managed angio group)
+
+The expectation is that the first group would be the most frail (because of the decision that even angiography is not considered appropriate), and the last group (angiography + PCI) is the least frail. The first question is first to validate this somehow, e.g. by looking at the breakdown of these groups vs. EFI (electronic frailty index) or comorbidity scores.
+
+Next, we want to see if there are "outliers" within each group, which would be cases where the management does not correlate with the frailty. These might instead correlate with age.
+
+
+
+
 Elderly patients with ACS may not receive guideline-recommended therapy [@kotanidis2024invasive]. This report contains survival models for elderly patients (> 70 years old) MI/cardiac death, depending on the type of ACS managemenent:
 
 * Invasive, meaning PCI/CABG, or
