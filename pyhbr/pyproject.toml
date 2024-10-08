@@ -1,6 +1,6 @@
 [project]
 name = "pyhbr"
-version = "0.0.7"
+version = "0.0.8"
 authors = [
   { name="John Scott", email="john.scott@uhbw.nhs.uk" },
 ]
@@ -18,13 +18,16 @@ dependencies = [
   "pyodbc",
   "pyserde[yaml]",
   "gitpython",
-  "scikit-learn",
+  "scikit-learn==1.3.2",
   "matplotlib",
   "pyqt6",
   "loguru",
-  "scikit-survival",
+  "scikit-survival==0.22.2",
   "seaborn",
   "xgboost",
+  "tabulate",
+  "nbformat",
+  "nbclient",
 ]
 
 [project.scripts]

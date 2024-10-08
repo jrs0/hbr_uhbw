@@ -4,8 +4,8 @@ subtitle: {{ subtitle }}
 date: now
 date-format: short
 author: {{ author }}
-engine: jupyter
-jupyter: python3
+#engine: jupyter
+#jupyter: python3
 toc: true
 number-sections: true
 bibliography: ref.bib

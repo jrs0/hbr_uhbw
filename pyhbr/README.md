@@ -10,6 +10,8 @@ To install the latest version of the package, run
 pip install pyhbr
 ```
 
+Ensure that you also install Quarto if you run `generate-report` with the `-r` option.
+
 Instead of using pip, it is possible to install the package on from this git repository. On Windows, using VS Code, follow these steps:
 
 1. Install Python 3 (>= 3.11)
