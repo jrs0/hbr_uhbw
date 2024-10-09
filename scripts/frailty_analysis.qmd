@@ -8,15 +8,16 @@ format:
     html-math-method: katex
   pdf:
     documentclass: article
-    #margin-left: 20mm
-    #margin-right: 20mm
+    margin-left: 20mm
+    margin-right: 20mm
   docx: {}
 ---
 
-Elderly patients with ACS may not receive guideline-recommended therapy [@kotanidis2024invasive]. This report contains survival models for elderly patients (> 70 years old) MI/cardiac death, depending on the type of ACS managemenent:
+Elderly patients with ACS may not receive guideline-recommended therapy [@kotanidis2024invasive]. This report contains survival models for elderly patients (> 75 years old) MI/cardiac death, depending on the type of ACS managemenent:
 
-* Invasive, meaning PCI/CABG, or
-* Conservative, meaning only DAPT (no PCI/CABG)
+* PCI/CABG
+* Angiogram, but no PCI/CABG (medically managed)
+* No angiogram was performed.
 
 ```{python}
 #| echo: false
@@ -45,6 +46,8 @@ data, data_path = common.load_item(f"icb_hic_data", save_dir=save_dir)
 # Load the raw data file
 raw_file = data["raw_file"]
 raw_data = common.load_exact_item(raw_file, save_dir=save_dir)
+
+figsize = (11,5)
 ```
 
 ```{python}
@@ -122,16 +125,21 @@ The type of management is identified by looking at whether any PCI or CABG proce
 The type of management given to the patients in the index spells broken down by age and presentation is shown below.
 
 ```{python}
+# | echo: false
+# | warning: false
 pd.crosstab(df["Management"], [df["Presentation"], df["Elderly"]], margins=True)
 ```
 
 The plots below show the breakdown of age and frailty in the different management groups The distribution of age and cambridge score by management type is shown first. (Electronic frailty index has not been used because there was approximately 70% missingness in the data. Instead, Cambridge multimorbidity score is used as a surrogate for frailty.)
 
 ```{python}
+# | echo: false
+# | warning: false
+
 #df[["Management", "Age", "Cambridge Score"]].groupby("Management").describe(include="all").transpose()
 
 
-fig, ax = plt.subplots(1,2)
+fig, ax = plt.subplots(1,2, figsize=figsize)
 sns.kdeplot(df, x="Age", hue="Management", ax=ax[0])
 sns.kdeplot(df, x="Cambridge Score", hue="Management", ax=ax[1])
 
@@ -143,6 +151,9 @@ The figure below shows each patient as a point with their age and comorbidity sc
 The utility of a plot like this would relate to the lower right corner (elderly but not "frail", at least according to the multimorbidity score). Any surrugate for frailty could be used on the y axis instead of Cambridge score. Presumably, patients in this corner should receive PCI/CABG instead of no angiogram.
 
 ```{python}
+# | echo: false
+# | warning: false
+
 #df[["Management", "Age", "Cambridge Score"]].groupby("Management").describe(include="all").transpose()
 
 sns.scatterplot(df, x="Age", y="Cambridge Score", hue="Management", marker=".")
@@ -206,7 +217,7 @@ fig, ax = plt.subplots()
 fatal = survival["fatal"] & ~survival["right_censor"]
 
 # Restrict to PCI/CABG
-mask = info_management["management"] == "PCI/CABG"
+mask = df["Management"] == "PCI/CABG"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~fatal & mask & elderly
@@ -218,7 +229,7 @@ ax.fill_between(
 )
 
 # Restrict to medically managed
-mask = info_management["management"] == "Medical"
+mask = df["Management"] == "Medical"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~fatal & mask & elderly
@@ -230,7 +241,7 @@ ax.fill_between(
 )
 
 # Restrict to no angiogram
-mask = info_management["management"] == "No Angio"
+mask = df["Management"] == "No Angio"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~fatal & mask & elderly
@@ -262,7 +273,7 @@ fig, ax = plt.subplots()
 non_fatal = ~survival["fatal"] & ~survival["right_censor"]
 
 # Restrict to PCI/CABG
-mask = info_management["management"] == "PCI/CABG"
+mask = df["Management"] == "PCI/CABG"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~non_fatal & mask & elderly
@@ -274,7 +285,7 @@ ax.fill_between(
 )
 
 # Restrict to medically managed
-mask = info_management["management"] == "Medical"
+mask = df["Management"] == "Medical"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~non_fatal & mask & elderly
@@ -286,7 +297,7 @@ ax.fill_between(
 )
 
 # Restrict to no angiogram
-mask = info_management["management"] == "No Angio"
+mask = df["Management"] == "No Angio"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~non_fatal & mask & elderly
@@ -345,7 +356,7 @@ fig, ax = plt.subplots()
 fatal = survival["fatal"] & ~survival["right_censor"]
 
 # Restrict to PCI/CABG
-mask = info_management["management"] == "PCI/CABG"
+mask = df["Management"] == "PCI/CABG"
 
 time, survival_prob, conf_int = masked_survival(
     survival,
@@ -386,7 +397,7 @@ fig, ax = plt.subplots()
 fatal = survival["fatal"] & ~survival["right_censor"]
 
 # Restrict to PCI/CABG
-mask = info_management["management"] == "Medical"
+mask = df["Management"] == "Medical"
 
 time, survival_prob, conf_int = masked_survival(
     survival,
@@ -427,7 +438,7 @@ fig, ax = plt.subplots()
 fatal = survival["fatal"] & ~survival["right_censor"]
 
 # Restrict to PCI/CABG
-mask = info_management["management"] == "No Angio"
+mask = df["Management"] == "No Angio"
 
 time, survival_prob, conf_int = masked_survival(
     survival,
