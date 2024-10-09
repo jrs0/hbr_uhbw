@@ -465,11 +465,14 @@ def get_management(
         else:
             return "NoAngio"
 
-    return (
+    df = (
         same_spell_management_window.groupby("index_spell_id")[["group"]]
         .agg(check_management_type)
         .astype("category")
     )
+    df.index.names = ["spell_id"]
+    df.columns.names = ["management"]
+    return df
 
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
     """Get counts of previous clinical codes in code groups before the index.
