@@ -28,6 +28,8 @@ dependencies = [
   "tabulate",
   "nbformat",
   "nbclient",
+  "pyarrow",
+  "fastparquet",
 ]
 
 [project.scripts]
