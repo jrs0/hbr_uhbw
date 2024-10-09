@@ -360,7 +360,7 @@ def main():
     max_after = dt.timedelta(days=7)
     pci_group = "all_pci_pathak"
     cabg_group = "cabg_bortolussi"
-    angiogram_group = "angiography_ismail"
+    angio_group = "angiography_ismail"
     info_management = acs.get_management(
         index_spells,
         all_other_codes,
@@ -368,7 +368,7 @@ def main():
         max_after,
         pci_group,
         cabg_group,
-        angiogram_group,
+        angio_group,
     )
     log.info(f"Breakdown of management: {info_management.value_counts()}")
 
