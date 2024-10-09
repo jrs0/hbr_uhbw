@@ -39143,6 +39143,7 @@ groups:
 - pci
 - pci_complex
 - angiography_ismail
+- all_angiography
 - cabg_bortolussi
 - all_pci_pathak
 - packed_red_cells_transfusion

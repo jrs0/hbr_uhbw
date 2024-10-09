@@ -457,13 +457,29 @@ def get_management(
             A list containing "PCI/CABG", "No Angio", or "Medical".
             
         """
-        if g.eq(angio_group).any():
-            if g.eq(cabg_group).any() or g.eq(pci_group).any():
-                return "PCI/CABG"
-            else:
-                return "Medical"
+        #if g.eq(angio_group).any():
+        #    if g.eq(cabg_group).any() or g.eq(pci_group).any():
+        #        return "PCI/CABG"
+        #    else:
+        #        return "Medical"
+        #else:
+        #    return "No Angio"
+        
+        # The reason for using this logic instead of the logic
+        # above is that the above logic produces too many No Angio
+        # categories.
+        if g.eq(pci_group).any() or g.eq(cabg_group).any():
+            # Assume that PCI/CABG implies angiography
+            return "PCI/CABG"
+        elif g.eq(angio_group).any():
+            # Assume that no PCI/CABG by angiography means
+            # conservatively managed
+            return "Medical"
         else:
+            # If there is no PCI/CABG and no angiography,
+            # mark as no angiography
             return "No Angio"
+        
 
     df = (
         same_spell_management_window.groupby("index_spell_id")[["group"]]
