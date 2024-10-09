@@ -442,7 +442,7 @@ def get_management(
         
         ACS patients fall into these categories:
         
-        * NoAngio, if no coronary angiography was performed
+        * No Angio, if no coronary angiography was performed
         * PCI/CABG, if angiography was performed and followed up with
             PCI or CABG
         * Medical, if angiography was performed but not followed up
@@ -454,7 +454,7 @@ def get_management(
                 for calling with agg)
 
         Returns:
-            A list containing "PCI/CABG", "NoAngio", or "Medical".
+            A list containing "PCI/CABG", "No Angio", or "Medical".
             
         """
         if g.eq(angio_group).any():
@@ -463,15 +463,14 @@ def get_management(
             else:
                 return "Medical"
         else:
-            return "NoAngio"
+            return "No Angio"
 
     df = (
         same_spell_management_window.groupby("index_spell_id")[["group"]]
         .agg(check_management_type)
-        .astype("category")
+        .astype("category").rename(columns={"group": "management"})
     )
     df.index.names = ["spell_id"]
-    df.columns.names = ["management"]
     return df
 
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
