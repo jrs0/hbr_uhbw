@@ -1808,6 +1808,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - A01
     - A84
@@ -2639,6 +2640,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - B01
     - B45
@@ -4586,6 +4588,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - C01
     - C91
@@ -5123,6 +5126,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - D01
     - D28
@@ -6812,6 +6816,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - E01
     - E98
@@ -8051,6 +8056,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - F01
     - F67
@@ -9884,6 +9890,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - G01
     - G82
@@ -11462,6 +11469,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - H01
     - H73
@@ -13100,6 +13108,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - J01
     - J77
@@ -13124,6 +13133,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K011
       - K019
@@ -13159,6 +13169,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K021
       - K029
@@ -13194,6 +13205,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K041
       - K049
@@ -13217,6 +13229,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K051
       - K059
@@ -13246,6 +13259,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K061
       - K069
@@ -13272,6 +13286,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K071
       - K079
@@ -13301,6 +13316,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K081
       - K089
@@ -13336,6 +13352,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K091
       - K099
@@ -13368,6 +13385,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K101
       - K109
@@ -13406,6 +13424,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K111
       - K119
@@ -13438,6 +13457,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K121
       - K129
@@ -13470,6 +13490,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K131
       - K139
@@ -13502,6 +13523,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K141
       - K149
@@ -13525,6 +13547,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K151
       - K159
@@ -13560,6 +13583,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K161
       - K169
@@ -13598,6 +13622,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K171
       - K179
@@ -13636,6 +13661,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K181
       - K189
@@ -13671,6 +13697,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K191
       - K199
@@ -13700,6 +13727,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K201
       - K209
@@ -13726,6 +13754,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K221
       - K229
@@ -13761,6 +13790,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K231
       - K239
@@ -13799,6 +13829,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K241
       - K249
@@ -13831,6 +13862,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K251
       - K259
@@ -13863,6 +13895,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K261
       - K269
@@ -13898,6 +13931,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K271
       - K279
@@ -13930,6 +13964,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K281
       - K289
@@ -13968,6 +14003,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K291
       - K299
@@ -14000,6 +14036,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K301
       - K309
@@ -14032,6 +14069,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K311
       - K319
@@ -14061,6 +14099,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K321
       - K329
@@ -14096,6 +14135,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K331
       - K339
@@ -14131,6 +14171,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K341
       - K349
@@ -14169,6 +14210,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K351
       - K359
@@ -14192,6 +14234,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K361
       - K369
@@ -14227,6 +14270,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K371
       - K379
@@ -14262,6 +14306,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K381
       - K389
@@ -14290,6 +14335,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K401
       - K409
@@ -14318,6 +14364,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K411
       - K419
@@ -14346,6 +14393,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K421
       - K429
@@ -14374,6 +14422,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K431
       - K439
@@ -14396,6 +14445,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K441
       - K449
@@ -14430,6 +14480,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K451
       - K459
@@ -14461,6 +14512,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K461
       - K469
@@ -14492,6 +14544,7 @@ categories:
       - pci
       - all_pci_pathak
       - pci_complex
+      - angiography_ismail
       index:
       - K471
       - K479
@@ -14521,6 +14574,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K481
       - K489
@@ -14548,6 +14602,7 @@ categories:
       exclude:
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K491
       - K499
@@ -14575,6 +14630,7 @@ categories:
       exclude:
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K501
       - K509
@@ -14598,6 +14654,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K511
       - K519
@@ -14633,6 +14690,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K521
       - K529
@@ -14656,6 +14714,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K531
       - K539
@@ -14679,6 +14738,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K541
       - K549
@@ -14714,6 +14774,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K551
       - K559
@@ -14743,6 +14804,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K561
       - K569
@@ -14781,6 +14843,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K571
       - K579
@@ -14816,6 +14879,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K581
       - K589
@@ -14854,6 +14918,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K591
       - K599
@@ -14892,6 +14957,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K601
       - K609
@@ -14930,6 +14996,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K611
       - K619
@@ -14965,6 +15032,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K621
       - K629
@@ -14989,9 +15057,13 @@ categories:
         index: K636
         name: K63.6
       - docs: Other specified contrast radiology of heart
+        exclude:
+        - angiography_ismail
         index: K638
         name: K63.8
       - docs: Unspecified contrast radiology of heart
+        exclude:
+        - angiography_ismail
         index: K639
         name: K63.9
       docs: Contrast radiology of heart
@@ -15020,6 +15092,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K641
       - K649
@@ -15069,6 +15142,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K661
       - K669
@@ -15089,6 +15163,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K671
       - K679
@@ -15112,6 +15187,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K681
       - K689
@@ -15135,6 +15211,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K691
       - K699
@@ -15164,6 +15241,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K711
       - K719
@@ -15193,6 +15271,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K721
       - K729
@@ -15219,6 +15298,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K731
       - K739
@@ -15245,6 +15325,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K741
       - K749
@@ -15279,6 +15360,7 @@ categories:
       docs: Percutaneous transluminal balloon angioplasty and insertion of stent into coronary artery
       exclude:
       - cabg_bortolussi
+      - angiography_ismail
       index:
       - K751
       - K759
@@ -15299,6 +15381,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K761
       - K769
@@ -15319,6 +15402,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K771
       - K779
@@ -15339,6 +15423,7 @@ categories:
       - all_pci_pathak
       - cabg_bortolussi
       - pci_complex
+      - angiography_ismail
       index:
       - K781
       - K789
@@ -17635,6 +17720,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - L01
     - L99
@@ -19525,6 +19611,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - M01
     - M86
@@ -20155,6 +20242,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - N01
     - N35
@@ -20836,6 +20924,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - P01
     - P32
@@ -22021,6 +22110,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - Q01
     - Q58
@@ -22721,6 +22811,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - R01
     - R43
@@ -24299,6 +24390,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - S01
     - S70
@@ -26333,6 +26425,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - T01
     - T98
@@ -27410,6 +27503,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - U01
     - U54
@@ -29090,6 +29184,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - V01
     - V70
@@ -31754,6 +31849,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - W01
     - W99
@@ -33892,6 +33988,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - X01
     - X98
@@ -36136,6 +36233,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - Y01
     - Y99
@@ -39031,6 +39129,7 @@ categories:
     - all_pci_pathak
     - cabg_bortolussi
     - pci_complex
+    - angiography_ismail
     index:
     - Z01
     - Z99
@@ -39043,6 +39142,7 @@ categories:
 groups:
 - pci
 - pci_complex
+- angiography_ismail
 - cabg_bortolussi
 - all_pci_pathak
 - packed_red_cells_transfusion

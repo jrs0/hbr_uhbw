@@ -10,12 +10,12 @@ To install the latest version of the package, run
 pip install pyhbr
 ```
 
-Ensure that you also install Quarto if you run `generate-report` with the `-r` option.
+If you are on Windows, you will need to install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), which requires admin rights. Ensure that you also install Quarto if you run `generate-report` with the `-r` option.
 
-Instead of using pip, it is possible to install the package on from this git repository. On Windows, using VS Code, follow these steps:
+Instead of using pip, it is possible to install the package from this git repository. On Windows, using VS Code, follow these steps:
 
 1. Install Python 3 (>= 3.11)
-2. Create a new virtual environment (`Ctrl-Shift-P`, run `Python: Create Environment...`, pick `Venv`). Ensure it is activated
+2. Create a new virtual environment (`Ctrl-Shift-P`, run `Python: Create Environment...`, pick `Venv`). Ensure it is activated.
 3. Clone this repository and change directory to the `pyhbr/` folder.
 4. In the VS Code terminal, install from the requirements file using `pip install -r requirements.txt`
 5. To install the package, run `pip install .` (If you want to make edits, use `pip install -e .`)
