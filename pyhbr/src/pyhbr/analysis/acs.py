@@ -399,6 +399,34 @@ def get_outcomes(
     return DataFrame({"all": non_fatal + fatal, "fatal": fatal})
 
 
+def check_management_type(g):
+    """Tree to determine management type
+    
+    ACS patients fall into these categories:
+    
+    * NoAngio, if no coronary angiography was performed
+    * PCI/CABG, if angiography was performed and followed up with
+        PCI or CABG
+    * Medical, if angiography was performed but not followed up
+        with PCI or CABG (in this case the patient is medically
+        managed).
+
+    Args:
+        g: A group in a groupby DataFrame (this function is intended
+            for calling with agg)
+
+    Returns:
+        A list containing "PCI/CABG", "NoAngio", or "Medical".
+        
+    """
+    if g.eq(angio_group).any():
+        if g.eq(cabg_group).any() or g.eq(pci_group).any():
+            return "PCI/CABG"
+        else:
+            return "Medical"
+    else:
+        return "NoAngio"
+
 def get_management(
     index_spells: DataFrame,
     all_other_codes: DataFrame,
@@ -406,6 +434,7 @@ def get_management(
     max_after: dt.timedelta,
     pci_group: str,
     cabg_group: str,
+    angio_group: str,
 ) -> Series:
     """Get the management type for each index event
 
@@ -418,10 +447,15 @@ def get_management(
         min_after: The start of the window after the index to look for management
         max_after: The end of the window after the index which defines management
         pci_group: The name of the code group defining PCI management
-        cabg_management: The name of the code group defining CABG management
+        cabg_group: The name of the code group defining CABG management
+        angio_group: The name of the code group defining coronary angiography management
 
     Returns:
-        A category series containing "PCI", "CABG", or "Conservative"
+        A category series containing "CABG", "PCI", "Angio", or "Conservative", in order
+            of most to least aggressive management. CABG and PCI are interventions that
+            take priority if they are present, Angio means that coronary angiography was
+            performed but not followed by PCI/CABG, and Conservative means that no
+            angiography was performed.
     """
 
     management_window = counting.get_time_window(all_other_codes, min_after, max_after)
@@ -432,20 +466,11 @@ def get_management(
         management_window["index_spell_id"].eq(management_window["other_spell_id"])
     ]
 
-    def check_management_type(g):
-        if g.eq(cabg_group).any():
-            return "CABG"
-        elif g.eq(pci_group).any():
-            return "PCI"
-        else:
-            return "Conservative"
-
     return (
         same_spell_management_window.groupby("index_spell_id")[["group"]]
         .agg(check_management_type)
         .astype("category")
     )
-
 
 def get_code_features(index_spells: DataFrame, all_other_codes: DataFrame) -> DataFrame:
     """Get counts of previous clinical codes in code groups before the index.
