@@ -398,35 +398,6 @@ def get_outcomes(
 
     return DataFrame({"all": non_fatal + fatal, "fatal": fatal})
 
-
-def check_management_type(g):
-    """Tree to determine management type
-    
-    ACS patients fall into these categories:
-    
-    * NoAngio, if no coronary angiography was performed
-    * PCI/CABG, if angiography was performed and followed up with
-        PCI or CABG
-    * Medical, if angiography was performed but not followed up
-        with PCI or CABG (in this case the patient is medically
-        managed).
-
-    Args:
-        g: A group in a groupby DataFrame (this function is intended
-            for calling with agg)
-
-    Returns:
-        A list containing "PCI/CABG", "NoAngio", or "Medical".
-        
-    """
-    if g.eq(angio_group).any():
-        if g.eq(cabg_group).any() or g.eq(pci_group).any():
-            return "PCI/CABG"
-        else:
-            return "Medical"
-    else:
-        return "NoAngio"
-
 def get_management(
     index_spells: DataFrame,
     all_other_codes: DataFrame,
@@ -465,6 +436,34 @@ def get_management(
     same_spell_management_window = management_window[
         management_window["index_spell_id"].eq(management_window["other_spell_id"])
     ]
+
+    def check_management_type(g):
+        """Tree to determine management type
+        
+        ACS patients fall into these categories:
+        
+        * NoAngio, if no coronary angiography was performed
+        * PCI/CABG, if angiography was performed and followed up with
+            PCI or CABG
+        * Medical, if angiography was performed but not followed up
+            with PCI or CABG (in this case the patient is medically
+            managed).
+
+        Args:
+            g: A group in a groupby DataFrame (this function is intended
+                for calling with agg)
+
+        Returns:
+            A list containing "PCI/CABG", "NoAngio", or "Medical".
+            
+        """
+        if g.eq(angio_group).any():
+            if g.eq(cabg_group).any() or g.eq(pci_group).any():
+                return "PCI/CABG"
+            else:
+                return "Medical"
+        else:
+            return "NoAngio"
 
     return (
         same_spell_management_window.groupby("index_spell_id")[["group"]]
