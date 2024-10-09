@@ -4,6 +4,7 @@
 import argparse
 from loguru import logger as log
 
+
 def main():
 
     # Keep this near the top otherwise help hangs
@@ -22,7 +23,7 @@ def main():
     )
 
     args = parser.parse_args()
-    
+
     import datetime as dt
     from dateutil import parser
 
@@ -35,7 +36,7 @@ def main():
     from pyhbr.analysis import arc_hbr
     import yaml
     from pathlib import Path
-    
+
     # Read the configuration file
     with open(args.config_file) as stream:
         try:
@@ -43,22 +44,24 @@ def main():
         except yaml.YAMLError as exc:
             print(f"Failed to load config file: {exc}")
             exit(1)
-        
+
     analysis_name = config["analysis_name"]
     save_dir = config["save_dir"]
     now = common.current_timestamp()
-                
+
     # Set up the log file output for the SQL queries
-    log_file = (Path(save_dir) / Path(analysis_name + f"_fetch_data_sql_{now}")).with_suffix(".log")
+    log_file = (
+        Path(save_dir) / Path(analysis_name + f"_fetch_data_sql_{now}")
+    ).with_suffix(".log")
     log_format = "{time} {level} {message}"
     sql_log_id = log.add(log_file, format=log_format)
-        
+
     # Check if the user has started from the SUS fetch
     # step. If so, run the SQL query to fetch the SUS
     # data (this takes a long time), and save the result
-    # to a file. 
+    # to a file.
     if args.queries:
-        
+
         # Set a date range for episode fetch. The primary
         # care data start in Oct 2019. Use an end date
         # in the future to ensure all recent data is fetched.
@@ -84,17 +87,21 @@ def main():
         log.info("Fetching HIC episodes to narrow subsequent queries by patient")
         hic_episodes = common.get_data(msa_engine, hic_icb.episode_id_query)
         hic_patient_ids = hic_episodes.patient_id.unique()
-        
+
         # Reduce the sus data to only the patients in the HIC data
-        reduced_sus_data = raw_sus_data[raw_sus_data["patient_id"].isin(hic_patient_ids)]
- 
+        reduced_sus_data = raw_sus_data[
+            raw_sus_data["patient_id"].isin(hic_patient_ids)
+        ]
+
         log.info("Read code groups into tables")
         diagnosis_codes = clinical_codes.load_from_file(config["icd10_codes_file"])
         procedure_codes = clinical_codes.load_from_file(config["opcs4_codes_file"])
         code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
- 
-        log.info("Identifying patients with index episodes to narrow subsequent queries")
-        episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)        
+
+        log.info(
+            "Identifying patients with index episodes to narrow subsequent queries"
+        )
+        episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)
         index_spells = acs.get_index_spells(
             episodes,
             codes,
@@ -107,7 +114,7 @@ def main():
 
         # Get the list of patients to narrow subsequent SQL queries
         patient_ids = index_spells["patient_id"].unique()
- 
+
         log.info("Fetching mortality data")
         date_of_death, cause_of_death = from_icb.get_mortality(
             abi_engine, start_date, end_date, code_groups
@@ -115,33 +122,44 @@ def main():
 
         log.info("Fetching score segments (for info, not features).")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.score_seg_query, patient_ids,
+            msa_engine,
+            icb.score_seg_query,
+            patient_ids,
         )
         score_seg = pd.concat(dfs).reset_index(drop=True)
 
         log.info("Fetching SWD prescriptions data (very slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_prescriptions_query, patient_ids, config["gp_opt_outs"]
+            msa_engine,
+            icb.primary_care_prescriptions_query,
+            patient_ids,
+            config["gp_opt_outs"],
         )
         primary_care_prescriptions = pd.concat(dfs).reset_index(drop=True)
 
         log.info("Fetching SWD measurements data (slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_measurements_query, patient_ids, config["gp_opt_outs"]
+            msa_engine,
+            icb.primary_care_measurements_query,
+            patient_ids,
+            config["gp_opt_outs"],
         )
         primary_care_measurements = pd.concat(dfs).reset_index(drop=True)
 
         # Primary care attributes (slow)
         log.info("Fetching SWD attributes data (slow) in chunks by patient")
         dfs = common.get_data_by_patient(
-            msa_engine, icb.primary_care_attributes_query, patient_ids, config["gp_opt_outs"]
+            msa_engine,
+            icb.primary_care_attributes_query,
+            patient_ids,
+            config["gp_opt_outs"],
         )
         with_flag_columns = [from_icb.process_flag_columns(df) for df in dfs]
         primary_care_attributes = pd.concat(with_flag_columns).reset_index(drop=True)
 
         log.info("Fetching HIC laboratory results (very slow)")
         lab_results = from_icb.get_unlinked_lab_results(msa_engine)
-        
+
         log.info("Fetching HIC secondary care prescriptions (fast)")
         secondary_care_prescriptions = from_hic.get_unlinked_prescriptions(
             msa_engine, "HIC_Pharmacy"
@@ -182,46 +200,44 @@ def main():
             "common_end": common_end,
             "index_start": index_start,
             "index_end": index_end,
-            
             "code_groups": code_groups,
-            
             # HES episodes/codes data
             "raw_sus_data": raw_sus_data,
             "reduced_sus_data": reduced_sus_data,
-            
             # SWD data
             "score_seg": score_seg,
             "primary_care_prescriptions": primary_care_prescriptions,
             "primary_care_measurements": primary_care_measurements,
             "primary_care_attributes": primary_care_attributes,
-            
             # Mortality data
             "date_of_death": date_of_death,
             "cause_of_death": cause_of_death,
-            
             # HIC data
             "lab_results": lab_results,
-            "secondary_care_prescriptions": secondary_care_prescriptions,   
+            "secondary_care_prescriptions": secondary_care_prescriptions,
         }
-        
+
         log.info("Saving raw data")
-        common.save_item(raw, f"{analysis_name}_raw", save_dir=save_dir, prompt_commit=True)
-        
+        common.save_item(
+            raw, f"{analysis_name}_raw", save_dir=save_dir, prompt_commit=True
+        )
+
     else:
         log.info(f"Skipping SQL data fetch.")
-        
-    
+
     # Stop logging to the SQL query log file
     log.remove(sql_log_id)
-    
+
     # Set up the log file output for processing
-    log_file = (Path(save_dir) / Path(analysis_name + f"_fetch_data_process_{now}")).with_suffix(".log")
+    log_file = (
+        Path(save_dir) / Path(analysis_name + f"_fetch_data_process_{now}")
+    ).with_suffix(".log")
     log_format = "{time} {level} {message}"
-    process_log_id = log.add(log_file, format=log_format)    
-    
+    process_log_id = log.add(log_file, format=log_format)
+
     log.info(f"Loading most recent data from {save_dir}.")
     raw, raw_path = common.load_item(f"{analysis_name}_raw", save_dir=save_dir)
-    
+
     # Read the items in the raw data file into variables
     start_date = raw["start_date"]
     end_date = raw["end_date"]
@@ -240,7 +256,7 @@ def main():
     secondary_care_prescriptions = raw["secondary_care_prescriptions"]
     date_of_death = raw["date_of_death"]
     cause_of_death = raw["cause_of_death"]
-    
+
     # Start the data processing
 
     log.info("Read code groups into tables")
@@ -249,7 +265,7 @@ def main():
     code_groups = clinical_codes.get_code_groups(diagnosis_codes, procedure_codes)
 
     log.info("Recreating episodes, codes and index spells tables")
-    episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)        
+    episodes, codes = from_icb.get_episodes_and_codes(reduced_sus_data, code_groups)
     index_spells = acs.get_index_spells(
         episodes,
         codes,
@@ -259,7 +275,7 @@ def main():
         config["nstemi_index_code_group"],
         config["complex_pci_index_code_group"],
     )
-    
+
     # Reduce the index spells to only those within the valid window
     log.info(f"Reducing index events to those within {index_start} and {index_end}")
     index_spells = index_spells[
@@ -267,14 +283,24 @@ def main():
         & (index_spells["spell_start"] > index_start)
     ]
     log.info(f"Total number of index events is {len(index_spells)}")
-    
+
     # Record some basic information in the log file
-    log.info(f"The number of ACS index events is {describe.column_prop(index_spells['acs_index'])}")
-    log.info(f"The number of PCI index events is {describe.column_prop(index_spells['pci_index'])}")
-    log.info(f"The number of complex PCI index events is {describe.column_prop(index_spells['complex_pci_index'])}")
-    log.info(f"The number of NSTEMI index events {describe.column_prop(index_spells['nstemi_index'])}")
-    log.info(f"The number of STEMI index events {describe.column_prop(index_spells['stemi_index'])}")
-    
+    log.info(
+        f"The number of ACS index events is {describe.column_prop(index_spells['acs_index'])}"
+    )
+    log.info(
+        f"The number of PCI index events is {describe.column_prop(index_spells['pci_index'])}"
+    )
+    log.info(
+        f"The number of complex PCI index events is {describe.column_prop(index_spells['complex_pci_index'])}"
+    )
+    log.info(
+        f"The number of NSTEMI index events {describe.column_prop(index_spells['nstemi_index'])}"
+    )
+    log.info(
+        f"The number of STEMI index events {describe.column_prop(index_spells['stemi_index'])}"
+    )
+
     log.info("Making features from HIC laboratory results")
     features_lab = arc_hbr.first_index_lab_result(index_spells, lab_results, episodes)
 
@@ -303,14 +329,18 @@ def main():
 
     max_missingness = config["attributes_max_missingness"]
     const_threshold = config["attributes_const_threshold"]
-    log.info(f"Remove SWD attributes with more than {100*max_missingness:.2f}% missingness or where more than {100*const_threshold:.2f}% of the column is constant")
+    log.info(
+        f"Remove SWD attributes with more than {100*max_missingness:.2f}% missingness or where more than {100*const_threshold:.2f}% of the column is constant"
+    )
     features_attributes = acs.remove_features(
         all_index_attributes,
         max_missingness=max_missingness,
         const_threshold=const_threshold,
     )
 
-    log.info("Identify most recent attribute periods before index date for score segments")
+    log.info(
+        "Identify most recent attribute periods before index date for score segments"
+    )
     index_spells_scores_link = acs.link_attribute_period_to_index(
         index_spells, score_seg
     )
@@ -320,7 +350,9 @@ def main():
         index_spells_attributes_link, score_seg
     )
 
-    log.info("Identifying all other diagnosis/procedure codes before and after the index event")
+    log.info(
+        "Identifying all other diagnosis/procedure codes before and after the index event"
+    )
     all_other_codes = counting.get_all_other_codes(index_spells, episodes, codes)
 
     log.info("Defining 7-day window after index for management type")
@@ -328,8 +360,15 @@ def main():
     max_after = dt.timedelta(days=7)
     pci_group = "all_pci_pathak"
     cabg_group = "cabg_bortolussi"
+    angiogram_group = "angiography_ismail"
     info_management = acs.get_management(
-        index_spells, all_other_codes, min_after, max_after, pci_group, cabg_group
+        index_spells,
+        all_other_codes,
+        min_after,
+        max_after,
+        pci_group,
+        cabg_group,
+        angiogram_group,
     )
     log.info(f"Breakdown of management: {info_management.value_counts()}")
 
@@ -362,7 +401,7 @@ def main():
     # Bleeding codes typically show up in the primary
     # or first secondary
     log.info("Identifying fatal bleeding outcomes")
-    max_position =  config["outcomes"]["bleeding"]["fatal"]["max_position"]
+    max_position = config["outcomes"]["bleeding"]["fatal"]["max_position"]
     fatal_bleeding_group = config["outcomes"]["bleeding"]["fatal"]["group"]
     fatal_bleeding = acs.identify_fatal_outcome(
         index_spells,
@@ -413,14 +452,22 @@ def main():
     outcomes["non_fatal_ischaemia"] = counting.count_code_groups(
         index_spells, non_fatal_ischaemia
     )
-    outcomes["fatal_bleeding"] = counting.count_code_groups(index_spells, fatal_bleeding)
-    outcomes["fatal_ischaemia"] = counting.count_code_groups(index_spells, fatal_ischaemia)
+    outcomes["fatal_bleeding"] = counting.count_code_groups(
+        index_spells, fatal_bleeding
+    )
+    outcomes["fatal_ischaemia"] = counting.count_code_groups(
+        index_spells, fatal_ischaemia
+    )
 
     # Get the survival time and right censoring data for bleeding and ischaemia (combines
     # both fatal/non-fatal outcomes with a flag to distinguish which is which)
     log.info("Calculate bleeding/ischaemia survival datasets")
-    bleeding_survival = acs.get_survival_data(index_spells, fatal_bleeding, non_fatal_bleeding, max_after)
-    ischaemia_survival = acs.get_survival_data(index_spells, fatal_ischaemia, non_fatal_ischaemia, max_after)
+    bleeding_survival = acs.get_survival_data(
+        index_spells, fatal_bleeding, non_fatal_bleeding, max_after
+    )
+    ischaemia_survival = acs.get_survival_data(
+        index_spells, fatal_ischaemia, non_fatal_ischaemia, max_after
+    )
 
     log.info("Reduce outcome counts to boolean columns for classification")
     bool_outcomes = outcomes > 0
@@ -451,14 +498,18 @@ def main():
     # Only blood pressure and HbA1c go back to 2019 in the data -- not
     # including the other measurements in order to keep the sample size up.
     log.info("Making features from primary care measurements")
-    prior_blood_pressure = from_icb.blood_pressure(index_spells, primary_care_measurements)
+    prior_blood_pressure = from_icb.blood_pressure(
+        index_spells, primary_care_measurements
+    )
     prior_hba1c = from_icb.hba1c(index_spells, primary_care_measurements)
     features_measurements = prior_blood_pressure.merge(
         prior_hba1c, how="left", on="spell_id"
     )
 
     log.info("Making index features")
-    features_index = index_spells.drop(columns=["episode_id", "patient_id", "spell_start"])
+    features_index = index_spells.drop(
+        columns=["episode_id", "patient_id", "spell_start"]
+    )
 
     log.info("Getting therapy from primary care prescriptions")
     therapy = acs.get_therapy(index_spells, primary_care_prescriptions)
@@ -488,29 +539,31 @@ def main():
         features_index.merge(features_lab, how="left", on="spell_id")
     )
     arc_hbr_score["arc_hbr_tcp"] = arc_hbr.arc_hbr_tcp(features_lab)
-    arc_hbr_score["arc_hbr_prior_bleeding"] = arc_hbr.arc_hbr_prior_bleeding(features_codes)
+    arc_hbr_score["arc_hbr_prior_bleeding"] = arc_hbr.arc_hbr_prior_bleeding(
+        features_codes
+    )
     arc_hbr_score["arc_hbr_cirrhosis_portal_hyp"] = arc_hbr.arc_hbr_cirrhosis_ptl_hyp(
         features_codes
     )
-    arc_hbr_score["arc_hbr_stroke_ich"] = arc_hbr.arc_hbr_ischaemic_stroke_ich(features_codes)
+    arc_hbr_score["arc_hbr_stroke_ich"] = arc_hbr.arc_hbr_ischaemic_stroke_ich(
+        features_codes
+    )
     arc_hbr_score["arc_hbr_cancer"] = arc_hbr.arc_hbr_cancer(features_codes)
     arc_hbr_score["total_score"] = arc_hbr_score.sum(axis=1)
 
-    #arc_hbr.plot_arc_score_distribution(arc_hbr_score)
-    #plt.tight_layout()
-    #plt.show()
+    # arc_hbr.plot_arc_score_distribution(arc_hbr_score)
+    # plt.tight_layout()
+    # plt.show()
 
     # Combine all tables (features and outcomes) into a single table
     # for saving.
     data = {
         "raw_file": raw_path.name,
         "index_spells": index_spells,
-        
         # Codes data
         "code_groups": code_groups,
         "codes": codes,
         "episodes": episodes,
-        
         # Outcomes
         "outcomes": bool_outcomes,
         "non_fatal_bleeding": non_fatal_bleeding,
@@ -519,26 +572,26 @@ def main():
         "fatal_ischaemia": fatal_ischaemia,
         "bleeding_survival": bleeding_survival,
         "ischaemia_survival": ischaemia_survival,
-        
         # HES data
         "features_index": features_index,
         "features_codes": features_codes,
-        
         # SWD data
         "features_attributes": features_attributes,
         "features_prescriptions": features_prescriptions,
         "features_measurements": features_measurements,
-        
         # HIC (UHBW) data
         "features_secondary_prescriptions": features_secondary_prescriptions,
         "features_lab": features_lab,
-        
         # Info (for descriptive purposes)
         "info_index_scores": info_index_scores,
         "info_management": info_management,
-        
         # ARC HBR score
-        "arc_hbr_score": arc_hbr_score
+        "arc_hbr_score": arc_hbr_score,
     }
 
-    common.save_item(data, f"{config['analysis_name']}_data", save_dir=config["save_dir"], prompt_commit=True)
+    common.save_item(
+        data,
+        f"{config['analysis_name']}_data",
+        save_dir=config["save_dir"],
+        prompt_commit=True,
+    )
