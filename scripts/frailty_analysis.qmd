@@ -13,19 +13,6 @@ format:
   docx: {}
 ---
 
-What we want to do is split the cohort along these lines:
-
-* Everyone is ACS/PCI index -- first stop NSTEMI/STEMI code
-* Next, does the patient have coronary angiography YES/NO
-* If YES - PCI vs CABG vs no PCI/CABG (medically managed angio group)
-
-The expectation is that the first group would be the most frail (because of the decision that even angiography is not considered appropriate), and the last group (angiography + PCI) is the least frail. The first question is first to validate this somehow, e.g. by looking at the breakdown of these groups vs. EFI (electronic frailty index) or comorbidity scores.
-
-Next, we want to see if there are "outliers" within each group, which would be cases where the management does not correlate with the frailty. These might instead correlate with age.
-
-
-
-
 Elderly patients with ACS may not receive guideline-recommended therapy [@kotanidis2024invasive]. This report contains survival models for elderly patients (> 70 years old) MI/cardiac death, depending on the type of ACS managemenent:
 
 * Invasive, meaning PCI/CABG, or
@@ -40,31 +27,20 @@ from sksurv.linear_model import CoxPHSurvivalAnalysis
 import yaml
 from pyhbr import common
 import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 import numpy as np
-
-# Read the configuration file
-with open("icb_hic.yaml") as stream:
-    try:
-        config = yaml.safe_load(stream)
-    except yaml.YAMLError as exc:
-        print(f"Failed to load config file: {exc}")
-        exit(1)
 ```
 
 ```{python}
 #| echo: false
 #| output: false
 
-# This is used to load a file, and is also used
-# as the prefix for all saved data files.
-analysis_name = config["analysis_name"]
-save_dir = config["save_dir"]
-
-print(f"Analysis name: {analysis_name}")
+# Path to the directory containing raw data
+save_dir = "../report/save_data"
 
 # Load the data from file
-data, data_path = common.load_item(f"{analysis_name}_data", save_dir=save_dir)
+data, data_path = common.load_item(f"icb_hic_data", save_dir=save_dir)
 
 # Load the raw data file
 raw_file = data["raw_file"]
@@ -72,68 +48,142 @@ raw_data = common.load_exact_item(raw_file, save_dir=save_dir)
 ```
 
 ```{python}
-#| echo: false
-#| output: false
+# | echo: false
+# | output: false
 
-# Get counts
-num_index = len(data["features_index"])
+# To simplify the analysis, only use index events marked as
+# ACS index (i.e. there were ACS codes in the first episode).
+df = data["features_index"]
+features_index = df[df["acs_index"]]
+
+# Fetch the other datasets and filter by ACS index (i.e. which
+# spell IDs are in features_index
+survival = features_index[[]].merge(
+    data["ischaemia_survival"], on="spell_id", how="left"
+)
+management = features_index[[]].merge(
+    data["info_management"], on="spell_id", how="left"
+)
+groups = features_index[[]].merge(data["features_codes"], on="spell_id", how="left")
+attributes = features_index[[]].merge(
+    data["features_attributes"], on="spell_id", how="left"
+)
+scores = features_index[[]].merge(data["info_index_scores"], on="spell_id", how="left")
+
+
+def map_presentation(x):
+    """Store the type of ACS presentation"""
+    if x["stemi_index"]:
+        return "STEMI"
+    elif x["nstemi_index"]:
+        return "NSTEMI"
+    else:
+        return "Unstable Angina"
+
+
+# Make a dataframe of features
+df = pd.DataFrame(index=features_index.index)
+
+# Add the management type
+df["Management"] = management["management"].cat.reorder_categories(
+    ["No Angio", "Medical", "PCI/CABG"]
+)
+df["Cambridge Score"] = scores["cambridge_score"]
+
+df["Age"] = features_index["age"]
+df["Elderly"] = np.where(df["Age"] >= 75, ">=75", "<75")
+df["Gender"] = features_index["gender"].str.title()
+df["Presentation"] = pd.Categorical(
+    features_index.apply(map_presentation, axis=1),
+    ["STEMI", "NSTEMI", "Unstable Angina"],
+)
+
+# Add some risk factors for ischaemia outcomes. These
+# come from ICD-10 code groups from HES data (the groups dataframe)
+df["Diabetes"] = groups["diabetes_before"] != 0
+
+# Risk factors from primary care attributes
+df["Smoking"] = attributes["smoking"].str.title()
+df["BMI"] = attributes["bmi"]
+
+
+# Get date range
 index_start = raw_data["index_start"].strftime("%Y-%m-%d")
 index_end = raw_data["index_end"].strftime("%Y-%m-%d")
 
-mask = data["features_index"]["age"] >= 70
-survival = data["ischaemia_survival"][mask]
-features_index = data["features_index"][mask]
-info_management = data["info_management"][mask]
+num_index = len(df)
 
-num_over_70 = len(survival)
-
-num_conservative = int((info_management == "Conservative").sum())
-num_cabg = int((info_management == "CABG").sum())
-num_pci = int((info_management == "PCI").sum())
 ```
 
-Index events are identified by looking at the first episode of the hospital admission. Both ACS events (primary ICD-10 diagnosis code in an ACS group) and PCI admissions (an OPCS-4 procedure code of PCI anywhere in the index episode) are included.
+Index events are identified by looking at the first episode of the hospital admission. If the primary diagnosis (ICD-10 code) of the episode is an ACS code, then the spell is an index event. The total number of index ACS events is `{python} num_index` between the dates `{python} index_start` and `{python} index_end`.
 
-The total number of index ACS events is `{python} num_index` between the dates `{python} index_start` and `{python} index_end`. Of these, `{python} num_over_70` are patients over 70. Of these, `{python} num_pci` are managed invasively with PCI, `{python} num_cabg` are managed invasively using CABG, and `{python} num_conservative` are managed conservatively (DAPT-medication only).
+The type of management is identified by looking at whether any PCI or CABG procedures were performed in the 7 days following the start of the index admission. If no PCI or CABG is present, the 7 day window is checked for whether an angiogram is performed, and if it is, the patient is recorded as medically managed. Otherwise, the patient is recorded as having no angiogram.
 
-The type of management is identified by looking at whether any PCI or CABG procedures were performed inthe 7 days following the start of the index admission. If no PCI or CABG is present, the admission is recorded as conservatively managed. If both PCI and CABG are present, the management type is recorded as CABG (CABG takes priority over PCI).
-
-The plot below shows the survival curve for the over-70 group (ignoring management type).
+The type of management given to the patients in the index spells broken down by age and presentation is shown below.
 
 ```{python}
-#| echo: false
-#| warning: false
+pd.crosstab(df["Management"], [df["Presentation"], df["Elderly"]], margins=True)
+```
 
-# Calculate survival curves for outcomes
+The plots below show the breakdown of age and frailty in the different management groups The distribution of age and cambridge score by management type is shown first. (Electronic frailty index has not been used because there was approximately 70% missingness in the data. Instead, Cambridge multimorbidity score is used as a surrogate for frailty.)
 
-# Set the aspect ratio for the figures to roughly 2:1,
-# because each plot is two graphs side-by-side
-figsize = (11, 5)
+```{python}
+#df[["Management", "Age", "Cambridge Score"]].groupby("Management").describe(include="all").transpose()
+
+
+fig, ax = plt.subplots(1,2)
+sns.kdeplot(df, x="Age", hue="Management", ax=ax[0])
+sns.kdeplot(df, x="Cambridge Score", hue="Management", ax=ax[1])
+
+plt.tight_layout()
+```
+
+The figure below shows each patient as a point with their age and comorbidity score at index on the x and x axes. Groups of points are coloured according to what management is performed.
+
+The utility of a plot like this would relate to the lower right corner (elderly but not "frail", at least according to the multimorbidity score). Any surrugate for frailty could be used on the y axis instead of Cambridge score. Presumably, patients in this corner should receive PCI/CABG instead of no angiogram.
+
+```{python}
+#df[["Management", "Age", "Cambridge Score"]].groupby("Management").describe(include="all").transpose()
+
+sns.scatterplot(df, x="Age", y="Cambridge Score", hue="Management", marker=".")
+
+plt.tight_layout()
+```
+
+The plot below shows the survival curve for the over-75 group (ignoring management type).
+
+```{python}
+# | echo: false
+# | warning: false
 
 # Plot the ROC curves for the models
 fig, ax = plt.subplots()
+elderly = df["Elderly"].eq(">=75")
 
 def masked_survival(survival, mask):
     masked_survival = survival[mask]
     status = ~masked_survival["right_censor"]
     survival_in_days = masked_survival["time_to_event"].dt.days
-    return kaplan_meier_estimator(
-        status, survival_in_days, conf_type="log-log"
-    )
+    return kaplan_meier_estimator(status, survival_in_days, conf_type="log-log")
+
 
 # Non-fatal MACE outcomes (remove fatal outcomes)
 remove = survival["fatal"] & ~survival["right_censor"]
-time, survival_prob, conf_int = masked_survival(survival,~remove)
+time, survival_prob, conf_int = masked_survival(survival, ~remove & elderly)
 
 ax.step(time, survival_prob, where="post")
-ax.fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="MACE (non-fatal)")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="MACE (non-fatal)"
+)
 
 # Cardiac death (remove non-fatal outcomes)
 remove = ~survival["fatal"] & ~survival["right_censor"]
-time, survival_prob, conf_int = masked_survival(survival,~remove)
+time, survival_prob, conf_int = masked_survival(survival, ~remove & elderly)
 
 ax.step(time, survival_prob, where="post")
-ax.fill_between(time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CV death")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CV death"
+)
 
 ax.set_ylim(0.80, 1.00)
 ax.set_ylabel(r"Est. probability of no adverse event")
@@ -143,15 +193,11 @@ plt.legend()
 plt.show()
 ```
 
-The plot below shows the difference in survival curves between the invasive and conservative management groups (still for age > 70), for non-fatal MACE outcomes:
+The plot below shows the difference in survival curves between the invasive and conservative management groups (still for age over 75), for non-fatal MACE outcomes:
 
 ```{python}
 #| echo: false
 #| warning: false
-
-# Set the aspect ratio for the figures to roughly 2:1,
-# because each plot is two graphs side-by-side
-figsize = (11, 5)
 
 # Plot the ROC curves for the models
 fig, ax = plt.subplots()
@@ -159,43 +205,43 @@ fig, ax = plt.subplots()
 # Fatal outcomes (to remove)
 fatal = survival["fatal"] & ~survival["right_censor"]
 
-# Restrict to PCI
-pci = info_management["group"] == "PCI"
+# Restrict to PCI/CABG
+mask = info_management["management"] == "PCI/CABG"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~fatal & pci
+    ~fatal & mask & elderly
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI/CABG"
 )
 
-# Restrict to CABG
-cabg = info_management["group"] == "CABG"
+# Restrict to medically managed
+mask = info_management["management"] == "Medical"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~fatal & cabg
+    ~fatal & mask & elderly
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CABG"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Medically managed (angio but no intervention)"
 )
 
-# Restrict to Conservative
-conservative = info_management["group"] == "Conservative"
+# Restrict to no angiogram
+mask = info_management["management"] == "No Angio"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~fatal & conservative
+    ~fatal & mask & elderly
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Conservative"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="No angiogram"
 )
 
-ax.set_ylim(0.20, 1.00)
+ax.set_ylim(0.70, 1.00)
 ax.set_ylabel(r"Est. probability of no adverse event")
 ax.set_xlabel("Time (days)")
 ax.set_title("Non-fatal MACE outcome probability by management")
@@ -209,50 +255,46 @@ The graph below shows the same plot (by management type) for fatal outcomes:
 #| echo: false
 #| warning: false
 
-# Set the aspect ratio for the figures to roughly 2:1,
-# because each plot is two graphs side-by-side
-figsize = (11, 5)
-
 # Plot the ROC curves for the models
 fig, ax = plt.subplots()
 
 # Non-fatal outcomes (to remove)
 non_fatal = ~survival["fatal"] & ~survival["right_censor"]
 
-# Restrict to PCI
-pci = info_management["group"] == "PCI"
+# Restrict to PCI/CABG
+mask = info_management["management"] == "PCI/CABG"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~non_fatal & pci
+    ~non_fatal & mask & elderly
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI/CABG"
 )
 
-# Restrict to CABG
-cabg = info_management["group"] == "CABG"
+# Restrict to medically managed
+mask = info_management["management"] == "Medical"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~non_fatal & cabg
+    ~non_fatal & mask & elderly
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CABG"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Medically managed"
 )
 
-# Restrict to Conservative
-conservative = info_management["group"] == "Conservative"
+# Restrict to no angiogram
+mask = info_management["management"] == "No Angio"
 time, survival_prob, conf_int = masked_survival(
     survival,
-    ~non_fatal & conservative
+    ~non_fatal & mask & elderly
 )
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="Conservative"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="No angiogram"
 )
 
 ax.set_ylim(0.70, 1.00)
@@ -273,19 +315,144 @@ plt.show()
 #X = features_index[["age", "gender"]].merge(info_management, left_index=True, right_index=True, how="left").rename(columns={"age": "Age", "gender": "Gender", "group": "Management"})
 #X["Management"] = X["Management"].map({"PCI": "Invasive", "CABG": "Invasive", "Conservative": "Conservative"})
 
-# Non-fatal MACE outcomes (remove fatal outcomes)
-remove = survival["fatal"] & ~survival["right_censor"]
-masked_survival = survival[~remove]
-status = ~masked_survival["right_censor"]
-survival_in_days = masked_survival["time_to_event"].dt.days
-y = pd.concat([status, survival_in_days], axis=1).to_records(index=False)
+# # Non-fatal MACE outcomes (remove fatal outcomes)
+# remove = survival["fatal"] & ~survival["right_censor"]
+# masked_survival = survival[~remove]
+# status = ~masked_survival["right_censor"]
+# survival_in_days = masked_survival["time_to_event"].dt.days
+# y = pd.concat([status, survival_in_days], axis=1).to_records(index=False)
 
-# Make features
-X = pd.DataFrame()
-X["Invasive"] = info_management[~remove]["group"] != "Conservative"
+# # Make features
+# X = pd.DataFrame()
+# X["Invasive"] = info_management[~remove]["group"] != "Conservative"
 
-estimator = CoxPHSurvivalAnalysis()
-estimator.fit(X, y)
+# estimator = CoxPHSurvivalAnalysis()
+# estimator.fit(X, y)
 
-pd.Series(np.exp(estimator.coef_), index=X.columns)
+# pd.Series(np.exp(estimator.coef_), index=X.columns)
+```
+
+The graphs below show survival curves in each group (PCI/CABG, medically managed, and no angiogram), broken down into less than 75 and over 75.
+
+```{python}
+#| echo: false
+#| warning: false
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots()
+
+# Fatal outcomes (to remove)
+fatal = survival["fatal"] & ~survival["right_censor"]
+
+# Restrict to PCI/CABG
+mask = info_management["management"] == "PCI/CABG"
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label=">=75"
+)
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & ~elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="<75"
+)
+
+ax.set_ylim(0.70, 1.00)
+ax.set_ylabel(r"Est. probability of no adverse event")
+ax.set_xlabel("Time (days)")
+ax.set_title("Non-fatal MACE outcomes, PCI/CABG")
+plt.legend()
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| warning: false
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots()
+
+# Fatal outcomes (to remove)
+fatal = survival["fatal"] & ~survival["right_censor"]
+
+# Restrict to PCI/CABG
+mask = info_management["management"] == "Medical"
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label=">=75"
+)
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & ~elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="<75"
+)
+
+ax.set_ylim(0.70, 1.00)
+ax.set_ylabel(r"Est. probability of no adverse event")
+ax.set_xlabel("Time (days)")
+ax.set_title("Non-fatal MACE outcomes, medically managed")
+plt.legend()
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| warning: false
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots()
+
+# Fatal outcomes (to remove)
+fatal = survival["fatal"] & ~survival["right_censor"]
+
+# Restrict to PCI/CABG
+mask = info_management["management"] == "No Angio"
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label=">=75"
+)
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & ~elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="<75"
+)
+
+ax.set_ylim(0.70, 1.00)
+ax.set_ylabel(r"Est. probability of no adverse event")
+ax.set_xlabel("Time (days)")
+ax.set_title("Non-fatal MACE outcomes, no angiogram")
+plt.legend()
+plt.show()
 ```
