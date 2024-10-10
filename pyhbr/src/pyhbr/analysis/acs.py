@@ -468,9 +468,12 @@ def get_management(
         # The reason for using this logic instead of the logic
         # above is that the above logic produces too many No Angio
         # categories.
-        if g.eq(pci_group).any() or g.eq(cabg_group).any():
-            # Assume that PCI/CABG implies angiography
-            return "PCI/CABG"
+        if g.eq(cabg_group).any():
+            # Assume that CABG implies angiography (takes precedence of PCI)
+            return "CABG"
+        elif g.eq(pci_group).any():
+            # Assume that PCI implies angiography
+            return "PCI"
         elif g.eq(angio_group).any():
             # Assume that no PCI/CABG by angiography means
             # conservatively managed

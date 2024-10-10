@@ -32,7 +32,6 @@ format:
     documentclass: article
     margin-left: 20mm
     margin-right: 20mm
-    fig-pos: 't'
   docx: {}
 ---
 
@@ -45,9 +44,5 @@ format:
 {% endfor %}
 
 {% include "conclusion.qmd" %}
-
-# References
-::: {{ '{#' }}refs}
-:::
 
 {% include "appendices.qmd" %}
