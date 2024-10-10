@@ -29,9 +29,10 @@ format:
     css: styles.css
     html-math-method: katex
   pdf:
-    documentclass: report
+    documentclass: article
     margin-left: 20mm
     margin-right: 20mm
+    fig-pos: 't'
   docx: {}
 ---
 
@@ -42,5 +43,11 @@ format:
 {% include "model_page.qmd" %}
 {% endwith %}
 {% endfor %}
+
+{% include "conclusion.qmd" %}
+
+# References
+::: {{ '{#' }}refs}
+:::
 
 {% include "appendices.qmd" %}

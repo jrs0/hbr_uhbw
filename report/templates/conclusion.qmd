@@ -1,0 +1,5 @@
+# Conclusion
+
+The results showed that the best model for predicting one-year BARC 2-5 bleeding was {{ best_bleeding_model_name }}, with an AUC {{ best_bleeding_model_auc }}, and the best model for predicting one-year ischaemia was {{ best_ischaemia_model_name }}, with an AUC {{ best_ischaemia_model_auc }}
+
+Bleeding models are significantly harder to train than ischaemia models, due to the low prevalence of the bleeding outcome. As a result, further work could focus on forming better features relating to bleeding risk factors. Alternatively, it may be possible to utilise more flexible (but more computationally instensive) deep-learning approaches in an attempt to remove some of the manual feature selection involved. This may help to address the fundamental issue underpinning the low performance of the bleeding models, that none of the classification approaches are able to find features (or combinations of features) that correlate sufficiently well with the bleeding outcome.

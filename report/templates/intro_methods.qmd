@@ -29,27 +29,32 @@ An alternative approach is the bleeding and ischaemia risk trade-off model [@urb
 
 Another score is DAPT [@yeh2016development], which ranks patients on a scale -2 to 10 according to whether they have more bleeding or more ischaemia risk. However, this model is intended for deciding continuation of therapy at 12 months, rather than initial prescription.
 
+## Other Risk Prediction Tools
+
+Bleeding and ischaemia in patients with ACS is a well studied problem, and a large number of risk scores exist, some of which are available as web application or mobile phone applications [@chan2020risk]. One such risk score is the DAPT-score, which is designed to assess bleeding and ischaemia risk for the purpose of deciding duration of DAPT therapy [@yeh2016development]. The DAPT bleeding endpoint definition is moderate or severe GUSTO bleeding, meaning intracerebral haemorrhage, or bleeding requiring blood transfusion or resulting in substantial haemodynamic compromise requiring treatment [@gusto1993international]. The ischaemic endpoint was defined as MI or an ARC definition of definite/probable ST [@cutlip2007clinical]. Models developed to predict occurance of these events between 12 and 30 months after the index procedure both achieved a ROC AUC of 0.64 in the validation group. The difference in bleeding and ischaemia prediction depending on the assumption of continuation vs. discontinuation of therapy (an input to the model) was used to assess the trade-off between bleeding and ischaemia risk. The DAPT score is available as a web calculator [@dapt2023website].
+
+Another bleeding risk score is PreciseDAPT [@costa2017derivation], which predicts the risk of out-of-hospital TIMI (thrombolysis in myocardial infarction) major/minor bleeding [@mehran2011standardized].The bleeding model achieved ROC AUCs of 0.70 and 0.66 in two external validation cohorts, and is available as a web calculator [@precisedapt2023website], which presents the risk of bleeding and ischaemia depending on DAPT duration (3-6 months vs. 12-24 months).
+
+The ARC-HBR trade-off model is designed specifically for use in patients who statisfy the ARC-HBR criteria [@urban2021assessing]. The ischaemia endpoint definition was a composite of ARC definite or probable ST, and MI occurring >48 hours after the index event. The MI definition differed according to the underlying study data used: 5 studies used the third universal definition [@thygesen2012task], one used the ARC MI definition [@cutlip2007clinical], and one used an ad-hoc definition [@valgimigli2015zotarolimus]. Bleeding is defined as BARC 3 or 5 [@mehran2011standardized]. DAPT therapy is not an input to the model, and it is explicitly stated that no conclusions can be drawn about associations between DAPT duration or type and the bleeding and ischaemia risks presented [@urban2021assessing]. The ARC-HBR risk trade-off calculation is available as a mobile application, which is used first to assess if a patient is at high bleeding risk, and then if so, provides their relative bleeding and ischaemia risk levels [@archbrtradeoff2023website].
+
+Machine learning algorithms have been shown to perform very well in predicting MI diagnosis during index hospitalisation (ROC AUC of 0.96 [@than2019machine]). Similarly, prediction of in-hospital BARC 3-5 bleeding in PCI patients has achieved a ROC AUC of 0.837 [@zhao2023machine]. This provides some evidence that machine learning methods could form the basis for risk prediction tools.
+
 # Methods
 
 We assess multiple different machine learning models, trained on multiple different datasets, for the estimation of one-year probability of bleeding and further ischaemia outcome, using the approach described below.
 
-## Input Data
-
-{{ features_table }}
-: Features used to train the models. The feature name and description are listed, along with the data source for the feature. Three data sources are used: HES data, containing ICD-10 and OPCS-4 codes, are used for prior clinical code history and patient index attributes; SWD data is used for primary care general patient attributes, primary care prescriptions, and primary care measurements; and HIC data is used for index secondary care lab results and prior prescriptions at index. {{ '{#' }}tbl-features}
-
-We obtain a cohort of ACS patients from Hospital Episode Statistics (HES), which is a national administrative dataset available across the UK. This dataset defines both the inclusion criteria and the outcomes.
-
-We also obtain features (input predictors to the machine learning algorithms) from HES data, by identifying patients with groups of diagnosis and procedure codes that corresponding to risk factors identified in other models and the wider literature.
-
-The system wide dataset (SWD) is a Bristol, North Somerset, and South Gloucestershire-specific repository of primary care patient information, which includes flags for comorbidities and risk factors, and some physiological measurements. These are also used as predictors in the models.
-
 ## Inclusion Criteria
 
-Patients are considered for inclusion based on the primary and secondary diagnoses and procedures in HES data. For a hospital spell to be considered an index event:
+We obtain a cohort of ACS patients from Hospital Episode Statistics (HES), which is a national administrative dataset available across the UK. This dataset defines both the inclusion criteria and the outcomes. Patients are considered for inclusion based on the primary and secondary diagnoses and procedures in HES data. For a hospital spell to be considered an index event:
 
 * The primary diagnosis of the first episode must contain an ACS ICD-10 code; or
 * There must be a PCI procedure OPCS-4 code in any primary or secondary position in the first episode of the spell.
+
+For the ACS diagnosis code inclusion, only the primary position is allowed to avoid the possibility of incorrectly including unrelated spells with historical ACS events coded in secondary positions. For PCI, it is assumed that all procedures (both primary and secondary) occur in the episode, so this will not produce false positive inclusions.
+
+A great many choices exist when defining code groups to capture patient groups in administrative databases [@bosco2021major]. Due to the use of clinical coding for financial and administrative purposes, ICD-10 code definitions do not necessarily line up with clinically relevant patient groups, or contain other errors [@gavrielov2014use]. It is therfore important that the accuracy of the code group in identifying patients of interest is quantified and incorporated into the uncertainty of the modelling results. We have selected code groups from the literature that have been validated in administrative databases.
+
+A UK Biobank report identifies a validated group of codes for identification of MI (both STEMI and NSTEMI) based on HES data, with PPV greater than 70% for each group [@biobankdefinitions]. However, the codes contain I25.2 (old myocardial infarction), which would capture patients in index events who do not necessarily have ACS at that time. This issue was addressed in a study validating ACS code groups in a French administrative database [@bezin2015choice]. Of the different code groups they present, the I20.0, I21.* and I24.* was identified as a good compromise between validated ACS and PPV (84%).
 
 Hospital spells were only included if they had a full year of information prior to the index data, for features, and a full year following the index for outcomes. Through this process, {{ num_index_spells }} index events were identified for inclusion between the dates {{ index_start }} and {{ index_end}}. 
 
@@ -57,7 +62,17 @@ The list of bleeding and ischaemia ICD-10 and OPCS-4 codes are included in suppl
 
 ## Endpoints
 
+The basis for the index event and outcome definition is the diagnosis (ICD-10) and procedure (OPCS-4) codes in Hospital Episode Statistics (HES). Unlike in the ARC-HBR risk trade-off model [@urban2021assessing], modelling is not restricted to patients who are at high bleeding risk. This is because identifying patients at high bleeding risk itself requires a model, or a valid calculation of the ARC-HBR score, which is not possible because the information is not present in source datasets. As discussed above, a model that applies uniformly across all patients would also be more helpful because there would be less need to ensure that a patient is eligible before applying the model. 
+
 Bleeding and ischaemia endpoints are based on the presence of an ICD-10 diagnosis code in a subsequent spell occurring up to one year after the index spell. The index spell was excluded because multiple episodes in the index spell often encode the same ACS, which would contribute false-positive outcomes. A disadvantage of this approach is that further ischaemia that occurs soon after the index event is excluded in our analysis.
+
+Identifying significant bleeding using ICD-10 codes is a complicated problem due to the heterogeneous nature of bleeding conditions. Ideally, a group of bleeding codes should be selected which aligns with the definitions generally agreed upon by other bleeding risk prediction tools [@yeh2016development; @costa2017derivation; @urban2021assessing]; for example, BARC 3 or 5 bleeding, moderate or severe GUSTO bleeding, or TIMI major/minor bleeding. We selected the code group of a UK study for identifying BARC 2-5 bleeding [@pufulete2019comprehensive].
+
+Identification of ischaemic outcomes was based on a definition of major adverse cardiac event (MACE), a type of composite endpoint typically utilised in clinical trials. Several ischaemia outcome definitions are commonly used when deriving outcomes from administrative databases [@bosco2021major]. From the options reviewed there, we selected the MACE definition of [@ohm2018socioeconomic] but excluded ischaemic stroke in order to make our model results more closely comparable with the ARC HBR bleeding/ischaemia trade-off model [@urban2021assessing].
+
+Here, code groups are used to identify both endpoints (used as outcomes to train the models) and features (inputs to the models), and innacuracies in these two categories have different effects. Inaccuracies in the outcome definition affect the accuracy of the model, because it may be trained to predict the wrong thing, and is not observable by the model validation process. On the other hand, errors in the features simply cause the model to perform less well, which is observable by the model validation process. As a result, it is more important to be sure of the outcome code definitons than the many other code groups used as features.
+
+Confirming the accuracy of the outcome code groups is outside the scope of this report, especially including the nuances that can arise from differences in locality, coding standards, and use of diagnosis positions. The resulting models should be considered a proof-of-principle of the approach, rather than a fully-validated prediction of bleeding and ischaemia risk. In particular, chart review should be performed on code groups intended for models deployed in a clinical setting.
 
 ![Distribution of primary/secondary code positions]({{ codes_hist_image }}){{ '{#' }}fig-code-dist}
 
@@ -77,6 +92,37 @@ Fatal bleeding and ischaemia outcomes, based on a bleeding or ischaemia primary 
 ![Kaplan-Meier curves for bleeding outcome by ARC HBR score]({{ arc_survival_image }}){{ '{#' }}fig-arc-survival-curves}
 
 @fig-arc-survival-curves shows Kaplan-Meier curves for bleeding over the course of one year, broken down by ARC HBR score.
+
+## Model Input Features
+
+Three data sources are used to provide features for the models: HES data for historical coding; a regional dataset containing primary care information (the System Wide Dataset, SWD); and a hospital-specific dataset of laboratory data and prescription information, derived from the Hospital Information Collaborate (HIC) data at UHBW.
+
+### HES Features
+
+In addition to defining the index event and outcomes, HES data is also used for features. In the 12 months prior to the index event, the number of occurences of ICD-10 and OPCS-4 codes in "feature" code groups are counted, and these variables are used as predictors in the models. These feature groups are designed to correspond to known risk factors for bleeding and ischaemia outcomes [@urban2021assessing], where suitable information is present in clinical coding. All clinical code positions (primary and all secondaries) are counted. These features are listed in @tbl-features as HES ICD-10 codes.
+
+The 1 months prior to the index event is excluded, and does not contribute to the count of prior clinical codes. This is because clinical coding takes time to manually complete, and models deployed in real time would not have access to this information. 
+
+In addition to historical code features, HES data is used to generate some index features, including the presentation type (STEMI or NSTEMI) (defined by code groups), and patient age and gender at index. Although this is based on coded information which would not be present in real time, it is assumed that the information could be sourced using other means in a deployed model. These features are labelled in @tbl-features as HES index features.
+
+### SWD Features
+
+The system wide dataset (SWD) is a Bristol, North Somerset, and South Gloucestershire-specific repository of primary care patient information, which includes flags for comorbidities and risk factors, and some physiological measurements. Patient attribute information is recorded on a monthly basis. We linked this information to each index spell by taking the most recent patient attribute that occurred before the index spell, and not more than two months before the index spell. The choice of a two month cut-off represents a trade-off between the temporal relevance of the data and missingness.  
+
+Attributes are excluded from any further analysis if more than 75% of the data is missing, or if more than 95% of the column is a single constant value, in order to avoid swamping models with a large number of non-informative information. (This process is in addition to automatic feature selection/removal by the model fitting process itself.)
+
+SWD data also includes primary care prescriptions. We focus on features relevant for bleeding risk (the harder modelling task), and count the number of prescriptions of oral anticoagulants (OAC), defined as either warfarin, apixaban, dabigatran etexilate, edoxaban, and rivaroxaban, and non-steroidal anti-inflamatory drugs (NSAIDs), defined as either ibuprofen, naproxen, diclofenac, celecoxib, mefenamic acid, etoricoxib, or indomethacin. These represent two medicine-related parts of the ARC HBR criteria [@urban2019defining]. The number of prescriptions in the year before the index spell were counted and used as predictors (labelled in @tbl-features as SWD prescriptions).
+
+The SWD primary care physiological measurements were restricted to those which are most available in the data. To maximise the time, we selected HbA1c and blood pressure, as these data go back to 2019 (the start of our common-data period). Blood pressure was split into diastolic and systolic numerical components for use as features. We used the most recent measurement up to 2 months prior to the index event (but not after the index) to be used as a feature. These columns are summarised in @tbl-features as SWD measurements.
+
+### HIC Data
+
+HIC data includes laboratory tests performed at the index, including the full blood count and urea and electrolytes measurements. We included haemoglobin (Hb), platelet count, and estimated glomerular filtration rate (eGFR) are numerical features in the models. These were taken from the first test performed after admission in the index spell. Anaemia (low Hb), thrombocytopenia (low platelet count), and low eGFR (reduced liver function) are all ARC HBR criteria (bleeding risk factors) [@urban2019defining].
+
+Secondary care prescriptions were searched for OAC and NSAID prescriptions present on admission. HIC-derived features are listed in @tbl-features as HIC lab results and HIC prescriptions.
+
+{{ features_table }}
+: Features used to train the models. The feature name and description are listed, along with the data source for the feature. Three data sources are used: HES data, containing ICD-10 and OPCS-4 codes, are used for prior clinical code history and patient index attributes; SWD data is used for primary care general patient attributes, primary care prescriptions, and primary care measurements; and HIC data is used for index secondary care lab results and prior prescriptions at index. {{ '{#' }}tbl-features}
 
 ## Models
 
