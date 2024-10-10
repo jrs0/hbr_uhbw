@@ -130,6 +130,21 @@ The type of management given to the patients in the index spells broken down by 
 pd.crosstab(df["Management"], [df["Presentation"], df["Elderly"]], margins=True)
 ```
 
+Some numerical characteristics for the patients in each management group are shown below. The count column shows 
+
+```{python}
+x = df.select_dtypes("number")
+df[["Management"]].merge(x, how="left", on="spell_id").groupby("Management").agg(["mean", "std"]).round(1)
+```
+
+
+
+```{python}
+x = df.select_dtypes(exclude="number")
+x.groupby("Management")
+```
+
+
 The plots below show the breakdown of age and frailty in the different management groups The distribution of age and cambridge score by management type is shown first. (Electronic frailty index has not been used because there was approximately 70% missingness in the data. Instead, Cambridge multimorbidity score is used as a surrogate for frailty.)
 
 ```{python}
@@ -204,7 +219,7 @@ plt.legend()
 plt.show()
 ```
 
-The plot below shows the difference in survival curves between the invasive and conservative management groups (still for age over 75), for non-fatal MACE outcomes:
+The plot below shows the difference in survival curves between the invasive and conservative management groups (still for age over 75), for non-fatal MACE outcomes (note that in this and the plots below, CABG curves may be missing due to insufficient data to calculate the survival function):
 
 ```{python}
 #| echo: false
@@ -216,8 +231,8 @@ fig, ax = plt.subplots()
 # Fatal outcomes (to remove)
 fatal = survival["fatal"] & ~survival["right_censor"]
 
-# Restrict to PCI/CABG
-mask = df["Management"] == "PCI/CABG"
+# Restrict to CABG
+mask = df["Management"] == "CABG"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~fatal & mask & elderly
@@ -225,7 +240,19 @@ time, survival_prob, conf_int = masked_survival(
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI/CABG"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CABG"
+)
+
+# Restrict to PCI
+mask = df["Management"] == "PCI"
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & mask & elderly
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI"
 )
 
 # Restrict to medically managed
@@ -270,10 +297,23 @@ The graph below shows the same plot (by management type) for fatal outcomes:
 fig, ax = plt.subplots()
 
 # Non-fatal outcomes (to remove)
-non_fatal = ~survival["fatal"] & ~survival["right_censor"]
+#non_fatal = ~survival["fatal"] & ~survival["right_censor"]
+fatal = survival["fatal"]
 
-# Restrict to PCI/CABG
-mask = df["Management"] == "PCI/CABG"
+# Restrict to CABG
+mask = df["Management"] == "CABG"
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    fatal & mask & elderly
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="CABG"
+)
+
+# Restrict to PCI
+mask = df["Management"] == "PCI"
 time, survival_prob, conf_int = masked_survival(
     survival,
     ~non_fatal & mask & elderly
@@ -281,7 +321,7 @@ time, survival_prob, conf_int = masked_survival(
 
 ax.step(time, survival_prob, where="post")
 ax.fill_between(
-    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI/CABG"
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="PCI"
 )
 
 # Restrict to medically managed
@@ -355,8 +395,8 @@ fig, ax = plt.subplots()
 # Fatal outcomes (to remove)
 fatal = survival["fatal"] & ~survival["right_censor"]
 
-# Restrict to PCI/CABG
-mask = df["Management"] == "PCI/CABG"
+# Restrict to CABG
+mask = df["Management"] == "CABG"
 
 time, survival_prob, conf_int = masked_survival(
     survival,
@@ -381,7 +421,48 @@ ax.fill_between(
 ax.set_ylim(0.70, 1.00)
 ax.set_ylabel(r"Est. probability of no adverse event")
 ax.set_xlabel("Time (days)")
-ax.set_title("Non-fatal MACE outcomes, PCI/CABG")
+ax.set_title("Non-fatal MACE outcomes, CABG")
+plt.legend()
+plt.show()
+```
+
+```{python}
+#| echo: false
+#| warning: false
+
+# Plot the ROC curves for the models
+fig, ax = plt.subplots()
+
+# Fatal outcomes (to remove)
+fatal = survival["fatal"] & ~survival["right_censor"]
+
+# Restrict to PCI
+mask = df["Management"] == "PCI"
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label=">=75"
+)
+
+time, survival_prob, conf_int = masked_survival(
+    survival,
+    ~fatal & ~elderly & mask
+)
+
+ax.step(time, survival_prob, where="post")
+ax.fill_between(
+    time, conf_int[0], conf_int[1], alpha=0.25, step="post", label="<75"
+)
+
+ax.set_ylim(0.70, 1.00)
+ax.set_ylabel(r"Est. probability of no adverse event")
+ax.set_xlabel("Time (days)")
+ax.set_title("Non-fatal MACE outcomes, PCI")
 plt.legend()
 plt.show()
 ```
@@ -466,4 +547,12 @@ ax.set_xlabel("Time (days)")
 ax.set_title("Non-fatal MACE outcomes, no angiogram")
 plt.legend()
 plt.show()
+```
+
+```{python}
+# x = df[["Management"]].merge(attributes.select_dtypes(include="number"), on="spell_id", how="left")
+
+# x.melt("Management", var_name = "Attribute", value_name="Value").groupby(["Management", "Attribute"]).value_counts(dropna=False)
+
+# x.groupby("Management").describe().transpose()
 ```
