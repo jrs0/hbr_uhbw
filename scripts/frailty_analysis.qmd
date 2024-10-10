@@ -89,7 +89,7 @@ df = pd.DataFrame(index=features_index.index)
 
 # Add the management type
 df["Management"] = management["management"].cat.reorder_categories(
-    ["No Angio", "Medical", "PCI/CABG"]
+    ["No Angio", "Medical", "PCI", "CABG"]
 )
 df["Cambridge Score"] = scores["cambridge_score"]
 
