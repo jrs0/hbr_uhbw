@@ -25,7 +25,7 @@ from loguru import logger as log
 
 
 def make_engine(
-    con_string: str = "mssql+pyodbc://dsn", database: str = "hic_cv_test"
+    con_string: str = "mssql+pyodbc://xsw", database: str = "hic_cv_test"
 ) -> Engine:
     """Make a sqlalchemy engine
 

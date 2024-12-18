@@ -23,7 +23,7 @@ analysis_name: "icb_hic"
 # window on each side of the index events for
 # patient history and outcomes.
 start_date: "2019-1-1"
-end_date: "2025-1-1"
+end_date: "2024-10-10"
 
 # Set the name of the ICD-10 and OPCS-4 codes files
 # that will be used to define features and outcome
