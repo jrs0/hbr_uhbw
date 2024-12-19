@@ -144,7 +144,7 @@ features:
     text: "COPD"
     docs: "chronic obstructive pulmonary disease flag"
     category: "SWD attributes"
-    exclude: True
+    exclude: False
   "diabetes_2":
     text: "type-2 diabetes (Attr.)"
     docs: "type-2 diabetes flag"
@@ -339,7 +339,7 @@ features:
     text: "smoking"
     docs: "smoking status"
     category: "SWD attributes"
-    exclude: True
+    exclude: False
   "stroke":
     text: "stroke"
     docs: "cerebrovascular disease - stroke"
@@ -431,7 +431,7 @@ features:
     text: "prior diabetes (any)" 
     docs: "count of previous year diabetes diagnosis codes"
     category: "HES ICD-10 codes"
-    exclude: True
+    exclude: False
   
   "ckd_before":
     text: "prior CKD" 
