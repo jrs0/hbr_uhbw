@@ -738,7 +738,7 @@ outcomes:
     abbr: "B"
     fatal:
       group: "bleeding_adaptt"
-      max_position: 1
+      max_position: 99
     non_fatal:
       group: "bleeding_adaptt"
       # Including all secondary codes in order to catch
@@ -746,7 +746,7 @@ outcomes:
       # include historical/minor bleeds, but this was 
       # considered better than missing out of bleeding
       # not coded in the primary or first secondary position.
-      max_position: 10
+      max_position: 99
   ischaemia:
     text: "ischaemia"
     title: "Ischaemia"
@@ -760,10 +760,10 @@ outcomes:
       # position is allowed, in an attempt to restrict
       # to cardiovascular death which does not have
       # another cause.
-      max_position: 2
+      max_position: 99
     non_fatal:
       group: "ami_stroke_ohm"
-      max_position: 5
+      max_position: 99
 
 # Names of code groups
 code_groups:
