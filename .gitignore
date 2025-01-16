@@ -21,7 +21,7 @@ __pycache__
 site
 
 # Saved data (datasets, models, etc.)
-save_data/
+save_data*/
 figures/
 
 # Make an exception for the tool_description.pdf file
