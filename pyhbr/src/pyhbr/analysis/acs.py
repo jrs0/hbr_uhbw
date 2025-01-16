@@ -87,9 +87,9 @@ def get_index_spells(
     # ACS matches based on a primary diagnosis of ACS (this is to rule out
     # cases where patient history may contain ACS recorded as a secondary
     # diagnosis).
-    acs_match = (first_episodes_with_codes["group"].str.contains(acs_group)) & (
-        first_episodes_with_codes["position"] == 1
-    )
+    acs_match = (first_episodes_with_codes["group"].str.contains(acs_group)) #& (
+    #    first_episodes_with_codes["position"] == 1
+    #)
 
     # A PCI match is allowed anywhere in the procedures list, but must still
     # be present in the first episode of the index spell.
