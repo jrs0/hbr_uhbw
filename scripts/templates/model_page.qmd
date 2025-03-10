@@ -4,9 +4,7 @@ This is a summary of the {{ model["text"] }} model ({{ model["abbr"] }}).  {{ mo
 
 ![ROC curves for the {{ model["text"] }} model]({{ model["roc_curves_image"] }}){{ '{#' }}fig-roc-{{ model["abbr"] }}}
 
-For the bleeding model (on the right), the area under the ROC curve (AUC) for the model-under-test (red curve; trained using all the training data) is {{ model["roc_auc_bleeding"]}}. The bootstrap models (blue curves) give an idea of the variability in this metric.
-
-For the ischaemia model (on the left), the ROC AUC is {{ model["roc_auc_ischaemia"] }}
+For the bleeding and ischaemia models, the area under the ROC curve (AUC) for the model-under-test (red curve; trained using all the training data) is shown in the figure legend. The spread in ROC values across all bootstrap models (represented by the spread of blue curves) is { model["roc_auc_bleeding"]}} for the bleeding model, and {{ model["roc_auc_ischaemia"] }} for the ischaemia model.
 
 {% raw %}
 {{< pagebreak >}}
