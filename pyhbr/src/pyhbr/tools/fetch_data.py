@@ -511,9 +511,9 @@ def main():
         columns=["episode_id", "patient_id", "spell_start"]
     )
 
-    log.info("Getting therapy from primary care prescriptions")
-    therapy = acs.get_therapy(index_spells, primary_care_prescriptions)
-    features_index = features_index.merge(therapy, how="left", on="spell_id")
+    # log.info("Getting therapy from primary care prescriptions")
+    # therapy = acs.get_therapy(index_spells, primary_care_prescriptions)
+    # features_index = features_index.merge(therapy, how="left", on="spell_id")
 
     log.info("calculate ARC HBR score")
     arc_hbr_score = pd.DataFrame(index=features_index.index)
