@@ -505,7 +505,7 @@ def plot_arc_hbr_survival(ax, data, ):
     df["percent"] = 100 * df["size"] / df["score_sum"]
     print(df.sort_values(["score", "therapy"]))
     df = df.rename(
-        columns={"percent": "Percent", "score": "Score"}
+         columns={"therapy": "Therapy", "percent": "Percent", "score": "Score"}
     ).drop(columns=["size", "score_sum"])
     print(df)
 

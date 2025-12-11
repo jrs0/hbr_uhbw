@@ -571,6 +571,11 @@ features:
     category: "HES index features"
     exclude: False
 
+  "therapy":
+    text: "foo"
+    docs: "bar"
+    category: "foobar"
+    exclude: True
 ### MODELLING ###
 
 # Test/train split
