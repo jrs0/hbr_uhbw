@@ -647,7 +647,7 @@ models:
     config:
       "n_estimators": "50"
       "learning_rate": "1.0"
-      "algorithm": "'SAMME.R'"
+      "algorithm": "'SAMME'"
     description: >
       An ensemble method fitting simple trees to the data, where later iterations of the
       fit focus on more difficult cases.
