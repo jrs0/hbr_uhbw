@@ -3045,7 +3045,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - A00
     - B99
@@ -5932,7 +5931,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - C00
     - D48
@@ -6602,7 +6600,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - D50
     - D89
@@ -8014,7 +8011,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - E00
     - E90
@@ -8071,7 +8067,6 @@ categories:
       - ami_stroke_ohm
       - cv_death_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I00
       - I02
@@ -8193,7 +8188,6 @@ categories:
       - ami_stroke_ohm
       - cv_death_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I05
       - I09
@@ -8275,7 +8269,6 @@ categories:
       - ami_stroke_ohm
       - cv_death_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I10
       - I15
@@ -8309,7 +8302,6 @@ categories:
         - hussain_ami_stroke
         - ami_stroke_ohm
         - cv_death_ohm
-        - ami_ohm
         index: I20
         name: I20
       - categories:
@@ -8423,7 +8415,6 @@ categories:
         - hussain_ami_stroke
         - ami_stroke_ohm
         - cv_death_ohm
-        - ami_ohm
         index: I23
         name: I23
       - categories:
@@ -8453,7 +8444,6 @@ categories:
         - hussain_ami_stroke
         - ami_stroke_ohm
         - cv_death_ohm
-        - ami_ohm
         index: I24
         name: I24
       - categories:
@@ -8511,7 +8501,6 @@ categories:
         - hussain_ami_stroke
         - ami_stroke_ohm
         - cv_death_ohm
-        - ami_ohm
         index: I25
         name: I25
       docs: Ischaemic heart diseases
@@ -8591,7 +8580,6 @@ categories:
       - ami_stroke_ohm
       - cv_death_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I26
       - I28
@@ -9102,7 +9090,6 @@ categories:
       - bleeding_barc
       - ami_stroke_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I30
       - I52
@@ -9462,7 +9449,6 @@ categories:
       - acs_bezin
       - ihd_bezin
       - portal_hypertension
-      - ami_ohm
       index:
       - I60
       - I69
@@ -9674,7 +9660,6 @@ categories:
       - ami_stroke_ohm
       - cv_death_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I70
       - I79
@@ -9894,7 +9879,6 @@ categories:
       - ami_stroke_ohm
       - cv_death_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I80
       - I89
@@ -9978,7 +9962,6 @@ categories:
       - ami_stroke_ohm
       - cv_death_ohm
       - haemorrhagic_stroke
-      - ami_ohm
       index:
       - I95
       - I99
@@ -11549,7 +11532,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - F00
     - F99
@@ -12871,7 +12853,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - G00
     - G99
@@ -13973,7 +13954,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - H00
     - H59
@@ -14455,7 +14435,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - H60
     - H95
@@ -15428,7 +15407,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - J00
     - J99
@@ -17537,7 +17515,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - K00
     - K93
@@ -18874,7 +18851,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - L00
     - L99
@@ -20966,7 +20942,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - M00
     - M99
@@ -22741,7 +22716,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - N00
     - N99
@@ -27541,7 +27515,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - S00
     - T98
@@ -29190,7 +29163,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - O00
     - O99
@@ -30496,7 +30468,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - P00
     - P96
@@ -32839,7 +32810,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - Q00
     - Q99
@@ -34304,7 +34274,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - R00
     - R99
@@ -39281,7 +39250,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - V01
     - Y98
@@ -41572,7 +41540,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - Z00
     - Z99
@@ -41759,7 +41726,6 @@ categories:
     - ami_stroke_ohm
     - cv_death_ohm
     - haemorrhagic_stroke
-    - ami_ohm
     index:
     - U00
     - U85
@@ -41775,7 +41741,6 @@ groups:
 - bleeding_adaptt
 - bleeding_barc
 - ami_stroke_ohm
-- ami_ohm
 - mi_stemi_schnier
 - mi_nstemi_schnier
 - mi_schnier
