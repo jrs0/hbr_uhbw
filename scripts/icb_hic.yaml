@@ -570,6 +570,12 @@ features:
     docs: "gender at index"
     category: "HES index features"
     exclude: False
+
+  "therapy":
+    text: "foo"
+    docs: "bar"
+    category: "foobar"
+    exclude: True
     
 ### MODELLING ###
 
