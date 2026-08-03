@@ -140,27 +140,31 @@ def main():
    
     without_trade_off = summary_table[~summary_table["model_key"].eq("trade_off")]
    
+    # Extract best/worst models for bleeding
     outcome = "bleeding"
     df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
-    m = df[df["median_auc"].eq(df["median_auc"].max())]
-    variables[f"best_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
-    variables[f"best_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]
+    m_best_bleeding = df[df["median_auc"].eq(df["median_auc"].max())]
+    best_bleeding_key = m_best_bleeding["model_key"].values[0]  # Store key
+    
+    variables[f"best_{outcome}_model_auc"] = f"{m_best_bleeding['median_auc'].values[0]:.2f}"
+    variables[f"best_{outcome}_model_name"] = config["models"][best_bleeding_key]["text"]
 
-    df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
     m = df[df["median_auc"].eq(df["median_auc"].min())]
-    variables[f"worst_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
-    variables[f"worst_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]
+    variables[f"worst_{outcome}_model_auc"] = f"{m['median_auc'].values[0]:.2f}"
+    variables[f"worst_{outcome}_model_name"] = config["models"][m["model_key"].values[0]]["text"]
 
+    # Extract best/worst models for ischaemia
     outcome = "ischaemia"
     df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
-    m = df[df["median_auc"].eq(df["median_auc"].max())]
-    variables[f"best_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
-    variables[f"best_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]
+    m_best_ischaemia = df[df["median_auc"].eq(df["median_auc"].max())]
+    best_ischaemia_key = m_best_ischaemia["model_key"].values[0]  # Store key
+    
+    variables[f"best_{outcome}_model_auc"] = f"{m_best_ischaemia['median_auc'].values[0]:.2f}"
+    variables[f"best_{outcome}_model_name"] = config["models"][best_ischaemia_key]["text"]
 
-    df = without_trade_off[without_trade_off["outcome_key"].eq(outcome)]
     m = df[df["median_auc"].eq(df["median_auc"].min())]
-    variables[f"worst_{outcome}_model_auc"] = f"{m['median_auc'][0]:.2f}"
-    variables[f"worst_{outcome}_model_name"] = config["models"][m["model_key"][0]]["text"]    
+    variables[f"worst_{outcome}_model_auc"] = f"{m['median_auc'].values[0]:.2f}"
+    variables[f"worst_{outcome}_model_name"] = config["models"][m["model_key"].values[0]]["text"]
 
     # Convert the summary table to markdown and insert it directly in the document
     variables["summary_table"] = summary_table.drop(columns=["model_key", "outcome_key", "median_auc"]).to_markdown()
@@ -295,6 +299,40 @@ def main():
         model["risk_uncertainty_ischaemia"] = summary_table.loc[
             ischaemia_row, "Estimated Risk Uncertainty"
         ]
+        # top features
+        model_data, model_data_path = common.load_item(
+            f"{analysis_name}_{name}", save_dir=save_dir
+        )
+        variables["test_proportion"] = model_data["config"]["test_proportion"]
+
+        # --- NEW CODE: Extract Top 3 Features ---
+        # Assuming model_data contains a feature importance Series/dict or DataFrame:
+        if "feature_importances" in model_data:
+            importances = model_data["feature_importances"]  # pd.Series or dict
+            if isinstance(importances, dict):
+                importances = pd.Series(importances)
+            
+            # Sort descending and get top 3 keys
+            top_3_keys = importances.sort_values(ascending=False).head(3).index.tolist()
+            
+            # Map raw feature keys to human-readable names from config['features']
+            top_3_names = [
+                config["features"].get(feat, {}).get("text", feat) 
+                for feat in top_3_keys
+            ]
+            
+            # Store as list or comma-separated string
+            model["top_3_features"] = top_3_names
+            model["top_3_features_str"] = ", ".join(top_3_names)
+
+            # Assign directly to global variables if this model is the best for an outcome
+            if name == best_bleeding_key:
+                variables["best_bleeding_top_features"] = ", ".join(top_3_names)
+                variables["best_bleeding_top_features_list"] = top_3_names
+            if name == best_ischaemia_key:
+                variables["best_ischaemia_top_features"] = ", ".join(top_3_names)
+                variables["best_ischaemia_top_features_list"] = top_3_names
+        # ----------------------------------------
 
     # Copy static files to output folder
     shutil.copy(config["bib_file"], report_dir / Path("ref.bib"))
