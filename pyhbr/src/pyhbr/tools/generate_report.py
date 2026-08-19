@@ -264,7 +264,7 @@ def main():
         # Map to human-readable names from config if available
         if feature_config:
             df_imp["readable_name"] = df_imp["clean_column"].apply(
-                lambda x: feature_config.get(x, {}).get("text", x)
+                lambda x: feature_config.get(x, {}).get("docs", x)
                 if isinstance(feature_config.get(x), dict)
                 else x
             )
@@ -273,10 +273,15 @@ def main():
 
         top_df = df_imp.head(top_n)
         formatted_items = []
+        first_row = True 
         for _, row in top_df.iterrows():
             feat_name = row["readable_name"]
             pct = row["normalized_imp"] * 100
-            formatted_items.append(f"{feat_name} ({pct:.1f}%)")
+            if first_row:
+                formatted_items.append(f"{feat_name} (permutation importance of {pct:.1f}%)")
+                first_row = False
+            else:
+                formatted_items.append(f"{feat_name} ({pct:.1f}%)")
 
         if len(formatted_items) > 1:
             return ", ".join(formatted_items[:-1]) + f", and {formatted_items[-1]}"
